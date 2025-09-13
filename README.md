@@ -1,0 +1,80 @@
+# Wipple Next
+
+A new implementation of the [Wipple](https://github.com/wipplelang/wipple) compiler.
+
+## Overview
+
+The compiler is built around a database of _facts_ relating _nodes_ in the program. Each stage (parsing, typechecking) adds new facts to the database, and feedback generation is structured as queries on the database.
+
+## Example: Variables
+
+After the parser produces `VariableExpression` objects in the AST:
+
+1.  `visitVariableExpression` in `src/visit` creates a new `Node` and resolves the variable name from the AST object. If the variable is resolved to a definition, a _constraint_ is added linking the type of the variable to the type of the definition. If the variable cannot be resolved, the `IsUnresolvedVariable` fact is added to the node.
+
+2.  The typechecker uses the added constraint to place the variable reference and its definition in the same _group_ (see below).
+
+3.  Feedback is generated according to the available facts. For example, all nodes with the `IsUnresolvedVariable` fact will produce the `unresolved-variable` error in `src/feedback/items`.
+
+## Typechecking
+
+The key difference between Wipple's new and old typecheckers is that the new one tries to form _groups_ rather than comparing types directly. In more technical terms, types can reference _other nodes_ rather than creating type variables, and the typechecker takes care not to visibly "apply" types containing node references until all constraints have been solved.
+
+The advantage of forming groups instead of comparing types is that Wipple can produce much richer type error messages. For example, this program tries to call the function `f` with two different types of inputs:
+
+```wipple
+f : x -> ()
+f 3.14
+f "abc"
+```
+
+In the old typechecker, the error appears on `"abc"`:
+
+```
+f "abc"
+  ^^^^^
+  This code is supposed to be text, but it's actually a number
+```
+
+This is because `x` is first unified with `3.14` (a `Number` value), and then `Number` is unified with `"abc"` (a `Text` value). The old typechecker simply reports conflicts at the locations they occur.
+
+The new typechecker works differently — the fact that `3.14` and `"abc"` have types `Number` and `Text` respectively is _not_ considered until the end. First, the typechecker places `x` and `3.14` in the same group, and then `"abc"` in this group as well. After all groups have been formed, concrete types are processed. Then, if a group contains multiple different types, an error is reported on the group's representative:
+
+```
+f : x -> ()
+    ^
+    `x` is `Text` or `Number`, but it can only be one of these.
+    `x` must be the same type as `3.14` and `"abc"`; double-check these.
+```
+
+As a consequence of this approach, the typechecker must avoid applying types, even when instantiating generic constants. Instantiation works by cloning _all_ the nodes and constraints involved in the type annotation, so the constraints that form groups with nodes at the use site are considered first. This allows instantiated type parameters to be placed into groups, which is needed for `infer` to work properly. It also allows the relevant portions of type annotations to belong to groups automatically:
+
+```
+Add : left right (infer sum) => trait (left right -> sum)
+
+instance (Add Number Number Number) : _
+
+add :: left right -> sum where (Add left right sum)
+
+-- Force the output of `add` to be `Text`
+show :: Text -> ()
+
+show (add 1 2)
+```
+
+In that example, the instantiated `sum`, the `Number` from the `Add` instance, and the `Text` from `show` are all placed into the same group, resulting in an informative error message.
+
+```
+instance (Add Number Number Number) : _
+                            ^^^^^^
+
+add :: left right -> sum where (Add left right sum)
+                     ^^^
+
+show :: Text -> ()
+        ^^^^
+
+show (add 1 2)
+     ^^^^^^^^^
+     `add 1 2` is `Text` or `Number`, but it can only be one of these.
+```

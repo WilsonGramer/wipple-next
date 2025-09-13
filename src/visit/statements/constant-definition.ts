@@ -1,0 +1,49 @@
+import { Visit } from "../visitor";
+import { Fact, Node } from "../../db";
+import { ConstantDefinitionStatement } from "../../syntax";
+import { visitType } from "../types";
+import { TypeConstraint } from "../../typecheck";
+import { visitConstraint } from "../constraints";
+import { parseConstantAttributes } from "../attributes";
+import { ConstantDefinition } from "../definitions";
+
+export class TypeInConstantDefinition extends Fact<Node> {}
+export class ConstraintInConstantDefinition extends Fact<Node> {}
+
+export const visitConstantDefinition: Visit<ConstantDefinitionStatement> = (
+    visitor,
+    statement,
+    definitionNode,
+) => {
+    visitor.withDefinition(definitionNode, () => {
+        definitionNode.code = statement.name.value;
+
+        visitor.pushScope();
+
+        const attributes = parseConstantAttributes(visitor, statement.attributes);
+
+        visitor.currentDefinition!.implicitTypeParameters = true;
+
+        const type = visitor.visit(statement.constraints.type, TypeInConstantDefinition, visitType);
+
+        for (const constraint of statement.constraints.constraints) {
+            visitor.visit(constraint, ConstraintInConstantDefinition, visitConstraint);
+        }
+
+        visitor.popScope();
+
+        visitor.addConstraints(new TypeConstraint(definitionNode, type));
+
+        const definition: ConstantDefinition = {
+            type: "constant",
+            node: definitionNode,
+            comments: statement.comments,
+            attributes,
+            value: { assigned: false, type },
+        };
+
+        visitor.defineName(statement.name.value, definition);
+
+        return definition;
+    });
+};
