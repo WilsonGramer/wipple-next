@@ -33,7 +33,7 @@ In the old typechecker, the error appears on `"abc"`:
 ```
 f "abc"
   ^^^^^
-  This code is supposed to be a string, but it's actually a number
+  This code is supposed to be a number, but it's actually a string
 ```
 
 This is because `x` is first unified with `3.14` (a `Number` value), and then `Number` is unified with `"abc"` (a `String` value). The old typechecker simply reports conflicts at the locations they occur.
@@ -72,7 +72,7 @@ add :: left right -> sum where (Add left right sum)
                      ^^^
 
 show :: String -> ()
-        ^^^^
+        ^^^^^^
 
 show (add 1 2)
      ^^^^^^^^^
