@@ -33,17 +33,17 @@ In the old typechecker, the error appears on `"abc"`:
 ```
 f "abc"
   ^^^^^
-  This code is supposed to be text, but it's actually a number
+  This code is supposed to be a string, but it's actually a number
 ```
 
-This is because `x` is first unified with `3.14` (a `Number` value), and then `Number` is unified with `"abc"` (a `Text` value). The old typechecker simply reports conflicts at the locations they occur.
+This is because `x` is first unified with `3.14` (a `Number` value), and then `Number` is unified with `"abc"` (a `String` value). The old typechecker simply reports conflicts at the locations they occur.
 
-The new typechecker works differently — the fact that `3.14` and `"abc"` have types `Number` and `Text` respectively is _not_ considered until the end. First, the typechecker places `x` and `3.14` in the same group, and then `"abc"` in this group as well. After all groups have been formed, concrete types are processed. Then, if a group contains multiple different types, an error is reported on the group's representative:
+The new typechecker works differently — the fact that `3.14` and `"abc"` have types `Number` and `String` respectively is _not_ considered until the end. First, the typechecker places `x` and `3.14` in the same group, and then `"abc"` in this group as well. After all groups have been formed, concrete types are processed. Then, if a group contains multiple different types, an error is reported on the group's representative:
 
 ```
 f : x -> ()
     ^
-    `x` is `Text` or `Number`, but it can only be one of these.
+    `x` is `String` or `Number`, but it can only be one of these.
     `x` must be the same type as `3.14` and `"abc"`; double-check these.
 ```
 
@@ -56,13 +56,13 @@ instance (Add Number Number Number) : _
 
 add :: left right -> sum where (Add left right sum)
 
--- Force the output of `add` to be `Text`
-show :: Text -> ()
+-- Force the output of `add` to be `String`
+show :: String -> ()
 
 show (add 1 2)
 ```
 
-In that example, the instantiated `sum`, the `Number` from the `Add` instance, and the `Text` from `show` are all placed into the same group, resulting in an informative error message.
+In that example, the instantiated `sum`, the `Number` from the `Add` instance, and the `String` from `show` are all placed into the same group, resulting in an informative error message.
 
 ```
 instance (Add Number Number Number) : _
@@ -71,10 +71,10 @@ instance (Add Number Number Number) : _
 add :: left right -> sum where (Add left right sum)
                      ^^^
 
-show :: Text -> ()
+show :: String -> ()
         ^^^^
 
 show (add 1 2)
      ^^^^^^^^^
-     `add 1 2` is `Text` or `Number`, but it can only be one of these.
+     `add 1 2` is `String` or `Number`, but it can only be one of these.
 ```

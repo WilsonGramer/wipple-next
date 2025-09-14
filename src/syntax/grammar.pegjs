@@ -200,7 +200,7 @@ expression "expression"
     / binary_expression
 
 expression_element "expression"
-    = formatted_text_expression
+    = formatted_string_expression
     / call_expression
     / do_expression
     / when_expression
@@ -212,7 +212,7 @@ subexpression "expression"
     / variable_expression
     / trait_expression
     / number_expression
-    / text_expression
+    / string_expression
     / structure_expression
     / block_expression
     / unit_expression
@@ -229,7 +229,7 @@ trait_expression = trait:type_name { return { type: "trait", location: location(
 
 number_expression = value:number { return { type: "number", location: location(), value }; }
 
-text_expression = value:text { return { type: "text", location: location(), value }; }
+string_expression = value:string { return { type: "string", location: location(), value }; }
 
 structure_expression
     = "{" _ fields:structure_expression_fields _ "}" {
@@ -251,9 +251,9 @@ block_expression
 
 unit_expression = "(" _ ")" { return { type: "unit", location: location() }; }
 
-formatted_text_expression
-    = text:text inputs:(__ @subexpression)+ {
-            return { type: "formattedText", location: location(), text, inputs };
+string_expression
+    = string:string inputs:(__ @subexpression)+ {
+            return { type: "formattedString", location: location(), string, inputs };
         }
 
 call_expression
@@ -276,7 +276,7 @@ arm
         }
 
 intrinsic_expression
-    = "intrinsic" _ name:text inputs:(_ @subexpression)* {
+    = "intrinsic" _ name:string inputs:(_ @subexpression)* {
             return { type: "intrinsic", location: location(), name, inputs };
         }
 
@@ -396,7 +396,7 @@ subpattern "pattern"
     = wildcard_pattern
     / variable_pattern
     / number_pattern
-    / text_pattern
+    / string_pattern
     / destructure_pattern
     / unit_pattern
     / parenthesized_pattern
@@ -410,7 +410,7 @@ variable_pattern
 
 number_pattern = value:number { return { type: "number", location: location(), value }; }
 
-text_pattern = value:text { return { type: "text", location: location(), value }; }
+string_pattern = value:string { return { type: "string", location: location(), value }; }
 
 destructure_pattern
     = "{" _ fields:destructure_pattern_field* _ "}" {
@@ -534,15 +534,15 @@ attribute "attribute"
             return { location: location(), name, value };
         }
 
-attribute_value = text_attribute_value
+attribute_value = string_attribute_value
 
-text_attribute_value = value:text { return { type: "text", location: location(), value }; }
+string_attribute_value = value:string { return { type: "string", location: location(), value }; }
 
 // Tokens
 
 comment "comment" = "--" value:$(!"\n" .)* "\n"? { return { location: location(), value }; }
 
-text "text"
+string "string"
     = value:("\"" @$(!"\"" .)* "\"" / "'" @$(!"'" .)* "'") {
             return { location: location(), value };
         }

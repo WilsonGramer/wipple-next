@@ -66,10 +66,10 @@ const parseNameAttribute = (visitor: Visitor, name: string, attributes: Attribut
     return found;
 };
 
-const parseTextValueAttribute = (visitor: Visitor, name: string, attributes: Attribute[]) =>
+const parseStringValueAttribute = (visitor: Visitor, name: string, attributes: Attribute[]) =>
     parseAssignmentAttribute(visitor, name, attributes, (value) => {
         switch (value.type) {
-            case "text":
+            case "string":
                 return value.value;
             default:
                 return undefined;

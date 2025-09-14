@@ -18,7 +18,7 @@ export const visitPattern = (visitor: Visitor, pattern: Pattern, node: Node) => 
             return visitWildcardPattern(visitor, pattern, node);
         case "variable":
             return visitVariablePattern(visitor, pattern, node);
-        case "text":
+        case "string":
             throw new Error("TODO");
         case "destructure":
             throw new Error("TODO");

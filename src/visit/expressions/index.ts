@@ -3,7 +3,7 @@ import { IsTyped } from "..";
 import { Node } from "../../db";
 import { Expression } from "../../syntax";
 import { visitNumberExpression } from "./number";
-import { visitTextExpression } from "./text";
+import { visitStringExpression } from "./string";
 import { visitPlaceholderExpression } from "./placeholder";
 import { visitAnnotateExpression } from "./annotate";
 import { visitBlockExpression } from "./block";
@@ -32,7 +32,7 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
             return visitAnnotateExpression(visitor, expression, node);
         case "binary":
             throw new Error("TODO");
-        case "formattedText":
+        case "formattedString":
             throw new Error("TODO");
         case "call":
             return visitCallExpression(visitor, expression, node);
@@ -48,8 +48,8 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
             return visitVariableExpression(visitor, expression, node);
         case "trait":
             throw new Error("TODO");
-        case "text":
-            return visitTextExpression(visitor, expression, node);
+        case "string":
+            return visitStringExpression(visitor, expression, node);
         case "structure":
             throw new Error("TODO");
         case "block":

@@ -7,10 +7,10 @@ export interface Attribute {
     value?: AttributeValue;
 }
 
-export type AttributeValue = TextAttributeValue;
+export type AttributeValue = StringAttributeValue;
 
-export interface TextAttributeValue {
-    type: "text";
+export interface StringAttributeValue {
+    type: "string";
     location: LocationRange;
     value: Token;
 }

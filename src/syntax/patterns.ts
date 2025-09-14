@@ -7,7 +7,7 @@ export type Pattern =
     | WildcardPattern
     | VariablePattern
     | NumberPattern
-    | TextPattern
+    | StringPattern
     | DestructurePattern
     | SetPattern
     | VariantPattern
@@ -32,8 +32,8 @@ export interface NumberPattern {
     value: Token;
 }
 
-export interface TextPattern {
-    type: "text";
+export interface StringPattern {
+    type: "string";
     location: LocationRange;
     value: Token;
 }

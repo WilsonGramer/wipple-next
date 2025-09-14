@@ -12,7 +12,7 @@ export type Expression =
     | AsExpression
     | AnnotateExpression
     | BinaryExpression
-    | FormattedTextExpression
+    | FormattedStringExpression
     | CallExpression
     | DoExpression
     | WhenExpression
@@ -21,7 +21,7 @@ export type Expression =
     | VariableExpression
     | TraitExpression
     | NumberExpression
-    | TextExpression
+    | StringExpression
     | StructureExpression
     | BlockExpression
     | UnitExpression;
@@ -49,8 +49,8 @@ export interface NumberExpression {
     value: Token;
 }
 
-export interface TextExpression {
-    type: "text";
+export interface StringExpression {
+    type: "string";
     location: LocationRange;
     value: Token;
 }
@@ -78,10 +78,10 @@ export interface UnitExpression {
     location: LocationRange;
 }
 
-export interface FormattedTextExpression {
-    type: "formattedText";
+export interface FormattedStringExpression {
+    type: "formattedString";
     location: LocationRange;
-    text: Token;
+    string: Token;
     inputs: Expression[];
 }
 

@@ -15,17 +15,17 @@ test("number expression", () => {
     });
 });
 
-test("text expression", () => {
+test("string expression", () => {
     testParse("expression", `"abc"`, {
-        type: "text",
+        type: "string",
         value: { value: "abc" },
     });
 });
 
-test("formatted text expression", () => {
+test("formatted string expression", () => {
     testParse("expression", `"Hello, _!" name`, {
-        type: "formattedText",
-        text: { value: "Hello, _!" },
+        type: "formattedString",
+        string: { value: "Hello, _!" },
         inputs: [
             {
                 type: "variable",

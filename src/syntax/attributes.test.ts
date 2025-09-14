@@ -12,7 +12,7 @@ test("valued attribute", () => {
     testParse("attribute", `[a : "b"]`, {
         name: { value: "a" },
         value: {
-            type: "text",
+            type: "string",
             value: { value: "b" },
         },
     });
