@@ -1,4 +1,4 @@
-import { Constraint, Substitutions } from "./constraint";
+import { Constraint } from "./constraint";
 import { Solver } from "../solve";
 import { Fact, Node } from "../../db";
 import { HasInstance } from "../../visit/visitor";
@@ -10,7 +10,7 @@ import { InstantiateConstraint, Score } from ".";
 export interface Bound {
     source: Node | undefined;
     trait: Node;
-    substitutions: Substitutions;
+    substitutions: Map<Node, Type>;
 }
 
 export const displayBound = (bound: Bound) =>
@@ -51,7 +51,7 @@ export class BoundConstraint extends Constraint {
     instantiate(
         source: Node | undefined,
         replacements: Map<Node, Node>,
-        substitutions: Substitutions,
+        substitutions: Map<Node, Type>,
     ): this | undefined {
         return new BoundConstraint({
             source,

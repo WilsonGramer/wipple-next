@@ -4,6 +4,5 @@ export {
     Constraint,
     BoundConstraint,
     InstantiateConstraint,
-    Substitutions,
     TypeConstraint,
 } from "./constraints";

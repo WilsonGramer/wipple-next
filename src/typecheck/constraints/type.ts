@@ -1,4 +1,4 @@
-import { Constraint, Substitutions } from "./constraint";
+import { Constraint } from "./constraint";
 import { Node } from "../../db";
 import { Solver } from "../solve";
 import { getOrInstantiate, Score } from ".";
@@ -33,7 +33,7 @@ export class TypeConstraint extends Constraint {
     instantiate(
         source: Node | undefined,
         replacements: Map<Node, Node>,
-        substitutions: Substitutions,
+        substitutions: Map<Node, Type>,
     ): this | undefined {
         return new TypeConstraint(
             getOrInstantiate(this.node, source, replacements),
@@ -76,7 +76,7 @@ export const instantiateType = (
     type: Type,
     source: Node | undefined,
     replacements: Map<Node, Node>,
-    substitutions: Substitutions,
+    substitutions: Map<Node, Type>,
 ) =>
     traverseType(type, (type) => {
         if (type instanceof Node) {

@@ -1,7 +1,8 @@
 import { LocationRange } from "peggy";
 import { Db, Fact, Node, Span } from "../db";
 import { Definition, InstanceDefinition } from "./definitions";
-import { Constraint, Substitutions } from "../typecheck";
+import { Constraint } from "../typecheck";
+import { Type } from "../typecheck/constraints/type";
 
 export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 
@@ -176,6 +177,6 @@ export class HasConstraints extends Fact<Constraint[]> {
     display = () => undefined;
 }
 
-export class HasInstance extends Fact<[Node, Substitutions]> {
-    display = ([node]: [Node, Substitutions]) => node.toString();
+export class HasInstance extends Fact<[Node, Map<Node, Type>]> {
+    display = ([node]: [Node, Map<Node, Type>]) => node.toString();
 }

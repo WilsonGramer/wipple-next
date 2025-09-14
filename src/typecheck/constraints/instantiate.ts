@@ -1,14 +1,15 @@
-import { Constraint, Substitutions } from "./constraint";
+import { Constraint } from "./constraint";
 import { Solver } from "../solve";
 import { Node } from "../../db/node";
 import { HasConstraints } from "../../visit/visitor";
 import { Score } from ".";
+import { Type } from "./type";
 
 export interface Instantiation {
     source: Node | undefined;
     definition: Node;
     replacements: Map<Node, Node>;
-    substitutions: Substitutions;
+    substitutions: Map<Node, Type>;
 }
 
 export class InstantiateConstraint extends Constraint {
@@ -26,7 +27,7 @@ export class InstantiateConstraint extends Constraint {
     instantiate(
         _source: Node | undefined,
         _replacements: Map<Node, Node>,
-        _substitutions: Substitutions,
+        _substitutions: Map<Node, Type>,
     ): this | undefined {
         return undefined; // ignore nested instantiate constraints
     }

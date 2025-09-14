@@ -1,5 +1,5 @@
 import { Solver } from "../solve";
-import { Constraint, Substitutions } from "./constraint";
+import { Constraint } from "./constraint";
 import { BoundConstraint } from "./bound";
 import { InstantiateConstraint } from "./instantiate";
 import { TypeConstraint } from "./type";
@@ -49,4 +49,4 @@ export const getOrInstantiate = <T>(
     }
 };
 
-export { Constraint, BoundConstraint, InstantiateConstraint, Substitutions, TypeConstraint };
+export { Constraint, BoundConstraint, InstantiateConstraint, TypeConstraint };
