@@ -1,41 +1,9 @@
-import { Solver } from "../solve";
 import { BoundConstraint } from "./bound";
 import { InstantiateConstraint } from "./instantiate";
-import { Type, TypeConstraint } from "./type";
+import { TypeConstraint } from "./type";
 import { Node } from "../../db";
-
-/**
- * Constraints are produced during the `visit` stage and add type information to
- * the program.
- */
-export abstract class Constraint {
-    /**
-     * Used to order constraints (see `scores` below). For example, `group`
-     * constraints have a higher score than `type` constraints so that groups
-     * are formed before concrete types are applied; similarly, `bound`
-     * constraints have a lower score than `type` constraints so that bound
-     * resolution has access to concrete type information.
-     */
-    abstract score(): Score;
-
-    /**
-     * Produce a deep copy of this constraint, ignoring type parameters. This is
-     * used when resolving generic constants and bounds, so the "concrete" type
-     * parameter can be substituted with a real type from the use site. Without
-     * this, the typechecker would try to unify type parameters with other
-     * concrete types, causing errors.
-     */
-    abstract instantiate(
-        source: Node | undefined,
-        replacements: Map<Node, Node>,
-        substitutions: Map<Node, Type>,
-    ): this | undefined;
-
-    /**
-     * Add the type information in this constraint to the solver.
-     */
-    abstract run(solver: Solver): void;
-}
+import { Constraint } from "./constraint";
+import { Solver } from "../solve";
 
 /**
  * Instantiate constraints run first because they get type information from the
@@ -91,4 +59,4 @@ export const getOrInstantiate = <T>(
     }
 };
 
-export { BoundConstraint, InstantiateConstraint, TypeConstraint };
+export { Constraint, BoundConstraint, InstantiateConstraint, TypeConstraint };

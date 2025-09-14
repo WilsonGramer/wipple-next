@@ -4,7 +4,8 @@ import { HasInstance } from "../../visit/visitor";
 import { displayType, instantiateType, Type, typeReferencesNode } from "./type";
 import chalk from "chalk";
 import { IsInferredTypeParameter } from "../../visit/statements/trait-definition";
-import { Constraint, InstantiateConstraint, Score } from ".";
+import { InstantiateConstraint, Score } from ".";
+import { Constraint } from "./constraint";
 
 export interface Bound {
     source: Node | undefined;

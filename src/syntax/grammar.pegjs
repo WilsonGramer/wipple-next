@@ -251,7 +251,7 @@ block_expression
 
 unit_expression = "(" _ ")" { return { type: "unit", location: location() }; }
 
-string_expression
+formatted_string_expression
     = string:string inputs:(__ @subexpression)+ {
             return { type: "formattedString", location: location(), string, inputs };
         }

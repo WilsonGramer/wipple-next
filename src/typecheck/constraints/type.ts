@@ -1,6 +1,7 @@
 import { Node } from "../../db";
 import { Solver } from "../solve";
-import { Constraint, getOrInstantiate, Score } from ".";
+import { getOrInstantiate, Score } from ".";
+import { Constraint } from "./constraint";
 
 export class TypeConstraint extends Constraint {
     node: Node;
