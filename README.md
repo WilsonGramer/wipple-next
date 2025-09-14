@@ -2,7 +2,15 @@
 
 A new implementation of the [Wipple](https://github.com/wipplelang/wipple) compiler.
 
-## Overview
+## Using the CLI
+
+1.  Create a `test.wipple` file at the top level. All `test*.wipple` files are ignored by Git.
+
+2.  Run the CLI with `npm run dev -- -- test.wipple`.
+
+3.  The CLI will output all the facts and feedback collected during compilation. To filter the facts per line, use `-l`, e.g. `npm run dev -- -- test.wipple -l 1`. You can use `-l` multiple times.
+
+## Compiler design overview
 
 The compiler is built around a database of _facts_ relating _nodes_ in the program. Each stage (parsing, typechecking) adds new facts to the database, and feedback generation is structured as queries on the database.
 
