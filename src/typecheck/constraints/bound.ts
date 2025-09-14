@@ -1,11 +1,10 @@
-import { Constraint } from "./constraint";
 import { Solver } from "../solve";
 import { Fact, Node } from "../../db";
 import { HasInstance } from "../../visit/visitor";
 import { displayType, instantiateType, Type, typeReferencesNode } from "./type";
 import chalk from "chalk";
 import { IsInferredTypeParameter } from "../../visit/statements/trait-definition";
-import { InstantiateConstraint, Score } from ".";
+import { Constraint, InstantiateConstraint, Score } from ".";
 
 export interface Bound {
     source: Node | undefined;

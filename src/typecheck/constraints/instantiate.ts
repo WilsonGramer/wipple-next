@@ -1,8 +1,7 @@
-import { Constraint } from "./constraint";
 import { Solver } from "../solve";
 import { Node } from "../../db/node";
 import { HasConstraints } from "../../visit/visitor";
-import { Score } from ".";
+import { Constraint, Score } from ".";
 import { Type } from "./type";
 
 export interface Instantiation {

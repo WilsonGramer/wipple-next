@@ -1,7 +1,6 @@
-import { Constraint } from "./constraint";
 import { Node } from "../../db";
 import { Solver } from "../solve";
-import { getOrInstantiate, Score } from ".";
+import { Constraint, getOrInstantiate, Score } from ".";
 
 export class TypeConstraint extends Constraint {
     node: Node;
@@ -17,19 +16,6 @@ export class TypeConstraint extends Constraint {
         return this.referencedNodes().length > 0 ? "group" : "type";
     }
 
-    referencedNodes(): Node[] {
-        const nodes: Node[] = [];
-        traverseType(this.type, (type) => {
-            if (type instanceof Node) {
-                nodes.push(type);
-            }
-
-            return type;
-        });
-
-        return nodes;
-    }
-
     instantiate(
         source: Node | undefined,
         replacements: Map<Node, Node>,
@@ -43,6 +29,19 @@ export class TypeConstraint extends Constraint {
 
     run(solver: Solver) {
         solver.unify(this.node, this.type);
+    }
+
+    private referencedNodes(): Node[] {
+        const nodes: Node[] = [];
+        traverseType(this.type, (type) => {
+            if (type instanceof Node) {
+                nodes.push(type);
+            }
+
+            return type;
+        });
+
+        return nodes;
     }
 }
 
