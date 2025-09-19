@@ -42,6 +42,8 @@ Check if a value matches a pattern.
     }
     ```
 
+    Requires `True` and `False` to be in scope.
+
 ### `when` expressions
 
 Control flow by pattern matching.
@@ -80,7 +82,7 @@ Create a list, set, etc. using `,`.
 
 **Implementation notes:**
 
-- `,` desugars to a call to `Build-Collection` for each element, aka. `a, b, c` becomes `Build-Collection c (Build-Collection b (Build-Collection a Initial-Collection))`.
+- `,` desugars to a call to `Build-Collection` for each element, aka. `a, b, c` becomes `Build-Collection c (Build-Collection b (Build-Collection a Initial-Collection))`. Requires the `Build-Collection` and `Initial-Collection` traits to be in scope.
 
 ### Formatted string expressions
 
@@ -104,7 +106,7 @@ Number literals.
 
 **Implementation notes:**
 
-- None
+- Requires the `Number` type to be in scope.
 
 ### Placeholder expressions
 
@@ -120,7 +122,7 @@ String literals.
 
 **Implementation notes:**
 
-- None
+- Requires the `Text` type to be in scope.
 
 ### Structure expressions
 
