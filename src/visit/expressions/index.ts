@@ -11,6 +11,7 @@ import { visitUnitExpression } from "./unit";
 import { visitVariableExpression } from "./variable";
 import { visitCallExpression } from "./call";
 import { visitFunctionExpression } from "./function";
+import { visitDoExpression } from "./do";
 
 export const visitExpression = (visitor: Visitor, expression: Expression, node: Node) => {
     visitor.db.add(node, new IsTyped(null));
@@ -37,7 +38,7 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
         case "call":
             return visitCallExpression(visitor, expression, node);
         case "do":
-            throw new Error("TODO");
+            return visitDoExpression(visitor, expression, node);
         case "when":
             throw new Error("TODO");
         case "intrinsic":

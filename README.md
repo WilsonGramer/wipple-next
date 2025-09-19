@@ -14,7 +14,7 @@ A new implementation of the [Wipple](https://github.com/wipplelang/wipple) compi
 
 The compiler is built around a database of _facts_ relating _nodes_ in the program. Each stage (parsing, typechecking) adds new facts to the database, and feedback generation is structured as queries on the database.
 
-## Example: Variables
+### Example: Variables
 
 After the parser produces `VariableExpression` objects in the AST:
 
@@ -24,7 +24,7 @@ After the parser produces `VariableExpression` objects in the AST:
 
 3.  Feedback is generated according to the available facts. For example, all nodes with the `IsUnresolvedVariable` fact will produce the `unresolved-variable` error in `src/feedback/items`.
 
-## Typechecking
+### Typechecking
 
 The key difference between Wipple's new and old typecheckers is that the new one tries to form _groups_ rather than comparing types directly. In more technical terms, types can reference _other nodes_ rather than creating type variables, and the typechecker takes care not to visibly "apply" types containing node references until all constraints have been solved.
 
@@ -86,3 +86,54 @@ show (add 1 2)
      ^^^^^^^^^
      `add 1 2` is `String` or `Number`, but it can only be one of these.
 ```
+
+## Progress
+
+| Name                         | Description                             | Parsing | Visiting | Codegen |
+| ---------------------------- | --------------------------------------- | ------- | -------- | ------- |
+| `as` expressions             | Convert a value to a different type     | ☑️      |          |         |
+| `do` expressions             | Run the code in a block                 | ☑️      |          |         |
+| `intrinsic` expressions      | Call external runtime code              | ☑️      |          |         |
+| `is` expressions             | Check if a value matches a pattern      | ☑️      |          |         |
+| `when` expressions           | Control flow by pattern matching        | ☑️      |          |         |
+| Annotate expressions         | Annotate the type of a value            | ☑️      | ☑️       |         |
+| Block expressions            | Store code to run it later              | ☑️      | ☑️       |         |
+| Call expressions             | Call a function with one or more inputs | ☑️      | ☑️       |         |
+| Collection expressions       | Create a list, set, etc. using `,`      | ☑️      |          |         |
+| Formatted string expressions | String interpolation                    | ☑️      |          |         |
+| Function expressions         | Define a function                       | ☑️      | ☑️       |         |
+| Number expressions           | Number literals                         | ☑️      | ☑️       |         |
+| Placeholder expressions      | Indicate unfinished code                | ☑️      | ☑️       |         |
+| String expressions           | String literals                         | ☑️      | ☑️       |         |
+| Structure expressions        | Create a structure value                | ☑️      |          |         |
+| Trait expressions            | Retrieve an instance of a trait         | ☑️      |          |         |
+| Tuple expressions            | Create a tuple using `;`                | ☑️      |          |         |
+| Unit expressions             | The empty tuple                         | ☑️      | ☑️       |         |
+| Variable expressions         | Reference a variable                    | ☑️      | ☑️       |         |
+| `or` patterns                | Match one of multiple patterns          | ☑️      |          |         |
+| `set` patterns               | Update the value of a variable          | ☑️      | ☑️       |         |
+| Annotate patterns            | Annotate the type of a pattern          | ☑️      | ☑️       |         |
+| Destructure patterns         | Extract the fields in a structure value | ☑️      |          |         |
+| Number patterns              | Match a specific number                 | ☑️      | ☑️       |         |
+| String patterns              | Match a specific string                 | ☑️      | ☑️       |         |
+| Tuple patterns               | Match a tuple of patterns               | ☑️      |          |         |
+| Unit patterns                | Match the empty tuple                   | ☑️      | ☑️       |         |
+| Variable patterns            | Define a new variable                   | ☑️      | ☑️       |         |
+| Variant patterns             | Match one variant of an enumeration     | ☑️      |          |         |
+| Wildcard patterns            | Match any value                         | ☑️      | ☑️       |         |
+| Block types                  | The type of block expressions           | ☑️      | ☑️       |         |
+| Function types               | The type of functions                   | ☑️      | ☑️       |         |
+| Named types                  | A defined type with optional parameters | ☑️      | ☑️       |         |
+| Parameter types              | Define or reference a type parameter    | ☑️      | ☑️       |         |
+| Placeholder types            | An inferred type                        | ☑️      | ☑️       |         |
+| Tuple types                  | The type of tuples                      | ☑️      | ☑️       |         |
+| Unit types                   | The type of the empty tuple             | ☑️      | ☑️       |         |
+| Bound constraints            | Require an instance of a trait to exist | ☑️      | ☑️       |         |
+| Default constraints          | Set a fallback type for a parameter     | ☑️      |          |         |
+| Constant definitions         | Define a new constant                   | ☑️      | ☑️       |         |
+| Instance definitions         | Define a new instance of a trait        | ☑️      | ☑️       |         |
+| Trait definitions            | Define a new trait                      | ☑️      | ☑️       |         |
+| Type definitions             | Define a new structure or enumeration   | ☑️      |          |         |
+| Assignment statements        | Assign a value to a pattern             | ☑️      | ☑️       |         |
+| Expression statements        | An expression in statement position     | ☑️      | ☑️       |         |
+| Attributes                   | Modify the behavior of a definition     | ☑️      | ☑️       |         |

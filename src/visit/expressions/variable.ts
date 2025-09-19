@@ -2,6 +2,8 @@ import { Visit } from "../visitor";
 import { Fact, Node } from "../../db";
 import { VariableExpression } from "../../syntax";
 import { Constraint, InstantiateConstraint, TypeConstraint } from "../../typecheck";
+import * as codegen from "../../codegen";
+import { Type } from "../../typecheck/constraints/type";
 
 export class ResolvedVariable extends Fact<Node> {}
 export class ResolvedConstant extends Fact<Node> {}
@@ -15,13 +17,20 @@ export const visitVariableExpression: Visit<VariableExpression> = (visitor, expr
             switch (definition.type) {
                 case "variable":
                     node.isHidden = true;
+
+                    node.setCodegen(codegen.variableExpression(definition.node));
+
                     return [new TypeConstraint(node, definition.node), ResolvedVariable];
                 case "constant":
+                    const substitutions = new Map<Node, Type>();
+
+                    node.setCodegen(codegen.constantExpression(definition.node, substitutions));
+
                     return [
                         new InstantiateConstraint({
                             source: node,
                             definition: definition.node,
-                            substitutions: new Map(),
+                            substitutions,
                             replacements: new Map([[definition.node, node]]),
                         }),
                         ResolvedConstant,

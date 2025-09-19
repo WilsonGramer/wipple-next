@@ -3,6 +3,7 @@ import { Fact, Node } from "../../db";
 import { CallExpression } from "../../syntax";
 import { visitExpression } from ".";
 import { TypeConstraint, types } from "../../typecheck";
+import * as codegen from "../../codegen";
 
 export class IsCallExpression extends Fact<null> {}
 export class FunctionInCallExpression extends Fact<Node> {}
@@ -32,6 +33,8 @@ export const visitCallExpression: Visit<CallExpression> = (visitor, expression, 
                 visitor.db.add(node, new IsUnitExpression(null));
                 visitor.addConstraints(new TypeConstraint(unitNode, types.function([input], node)));
 
+                node.setCodegen(codegen.callExpression(unitNode, [input]));
+
                 return;
             }
         }
@@ -45,4 +48,6 @@ export const visitCallExpression: Visit<CallExpression> = (visitor, expression, 
 
     visitor.db.add(node, new IsCallExpression(null));
     visitor.addConstraints(new TypeConstraint(func, types.function(inputs, node)));
+
+    node.setCodegen(codegen.callExpression(func, inputs));
 };

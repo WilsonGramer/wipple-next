@@ -17,4 +17,6 @@ export const visitAnnotateExpression: Visit<AnnotateExpression> = (visitor, expr
 
     visitor.db.add(node, new IsAnnotateExpression(null));
     visitor.addConstraints(new TypeConstraint(value, type), new TypeConstraint(node, value));
+
+    node.setCodegen(value.codegen);
 };

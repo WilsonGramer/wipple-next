@@ -2,6 +2,7 @@ import { Node } from "../../db";
 import { Solver } from "../solve";
 import { getOrInstantiate, Score } from ".";
 import { Constraint } from "./constraint";
+import { CodegenItem } from "../../codegen";
 
 export class TypeConstraint extends Constraint {
     node: Node;
@@ -51,6 +52,7 @@ export interface ConstructedType {
     tag: unknown;
     children: Type[];
     display: (children: string[], root: boolean) => string;
+    codegen: CodegenItem;
 }
 
 export type Type = Node | ConstructedType;

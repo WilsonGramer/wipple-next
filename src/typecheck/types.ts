@@ -1,7 +1,8 @@
 import { Node } from "../db";
-import { Type } from "./constraints/type";
+import { ConstructedType, Type } from "./constraints/type";
+import * as codegen from "../codegen";
 
-export const named = (name: Node, parameters: Type[]): Type => ({
+export const named = (name: Node, parameters: Type[]): ConstructedType => ({
     tag: name,
     children: parameters,
     display: (parameters, root) => {
@@ -12,9 +13,10 @@ export const named = (name: Node, parameters: Type[]): Type => ({
             return root ? display : `(${display})`;
         }
     },
+    codegen: codegen.namedType(name, parameters),
 });
 
-const func = (inputs: Type[], output: Type): Type => ({
+const func = (inputs: Type[], output: Type): ConstructedType => ({
     tag: func,
     children: [...inputs, output],
     display: (children, root) => {
@@ -24,11 +26,12 @@ const func = (inputs: Type[], output: Type): Type => ({
         const display = `${inputs.join(" ")} -> ${output}`;
         return root ? display : `(${display})`;
     },
+    codegen: codegen.functionType(inputs, output),
 });
 
 export { func as function };
 
-export const tuple = (elements: Type[]): Type => ({
+export const tuple = (elements: Type[]): ConstructedType => ({
     tag: tuple,
     children: elements,
     display: (elements) => {
@@ -40,19 +43,22 @@ export const tuple = (elements: Type[]): Type => ({
             return `(${elements.join(" ; ")})`;
         }
     },
+    codegen: codegen.tupleType(elements),
 });
 
 export const unit = () => tuple([]);
 
-export const block = (output: Type): Type => ({
+export const block = (output: Type): ConstructedType => ({
     tag: block,
     children: [output],
     display: ([output]) => `{${output}}`,
+    codegen: codegen.blockType(output),
 });
 
-export const parameter = (name: Node): Type => ({
+export const parameter = (name: Node): ConstructedType => ({
     kind: "parameter",
     tag: name,
     children: [],
     display: () => name.code,
+    codegen: codegen.parameterType(name),
 });

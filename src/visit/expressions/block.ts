@@ -3,6 +3,7 @@ import { Fact, Node } from "../../db";
 import { BlockExpression } from "../../syntax";
 import { visitStatement } from "../statements";
 import { TypeConstraint, types } from "../../typecheck";
+import * as codegen from "../../codegen";
 
 export class IsBlockExpression extends Fact<null> {}
 export class StatementInBlockExpression extends Fact<Node> {}
@@ -20,4 +21,6 @@ export const visitBlockExpression: Visit<BlockExpression> = (visitor, expression
     visitor.addConstraints(
         new TypeConstraint(node, types.block(statements.at(-1) ?? types.unit())),
     );
+
+    node.setCodegen(codegen.functionExpression([], statements));
 };

@@ -4,6 +4,7 @@ import { FunctionExpression } from "../../syntax";
 import { visitExpression } from ".";
 import { TypeConstraint, types } from "../../typecheck";
 import { visitPattern } from "../patterns";
+import * as codegen from "../../codegen";
 
 export class IsFunctionExpression extends Fact<null> {}
 export class InputInFunctionExpression extends Fact<Node> {}
@@ -22,4 +23,6 @@ export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expr
 
     visitor.db.add(node, new IsFunctionExpression(null));
     visitor.addConstraints(new TypeConstraint(node, types.function(inputs, output)));
+
+    node.setCodegen(codegen.functionExpression(inputs, [output]));
 };
