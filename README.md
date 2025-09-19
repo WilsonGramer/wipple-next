@@ -89,51 +89,50 @@ show (add 1 2)
 
 ## Progress
 
-| Name                         | Description                             | Parsing | Visiting | Codegen |
-| ---------------------------- | --------------------------------------- | ------- | -------- | ------- |
-| `as` expressions             | Convert a value to a different type     | ☑️      |          |         |
-| `do` expressions             | Run the code in a block                 | ☑️      |          |         |
-| `intrinsic` expressions      | Call external runtime code              | ☑️      |          |         |
-| `is` expressions             | Check if a value matches a pattern      | ☑️      |          |         |
-| `when` expressions           | Control flow by pattern matching        | ☑️      |          |         |
-| Annotate expressions         | Annotate the type of a value            | ☑️      | ☑️       |         |
-| Block expressions            | Store code to run it later              | ☑️      | ☑️       |         |
-| Call expressions             | Call a function with one or more inputs | ☑️      | ☑️       |         |
-| Collection expressions       | Create a list, set, etc. using `,`      | ☑️      |          |         |
-| Formatted string expressions | String interpolation                    | ☑️      |          |         |
-| Function expressions         | Define a function                       | ☑️      | ☑️       |         |
-| Number expressions           | Number literals                         | ☑️      | ☑️       |         |
-| Placeholder expressions      | Indicate unfinished code                | ☑️      | ☑️       |         |
-| String expressions           | String literals                         | ☑️      | ☑️       |         |
-| Structure expressions        | Create a structure value                | ☑️      |          |         |
-| Trait expressions            | Retrieve an instance of a trait         | ☑️      |          |         |
-| Tuple expressions            | Create a tuple using `;`                | ☑️      |          |         |
-| Unit expressions             | The empty tuple                         | ☑️      | ☑️       |         |
-| Variable expressions         | Reference a variable                    | ☑️      | ☑️       |         |
-| `or` patterns                | Match one of multiple patterns          | ☑️      |          |         |
-| `set` patterns               | Update the value of a variable          | ☑️      | ☑️       |         |
-| Annotate patterns            | Annotate the type of a pattern          | ☑️      | ☑️       |         |
-| Destructure patterns         | Extract the fields in a structure value | ☑️      |          |         |
-| Number patterns              | Match a specific number                 | ☑️      | ☑️       |         |
-| String patterns              | Match a specific string                 | ☑️      | ☑️       |         |
-| Tuple patterns               | Match a tuple of patterns               | ☑️      |          |         |
-| Unit patterns                | Match the empty tuple                   | ☑️      | ☑️       |         |
-| Variable patterns            | Define a new variable                   | ☑️      | ☑️       |         |
-| Variant patterns             | Match one variant of an enumeration     | ☑️      |          |         |
-| Wildcard patterns            | Match any value                         | ☑️      | ☑️       |         |
-| Block types                  | The type of block expressions           | ☑️      | ☑️       |         |
-| Function types               | The type of functions                   | ☑️      | ☑️       |         |
-| Named types                  | A defined type with optional parameters | ☑️      | ☑️       |         |
-| Parameter types              | Define or reference a type parameter    | ☑️      | ☑️       |         |
-| Placeholder types            | An inferred type                        | ☑️      | ☑️       |         |
-| Tuple types                  | The type of tuples                      | ☑️      | ☑️       |         |
-| Unit types                   | The type of the empty tuple             | ☑️      | ☑️       |         |
-| Bound constraints            | Require an instance of a trait to exist | ☑️      | ☑️       |         |
-| Default constraints          | Set a fallback type for a parameter     | ☑️      |          |         |
-| Constant definitions         | Define a new constant                   | ☑️      | ☑️       |         |
-| Instance definitions         | Define a new instance of a trait        | ☑️      | ☑️       |         |
-| Trait definitions            | Define a new trait                      | ☑️      | ☑️       |         |
-| Type definitions             | Define a new structure or enumeration   | ☑️      |          |         |
-| Assignment statements        | Assign a value to a pattern             | ☑️      | ☑️       |         |
-| Expression statements        | An expression in statement position     | ☑️      | ☑️       |         |
-| Attributes                   | Modify the behavior of a definition     | ☑️      | ☑️       |         |
+| Name                                                                          | Parsing | Visiting | Codegen |
+| ----------------------------------------------------------------------------- | ------- | -------- | ------- |
+| [`as` expressions](docs/Language.md#as-expressions)                           | ☑️      |          |         |
+| [`do` expressions](docs/Language.md#do-expressions)                           | ☑️      |          |         |
+| [`intrinsic` expressions](docs/Language.md#intrinsic-expressions)             | ☑️      |          |         |
+| [`is` expressions](docs/Language.md#is-expressions)                           | ☑️      |          |         |
+| [`when` expressions](docs/Language.md#when-expressions)                       | ☑️      |          |         |
+| [Annotate expressions](docs/Language.md#annotate-expressions)                 | ☑️      | ☑️       |         |
+| [Block expressions](docs/Language.md#block-expressions)                       | ☑️      | ☑️       |         |
+| [Call expressions](docs/Language.md#call-expressions)                         | ☑️      | ☑️       |         |
+| [Collection expressions](docs/Language.md#collection-expressions)             | ☑️      |          |         |
+| [Formatted string expressions](docs/Language.md#formatted-string-expressions) | ☑️      |          |         |
+| [Function expressions](docs/Language.md#function-expressions)                 | ☑️      | ☑️       |         |
+| [Number expressions](docs/Language.md#number-expressions)                     | ☑️      | ☑️       |         |
+| [Placeholder expressions](docs/Language.md#placeholder-expressions)           | ☑️      | ☑️       |         |
+| [String expressions](docs/Language.md#string-expressions)                     | ☑️      | ☑️       |         |
+| [Structure expressions](docs/Language.md#structure-expressions)               | ☑️      |          |         |
+| [Trait expressions](docs/Language.md#trait-expressions)                       | ☑️      |          |         |
+| [Tuple expressions](docs/Language.md#tuple-expressions)                       | ☑️      |          |         |
+| [Unit expressions](docs/Language.md#unit-expressions)                         | ☑️      | ☑️       |         |
+| [Variable expressions](docs/Language.md#variable-expressions)                 | ☑️      | ☑️       |         |
+| [`or` patterns](docs/Language.md#or-patterns)                                 | ☑️      |          |         |
+| [`set` patterns](docs/Language.md#set-patterns)                               | ☑️      | ☑️       |         |
+| [Annotate patterns](docs/Language.md#annotate-patterns)                       | ☑️      | ☑️       |         |
+| [Destructure patterns](docs/Language.md#destructure-patterns)                 | ☑️      |          |         |
+| [Number patterns](docs/Language.md#number-patterns)                           | ☑️      | ☑️       |         |
+| [String patterns](docs/Language.md#string-patterns)                           | ☑️      | ☑️       |         |
+| [Tuple patterns](docs/Language.md#tuple-patterns)                             | ☑️      |          |         |
+| [Unit patterns](docs/Language.md#unit-patterns)                               | ☑️      | ☑️       |         |
+| [Variable patterns](docs/Language.md#variable-patterns)                       | ☑️      | ☑️       |         |
+| [Variant patterns](docs/Language.md#variant-patterns)                         | ☑️      |          |         |
+| [Wildcard patterns](docs/Language.md#wildcard-patterns)                       | ☑️      | ☑️       |         |
+| [Block types](docs/Language.md#block-types)                                   | ☑️      | ☑️       |         |
+| [Function types](docs/Language.md#function-types)                             | ☑️      | ☑️       |         |
+| [Named types](docs/Language.md#named-types)                                   | ☑️      | ☑️       |         |
+| [Parameter types](docs/Language.md#parameter-types)                           | ☑️      | ☑️       |         |
+| [Placeholder types](docs/Language.md#placeholder-types)                       | ☑️      | ☑️       |         |
+| [Tuple types](docs/Language.md#tuple-types)                                   | ☑️      | ☑️       |         |
+| [Unit types](docs/Language.md#unit-types)                                     | ☑️      | ☑️       |         |
+| [Bound constraints](docs/Language.md#bound-constraints)                       | ☑️      | ☑️       |         |
+| [Default constraints](docs/Language.md#default-constraints)                   | ☑️      |          |         |
+| [Constant definitions](docs/Language.md#constant-definitions)                 | ☑️      | ☑️       |         |
+| [Instance definitions](docs/Language.md#instance-definitions)                 | ☑️      | ☑️       |         |
+| [Trait definitions](docs/Language.md#trait-definitions)                       | ☑️      | ☑️       |         |
+| [Type definitions](docs/Language.md#type-definitions)                         | ☑️      |          |         |
+| [Assignment statements](docs/Language.md#assignment-statements)               | ☑️      | ☑️       |         |
+| [Expression statements](docs/Language.md#expression-statements)               | ☑️      | ☑️       |         |
