@@ -13,6 +13,7 @@ import { visitCallExpression } from "./call";
 import { visitFunctionExpression } from "./function";
 import { visitDoExpression } from "./do";
 import { visitTraitExpression } from "./trait";
+import { visitAsExpression } from "./as";
 
 export const visitExpression = (visitor: Visitor, expression: Expression, node: Node) => {
     visitor.db.add(node, new IsTyped(null));
@@ -29,7 +30,7 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
         case "is":
             throw new Error("TODO");
         case "as":
-            throw new Error("TODO");
+            return visitAsExpression(visitor, expression, node);
         case "annotate":
             return visitAnnotateExpression(visitor, expression, node);
         case "binary":

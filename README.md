@@ -91,7 +91,7 @@ show (add 1 2)
 
 | Name                                                                          | Parsing | Visiting | Codegen |
 | ----------------------------------------------------------------------------- | ------- | -------- | ------- |
-| [`as` expressions](docs/Language.md#as-expressions)                           | ☑️      |          |         |
+| [`as` expressions](docs/Language.md#as-expressions)                           | ☑️      | ☑️       |         |
 | [`do` expressions](docs/Language.md#do-expressions)                           | ☑️      |          |         |
 | [`intrinsic` expressions](docs/Language.md#intrinsic-expressions)             | ☑️      |          |         |
 | [`is` expressions](docs/Language.md#is-expressions)                           | ☑️      |          |         |

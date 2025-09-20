@@ -1,15 +1,23 @@
-import { Codegen } from ".";
-import { Node } from "../db";
+import { CodegenItem } from ".";
 
-export const ifStatement =
-    (conditions: Node[], statements: Node[], isElse: boolean) => (codegen: Codegen) => {
+export const ifStatement = (
+    conditions: CodegenItem[],
+    statements: CodegenItem[],
+    isElse: boolean,
+): CodegenItem => ({
+    codegen: (codegen) => {
         throw new Error("TODO");
-    };
+    },
+});
 
-export const expressionStatement = (expression: Node) => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
+export const expressionStatement = (expression: CodegenItem): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});
 
-export const returnStatement = (expression: Node) => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
+export const returnStatement = (expression: CodegenItem): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});

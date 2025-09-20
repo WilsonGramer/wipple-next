@@ -1,31 +1,38 @@
-import { Codegen } from ".";
+import { CodegenItem } from ".";
 import { Node } from "../db";
-import { Type } from "../typecheck/constraints/type";
 
-export const parameterType = (name: Node) => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
+export const parameterType = (name: Node): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});
 
-export const namedType = (name: Node, parameters: Type[]) => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
+export const namedType = (name: Node, parameters: CodegenItem[]): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});
 
-export const functionType = (params: Type[], returnType: Type) => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
+export const functionType = (params: CodegenItem[], returnType: CodegenItem): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});
 
-export const tupleType = (elements: Type[]) => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
+export const tupleType = (elements: CodegenItem[]): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});
 
-export const blockType = (output: Type) => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
+export const blockType = (output: CodegenItem): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});
 
-export const intrinsicType = () => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
-
-export const equalType = (left: Type, right: Type) => (codegen: Codegen) => {
-    throw new Error("TODO");
-};
+export const intrinsicType = (): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});
