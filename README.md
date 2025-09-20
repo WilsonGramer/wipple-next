@@ -106,7 +106,7 @@ show (add 1 2)
 | [Placeholder expressions](docs/Language.md#placeholder-expressions)           | ☑️      | ☑️       |         |
 | [String expressions](docs/Language.md#string-expressions)                     | ☑️      | ☑️       |         |
 | [Structure expressions](docs/Language.md#structure-expressions)               | ☑️      |          |         |
-| [Trait expressions](docs/Language.md#trait-expressions)                       | ☑️      |          |         |
+| [Trait expressions](docs/Language.md#trait-expressions)                       | ☑️      | ☑️       |         |
 | [Tuple expressions](docs/Language.md#tuple-expressions)                       | ☑️      |          |         |
 | [Unit expressions](docs/Language.md#unit-expressions)                         | ☑️      | ☑️       |         |
 | [Variable expressions](docs/Language.md#variable-expressions)                 | ☑️      | ☑️       |         |

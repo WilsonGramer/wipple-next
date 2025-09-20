@@ -12,6 +12,7 @@ import { visitVariableExpression } from "./variable";
 import { visitCallExpression } from "./call";
 import { visitFunctionExpression } from "./function";
 import { visitDoExpression } from "./do";
+import { visitTraitExpression } from "./trait";
 
 export const visitExpression = (visitor: Visitor, expression: Expression, node: Node) => {
     visitor.db.add(node, new IsTyped(null));
@@ -48,7 +49,7 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
         case "variable":
             return visitVariableExpression(visitor, expression, node);
         case "trait":
-            throw new Error("TODO");
+            return visitTraitExpression(visitor, expression, node);
         case "string":
             return visitStringExpression(visitor, expression, node);
         case "structure":
