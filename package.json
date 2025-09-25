@@ -8,7 +8,7 @@
         "build:grammar": "peggy src/syntax/grammar.pegjs --format es --source-map --allowed-start-rules '*' --cache",
         "build:esbuild": "node build.mjs",
         "dev": "npm run build && npm start",
-        "test": "node -r esbuild-runner/register --test src/**/*.test.ts",
+        "test": "npm run build && node -r esbuild-runner/register --test src/**/*.test.ts",
         "format": "prettier --write ."
     },
     "dependencies": {

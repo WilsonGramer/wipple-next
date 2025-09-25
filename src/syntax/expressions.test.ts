@@ -38,12 +38,13 @@ test("formatted string expression", () => {
 test("structure expression", () => {
     testParse(
         "expression",
-        `{
+        `Foo {
         a : b
         c : d
     }`,
         {
             type: "structure",
+            name: { value: "Foo" },
             fields: [
                 {
                     name: { value: "a" },

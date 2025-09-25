@@ -201,6 +201,7 @@ expression "expression"
 
 expression_element "expression"
     = formatted_string_expression
+    / structure_expression
     / call_expression
     / do_expression
     / when_expression
@@ -213,7 +214,6 @@ subexpression "expression"
     / trait_expression
     / number_expression
     / string_expression
-    / structure_expression
     / block_expression
     / unit_expression
     / parenthesized_expression
@@ -232,8 +232,8 @@ number_expression = value:number { return { type: "number", location: location()
 string_expression = value:string { return { type: "string", location: location(), value }; }
 
 structure_expression
-    = "{" _ fields:structure_expression_fields _ "}" {
-            return { type: "structure", location: location(), fields };
+    = name:type_name _ "{" _ fields:structure_expression_fields _ "}" {
+            return { type: "structure", location: location(), name, fields };
         }
 
 structure_expression_fields

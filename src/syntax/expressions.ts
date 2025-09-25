@@ -58,6 +58,7 @@ export interface StringExpression {
 export interface StructureExpression {
     type: "structure";
     location: LocationRange;
+    name: Token;
     fields: StructureExpressionField[];
 }
 
