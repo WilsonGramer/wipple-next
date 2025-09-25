@@ -18,7 +18,7 @@ test("generic type definition", () => {
         comments: [],
         attributes: [],
         name: { value: "Foo" },
-        parameters: [{ value: "value" }],
+        parameters: [{ name: { value: "value" } }],
         representation: { type: "marker" },
     });
 });
@@ -114,7 +114,7 @@ test("generic trait definition", () => {
         comments: [],
         attributes: [],
         name: { value: "Foo" },
-        parameters: [{ value: "value" }],
+        parameters: [{ name: { value: "value" } }],
         constraints: {
             type: {
                 type: "function",

@@ -36,7 +36,7 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
         visitor.enqueue("afterTypeDefinitions", () => {
             switch (statement.representation.type) {
                 case "marker": {
-                    throw new Error("TODO");
+                    break;
                 }
                 case "structure": {
                     throw new Error("TODO");
