@@ -33,25 +33,27 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
             }),
         );
 
-        visitor.enqueue("afterTypeDefinitions", () => {
-            switch (statement.representation.type) {
-                case "marker": {
-                    break;
+        if (!attributes.intrinsic) {
+            visitor.enqueue("afterTypeDefinitions", () => {
+                switch (statement.representation.type) {
+                    case "marker": {
+                        throw new Error("TODO");
+                    }
+                    case "structure": {
+                        throw new Error("TODO");
+                    }
+                    case "enumeration": {
+                        throw new Error("TODO");
+                    }
+                    case "wrapper": {
+                        throw new Error("TODO");
+                    }
+                    default: {
+                        statement.representation satisfies never;
+                    }
                 }
-                case "structure": {
-                    throw new Error("TODO");
-                }
-                case "enumeration": {
-                    throw new Error("TODO");
-                }
-                case "wrapper": {
-                    throw new Error("TODO");
-                }
-                default: {
-                    statement.representation satisfies never;
-                }
-            }
-        });
+            });
+        }
 
         // Types don't have additional constraints
 

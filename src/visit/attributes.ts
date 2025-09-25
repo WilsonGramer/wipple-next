@@ -19,12 +19,13 @@ export const parseConstantAttributes = (
     unit: parseNameAttribute(visitor, "unit", attributes),
 });
 
-export interface TypeAttributes {}
+export interface TypeAttributes {
+    intrinsic?: boolean;
+}
 
-export const parseTypeAttributes = (
-    visitor: Visitor,
-    attributes: Attribute[],
-): TypeAttributes => ({});
+export const parseTypeAttributes = (visitor: Visitor, attributes: Attribute[]): TypeAttributes => ({
+    intrinsic: parseNameAttribute(visitor, "intrinsic", attributes),
+});
 
 export interface TraitAttributes {}
 
@@ -41,7 +42,7 @@ export interface InstanceAttributes {
 export const parseInstanceAttributes = (
     visitor: Visitor,
     attributes: Attribute[],
-): TypeAttributes => ({
+): InstanceAttributes => ({
     default: parseNameAttribute(visitor, "default", attributes),
     error: parseNameAttribute(visitor, "error", attributes),
 });

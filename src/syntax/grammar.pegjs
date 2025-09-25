@@ -564,7 +564,8 @@ variable_name "variable name" = value:$lowercase_name { return { location: locat
 type_parameter_name "type parameter name"
     = value:$lowercase_name { return { location: location(), value }; }
 
-attribute_name "attribute name" = value:$lowercase_name { return { location: location(), value }; }
+attribute_name "attribute name"
+    = value:$(lowercase_name / keyword) { return { location: location(), value }; }
 
 keyword
     = "do"
