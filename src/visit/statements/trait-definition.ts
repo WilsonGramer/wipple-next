@@ -20,8 +20,6 @@ export const visitTraitDefinition: Visit<TraitDefinitionStatement> = (
     visitor.withDefinition(definitionNode, () => {
         definitionNode.code = statement.name.value;
 
-        visitor.pushScope();
-
         const attributes = parseTraitAttributes(visitor, statement.attributes);
 
         const parameters = statement.parameters.map(({ name, infer }) =>
@@ -40,14 +38,19 @@ export const visitTraitDefinition: Visit<TraitDefinitionStatement> = (
             }),
         );
 
-        const type = visitor.visit(statement.constraints.type, TypeInTraitDefinition, visitType);
-        visitor.addConstraints(new TypeConstraint(definitionNode, type));
+        visitor.enqueue("afterTypeDefinitions", () => {
+            const type = visitor.visit(
+                statement.constraints.type,
+                TypeInTraitDefinition,
+                visitType,
+            );
 
-        for (const constraint of statement.constraints.constraints) {
-            visitor.visit(constraint, ConstraintInTraitDefinition, visitConstraint);
-        }
+            visitor.addConstraints(new TypeConstraint(definitionNode, type));
 
-        visitor.popScope();
+            for (const constraint of statement.constraints.constraints) {
+                visitor.visit(constraint, ConstraintInTraitDefinition, visitConstraint);
+            }
+        });
 
         const definition: TraitDefinition = {
             type: "trait",

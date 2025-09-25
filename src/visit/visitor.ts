@@ -18,6 +18,7 @@ export class Visitor {
     definitionConstraints = new Map<Node, Constraint[]>();
     constraints = new Map<Node, Constraint[]>();
     instances = new Map<Node, InstanceDefinition[]>();
+    queue = new Queue();
 
     constructor(path: string, code: string, db: Db) {
         this.path = path;
@@ -116,12 +117,12 @@ export class Visitor {
         definitions.get(name)!.push(definition);
     }
 
-    defineInstance(definition: InstanceDefinition) {
-        if (!this.instances.has(definition.trait)) {
-            this.instances.set(definition.trait, []);
+    defineInstance(trait: Node, definition: InstanceDefinition) {
+        if (!this.instances.has(trait)) {
+            this.instances.set(trait, []);
         }
 
-        this.instances.get(definition.trait)!.push(definition);
+        this.instances.get(trait)!.push(definition);
     }
 
     withDefinition(node: Node, f: () => Definition | undefined) {
@@ -138,7 +139,16 @@ export class Visitor {
         }
     }
 
+    enqueue(key: QueueKey, visit: () => void) {
+        this.queue[key].push({ visitor: { ...this }, visit });
+    }
+
     finish() {
+        for (const { visitor, visit } of this.queue) {
+            Object.assign(this, visitor);
+            visit();
+        }
+
         for (const [node, constraints] of [...this.definitionConstraints, ...this.constraints]) {
             this.db.add(node, new HasConstraints(constraints));
         }
@@ -180,3 +190,21 @@ export class HasConstraints extends Fact<Constraint[]> {
 export class HasInstance extends Fact<[Node, Map<Node, Type>]> {
     display = ([node]: [Node, Map<Node, Type>]) => node.toString();
 }
+
+/** Needed so definitions are resolved before nodes that reference them */
+class Queue {
+    afterTypeDefinitions: QueuedVisit[] = [];
+    afterAllDefinitions: QueuedVisit[] = [];
+
+    *[Symbol.iterator]() {
+        yield* this.afterTypeDefinitions;
+        yield* this.afterAllDefinitions;
+    }
+}
+
+interface QueuedVisit {
+    visitor: Visitor;
+    visit: () => void;
+}
+
+type QueueKey = { [K in keyof Queue]: Queue[K] extends QueuedVisit[] ? K : never }[keyof Queue];

@@ -28,7 +28,7 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
         if (definition != null) {
             if (!definition.value.assigned) {
                 // Ensure the value is assignable to the constant's type
-                visitor.addConstraints(new TypeConstraint(value, definition.value.type));
+                visitor.addConstraints(new TypeConstraint(value, definition.value.type()));
 
                 visitor.db.add(value, new ValueInConstantDefinition(definition.node));
                 definition.value = { assigned: true, node: value };

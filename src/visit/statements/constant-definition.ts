@@ -18,28 +18,27 @@ export const visitConstantDefinition: Visit<ConstantDefinitionStatement> = (
     visitor.withDefinition(definitionNode, () => {
         definitionNode.code = statement.name.value;
 
-        visitor.pushScope();
-
         const attributes = parseConstantAttributes(visitor, statement.attributes);
 
-        visitor.currentDefinition!.implicitTypeParameters = true;
+        let type: Node;
+        visitor.enqueue("afterTypeDefinitions", () => {
+            visitor.currentDefinition!.implicitTypeParameters = true;
 
-        const type = visitor.visit(statement.constraints.type, TypeInConstantDefinition, visitType);
+            type = visitor.visit(statement.constraints.type, TypeInConstantDefinition, visitType);
 
-        for (const constraint of statement.constraints.constraints) {
-            visitor.visit(constraint, ConstraintInConstantDefinition, visitConstraint);
-        }
+            for (const constraint of statement.constraints.constraints) {
+                visitor.visit(constraint, ConstraintInConstantDefinition, visitConstraint);
+            }
 
-        visitor.popScope();
-
-        visitor.addConstraints(new TypeConstraint(definitionNode, type));
+            visitor.addConstraints(new TypeConstraint(definitionNode, type));
+        });
 
         const definition: ConstantDefinition = {
             type: "constant",
             node: definitionNode,
             comments: statement.comments,
             attributes,
-            value: { assigned: false, type },
+            value: { assigned: false, type: () => type },
         };
 
         visitor.defineName(statement.name.value, definition);

@@ -16,8 +16,6 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
     visitor.withDefinition(definitionNode, () => {
         definitionNode.code = statement.name.value;
 
-        visitor.pushScope();
-
         const attributes = parseTypeAttributes(visitor, statement.attributes);
 
         const parameters = statement.parameters.map(({ name, infer }) =>
@@ -35,11 +33,27 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
             }),
         );
 
+        visitor.enqueue("afterTypeDefinitions", () => {
+            switch (statement.representation.type) {
+                case "marker": {
+                    throw new Error("TODO");
+                }
+                case "structure": {
+                    throw new Error("TODO");
+                }
+                case "enumeration": {
+                    throw new Error("TODO");
+                }
+                case "wrapper": {
+                    throw new Error("TODO");
+                }
+                default: {
+                    statement.representation satisfies never;
+                }
+            }
+        });
+
         // Types don't have additional constraints
-
-        // TODO: Handle representation (structure, enumeration, etc.)
-
-        visitor.popScope();
 
         const definition: TypeDefinition = {
             type: "type",

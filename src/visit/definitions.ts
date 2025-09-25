@@ -25,7 +25,7 @@ export interface ConstantDefinition {
     node: Node;
     comments: Token[];
     attributes: ConstantAttributes;
-    value: { assigned: true; node: Node } | { assigned: false; type: Node };
+    value: { assigned: true; node: Node } | { assigned: false; type: () => Node };
 }
 
 export interface TypeDefinition {
@@ -49,8 +49,7 @@ export interface InstanceDefinition {
     node: Node;
     comments: Token[];
     attributes: InstanceAttributes;
-    trait: Node;
-    value: Node;
+    value: () => Node;
     // substitutions are added via facts
 }
 

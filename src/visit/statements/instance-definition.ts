@@ -21,73 +21,77 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
     definitionNode,
 ) => {
     visitor.withDefinition(definitionNode, () => {
-        visitor.pushScope();
-
         const attributes = parseInstanceAttributes(visitor, statement.attributes);
 
-        const trait = visitor.resolveName(
-            statement.constraints.bound.trait.value,
-            definitionNode,
-            (definition) => {
-                switch (definition.type) {
-                    case "trait":
-                        return [definition, TraitInInstanceDefinition];
-                    default:
-                        return undefined;
-                }
-            },
-        );
+        let trait: Node | undefined;
+        let value: Node;
+        visitor.enqueue("afterTypeDefinitions", () => {
+            const traitDefinition = visitor.resolveName(
+                statement.constraints.bound.trait.value,
+                definitionNode,
+                (definition) => {
+                    switch (definition.type) {
+                        case "trait":
+                            return [definition, TraitInInstanceDefinition];
+                        default:
+                            return undefined;
+                    }
+                },
+            );
 
-        if (trait == null) {
-            visitor.db.add(definitionNode, new IsUnresolvedInstance(null));
-            return;
-        }
+            if (traitDefinition == null) {
+                visitor.db.add(definitionNode, new IsUnresolvedInstance(null));
+                return;
+            }
 
-        visitor.db.add(definitionNode, new ResolvedInstance(trait.node));
+            trait = traitDefinition.node;
 
-        visitor.currentDefinition!.implicitTypeParameters = true;
+            visitor.db.add(definitionNode, new ResolvedInstance(traitDefinition.node));
 
-        const parameters = statement.constraints.bound.parameters.map((type) =>
-            visitor.visit(type, ParameterInInstanceDefinition, visitType),
-        );
+            visitor.currentDefinition!.implicitTypeParameters = true;
 
-        // TODO: Ensure `parameters` has the right length
-        const substitutions = new Map(
-            trait.parameters.map((parameter, index) => [parameter, parameters[index]]),
-        );
+            const parameters = statement.constraints.bound.parameters.map((type) =>
+                visitor.visit(type, ParameterInInstanceDefinition, visitType),
+            );
 
-        for (const constraint of statement.constraints.constraints) {
-            visitor.visit(constraint, ConstraintInInstanceDefinition, visitConstraint);
-        }
+            // TODO: Ensure `parameters` has the right length
+            const substitutions = new Map(
+                traitDefinition.parameters.map((parameter, index) => [
+                    parameter,
+                    parameters[index],
+                ]),
+            );
 
-        visitor.currentDefinition!.implicitTypeParameters = false;
+            for (const constraint of statement.constraints.constraints) {
+                visitor.visit(constraint, ConstraintInInstanceDefinition, visitConstraint);
+            }
 
-        const value = visitor.visit(statement.value, ValueInInstanceDefinition, visitExpression);
+            visitor.currentDefinition!.implicitTypeParameters = false;
 
-        visitor.popScope();
+            value = visitor.visit(statement.value, ValueInInstanceDefinition, visitExpression);
 
-        visitor.addConstraints(
-            new InstantiateConstraint({
-                source: definitionNode,
-                definition: trait.node,
-                replacements: new Map([[trait.node, definitionNode]]),
-                substitutions,
-            }),
-            new TypeConstraint(value, definitionNode),
-        );
+            visitor.addConstraints(
+                new InstantiateConstraint({
+                    source: definitionNode,
+                    definition: traitDefinition.node,
+                    replacements: new Map([[traitDefinition.node, definitionNode]]),
+                    substitutions,
+                }),
+                new TypeConstraint(value, definitionNode),
+            );
 
-        visitor.db.add(trait.node, new HasInstance([definitionNode, substitutions]));
+            visitor.db.add(traitDefinition.node, new HasInstance([definitionNode, substitutions]));
+
+            visitor.defineInstance(trait, definition);
+        });
 
         const definition: InstanceDefinition = {
             type: "instance",
             node: definitionNode,
             comments: statement.comments,
             attributes,
-            trait: trait.node,
-            value,
+            value: () => value,
         };
-
-        visitor.defineInstance(definition);
 
         return definition;
     });
