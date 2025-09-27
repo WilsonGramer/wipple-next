@@ -49,12 +49,13 @@ export interface InstanceDefinition {
     node: Node;
     comments: Token[];
     attributes: InstanceAttributes;
-    value: () => Node;
+    value: () => Node | undefined;
     // substitutions are added via facts
 }
 
 export interface TypeParameterDefinition {
     type: "typeParameter";
     node: Node;
+    name: string;
     infer?: boolean;
 }

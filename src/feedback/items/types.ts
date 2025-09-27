@@ -7,9 +7,7 @@ import { IsTyped } from "../../visit";
 
 registerFeedback({
     id: "conflicting-types",
-    query: function* (db) {
-        const ignore = (node: Node) => node.isHidden;
-
+    query: function* (db, filter) {
         for (const node of db.nodes()) {
             const { instantiatedFrom, instantiatedBy: source } = node;
 
@@ -23,10 +21,7 @@ registerFeedback({
                     source,
                     node: instantiatedFrom ?? node,
                     types: group.types,
-                    nodes: group.nodes
-                        .values()
-                        .filter((node) => !ignore(node))
-                        .toArray(),
+                    nodes: group.nodes.values().filter(filter).toArray(),
                 };
             }
         }

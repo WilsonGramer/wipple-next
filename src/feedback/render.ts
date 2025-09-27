@@ -1,19 +1,17 @@
 import chalk from "chalk";
-import { Node } from "../db";
+import { Db, Node } from "../db";
 import dedent from "dedent";
 import { displayType, Type } from "../typecheck/constraints/type";
 import { Bound, displayBound } from "../typecheck/constraints/bound";
+import { Token } from "../syntax";
 
 export interface RenderedFeedback {
-    strings: TemplateStringsArray;
+    strings: readonly string[];
     values: Renderable[];
     toString: () => string;
 }
 
-export const render = (
-    strings: TemplateStringsArray,
-    ...values: Renderable[]
-): RenderedFeedback => ({
+export const render = (strings: readonly string[], ...values: Renderable[]): RenderedFeedback => ({
     strings,
     values,
     toString: () =>
@@ -22,6 +20,27 @@ export const render = (
                 strings[strings.length - 1],
         ).trim(),
 });
+
+export const renderComments = (
+    comments: Token[],
+    links: Record<string, Renderable>,
+    suffix = "",
+) => {
+    const string = comments.map((comment) => comment.value).join("\n");
+
+    const items = string.split(/\[`([^`]+)`\]/);
+
+    const segments: string[] = [];
+    const values: Renderable[] = [];
+    for (let i = 0; i < items.length - 1; i += 2) {
+        segments.push(items[i]);
+        values.push(links[items[i + 1]] ?? "<unknown>");
+    }
+
+    segments.push(items[items.length - 1] + suffix);
+
+    return render(segments, ...values);
+};
 
 export type Renderable = string | Node | RenderableType | RenderableBound | RenderableCode;
 
@@ -54,9 +73,9 @@ export class RenderableType {
 render.type = (type: Type) => new RenderableType(type);
 
 export class RenderableBound {
-    bound: Bound;
+    bound: Bound<Type>;
 
-    constructor(bound: Bound) {
+    constructor(bound: Bound<Type>) {
         this.bound = bound;
     }
 
@@ -65,7 +84,7 @@ export class RenderableBound {
     }
 }
 
-render.bound = (bound: Bound) => new RenderableBound(bound);
+render.bound = (bound: Bound<Type>) => new RenderableBound(bound);
 
 render.list = (values: Renderable[], separator: string) => {
     if (values.length > 2) {

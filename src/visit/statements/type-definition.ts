@@ -16,12 +16,15 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
     visitor.withDefinition(definitionNode, () => {
         definitionNode.code = statement.name.value;
 
+        visitor.pushScope();
+
         const attributes = parseTypeAttributes(visitor, statement.attributes);
 
         const parameters = statement.parameters.map(({ name, infer }) =>
             visitor.visit(name, ParameterInTypeDefinition, (visitor, parameter, node) => {
                 visitor.defineName(parameter.value, {
                     type: "typeParameter",
+                    name: parameter.value,
                     node,
                 });
 
@@ -56,6 +59,8 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
         }
 
         // Types don't have additional constraints
+
+        visitor.popScope();
 
         const definition: TypeDefinition = {
             type: "type",

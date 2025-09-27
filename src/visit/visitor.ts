@@ -10,10 +10,12 @@ export class Visitor {
     path: string;
     code: string;
     db: Db;
-    currentNode!: Node;
+
     scopes = [new Scope()];
-    nodes = new Set<Node>();
+    currentNode!: Node;
     currentDefinition?: VisitorCurrentDefinition;
+
+    nodes = new Set<Node>();
     definitions = new Map<Node, Definition>();
     definitionConstraints = new Map<Node, Constraint[]>();
     constraints = new Map<Node, Constraint[]>();
@@ -139,14 +141,19 @@ export class Visitor {
         }
     }
 
-    enqueue(key: QueueKey, visit: () => void) {
-        this.queue[key].push({ visitor: { ...this }, visit });
+    enqueue(key: QueueKey, f: () => void) {
+        this.queue[key].push({
+            scopes: [...this.scopes],
+            currentNode: this.currentNode,
+            currentDefinition: this.currentDefinition,
+            f,
+        });
     }
 
     finish() {
-        for (const { visitor, visit } of this.queue) {
-            Object.assign(this, visitor);
-            visit();
+        for (const { f, ...props } of this.queue) {
+            Object.assign(this, props);
+            f();
         }
 
         for (const [node, constraints] of [...this.definitionConstraints, ...this.constraints]) {
@@ -156,8 +163,6 @@ export class Visitor {
         return {
             definitions: this.definitions,
             instances: this.instances,
-            // definitionConstraints: [...this.definitionConstraints.values()].flat(),
-            // constraints: [...this.constraints.values()].flat(),
         };
     }
 }
@@ -181,16 +186,6 @@ export class VisitorCurrentDefinition {
     }
 }
 
-export class HasNode extends Fact<Node> {}
-
-export class HasConstraints extends Fact<Constraint[]> {
-    display = () => undefined;
-}
-
-export class HasInstance extends Fact<[Node, Map<Node, Type>]> {
-    display = ([node]: [Node, Map<Node, Type>]) => node.toString();
-}
-
 /** Needed so definitions are resolved before nodes that reference them */
 class Queue {
     afterTypeDefinitions: QueuedVisit[] = [];
@@ -202,9 +197,25 @@ class Queue {
     }
 }
 
-interface QueuedVisit {
-    visitor: Visitor;
-    visit: () => void;
+interface QueuedVisit extends Partial<Visitor> {
+    f: () => void;
 }
 
 type QueueKey = { [K in keyof Queue]: Queue[K] extends QueuedVisit[] ? K : never }[keyof Queue];
+
+export class HasNode extends Fact<Node> {}
+
+export class HasConstraints extends Fact<Constraint[]> {
+    display = () => undefined;
+}
+
+export interface Instance {
+    node: Node;
+    substitutions: Map<Node, Node>;
+    default?: boolean;
+    error?: boolean;
+}
+
+export class HasInstance extends Fact<Instance> {
+    display = ({ node }: Instance) => node.toString();
+}

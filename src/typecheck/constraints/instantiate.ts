@@ -6,10 +6,10 @@ import { Type } from "./type";
 import { Constraint } from "./constraint";
 
 export interface Instantiation {
-    source: Node | undefined;
+    source: Node;
     definition: Node;
     replacements: Map<Node, Node>;
-    substitutions: Map<Node, Type>;
+    substitutions: Map<Node, Node>;
 }
 
 export class InstantiateConstraint extends Constraint {
@@ -25,9 +25,9 @@ export class InstantiateConstraint extends Constraint {
     }
 
     instantiate(
-        _source: Node | undefined,
+        _source: Node,
         _replacements: Map<Node, Node>,
-        _substitutions: Map<Node, Type>,
+        _substitutions: Map<Node, Node>,
     ): this | undefined {
         return undefined; // ignore nested instantiate constraints
     }

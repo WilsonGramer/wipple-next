@@ -2,7 +2,7 @@ import { LocationRange } from "peggy";
 import { Token } from "./tokens";
 import { Type } from "./types";
 
-export type Constraint = BoundConstraint | DefaultConstraint;
+export type Constraint = BoundConstraint | DefaultConstraint | EqualConstraint;
 
 export interface BoundConstraint {
     type: "bound";
@@ -16,4 +16,11 @@ export interface DefaultConstraint {
     location: LocationRange;
     parameter: Token;
     value: Type;
+}
+
+export interface EqualConstraint {
+    type: "equal";
+    location: LocationRange;
+    left: Type;
+    right: Type;
 }

@@ -26,7 +26,7 @@ export const visitAsExpression: Visit<AsExpression> = (visitor, expression, node
     const constraints = visitor.resolveName<Constraint[]>("As", node, (definition) => {
         switch (definition.type) {
             case "trait":
-                const substitutions = new Map<Node, Type>([
+                const substitutions = new Map<Node, Node>([
                     [definition.parameters[0], value], // input
                     [definition.parameters[1], type], // output
                 ]);
@@ -48,7 +48,7 @@ export const visitAsExpression: Visit<AsExpression> = (visitor, expression, node
                             substitutions,
                             replacements: new Map([[definition.node, asFunction]]),
                         }),
-                        new BoundConstraint({
+                        new BoundConstraint(asFunction, {
                             source: asFunction,
                             trait: definition.node,
                             substitutions,

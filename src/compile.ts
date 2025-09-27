@@ -1,5 +1,5 @@
 import { LocationRange } from "peggy";
-import { Fact, Node, Db, Filter } from "./db";
+import { Fact, Db } from "./db";
 import parse from "./syntax";
 import { visit } from "./visit";
 import { Group, Solver } from "./typecheck";
@@ -10,7 +10,6 @@ import { HasConstraints } from "./visit/visitor";
 export interface CompileOptions {
     path: string;
     code: string;
-    filter?: Filter[];
     // queries: ...
 }
 
@@ -23,7 +22,12 @@ export class HasType extends Fact<Type> {
 }
 
 export class InTypeGroup extends Fact<Group> {
-    display = () => undefined;
+    display = (group: Group) =>
+        group.nodes
+            .values()
+            .map((node) => chalk.blue(node))
+            .toArray()
+            .join(", ");
 }
 
 export const compile = (db: Db, options: CompileOptions): CompileResult => {

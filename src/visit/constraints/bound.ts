@@ -3,8 +3,6 @@ import { Fact, Node } from "../../db";
 import { BoundConstraint as SyntaxBoundConstraint } from "../../syntax";
 import { visitType } from "../types";
 import { BoundConstraint } from "../../typecheck";
-import { Bound } from "../../typecheck/constraints/bound";
-import { IsInferredTypeParameter } from "../statements/trait-definition";
 
 export class TraitInBoundConstraint extends Fact<Node> {}
 export class IsUnresolvedBoundConstraint extends Fact<null> {}
@@ -34,11 +32,11 @@ export const visitBoundConstraint: Visit<SyntaxBoundConstraint> = (visitor, stat
         trait.parameters.map((parameter, index) => [parameter, parameters[index]]),
     );
 
-    const bound: Bound = {
-        source: undefined, // will be updated during instantiation
-        trait: trait.node,
-        substitutions,
-    };
-
-    visitor.currentDefinition!.addConstraints(new BoundConstraint(bound));
+    visitor.currentDefinition!.addConstraints(
+        new BoundConstraint(node, {
+            source: undefined, // will be updated during instantiation
+            trait: trait.node,
+            substitutions,
+        }),
+    );
 };

@@ -6,6 +6,7 @@ import { collectFeedback } from "./feedback";
 import chalk from "chalk";
 import wrapAnsi from "wrap-ansi";
 import { inspect } from "node:util";
+import { nodeFilter } from "./db/filter";
 
 inspect.defaultOptions.depth = null;
 
@@ -18,14 +19,12 @@ const cmd = command({
     },
     handler: (args) => {
         const code = readFileSync(args.path, "utf8");
-        const filter = args.filterLines.length > 0 ? [{ lines: args.filterLines }] : [];
+        const filters = args.filterLines.length > 0 ? [{ lines: args.filterLines }] : [];
+
+        const filter = nodeFilter(filters);
 
         const db = new Db();
-        const result = compile(db, {
-            path: args.path,
-            code,
-            filter,
-        });
+        const result = compile(db, { path: args.path, code });
 
         if (!result.success) {
             switch (result.type) {
@@ -43,13 +42,12 @@ const cmd = command({
         }
 
         console.log(`${chalk.bold.underline("Facts:")}\n`);
-
         db.log(filter);
 
         console.log(`\n${chalk.bold.underline("Feedback:")}\n`);
 
         const seenFeedback = new Map<Node, Set<string>>();
-        for (const feedback of collectFeedback(db)) {
+        for (const feedback of collectFeedback(db, filter)) {
             if (!seenFeedback.get(feedback.on)) {
                 seenFeedback.set(feedback.on, new Set());
             }

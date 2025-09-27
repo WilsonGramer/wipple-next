@@ -15,7 +15,7 @@ export const visitTraitExpression: Visit<TraitExpression> = (visitor, expression
         (definition) => {
             switch (definition.type) {
                 case "trait":
-                    const substitutions = new Map<Node, Type>();
+                    const substitutions = new Map<Node, Node>();
 
                     node.setCodegen(codegen.traitExpression(definition.node, substitutions));
 
@@ -27,7 +27,7 @@ export const visitTraitExpression: Visit<TraitExpression> = (visitor, expression
                                 substitutions,
                                 replacements: new Map([[definition.node, node]]),
                             }),
-                            new BoundConstraint({
+                            new BoundConstraint(node, {
                                 source: node,
                                 trait: definition.node,
                                 substitutions,

@@ -108,7 +108,7 @@ export interface InstanceDefinitionStatement {
     comments: Token[];
     attributes: Attribute[];
     constraints: InstanceConstraints;
-    value: Expression;
+    value?: Expression;
 }
 
 export interface InstanceConstraints {

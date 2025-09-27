@@ -19,6 +19,7 @@ export interface ParameterType {
     type: "parameter";
     location: LocationRange;
     name: Token;
+    value?: Type;
 }
 
 export interface NamedType {

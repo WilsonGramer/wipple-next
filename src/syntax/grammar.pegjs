@@ -155,10 +155,7 @@ instance_definition_statement
         attributes:attribute*
         _
         constraints:instance_constraints
-        _
-        ":"
-        _
-        value:expression {
+        value:(_ ":" _ @expression)? {
             return {
                 type: "instanceDefinition",
                 location: location(),
@@ -459,6 +456,7 @@ type "type"
 
 type_element "type"
     = parameterized_type
+    / annotated_parameter_type
     / subtype
 
 subtype "type"
@@ -475,6 +473,9 @@ placeholder_type = "_" { return { type: "placeholder", location: location() }; }
 
 parameter_type
     = name:type_parameter_name { return { type: "parameter", location: location(), name }; }
+
+annotated_parameter_type
+    = name:type_parameter_name _ "::" _ value:type { return { type: "parameter", location: location(), name, value }; }
 
 named_type
     = name:type_name { return { type: "named", location: location(), name, parameters: [] }; }

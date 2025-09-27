@@ -30,12 +30,8 @@ export class Solver {
         this.constraints.add(...constraints);
     }
 
-    run(constraints?: Constraint[]) {
-        if (constraints != null) {
-            new Constraints(constraints).run(this);
-        } else {
-            this.constraints.run(this);
-        }
+    run() {
+        this.constraints.run(this);
     }
 
     unify(left: Type, right: Type) {
@@ -46,12 +42,15 @@ export class Solver {
         const leftNode = left instanceof Node ? left : undefined;
         const rightNode = right instanceof Node ? right : undefined;
 
+        if (leftNode != null && rightNode != null) {
+            this.merge(leftNode, rightNode);
+        }
+
         left = this.applyShallow(left);
         right = this.applyShallow(right);
 
         if (left instanceof Node && right instanceof Node) {
-            this.unionFind.union(left, right);
-            this.merge(left, right);
+            // already merged groups above
         } else if (left instanceof Node) {
             this.insert(left, right);
         } else if (right instanceof Node) {
@@ -126,17 +125,16 @@ export class Solver {
     }
 
     private merge(left: Node, right: Node) {
-        const representative = this.unionFind.find(left);
-        for (const node of [left, right]) {
-            if (node === representative) {
-                continue;
-            }
+        const leftRepresentative = this.unionFind.find(left);
+        const rightRepresentative = this.unionFind.find(right);
 
-            const types = this.groups.get(node);
-            if (types != null) {
-                this.insert(representative, ...types);
-                this.groups = this.groups.delete(node);
-            }
+        this.unionFind.union(leftRepresentative, rightRepresentative);
+
+        const rightTypes = this.groups.get(rightRepresentative) ?? ImmutableList();
+        this.groups = this.groups.delete(rightRepresentative);
+
+        for (const type of rightTypes) {
+            this.unify(leftRepresentative, type);
         }
     }
 

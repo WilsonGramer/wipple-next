@@ -84,9 +84,7 @@ export class Db {
         }
     }
 
-    log(filters: Filter[] = [], indent = 0) {
-        const filter = nodeFilter(filters);
-
+    log(filter: (node: Node) => boolean, indent = 0) {
         const nodes = this.nodes().filter(filter).toArray();
         nodes.sort((a, b) => a.span.sort(b.span));
 

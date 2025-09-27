@@ -19,9 +19,9 @@ export class TypeConstraint extends Constraint {
     }
 
     instantiate(
-        source: Node | undefined,
+        source: Node,
         replacements: Map<Node, Node>,
-        substitutions: Map<Node, Type>,
+        substitutions: Map<Node, Node>,
     ): this | undefined {
         return new TypeConstraint(
             getOrInstantiate(this.node, source, replacements),
@@ -76,9 +76,9 @@ export const traverseType = (type: Type, f: (type: Type) => Type): Type => {
 
 export const instantiateType = (
     type: Type,
-    source: Node | undefined,
+    source: Node,
     replacements: Map<Node, Node>,
-    substitutions: Map<Node, Type>,
+    substitutions: Map<Node, Node>,
 ) =>
     traverseType(type, (type) => {
         if (type instanceof Node) {
@@ -88,7 +88,13 @@ export const instantiateType = (
                 throw new Error("expected parameter to have a node tag");
             }
 
-            return getOrInstantiate(type.tag, source, substitutions, replacements);
+            if (substitutions.has(type.tag)) {
+                return substitutions.get(type.tag)!;
+            } else {
+                const replacement = getOrInstantiate(type.tag, source, replacements);
+                substitutions.set(type.tag, replacement);
+                return replacement;
+            }
         } else {
             return type;
         }

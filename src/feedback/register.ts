@@ -3,7 +3,7 @@ import { Db, Node } from "../db";
 
 interface Feedback<T> {
     id: string;
-    query: (db: Db) => Generator<T>;
+    query: (db: Db, filter: (node: Node) => boolean) => Generator<T>;
     on: (props: T) => Node;
     render: (props: T) => RenderedFeedback;
 }

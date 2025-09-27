@@ -22,7 +22,7 @@ export const visitVariableExpression: Visit<VariableExpression> = (visitor, expr
 
                     return [new TypeConstraint(node, definition.node), ResolvedVariable];
                 case "constant":
-                    const substitutions = new Map<Node, Type>();
+                    const substitutions = new Map<Node, Node>();
 
                     node.setCodegen(codegen.constantExpression(definition.node, substitutions));
 

@@ -10,7 +10,7 @@ import { Solver } from "../solve";
  * `HasConstraints` fact rather than the solver. Then form groups, add concrete
  * types, and finally resolve bounds.
  */
-export const scores = ["instantiate", "group", "type", "bound"] as const;
+export const scores = ["group", "type", "instantiate", "bound"] as const;
 export type Score = (typeof scores)[number];
 
 export class Constraints {
@@ -36,25 +36,15 @@ export class Constraints {
 }
 
 /**
- * Used during instantiation. If there's already a substitution/replacement for
+ * Used during instantiation. If there's already a replacement for
  * `node`, return it, otherwise create a new node.
  */
-export const getOrInstantiate = <T>(
-    node: Node,
-    source: Node | undefined,
-    substitutions: Map<Node, T | Node>,
-    replacements?: Map<Node, Node>, // provided if `substitutions` keys are type parameters
-): T | Node => {
-    if (substitutions.has(node)) {
-        return substitutions.get(node)!;
+export const getOrInstantiate = (node: Node, source: Node, replacements: Map<Node, Node>): Node => {
+    if (replacements.has(node)) {
+        return replacements.get(node)!;
     } else {
-        const instantiated =
-            replacements != null
-                ? getOrInstantiate(node, source, replacements)
-                : Node.instantiatedFrom(node, source);
-
-        substitutions.set(node, instantiated);
-
+        const instantiated = Node.instantiatedFrom(node, source);
+        replacements.set(node, instantiated);
         return instantiated;
     }
 };

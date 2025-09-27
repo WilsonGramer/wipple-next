@@ -1,6 +1,6 @@
 import { HasInstance, Visit } from "../visitor";
 import { Fact, Node } from "../../db";
-import { InstanceDefinitionStatement } from "../../syntax";
+import { InstanceDefinitionStatement, Token } from "../../syntax";
 import { InstantiateConstraint, TypeConstraint } from "../../typecheck";
 import { parseInstanceAttributes } from "../attributes";
 import { visitType } from "../types";
@@ -13,7 +13,9 @@ export class TraitInInstanceDefinition extends Fact<Node> {}
 export class ConstraintInInstanceDefinition extends Fact<Node> {}
 export class ValueInInstanceDefinition extends Fact<Node> {}
 export class IsUnresolvedInstance extends Fact<null> {}
+export class MissingValueInInstance extends Fact<null> {}
 export class ResolvedInstance extends Fact<Node> {}
+export class IsErrorInstance extends Fact<Token[]> {}
 
 export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
     visitor,
@@ -23,8 +25,10 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
     visitor.withDefinition(definitionNode, () => {
         const attributes = parseInstanceAttributes(visitor, statement.attributes);
 
+        visitor.pushScope();
+
         let trait: Node | undefined;
-        let value: Node;
+        let value: Node | undefined;
         visitor.enqueue("afterTypeDefinitions", () => {
             const traitDefinition = visitor.resolveName(
                 statement.constraints.bound.trait.value,
@@ -62,13 +66,11 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
                 ]),
             );
 
+            visitor.currentDefinition!.implicitTypeParameters = false;
+
             for (const constraint of statement.constraints.constraints) {
                 visitor.visit(constraint, ConstraintInInstanceDefinition, visitConstraint);
             }
-
-            visitor.currentDefinition!.implicitTypeParameters = false;
-
-            value = visitor.visit(statement.value, ValueInInstanceDefinition, visitExpression);
 
             visitor.addConstraints(
                 new InstantiateConstraint({
@@ -77,13 +79,29 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
                     replacements: new Map([[traitDefinition.node, definitionNode]]),
                     substitutions,
                 }),
-                new TypeConstraint(value, definitionNode),
             );
 
-            visitor.db.add(traitDefinition.node, new HasInstance([definitionNode, substitutions]));
+            if (statement.value != null) {
+                value = visitor.visit(statement.value, ValueInInstanceDefinition, visitExpression);
+                visitor.addConstraints(new TypeConstraint(value, definitionNode));
+            } else if (attributes.error == null) {
+                visitor.db.add(definitionNode, new MissingValueInInstance(null));
+            }
+
+            visitor.db.add(
+                traitDefinition.node,
+                new HasInstance({
+                    node: definitionNode,
+                    substitutions,
+                    default: attributes.default,
+                    error: attributes.error,
+                }),
+            );
 
             visitor.defineInstance(trait, definition);
         });
+
+        visitor.popScope();
 
         const definition: InstanceDefinition = {
             type: "instance",
@@ -92,6 +110,10 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
             attributes,
             value: () => value,
         };
+
+        if (attributes.error) {
+            visitor.db.add(definitionNode, new IsErrorInstance(statement.comments));
+        }
 
         return definition;
     });

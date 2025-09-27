@@ -21,7 +21,7 @@ export class Node {
     }
 
     static instantiatedFrom(other: Node, source: Node | undefined): Node {
-        if (other.instantiatedFrom) {
+        if (other.instantiatedFrom != null) {
             throw new Error("already instantiated");
         }
 

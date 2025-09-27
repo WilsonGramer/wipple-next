@@ -11,10 +11,6 @@ export class UnionFind {
     }
 
     union(left: Node, right: Node) {
-        if (left === right) {
-            return;
-        }
-
         const toUnify: ImmutableSet<Node>[] = [];
         const toKeep: ImmutableSet<Node>[] = [];
         for (const set of this.sets) {
@@ -33,15 +29,29 @@ export class UnionFind {
         this.sets = ImmutableList([...toKeep, union]);
     }
 
-    find(node: Node): Node {
+    tryFind(node: Node) {
+        const result: Node[] = [];
         for (const set of this.sets) {
             if (set.has(node)) {
-                return [...set][0]; // will be consistent because sets are ordered
+                result.push([...set][0]); // will be consistent because sets are ordered
             }
         }
 
-        this.sets.push(ImmutableSet([node]));
-        return node;
+        if (result.length > 1) {
+            throw new Error("node belongs to multiple sets");
+        }
+
+        return result[0];
+    }
+
+    find(node: Node) {
+        const representative = this.tryFind(node);
+        if (representative != null) {
+            return representative;
+        } else {
+            this.sets = this.sets.push(ImmutableSet([node]));
+            return node;
+        }
     }
 
     nodes() {
