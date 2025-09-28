@@ -47,7 +47,7 @@ statement "statement"
 type_definition_statement
     = comments:comments
         _
-        attributes:attribute*
+        attributes:attributes
         _
         name:type_name
         _
@@ -101,7 +101,7 @@ marker_type_representation = "type" { return { type: "marker", location: locatio
 trait_definition_statement
     = comments:comments
         _
-        attributes:attribute*
+        attributes:attributes
         _
         name:type_name
         _
@@ -129,7 +129,7 @@ trait_constraints
 constant_definition_statement
     = comments:comments
         _
-        attributes:attribute*
+        attributes:attributes
         _
         name:variable_name
         _
@@ -152,7 +152,7 @@ constant_constraints
 instance_definition_statement
     = comments:comments
         _
-        attributes:attribute*
+        attributes:attributes
         _
         constraints:instance_constraints
         value:(_ ":" _ @expression)? {
@@ -183,7 +183,7 @@ expression_statement
 
 empty_statement = comments:comments { return { type: "empty", location: location(), comments }; }
 
-comments = @comment*
+comments "comments" = comments:comment* { return { location: location(), comments }; }
 
 // Expressions
 
@@ -475,7 +475,9 @@ parameter_type
     = name:type_parameter_name { return { type: "parameter", location: location(), name }; }
 
 annotated_parameter_type
-    = name:type_parameter_name _ "::" _ value:type { return { type: "parameter", location: location(), name, value }; }
+    = name:type_parameter_name _ "::" _ value:type {
+            return { type: "parameter", location: location(), name, value };
+        }
 
 named_type
     = name:type_name { return { type: "named", location: location(), name, parameters: [] }; }
@@ -530,8 +532,10 @@ default_constraint
 
 // Attributes
 
+attributes "attributes" = attributes:attribute* { return { location: location(), attributes }; }
+
 attribute "attribute"
-    = "[" _ name:attribute_name _ value:(":" _ @attribute_value)? _ "]" {
+    = "[" _ name:attribute_name _ value:(":" _ @attribute_value)? _ "]" _ {
             return { location: location(), name, value };
         }
 

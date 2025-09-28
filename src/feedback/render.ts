@@ -1,9 +1,9 @@
 import chalk from "chalk";
-import { Db, Node } from "../db";
+import { Node } from "../db";
 import dedent from "dedent";
 import { displayType, Type } from "../typecheck/constraints/type";
 import { Bound, displayBound } from "../typecheck/constraints/bound";
-import { Token } from "../syntax";
+import { Comments } from "../syntax";
 
 export interface RenderedFeedback {
     strings: readonly string[];
@@ -22,11 +22,11 @@ export const render = (strings: readonly string[], ...values: Renderable[]): Ren
 });
 
 export const renderComments = (
-    comments: Token[],
+    comments: Comments,
     links: Record<string, Renderable>,
     suffix = "",
 ) => {
-    const string = comments.map((comment) => comment.value).join("\n");
+    const string = comments.comments.map((comment) => comment.value).join("\n");
 
     const items = string.split(/\[`([^`]+)`\]/);
 

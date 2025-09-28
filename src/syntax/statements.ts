@@ -1,5 +1,5 @@
 import { LocationRange } from "peggy";
-import { Attribute } from "./attributes";
+import { Attributes } from "./attributes";
 import { Constraint, BoundConstraint } from "./constraints";
 import { Expression } from "./expressions";
 import { Pattern } from "./patterns";
@@ -18,8 +18,8 @@ export type Statement =
 export interface TypeDefinitionStatement {
     type: "typeDefinition";
     location: LocationRange;
-    comments: Token[];
-    attributes: Attribute[];
+    comments: Comments;
+    attributes: Attributes;
     name: Token;
     parameters: TypeParameter[];
     representation: TypeRepresentation;
@@ -74,8 +74,8 @@ export interface WrapperTypeRepresentation {
 export interface TraitDefinitionStatement {
     type: "traitDefinition";
     location: LocationRange;
-    comments: Token[];
-    attributes: Attribute[];
+    comments: Comments;
+    attributes: Attributes;
     name: Token;
     parameters: TypeParameter[];
     constraints: TraitConstraints;
@@ -90,8 +90,8 @@ export interface TraitConstraints {
 export interface ConstantDefinitionStatement {
     type: "constantDefinition";
     location: LocationRange;
-    comments: Token[];
-    attributes: Attribute[];
+    comments: Comments;
+    attributes: Attributes;
     name: Token;
     constraints: ConstantConstraints;
 }
@@ -105,8 +105,8 @@ export interface ConstantConstraints {
 export interface InstanceDefinitionStatement {
     type: "instanceDefinition";
     location: LocationRange;
-    comments: Token[];
-    attributes: Attribute[];
+    comments: Comments;
+    attributes: Attributes;
     constraints: InstanceConstraints;
     value?: Expression;
 }
@@ -120,7 +120,7 @@ export interface InstanceConstraints {
 export interface AssignmentStatement {
     type: "assignment";
     location: LocationRange;
-    comments: Token[];
+    comments: Comments;
     pattern: Pattern;
     value: Expression;
 }
@@ -128,12 +128,17 @@ export interface AssignmentStatement {
 export interface ExpressionStatement {
     type: "expression";
     location: LocationRange;
-    comments: Token[];
+    comments: Comments;
     expression: Expression;
 }
 
 export interface EmptyStatement {
     type: "empty";
+    location: LocationRange;
+    comments: Comments;
+}
+
+export interface Comments {
     location: LocationRange;
     comments: Token[];
 }

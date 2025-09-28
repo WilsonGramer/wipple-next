@@ -1,6 +1,6 @@
 import { HasInstance, Visit } from "../visitor";
 import { Fact, Node } from "../../db";
-import { InstanceDefinitionStatement, Token } from "../../syntax";
+import { Comments, InstanceDefinitionStatement } from "../../syntax";
 import { InstantiateConstraint, TypeConstraint } from "../../typecheck";
 import { parseInstanceAttributes } from "../attributes";
 import { visitType } from "../types";
@@ -15,7 +15,7 @@ export class ValueInInstanceDefinition extends Fact<Node> {}
 export class IsUnresolvedInstance extends Fact<null> {}
 export class MissingValueInInstance extends Fact<null> {}
 export class ResolvedInstance extends Fact<Node> {}
-export class IsErrorInstance extends Fact<Token[]> {}
+export class IsErrorInstance extends Fact<Comments> {}
 
 export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
     visitor,

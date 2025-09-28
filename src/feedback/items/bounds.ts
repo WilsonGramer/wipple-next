@@ -56,15 +56,15 @@ registerFeedback({
                     links[typeParameter.name] = firstUse;
                 }
 
-                yield { node, bound, comments, links };
+                yield { node, instance: instanceNode, comments, links };
             }
         }
     },
     on: ({ node }) => node,
-    render: ({ node, bound, comments, links }) =>
+    render: ({ node, instance, comments, links }) =>
         renderComments(
             comments,
             { source: node, ...links },
-            `\n\n(This feedback comes from the instance ${render.bound(bound)}.)`,
+            `\n\n(This feedback comes from ${instance}.)`,
         ),
 });

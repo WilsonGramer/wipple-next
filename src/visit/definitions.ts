@@ -1,5 +1,5 @@
 import { Node } from "../db";
-import { Token } from "../syntax";
+import { Comments } from "../syntax";
 import {
     ConstantAttributes,
     InstanceAttributes,
@@ -23,7 +23,7 @@ export interface VariableDefinition {
 export interface ConstantDefinition {
     type: "constant";
     node: Node;
-    comments: Token[];
+    comments: Comments;
     attributes: ConstantAttributes;
     value: { assigned: true; node: Node } | { assigned: false; type: () => Node };
 }
@@ -31,7 +31,7 @@ export interface ConstantDefinition {
 export interface TypeDefinition {
     type: "type";
     node: Node;
-    comments: Token[];
+    comments: Comments;
     attributes: TypeAttributes;
     parameters: Node[];
 }
@@ -39,7 +39,7 @@ export interface TypeDefinition {
 export interface TraitDefinition {
     type: "trait";
     node: Node;
-    comments: Token[];
+    comments: Comments;
     attributes: TraitAttributes;
     parameters: Node[];
 }
@@ -47,7 +47,7 @@ export interface TraitDefinition {
 export interface InstanceDefinition {
     type: "instance";
     node: Node;
-    comments: Token[];
+    comments: Comments;
     attributes: InstanceAttributes;
     value: () => Node | undefined;
     // substitutions are added via facts

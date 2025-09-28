@@ -8,6 +8,16 @@ import { visitTraitDefinition } from "./trait-definition";
 import { visitInstanceDefinition } from "./instance-definition";
 
 export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
+    node.code = node.code.slice(
+        statement.comments.location.end.offset - statement.comments.location.start.offset,
+    );
+
+    if ("attributes" in statement) {
+        node.code = node.code.slice(
+            statement.attributes.location.end.offset - statement.attributes.location.start.offset,
+        );
+    }
+
     switch (statement.type) {
         case "constantDefinition": {
             return visitConstantDefinition(visitor, statement, node);
