@@ -1,6 +1,6 @@
 import { Visitor } from "../visitor";
 import { IsTyped } from "..";
-import { Node } from "../../db";
+import { Fact, Node } from "../../db";
 import { Expression } from "../../syntax";
 import { visitNumberExpression } from "./number";
 import { visitStringExpression } from "./string";
@@ -15,7 +15,10 @@ import { visitDoExpression } from "./do";
 import { visitTraitExpression } from "./trait";
 import { visitAsExpression } from "./as";
 
+export class IsExpression extends Fact<null> {}
+
 export const visitExpression = (visitor: Visitor, expression: Expression, node: Node) => {
+    visitor.db.add(node, new IsExpression(null));
     visitor.db.add(node, new IsTyped(null));
 
     switch (expression.type) {

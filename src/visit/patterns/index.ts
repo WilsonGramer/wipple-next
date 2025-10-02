@@ -1,5 +1,5 @@
 import { Visitor } from "../visitor";
-import { Node } from "../../db";
+import { Fact, Node } from "../../db";
 import { Pattern } from "../../syntax";
 import { visitWildcardPattern } from "./wildcard";
 import { visitVariablePattern } from "./variable";
@@ -10,7 +10,10 @@ import { visitStringExpression } from "../expressions/string";
 import { visitSetPattern } from "./set";
 import { visitUnitPattern } from "./unit";
 
+export class IsPattern extends Fact<null> {}
+
 export const visitPattern = (visitor: Visitor, pattern: Pattern, node: Node) => {
+    visitor.db.add(node, new IsPattern(null));
     visitor.db.add(node, new IsTyped(null));
 
     switch (pattern.type) {

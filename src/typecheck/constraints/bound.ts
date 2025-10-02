@@ -1,7 +1,7 @@
 import { Solver } from "../solve";
 import { Fact, Node } from "../../db";
 import { HasInstance } from "../../visit/visitor";
-import { displayType, instantiateType, Type } from "./type";
+import { displayType, Type } from "./type";
 import chalk from "chalk";
 import { IsInferredTypeParameter } from "../../visit/statements/trait-definition";
 import { getOrInstantiate, InstantiateConstraint, Score, TypeConstraint } from ".";

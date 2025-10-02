@@ -4,6 +4,7 @@ import dedent from "dedent";
 import { displayType, Type } from "../typecheck/constraints/type";
 import { Bound, displayBound } from "../typecheck/constraints/bound";
 import { Comments } from "../syntax";
+import { nodeDisplayOptions } from "../db/node";
 
 export interface RenderedFeedback {
     strings: readonly string[];
@@ -52,7 +53,7 @@ export class RenderableCode {
     }
 
     toString() {
-        return chalk.blue(this.code);
+        return chalk.blue(nodeDisplayOptions.markdown ? "`" + this.code + "`" : this.code);
     }
 }
 
@@ -66,7 +67,8 @@ export class RenderableType {
     }
 
     toString() {
-        return chalk.blue(displayType(this.type));
+        const type = displayType(this.type);
+        return chalk.blue(nodeDisplayOptions.markdown ? "`" + type + "`" : type);
     }
 }
 
@@ -80,7 +82,8 @@ export class RenderableBound {
     }
 
     toString() {
-        return chalk.blue(displayBound(this.bound));
+        const bound = displayBound(this.bound);
+        return chalk.blue(nodeDisplayOptions.markdown ? "`" + bound + "`" : bound);
     }
 }
 

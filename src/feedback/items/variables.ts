@@ -1,15 +1,10 @@
-import { IsUnresolvedVariable, ResolvedVariable } from "../../visit/expressions/variable";
 import { render } from "../render";
 import { registerFeedback } from "../register";
-import { IsVariablePattern } from "../../visit/patterns/variable";
+import * as queries from "../../queries";
 
 registerFeedback({
     id: "undefined-variable",
-    query: function* (db) {
-        for (const [variable] of db.list(IsUnresolvedVariable)) {
-            yield { variable };
-        }
-    },
+    query: queries.undefinedVariable,
     on: ({ variable }) => variable,
     render: ({ variable }) => render`
         Can't find ${variable}.
@@ -20,13 +15,7 @@ registerFeedback({
 
 registerFeedback({
     id: "unused-variable",
-    query: function* (db) {
-        for (const [variable] of db.list(IsVariablePattern)) {
-            if (!db.has(ResolvedVariable, variable)) {
-                yield { variable };
-            }
-        }
-    },
+    query: queries.unusedVariable,
     on: ({ variable }) => variable,
     render: ({ variable }) => render`
         ${variable} is never used.

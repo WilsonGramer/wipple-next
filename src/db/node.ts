@@ -4,6 +4,11 @@ import { CodegenItem } from "../codegen";
 
 let counter = 0;
 
+export const nodeDisplayOptions = {
+    showLocation: true,
+    markdown: false,
+};
+
 export class Node {
     id: string;
     span: Span;
@@ -38,13 +43,15 @@ export class Node {
     }
 
     toString() {
-        let s = chalk.blue(this.code);
+        let s = chalk.blue(nodeDisplayOptions.markdown ? "`" + this.code + "`" : this.code);
 
-        if (this.instantiatedFrom != null) {
-            s += chalk.black.dim(` instantiated`);
+        if (nodeDisplayOptions.showLocation) {
+            if (this.instantiatedFrom != null) {
+                s += chalk.black.dim(` instantiated`);
+            }
+
+            s += chalk.black.dim(` @ ${this.span}`);
         }
-
-        s += chalk.black.dim(` @ ${this.span}`);
 
         return s;
     }

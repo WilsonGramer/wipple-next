@@ -1,5 +1,5 @@
 import { Visitor } from "../visitor";
-import { Node } from "../../db";
+import { Fact, Node } from "../../db";
 import { Type } from "../../syntax";
 import { visitFunctionType } from "./function";
 import { visitPlaceholderType } from "./placeholder";
@@ -9,7 +9,11 @@ import { visitNamedType } from "./named";
 import { visitBlockType } from "./block";
 import { visitTupleType } from "./tuple";
 
+export class IsType extends Fact<null> {}
+
 export const visitType = (visitor: Visitor, type: Type, node: Node) => {
+    visitor.db.add(node, new IsType(null));
+
     switch (type.type) {
         case "function":
             return visitFunctionType(visitor, type, node);

@@ -1,9 +1,10 @@
 import { RenderedFeedback } from "./render";
-import { Db, Node } from "../db";
+import { Node } from "../db";
+import { Query } from "../queries";
 
 interface Feedback<T> {
     id: string;
-    query: (db: Db, filter: (node: Node) => boolean) => Generator<T>;
+    query: Query<T>;
     on: (props: T) => Node;
     render: (props: T) => RenderedFeedback;
 }
