@@ -7,6 +7,7 @@ import { nodeFilter } from "./db/filter";
 import { nodeDisplayOptions } from "./db/node";
 import { LocationRange } from "peggy";
 import * as queries from "./queries";
+import { displayType, Type } from "./typecheck/constraints/type";
 
 const tokenTypes = ["type", "function", "typeParameter"] as const;
 
@@ -30,6 +31,7 @@ export default () => {
                     },
                     full: true,
                 },
+                hoverProvider: true,
             },
         };
     });
@@ -83,6 +85,15 @@ export default () => {
         }
 
         return addSemanticTokens(params.textDocument.uri, db);
+    });
+
+    connection.onHover((params) => {
+        const db = dbs.get(params.textDocument.uri);
+        if (!db) {
+            return null;
+        }
+
+        return getHover(params.textDocument.uri, params.position, db);
     });
 
     connection.listen();
@@ -155,4 +166,38 @@ const addSemanticTokens = (uri: string, db: Db) => {
     }
 
     return builder.build();
+};
+
+const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | undefined => {
+    const filter = nodeFilter([{ path: uri }]);
+
+    const matches: { length: number; type: Type }[] = [];
+    for (const { node, type } of queries.type(db, filter)) {
+        const range = convertRange(node.span.range);
+
+        if (
+            range.start.line === position.line &&
+            range.start.character <= position.character &&
+            range.end.line === position.line &&
+            range.end.character >= position.character
+        ) {
+            matches.push({ length: range.end.character - range.start.character, type });
+        }
+    }
+
+    matches.sort((a, b) => a.length - b.length);
+
+    const match = matches[0];
+    if (match == null) {
+        return undefined;
+    }
+
+    return {
+        contents: [
+            {
+                language: "wipple",
+                value: displayType(match.type),
+            },
+        ],
+    };
 };

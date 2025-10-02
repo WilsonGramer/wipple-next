@@ -4,6 +4,12 @@ import { Node } from "../db";
 import { typeReferencesNode } from "../typecheck/constraints/type";
 import { IsTyped } from "../visit";
 
+export const type = query(function* (db) {
+    for (const [node, type] of db.list(HasType)) {
+        yield { node, type };
+    }
+});
+
 export const conflictingTypes = query(function* (db, filter) {
     for (const [node, group] of db.list(InTypeGroup)) {
         const { instantiatedFrom, instantiatedBy: source } = node;
