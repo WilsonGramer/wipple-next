@@ -35,7 +35,7 @@ export const renderComments = (
     const values: Renderable[] = [];
     for (let i = 0; i < items.length - 1; i += 2) {
         segments.push(items[i]);
-        values.push(links[items[i + 1]] ?? "<unknown>");
+        values.push(links[items[i + 1]] ?? render.code("_"));
     }
 
     segments.push(items[items.length - 1] + suffix);

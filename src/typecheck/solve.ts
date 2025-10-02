@@ -56,6 +56,14 @@ export class Solver {
         } else if (right instanceof Node) {
             this.insert(right, left);
         } else {
+            if (left.tag === right.tag) {
+                for (let i = 0; i < Math.min(left.children.length, right.children.length); i++) {
+                    const leftChild = left.children[i];
+                    const rightChild = right.children[i];
+                    this.unify(leftChild, rightChild);
+                }
+            }
+
             if (left.tag !== right.tag || left.children.length !== right.children.length) {
                 this.error = true;
 
@@ -66,14 +74,7 @@ export class Solver {
                 if (rightNode != null) {
                     this.insert(rightNode, left, right);
                 }
-
-                return;
             }
-
-            left.children.forEach((leftChild, index) => {
-                const rightChild = right.children[index];
-                this.unify(leftChild, rightChild);
-            });
         }
     }
 
