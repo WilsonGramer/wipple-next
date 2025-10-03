@@ -10,6 +10,16 @@ export const type = query(function* (db) {
     }
 });
 
+export const related = query(function* (db) {
+    for (const [node, group] of db.list(InTypeGroup)) {
+        for (const related of group.nodes.values()) {
+            if (related !== node) {
+                yield { node, related };
+            }
+        }
+    }
+});
+
 export const conflictingTypes = query(function* (db) {
     for (const [node, group] of db.list(InTypeGroup)) {
         const { instantiatedFrom, instantiatedBy: source } = node;

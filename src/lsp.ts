@@ -33,6 +33,7 @@ export default () => {
                     full: true,
                 },
                 hoverProvider: true,
+                documentHighlightProvider: true,
             },
         };
     });
@@ -66,7 +67,7 @@ export default () => {
                 }
             }
 
-            addFeedback(e.document.uri, db, diagnostics);
+            addFeedback(db, diagnostics);
 
             connection.sendDiagnostics({
                 uri: e.document.uri,
@@ -97,6 +98,15 @@ export default () => {
         return getHover(params.textDocument.uri, params.position, db);
     });
 
+    connection.onDocumentHighlight((params) => {
+        const db = dbs.get(params.textDocument.uri);
+        if (!db) {
+            return [];
+        }
+
+        return getRelated(params.textDocument.uri, params.position, db);
+    });
+
     connection.listen();
 };
 
@@ -111,7 +121,7 @@ const convertRange = (location: LocationRange): lsp.Range => ({
     },
 });
 
-const addFeedback = (uri: string, db: Db, diagnostics: lsp.Diagnostic[]) => {
+const addFeedback = (db: Db, diagnostics: lsp.Diagnostic[]) => {
     const seenFeedback = new Map<Node, Set<string>>();
     for (const feedback of collectFeedback(db)) {
         if (!seenFeedback.get(feedback.on)) {
@@ -136,13 +146,19 @@ const addFeedback = (uri: string, db: Db, diagnostics: lsp.Diagnostic[]) => {
 };
 
 const addSemanticTokens = (uri: string, db: Db) => {
+    const filter = nodeFilter([{ path: uri }]);
+
     const tokens: [Node, (typeof tokenTypes)[number]][] = [];
 
     for (const { node } of queries.highlightType(db)) {
+        if (!filter(node)) continue;
+
         tokens.push([node, "type"]);
     }
 
     for (const { node } of queries.highlightFunction(db)) {
+        if (!filter(node)) continue;
+
         tokens.push([node, "function"]);
     }
 
@@ -166,6 +182,52 @@ const addSemanticTokens = (uri: string, db: Db) => {
 };
 
 const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | undefined => {
+    const nodeAtPosition = getNodeAtPosition(uri, position, db);
+    if (nodeAtPosition == null) {
+        return undefined;
+    }
+
+    const contents: lsp.Hover["contents"] = [];
+
+    for (const { node, type } of queries.type(db)) {
+        if (node !== nodeAtPosition) continue;
+
+        contents.push({
+            language: "wipple",
+            value: displayType(type),
+        });
+    }
+
+    for (const { node, comments, links } of queries.comments(db)) {
+        if (node !== nodeAtPosition) continue;
+
+        const documentation = renderComments(comments, links).toString();
+        contents.push(documentation);
+    }
+
+    return {
+        range: convertRange(nodeAtPosition.span.range),
+        contents,
+    };
+};
+
+const getRelated = (uri: string, position: lsp.Position, db: Db): lsp.DocumentHighlight[] => {
+    const nodeAtPosition = getNodeAtPosition(uri, position, db);
+    if (nodeAtPosition == null) {
+        return [];
+    }
+
+    const locations: lsp.Location[] = [];
+    for (const { node, related } of queries.related(db)) {
+        if (node !== nodeAtPosition) continue;
+
+        locations.push({ uri, range: convertRange(related.span.range) });
+    }
+
+    return locations;
+};
+
+const getNodeAtPosition = (uri: string, position: lsp.Position, db: Db): Node | undefined => {
     const filter = nodeFilter([{ path: uri }]);
 
     const matches: { length: number; node: Node }[] = [];
@@ -187,31 +249,5 @@ const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | unde
 
     matches.sort((a, b) => a.length - b.length);
 
-    const match = matches[0];
-    if (match == null) {
-        return undefined;
-    }
-
-    const contents: lsp.Hover["contents"] = [];
-
-    for (const { node, type } of queries.type(db)) {
-        if (node !== match.node) continue;
-
-        contents.push({
-            language: "wipple",
-            value: displayType(type),
-        });
-    }
-
-    for (const { node, comments, links } of queries.comments(db)) {
-        if (node !== match.node) continue;
-
-        const documentation = renderComments(comments, links).toString();
-        contents.push(documentation);
-    }
-
-    return {
-        range: convertRange(match.node.span.range),
-        contents,
-    };
+    return matches[0]?.node;
 };
