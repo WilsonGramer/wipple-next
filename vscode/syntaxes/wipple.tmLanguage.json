@@ -8,6 +8,7 @@
         { "include": "#string.single" },
         { "include": "#number" },
         { "include": "#keyword" },
+        { "include": "#keyword.operator" },
         { "include": "#capitalName" },
         { "include": "#lowercaseName" }
     ],
@@ -32,7 +33,11 @@
         },
         "keyword": {
             "name": "keyword.other.wipple",
-            "match": "\\b(?:do|infer|instance|intrinsic|set|trait|type|when|where|or|and|by|to|is|as)\\b"
+            "match": "\\b(?:do|infer|instance|intrinsic|set|trait|type|when|where)\\b"
+        },
+        "keyword.operator": {
+            "name": "keyword.operator.wipple",
+            "match": "_|\\-|\\->|\\,|;|:|::|\\.|\\*|\\/|\\/=|%|\\^|\\+|<|<=|=|=>|>|>=|\\b(?:and|as|by|is|or|to)\\b"
         },
         "capitalName": {
             "name": "entity.name.type.wipple",
