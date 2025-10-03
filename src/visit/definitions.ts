@@ -7,7 +7,7 @@ import {
     TypeAttributes,
 } from "./attributes";
 
-export type Definition =
+export type AnyDefinition =
     | VariableDefinition
     | ConstantDefinition
     | TypeDefinition

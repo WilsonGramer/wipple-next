@@ -2,10 +2,10 @@ import type { Db, Fact, Node } from "../db";
 import "./items";
 import feedback from "./register";
 
-export const collectFeedback = function* (db: Db, filter: (node: Node) => boolean) {
+export const collectFeedback = function* (db: Db) {
     for (const item of feedback()) {
         const { id } = item;
-        for (const props of item.query(db, filter)) {
+        for (const props of item.query(db)) {
             const on = item.on(props);
             if (on.isHidden) {
                 continue;

@@ -64,7 +64,7 @@ const cmd = subcommands({
                 console.log(`\n${chalk.bold.underline("Feedback:")}\n`);
 
                 const seenFeedback = new Map<Node, Set<string>>();
-                for (const feedback of collectFeedback(db, filter)) {
+                for (const feedback of collectFeedback(db)) {
                     if (!seenFeedback.get(feedback.on)) {
                         seenFeedback.set(feedback.on, new Set());
                     }

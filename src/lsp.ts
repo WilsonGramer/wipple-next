@@ -7,7 +7,8 @@ import { nodeFilter } from "./db/filter";
 import { nodeDisplayOptions } from "./db/node";
 import { LocationRange } from "peggy";
 import * as queries from "./queries";
-import { displayType, Type } from "./typecheck/constraints/type";
+import { displayType } from "./typecheck/constraints/type";
+import { renderComments } from "./feedback/render";
 
 const tokenTypes = ["type", "function", "typeParameter"] as const;
 
@@ -111,10 +112,8 @@ const convertRange = (location: LocationRange): lsp.Range => ({
 });
 
 const addFeedback = (uri: string, db: Db, diagnostics: lsp.Diagnostic[]) => {
-    const filter = nodeFilter([{ path: uri }]);
-
     const seenFeedback = new Map<Node, Set<string>>();
-    for (const feedback of collectFeedback(db, filter)) {
+    for (const feedback of collectFeedback(db)) {
         if (!seenFeedback.get(feedback.on)) {
             seenFeedback.set(feedback.on, new Set());
         }
@@ -137,15 +136,13 @@ const addFeedback = (uri: string, db: Db, diagnostics: lsp.Diagnostic[]) => {
 };
 
 const addSemanticTokens = (uri: string, db: Db) => {
-    const filter = nodeFilter([{ path: uri }]);
-
     const tokens: [Node, (typeof tokenTypes)[number]][] = [];
 
-    for (const { node } of queries.highlightType(db, filter)) {
+    for (const { node } of queries.highlightType(db)) {
         tokens.push([node, "type"]);
     }
 
-    for (const { node } of queries.highlightFunction(db, filter)) {
+    for (const { node } of queries.highlightFunction(db)) {
         tokens.push([node, "function"]);
     }
 
@@ -171,8 +168,8 @@ const addSemanticTokens = (uri: string, db: Db) => {
 const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | undefined => {
     const filter = nodeFilter([{ path: uri }]);
 
-    const matches: { length: number; type: Type }[] = [];
-    for (const { node, type } of queries.type(db, filter)) {
+    const matches: { length: number; node: Node }[] = [];
+    for (const node of db.nodes().filter(filter)) {
         const range = convertRange(node.span.range);
 
         if (
@@ -181,7 +178,10 @@ const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | unde
             range.end.line === position.line &&
             range.end.character >= position.character
         ) {
-            matches.push({ length: range.end.character - range.start.character, type });
+            matches.push({
+                length: range.end.character - range.start.character,
+                node,
+            });
         }
     }
 
@@ -192,12 +192,26 @@ const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | unde
         return undefined;
     }
 
+    const contents: lsp.Hover["contents"] = [];
+
+    for (const { node, type } of queries.type(db)) {
+        if (node !== match.node) continue;
+
+        contents.push({
+            language: "wipple",
+            value: displayType(type),
+        });
+    }
+
+    for (const { node, comments, links } of queries.comments(db)) {
+        if (node !== match.node) continue;
+
+        const documentation = renderComments(comments, links).toString();
+        contents.push(documentation);
+    }
+
     return {
-        contents: [
-            {
-                language: "wipple",
-                value: displayType(match.type),
-            },
-        ],
+        range: convertRange(match.node.span.range),
+        contents,
     };
 };

@@ -1,8 +1,7 @@
 import { LocationRange } from "peggy";
 import { Db, Fact, Node, Span } from "../db";
-import { Definition, InstanceDefinition } from "./definitions";
+import { AnyDefinition, InstanceDefinition } from "./definitions";
 import { Constraint } from "../typecheck";
-import { Type } from "../typecheck/constraints/type";
 
 export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 
@@ -16,7 +15,7 @@ export class Visitor {
     currentDefinition?: VisitorCurrentDefinition;
 
     nodes = new Set<Node>();
-    definitions = new Map<Node, Definition>();
+    definitions = new Map<Node, AnyDefinition>();
     definitionConstraints = new Map<Node, Constraint[]>();
     constraints = new Map<Node, Constraint[]>();
     instances = new Map<Node, InstanceDefinition[]>();
@@ -81,7 +80,7 @@ export class Visitor {
     resolveName<T>(
         name: string,
         from: Node,
-        filter: (definition: Definition) => [T, typeof Fact<Node>] | undefined,
+        filter: (definition: AnyDefinition) => [T, typeof Fact<Node>] | undefined,
     ): T | undefined {
         for (const scope of this.scopes.toReversed()) {
             for (const definition of scope.definitions.get(name)?.toReversed() ?? []) {
@@ -97,7 +96,7 @@ export class Visitor {
         return undefined;
     }
 
-    peekName<T>(name: string, filter: (definition: Definition) => T | undefined): T | undefined {
+    peekName<T>(name: string, filter: (definition: AnyDefinition) => T | undefined): T | undefined {
         for (const scope of this.scopes.toReversed()) {
             for (const definition of scope.definitions.get(name)?.toReversed() ?? []) {
                 const value = filter(definition);
@@ -110,7 +109,7 @@ export class Visitor {
         return undefined;
     }
 
-    defineName(name: string, definition: Definition) {
+    defineName(name: string, definition: AnyDefinition) {
         const { definitions } = this.scopes.at(-1)!;
         if (!definitions.has(name)) {
             definitions.set(name, []);
@@ -127,7 +126,7 @@ export class Visitor {
         this.instances.get(trait)!.push(definition);
     }
 
-    withDefinition(node: Node, f: () => Definition | undefined) {
+    withDefinition(node: Node, f: () => AnyDefinition | undefined) {
         const existingDefinitionInfo = this.currentDefinition;
         const newDefinitionInfo = new VisitorCurrentDefinition(node);
         this.currentDefinition = newDefinitionInfo;
@@ -160,6 +159,10 @@ export class Visitor {
             this.db.add(node, new HasConstraints(constraints));
         }
 
+        for (const [node, definition] of this.definitions) {
+            this.db.add(node, new Definition(definition));
+        }
+
         return {
             definitions: this.definitions,
             instances: this.instances,
@@ -168,12 +171,12 @@ export class Visitor {
 }
 
 export class Scope {
-    definitions = new Map<string, Definition[]>();
+    definitions = new Map<string, AnyDefinition[]>();
 }
 
 export class VisitorCurrentDefinition {
     node: Node;
-    definition!: Definition;
+    definition!: AnyDefinition;
     constraints: Constraint[] = [];
     implicitTypeParameters = false;
 
@@ -219,3 +222,5 @@ export interface Instance {
 export class HasInstance extends Fact<Instance> {
     display = ({ node }: Instance) => node.toString();
 }
+
+export class Definition extends Fact<AnyDefinition> {}

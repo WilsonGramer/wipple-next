@@ -10,7 +10,7 @@ export const type = query(function* (db) {
     }
 });
 
-export const conflictingTypes = query(function* (db, filter) {
+export const conflictingTypes = query(function* (db) {
     for (const [node, group] of db.list(InTypeGroup)) {
         const { instantiatedFrom, instantiatedBy: source } = node;
 
@@ -19,7 +19,7 @@ export const conflictingTypes = query(function* (db, filter) {
                 source,
                 node: instantiatedFrom ?? node,
                 types: group.types,
-                nodes: group.nodes.values().filter(filter).toArray(),
+                nodes: group.nodes.values().toArray(),
             };
         }
     }
