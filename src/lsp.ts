@@ -217,7 +217,7 @@ const getRelated = (uri: string, position: lsp.Position, db: Db): lsp.DocumentHi
         return [];
     }
 
-    const locations: lsp.Location[] = [];
+    const locations: lsp.Location[] = [{ uri, range: convertRange(nodeAtPosition.span.range) }];
     for (const { node, related } of queries.related(db)) {
         if (node !== nodeAtPosition) continue;
 
