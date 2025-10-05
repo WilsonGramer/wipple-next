@@ -382,11 +382,11 @@ pattern "pattern"
     = tuple_pattern
     / or_pattern
     / annotate_pattern
+    / set_pattern
     / pattern_element
 
 pattern_element "pattern"
-    = set_pattern
-    / variant_pattern
+    = variant_pattern
     / subpattern
 
 subpattern "pattern"
@@ -452,11 +452,11 @@ variant_pattern
 type "type"
     = tuple_type
     / function_type
+    / annotated_parameter_type
     / type_element
 
 type_element "type"
     = parameterized_type
-    / annotated_parameter_type
     / subtype
 
 subtype "type"
@@ -526,7 +526,7 @@ bound_constraint
         }
 
 default_constraint
-    = "(" _ parameter:type_element _ ":" _ value:type_element _ ")" {
+    = "(" _ parameter:type_element _ "::" _ value:type_element _ ")" {
             return { type: "default", location: location(), parameter, value };
         }
 
@@ -555,10 +555,9 @@ string "string"
 number "number"
     = value:$(("+" / "-")? [0-9]+ ("." [0-9]+)?) { return { location: location(), value }; }
 
-capital_name
-    = !(number / keyword) ([0-9] "-")* [A-Z] [A-Za-z0-9_]* ("-" [A-Za-z0-9_]+)* ("!" / "?")?
+capital_name = !number ([0-9] "-")* [A-Z] [A-Za-z0-9_]* ("-" [A-Za-z0-9_]+)* ("!" / "?")?
 
-lowercase_name = !(number / keyword / capital_name) [A-Za-z0-9_]+ ("-" [A-Za-z0-9_]+)* ("!" / "?")?
+lowercase_name = !(number / capital_name) [A-Za-z0-9_]+ ("-" [A-Za-z0-9_]+)* ("!" / "?")?
 
 type_name "type name" = value:$capital_name { return { location: location(), value }; }
 
@@ -569,8 +568,7 @@ variable_name "variable name" = value:$lowercase_name { return { location: locat
 type_parameter_name "type parameter name"
     = value:$lowercase_name { return { location: location(), value }; }
 
-attribute_name "attribute name"
-    = value:$(lowercase_name / keyword) { return { location: location(), value }; }
+attribute_name "attribute name" = value:$lowercase_name { return { location: location(), value }; }
 
 keyword
     = "do"

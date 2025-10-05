@@ -36,11 +36,6 @@ export class DefaultConstraint extends TypeConstraint {
             return;
         }
 
-        console.log("default constraint:", {
-            constraint: this,
-            applied: solver.apply(this.node),
-        });
-
         if (solver.apply(this.node) instanceof Node) {
             super.run(solver);
         }
