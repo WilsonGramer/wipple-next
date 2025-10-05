@@ -526,7 +526,7 @@ bound_constraint
         }
 
 default_constraint
-    = "(" _ parameter:type_parameter_name _ ":" _ value:type_element _ ")" {
+    = "(" _ parameter:type_element _ ":" _ value:type_element _ ")" {
             return { type: "default", location: location(), parameter, value };
         }
 

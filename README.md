@@ -129,7 +129,7 @@ show (add 1 2)
 | [Tuple types](docs/Language.md#tuple-types)                                   | ☑️      | ☑️       |         |
 | [Unit types](docs/Language.md#unit-types)                                     | ☑️      | ☑️       |         |
 | [Bound constraints](docs/Language.md#bound-constraints)                       | ☑️      | ☑️       |         |
-| [Default constraints](docs/Language.md#default-constraints)                   | ☑️      |          |         |
+| [Default constraints](docs/Language.md#default-constraints)                   | ☑️      | ☑️       |         |
 | [Constant definitions](docs/Language.md#constant-definitions)                 | ☑️      | ☑️       |         |
 | [Instance definitions](docs/Language.md#instance-definitions)                 | ☑️      | ☑️       |         |
 | [Trait definitions](docs/Language.md#trait-definitions)                       | ☑️      | ☑️       |         |

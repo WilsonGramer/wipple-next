@@ -1,6 +1,7 @@
 import { BoundConstraint } from "./bound";
 import { InstantiateConstraint } from "./instantiate";
 import { TypeConstraint } from "./type";
+import { DefaultConstraint } from "./default";
 import { Node } from "../../db";
 import { Constraint } from "./constraint";
 import { Solver } from "../solve";
@@ -10,7 +11,7 @@ import { Solver } from "../solve";
  * `HasConstraints` fact rather than the solver. Then form groups, add concrete
  * types, and finally resolve bounds.
  */
-export const scores = ["group", "type", "instantiate", "bound"] as const;
+export const scores = ["group", "type", "instantiate", "default", "bound"] as const;
 export type Score = (typeof scores)[number];
 
 export class Constraints {
@@ -49,4 +50,4 @@ export const getOrInstantiate = (node: Node, source: Node, replacements: Map<Nod
     }
 };
 
-export { Constraint, BoundConstraint, InstantiateConstraint, TypeConstraint };
+export { Constraint, BoundConstraint, InstantiateConstraint, TypeConstraint, DefaultConstraint };

@@ -14,7 +14,7 @@ export interface BoundConstraint {
 export interface DefaultConstraint {
     type: "default";
     location: LocationRange;
-    parameter: Token;
+    parameter: Type;
     value: Type;
 }
 
