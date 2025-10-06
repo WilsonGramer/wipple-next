@@ -65,7 +65,7 @@ test("block expression", () => {
         statements: [
             {
                 type: "expression",
-                comments: [],
+                comments: { comments: [] },
                 expression: {
                     type: "variable",
                     variable: { value: "foo" },

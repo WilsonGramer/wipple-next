@@ -15,9 +15,12 @@ test("bound constraint", () => {
 });
 
 test("default constraint", () => {
-    testParse("constraint", `(value : Number)`, {
+    testParse("constraint", `(value :: Number)`, {
         type: "default",
-        parameter: { value: "value" },
+        parameter: {
+            type: "parameter",
+            name: { value: "value" },
+        },
         value: {
             type: "named",
             name: { value: "Number" },

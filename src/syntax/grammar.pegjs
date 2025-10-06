@@ -555,9 +555,10 @@ string "string"
 number "number"
     = value:$(("+" / "-")? [0-9]+ ("." [0-9]+)?) { return { location: location(), value }; }
 
-capital_name = !number ([0-9] "-")* [A-Z] [A-Za-z0-9_]* ("-" [A-Za-z0-9_]+)* ("!" / "?")?
+capital_name
+    = !(number / keyword) ([0-9] "-")* [A-Z] [A-Za-z0-9_]* ("-" [A-Za-z0-9_]+)* ("!" / "?")?
 
-lowercase_name = !(number / capital_name) [A-Za-z0-9_]+ ("-" [A-Za-z0-9_]+)* ("!" / "?")?
+lowercase_name = !(number / capital_name / keyword) [A-Za-z0-9_]+ ("-" [A-Za-z0-9_]+)* ("!" / "?")?
 
 type_name "type name" = value:$capital_name { return { location: location(), value }; }
 
@@ -568,7 +569,8 @@ variable_name "variable name" = value:$lowercase_name { return { location: locat
 type_parameter_name "type parameter name"
     = value:$lowercase_name { return { location: location(), value }; }
 
-attribute_name "attribute name" = value:$lowercase_name { return { location: location(), value }; }
+attribute_name "attribute name"
+    = value:$(lowercase_name / keyword) { return { location: location(), value }; }
 
 keyword
     = "do"

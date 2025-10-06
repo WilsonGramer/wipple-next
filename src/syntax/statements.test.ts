@@ -4,8 +4,12 @@ import { testParse } from ".";
 test("type definition", () => {
     testParse("statement", "-- Documentation comment\n[foo]\nFoo : type", {
         type: "typeDefinition",
-        comments: [{ value: " Documentation comment" }],
-        attributes: [{ name: { value: "foo" }, value: null }],
+        comments: {
+            comments: [{ value: " Documentation comment" }],
+        },
+        attributes: {
+            attributes: [{ name: { value: "foo" }, value: null }],
+        },
         name: { value: "Foo" },
         parameters: [],
         representation: { type: "marker" },
@@ -15,8 +19,8 @@ test("type definition", () => {
 test("generic type definition", () => {
     testParse("statement", "Foo : value => type", {
         type: "typeDefinition",
-        comments: [],
-        attributes: [],
+        comments: { comments: [] },
+        attributes: { attributes: [] },
         name: { value: "Foo" },
         parameters: [{ name: { value: "value" } }],
         representation: { type: "marker" },
@@ -26,8 +30,8 @@ test("generic type definition", () => {
 test("marker type definition", () => {
     testParse("statement", "Foo : type", {
         type: "typeDefinition",
-        comments: [],
-        attributes: [],
+        comments: { comments: [] },
+        attributes: { attributes: [] },
         name: { value: "Foo" },
         parameters: [],
         representation: { type: "marker" },
@@ -43,8 +47,8 @@ test("structure type definition", () => {
         }`,
         {
             type: "typeDefinition",
-            comments: [],
-            attributes: [],
+            comments: { comments: [] },
+            attributes: { attributes: [] },
             name: { value: "Foo" },
             parameters: [],
             representation: {
@@ -73,8 +77,8 @@ test("enumeration type definition", () => {
         }`,
         {
             type: "typeDefinition",
-            comments: [],
-            attributes: [],
+            comments: { comments: [] },
+            attributes: { attributes: [] },
             name: { value: "Foo" },
             parameters: [],
             representation: {
@@ -97,8 +101,8 @@ test("enumeration type definition", () => {
 test("trait definition", () => {
     testParse("statement", "Foo : trait Number", {
         type: "traitDefinition",
-        comments: [],
-        attributes: [],
+        comments: { comments: [] },
+        attributes: { attributes: [] },
         name: { value: "Foo" },
         parameters: [],
         constraints: {
@@ -111,8 +115,8 @@ test("trait definition", () => {
 test("generic trait definition", () => {
     testParse("statement", "Foo : value => trait (value -> Number)", {
         type: "traitDefinition",
-        comments: [],
-        attributes: [],
+        comments: { comments: [] },
+        attributes: { attributes: [] },
         name: { value: "Foo" },
         parameters: [{ name: { value: "value" } }],
         constraints: {
@@ -129,8 +133,8 @@ test("generic trait definition", () => {
 test("constant definition", () => {
     testParse("statement", "show :: value -> Unit where (Show value)", {
         type: "constantDefinition",
-        comments: [],
-        attributes: [],
+        comments: { comments: [] },
+        attributes: { attributes: [] },
         name: { value: "show" },
         constraints: {
             type: {
@@ -152,8 +156,8 @@ test("constant definition", () => {
 test("simple valued instance definition", () => {
     testParse("statement", "instance (Foo Number) : 3.14", {
         type: "instanceDefinition",
-        comments: [],
-        attributes: [],
+        comments: { comments: [] },
+        attributes: { attributes: [] },
         constraints: {
             bound: {
                 type: "bound",
@@ -169,8 +173,8 @@ test("simple valued instance definition", () => {
 test("complex valued instance definition", () => {
     testParse("statement", "instance (Foo (Maybe value)) where (Foo value) : 3.14", {
         type: "instanceDefinition",
-        comments: [],
-        attributes: [],
+        comments: { comments: [] },
+        attributes: { attributes: [] },
         constraints: {
             bound: {
                 type: "bound",
