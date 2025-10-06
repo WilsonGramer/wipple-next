@@ -1,5 +1,7 @@
 # Wipple Next
 
+[![Tests](https://github.com/WilsonGramer/wipple-next/actions/workflows/test.yml/badge.svg)](https://github.com/WilsonGramer/wipple-next/actions/workflows/test.yml)
+
 A new implementation of the [Wipple](https://github.com/wipplelang/wipple) compiler.
 
 ## Using the CLI
