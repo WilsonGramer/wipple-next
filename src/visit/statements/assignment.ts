@@ -8,6 +8,7 @@ import { visitPattern } from "../patterns";
 export class PatternInAssignmentStatement extends Fact<Node> {}
 export class ValueInAssignmentStatement extends Fact<Node> {}
 export class ValueInConstantDefinition extends Fact<Node> {}
+export class AssignedTo extends Fact<Node> {}
 
 export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, statement, node) => {
     const value = visitor.visit(statement.value, ValueInAssignmentStatement, visitExpression);
@@ -40,5 +41,6 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
     }
 
     const pattern = visitor.visit(statement.pattern, PatternInAssignmentStatement, visitPattern);
+    visitor.db.add(pattern, new AssignedTo(value));
     visitor.addConstraints(new TypeConstraint(value, pattern));
 };

@@ -37,10 +37,6 @@ export const compileTest = (path: string) => {
 
     const feedback = new Map<Node, string[]>();
     for (const feedbackItem of collectFeedback(db)) {
-        if (!placeholders.includes(feedbackItem.on)) {
-            continue;
-        }
-
         if (!feedback.has(feedbackItem.on)) {
             feedback.set(feedbackItem.on, []);
         }

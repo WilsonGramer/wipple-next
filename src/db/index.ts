@@ -67,6 +67,13 @@ export class Db {
         return this.list(node, fact).next().value as any;
     }
 
+    find<T>(fact: typeof Fact<T>, value: T): Node | undefined {
+        return this.list(fact)
+            .filter(([_node, v]) => v === value)
+            .map(([node]) => node)
+            .next().value;
+    }
+
     display<T>(node: Node, fact: typeof Fact<T>): string[] {
         const values = this.facts.get(fact)?.get(node)?.values() ?? [];
 
