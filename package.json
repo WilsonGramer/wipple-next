@@ -8,7 +8,7 @@
         "build:grammar": "peggy src/syntax/grammar.pegjs --format es --source-map --allowed-start-rules '*' --cache",
         "build:esbuild": "node build.mjs",
         "dev": "npm run build && npm start",
-        "test": "npm run build && node -r esbuild-runner/register --test src/**/*.test.ts",
+        "test": "npm run build && node -r esbuild-runner/register --test src/**/*.test.ts tests/**/*.test.ts",
         "format": "prettier --write .",
         "exe": "npm run build && (EXE=/usr/local/bin/wipple; echo '#!/usr/bin/env node' > $EXE && cat ./dist/index.js >> $EXE && chmod +x $EXE)"
     },

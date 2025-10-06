@@ -35,14 +35,10 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
             } else {
                 // TODO: Constant already assigned a value
             }
-        } else {
-            const pattern = visitor.visit(
-                statement.pattern,
-                PatternInAssignmentStatement,
-                visitPattern,
-            );
-
-            visitor.addConstraints(new TypeConstraint(value, pattern));
+            return;
         }
     }
+
+    const pattern = visitor.visit(statement.pattern, PatternInAssignmentStatement, visitPattern);
+    visitor.addConstraints(new TypeConstraint(value, pattern));
 };

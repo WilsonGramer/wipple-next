@@ -1,8 +1,9 @@
 import chalk from "chalk";
 import { Fact } from "./fact";
-import { nodeFilter, Filter } from "./filter";
+import { Filter } from "./filter";
 import { Node } from "./node";
 import { Span } from "./span";
+import { stripVTControlCharacters } from "util";
 
 export class Db {
     private facts: Map<Function, Map<Node, Set<any>>>;
@@ -64,6 +65,14 @@ export class Db {
 
     get<T>(node: Node, fact: typeof Fact<T>): T | undefined {
         return this.list(node, fact).next().value as any;
+    }
+
+    display<T>(node: Node, fact: typeof Fact<T>): string[] {
+        const values = this.facts.get(fact)?.get(node)?.values() ?? [];
+
+        return Array.from(values).map((value) =>
+            stripVTControlCharacters(new (fact as any)(value).display(value)),
+        );
     }
 
     has<T>(node: Node, fact: typeof Fact<T>, value?: T): boolean;
