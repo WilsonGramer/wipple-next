@@ -1,0 +1,14 @@
+[intrinsic] Number : type
+[intrinsic] String : type
+[intrinsic] Boolean : type
+[intrinsic] Sequence : element => type ({element})
+[intrinsic] Box : value => type value
+
+As-Sequence : collection (infer element) => trait (collection -> Sequence element)
+instance (As-Sequence (Box value) value) : _
+
+filter :: (item -> Boolean) -> collection -> Sequence item where (As-Sequence collection item)
+
+box : (_ :: Box String)
+positive? : (_ :: Number) -> _
+(filter positive?) box
