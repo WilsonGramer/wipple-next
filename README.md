@@ -6,9 +6,9 @@ A new implementation of the [Wipple](https://github.com/wipplelang/wipple) compi
 
 1.  Create a `test.wipple` file at the top level. All `test*.wipple` files are ignored by Git.
 
-2.  Run the CLI with `npm run dev -- compile test.wipple`.
+2.  Run the CLI with `npm run dev -- -- compile test.wipple`.
 
-3.  The CLI will output all the facts and feedback collected during compilation. To filter the facts per line, use `-l`, e.g. `npm run dev -- compile test.wipple -l 1`. You can use `-l` multiple times.
+3.  The CLI will output all the facts and feedback collected during compilation. To filter the facts per line, use `-l`, e.g. `npm run dev -- -- compile test.wipple -l 1`. You can use `-l` multiple times.
 
 ## Compiler design overview
 
