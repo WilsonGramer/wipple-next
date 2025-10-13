@@ -118,7 +118,7 @@ trait_definition_statement
         }
 
 trait_constraints
-    = "trait" __ type:subtype __ constraints:constraints? {
+    = "trait" __ type:subtype constraints:constraints? {
             return { location: location(), type, constraints: constraints ?? [] };
         }
 
@@ -141,7 +141,7 @@ constant_definition_statement
         }
 
 constant_constraints
-    = "::" __ type:type __ constraints:constraints? {
+    = "::" __ type:type constraints:constraints? {
             return { location: location(), type, constraints: constraints ?? [] };
         }
 
@@ -163,7 +163,7 @@ instance_definition_statement
         }
 
 instance_constraints
-    = "instance" __ bound:bound_constraint __ constraints:constraints? {
+    = "instance" __ bound:bound_constraint constraints:constraints? {
             return { location: location(), bound, constraints: constraints ?? [] };
         }
 
@@ -510,7 +510,7 @@ type_parameter
     = name:type_parameter_name { return { name }; }
     / "(" _ "infer" _ name:type_parameter_name _ ")" { return { name, infer: true }; }
 
-constraints = "where" constraints:(__ @constraint)+ { return constraints; }
+constraints = _ "where" constraints:(__ @constraint)+ { return constraints; }
 
 constraint "constraint"
     = bound_constraint
