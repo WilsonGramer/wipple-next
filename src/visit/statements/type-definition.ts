@@ -1,15 +1,15 @@
-import { Visit, Visitor } from "../visitor";
+import { Visit } from "../visitor";
 import { Fact, Node } from "../../db";
 import { TypeDefinitionStatement } from "../../syntax";
 import { TypeConstraint, types } from "../../typecheck";
 import { parseTypeAttributes } from "../attributes";
-import { TypeDefinition } from "../definitions";
-import * as codegen from "../../codegen";
+import { ConstructorDefinition, TypeDefinition } from "../definitions";
 import { visitType } from "../types";
-import { ConstructedType } from "../../typecheck/constraints/type";
+import * as codegen from "../../codegen";
 
 export class ParameterInTypeDefinition extends Fact<Node> {}
 export class IsInvalidInferredTypeParameter extends Fact<null> {}
+export class FieldInTypeDefinition extends Fact<Node> {}
 export class VariantElementInTypeDefinition extends Fact<Node> {}
 
 export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
@@ -40,13 +40,136 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
             }),
         );
 
-        if (!attributes.intrinsic) {
-            visitor.enqueue("afterTypeDefinitions", () => {
-                generateConstructor(visitor, statement, types.named(definitionNode, parameters));
-            });
-        }
+        visitor.addConstraints(
+            new TypeConstraint(definitionNode, types.named(definitionNode, parameters)),
+        );
 
         // Types don't have additional constraints
+
+        if (!attributes.intrinsic) {
+            visitor.enqueue("afterTypeDefinitions", () => {
+                switch (statement.representation.type) {
+                    case "marker": {
+                        const markerNode = visitor.node(statement.name);
+
+                        visitor.withDefinition(markerNode, () => {
+                            markerNode.setCodegen(codegen.markerExpression());
+
+                            visitor.addConstraints(
+                                new TypeConstraint(
+                                    markerNode,
+                                    types.named(definitionNode, parameters),
+                                ),
+                            );
+
+                            const constructorDefinition: ConstructorDefinition = {
+                                type: "constructor",
+                                node: markerNode,
+                                comments: statement.comments,
+                            };
+
+                            visitor.defineName(statement.name.value, constructorDefinition);
+
+                            return constructorDefinition;
+                        });
+
+                        break;
+                    }
+                    case "structure": {
+                        for (const field of statement.representation.fields) {
+                            visitor.visit(field.type, FieldInTypeDefinition, visitType);
+                        }
+
+                        visitor.popScope();
+
+                        // Structures are created via structure expressions instead of a
+                        // constructor function
+                        break;
+                    }
+                    case "enumeration": {
+                        const scope = visitor.peekScope();
+
+                        statement.representation.variants.forEach((variant, index) => {
+                            const variantNode = visitor.node(variant.name);
+                            visitor.withDefinition(variantNode, () => {
+                                const elements = variant.elements.map((element) =>
+                                    visitor.visit(
+                                        element,
+                                        VariantElementInTypeDefinition,
+                                        visitType,
+                                    ),
+                                );
+
+                                visitor.popScope();
+
+                                const elementInputs = elements.map((element) =>
+                                    visitor.node({ location: element.span.range }),
+                                );
+
+                                const elementVariables = elements.map((element) =>
+                                    visitor.node({ location: element.span.range }),
+                                );
+
+                                variantNode.setCodegen(
+                                    elements.length > 0
+                                        ? codegen.functionExpression(
+                                              elementInputs,
+                                              elementVariables,
+                                              [
+                                                  codegen.ifStatement(
+                                                      elementInputs.map((input, index) =>
+                                                          codegen.assignCondition(
+                                                              input,
+                                                              elementVariables[index],
+                                                          ),
+                                                      ),
+                                                      [],
+                                                  ),
+                                                  codegen.returnStatement(
+                                                      codegen.variantExpression(
+                                                          index,
+                                                          elementVariables,
+                                                      ),
+                                                  ),
+                                              ],
+                                          )
+                                        : codegen.variantExpression(index, []),
+                                );
+
+                                visitor.addConstraints(
+                                    new TypeConstraint(
+                                        variantNode,
+                                        elements.length > 0
+                                            ? types.function(
+                                                  elements,
+                                                  types.named(definitionNode, parameters),
+                                              )
+                                            : types.named(definitionNode, parameters),
+                                    ),
+                                );
+
+                                const constructorDefinition: ConstructorDefinition = {
+                                    type: "constructor",
+                                    node: variantNode,
+                                    comments: statement.comments,
+                                };
+
+                                visitor.defineName(variant.name.value, constructorDefinition);
+
+                                visitor.pushScope(scope); // for the next variant
+
+                                return constructorDefinition;
+                            });
+                        });
+
+                        break;
+                    }
+                    default: {
+                        statement.representation satisfies never;
+                    }
+                }
+            });
+        }
 
         visitor.popScope();
 
@@ -62,88 +185,4 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
 
         return definition;
     });
-};
-
-const generateConstructor = (
-    visitor: Visitor,
-    statement: TypeDefinitionStatement,
-    instanceType: ConstructedType,
-) => {
-    switch (statement.representation.type) {
-        case "marker": {
-            const constructorNode = visitor.node(statement.name);
-            visitor.addConstraints(new TypeConstraint(constructorNode, instanceType));
-
-            const bodyNode = visitor.node(statement.name);
-            bodyNode.setCodegen(codegen.markerExpression());
-
-            visitor.defineName(statement.name.value, {
-                type: "constant",
-                node: constructorNode,
-                comments: statement.comments,
-                attributes: {},
-                value: {
-                    assigned: true,
-                    node: bodyNode,
-                },
-            });
-
-            break;
-        }
-        case "structure": {
-            // Structures are created via structure expressions instead of a
-            // constructor function
-            break;
-        }
-        case "enumeration": {
-            statement.representation.variants.forEach((variant, index) => {
-                const constructorNode = visitor.node(variant.name);
-
-                const elementTypes = variant.elements.map((element) =>
-                    visitor.visit(element, VariantElementInTypeDefinition, visitType),
-                );
-
-                visitor.addConstraints(
-                    new TypeConstraint(constructorNode, types.function(elementTypes, instanceType)),
-                );
-
-                const bodyNode = visitor.node(variant.name);
-
-                const elementInputs = variant.elements.map((element) => visitor.node(element));
-                const elementVariables = variant.elements.map((element) => visitor.node(element));
-
-                bodyNode.setCodegen(
-                    codegen.functionExpression(elementInputs, elementVariables, [
-                        codegen.ifStatement(
-                            elementInputs.map((input, index) =>
-                                codegen.assignCondition(input, elementVariables[index]),
-                            ),
-                            [
-                                codegen.returnStatement(
-                                    codegen.variantExpression(index, elementVariables),
-                                ),
-                            ],
-                        ),
-                        codegen.variantExpression(index, elementVariables),
-                    ]),
-                );
-
-                visitor.defineName(variant.name.value, {
-                    type: "constant",
-                    node: constructorNode,
-                    comments: statement.comments,
-                    attributes: {},
-                    value: {
-                        assigned: true,
-                        node: bodyNode,
-                    },
-                });
-            });
-
-            break;
-        }
-        default: {
-            statement.representation satisfies never;
-        }
-    }
 };

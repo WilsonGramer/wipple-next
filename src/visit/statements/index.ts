@@ -25,24 +25,38 @@ export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
 
     switch (statement.type) {
         case "constantDefinition": {
-            return visitConstantDefinition(visitor, statement, node);
+            visitConstantDefinition(visitor, statement, node);
+            break;
         }
         case "typeDefinition": {
-            return visitTypeDefinition(visitor, statement, node);
+            visitTypeDefinition(visitor, statement, node);
+            break;
         }
         case "traitDefinition": {
-            return visitTraitDefinition(visitor, statement, node);
+            visitTraitDefinition(visitor, statement, node);
+            break;
         }
         case "instanceDefinition": {
-            return visitInstanceDefinition(visitor, statement, node);
+            visitInstanceDefinition(visitor, statement, node);
+            break;
         }
         case "assignment": {
             node.isHidden = true;
-            return visitAssignmentStatement(visitor, statement, node);
+
+            visitor.enqueue("afterAllDefinitions", () => {
+                visitAssignmentStatement(visitor, statement, node);
+            });
+
+            break;
         }
         case "expression": {
             node.isHidden = true;
-            return visitExpressionStatement(visitor, statement, node);
+
+            visitor.enqueue("afterAllDefinitions", () => {
+                visitExpressionStatement(visitor, statement, node);
+            });
+
+            break;
         }
         case "empty": {
             node.isHidden = true;

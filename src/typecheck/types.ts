@@ -9,7 +9,7 @@ export const named = (name: Node, parameters: Type[]): ConstructedType => ({
         if (parameters.length === 0) {
             return name.code;
         } else {
-            const display = `${name.code} ${parameters.join(" ")}`;
+            const display = `${name.code} ${parameters.map((p) => p()).join(" ")}`;
             return root ? display : `(${display})`;
         }
     },
@@ -23,7 +23,7 @@ const func = (inputs: Type[], output: Type): ConstructedType => ({
         const output = children.pop()!;
         const inputs = children;
 
-        const display = `${inputs.join(" ")} -> ${output}`;
+        const display = `${inputs.map((i) => i()).join(" ")} -> ${output(true)}`;
         return root ? display : `(${display})`;
     },
     codegen: codegen.functionType(inputs, output),
@@ -38,9 +38,9 @@ export const tuple = (elements: Type[]): ConstructedType => ({
         if (elements.length === 0) {
             return "()";
         } else if (elements.length === 1) {
-            return `(${elements[0]} ;)`;
+            return `(${elements[0]()} ;)`;
         } else {
-            return `(${elements.join(" ; ")})`;
+            return `(${elements.map((e) => e()).join(" ; ")})`;
         }
     },
     codegen: codegen.tupleType(elements),
@@ -51,7 +51,7 @@ export const unit = () => tuple([]);
 export const block = (output: Type): ConstructedType => ({
     tag: block,
     children: [output],
-    display: ([output]) => `{${output}}`,
+    display: ([output]) => `{${output()}}`,
     codegen: codegen.blockType(output),
 });
 

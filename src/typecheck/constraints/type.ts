@@ -51,7 +51,7 @@ export interface ConstructedType {
     kind?: "parameter";
     tag: unknown;
     children: Type[];
-    display: (children: string[], root: boolean) => string;
+    display: (children: ((root?: boolean) => string)[], root: boolean) => string;
     codegen: CodegenItem;
 }
 
@@ -61,7 +61,12 @@ export const displayType = (type: Type, root = true): string => {
     if (type instanceof Node) {
         return "_";
     } else {
-        const children = type.children.map((child) => displayType(child, false));
+        const children = type.children.map(
+            (child) =>
+                (root = false) =>
+                    displayType(child, root),
+        );
+
         return type.display(children, root);
     }
 };

@@ -69,8 +69,12 @@ export class Visitor {
         this.currentDefinition?.addConstraints(...constraints);
     }
 
-    pushScope() {
-        this.scopes.push(new Scope());
+    pushScope(scope = new Scope()) {
+        this.scopes.push(scope);
+    }
+
+    peekScope() {
+        return this.scopes.at(-1)!;
     }
 
     popScope() {
@@ -123,7 +127,7 @@ export class Visitor {
     }
 
     defineName(name: string, definition: AnyDefinition) {
-        const { definitions } = this.scopes.at(-1)!;
+        const { definitions } = this.peekScope();
         if (!definitions.has(name)) {
             definitions.set(name, []);
         }

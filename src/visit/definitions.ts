@@ -13,7 +13,8 @@ export type AnyDefinition =
     | TypeDefinition
     | TraitDefinition
     | InstanceDefinition
-    | TypeParameterDefinition;
+    | TypeParameterDefinition
+    | ConstructorDefinition;
 
 export interface VariableDefinition {
     type: "variable";
@@ -58,4 +59,10 @@ export interface TypeParameterDefinition {
     node: Node;
     name: string;
     infer?: boolean;
+}
+
+export interface ConstructorDefinition {
+    type: "constructor";
+    node: Node;
+    comments: Comments;
 }
