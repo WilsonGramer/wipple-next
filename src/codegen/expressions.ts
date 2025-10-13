@@ -77,7 +77,11 @@ export const formatExpression = (
     },
 });
 
-export const functionExpression = (params: CodegenItem[], body: CodegenItem[]): CodegenItem => ({
+export const functionExpression = (
+    params: Node[],
+    vars: Node[],
+    body: CodegenItem[],
+): CodegenItem => ({
     codegen: (codegen) => {
         throw new Error("TODO");
     },

@@ -70,7 +70,6 @@ type_definition_statement
 type_representation
     = structure_type_representation
     / enumeration_type_representation
-    / wrapper_type_representation
     / marker_type_representation
 
 structure_type_representation
@@ -92,9 +91,6 @@ variant_definition
         }
 
 variant_definition_element = subtype
-
-wrapper_type_representation
-    = "type" __ inner:subtype { return { type: "wrapper", location: location(), inner }; }
 
 marker_type_representation = "type" { return { type: "marker", location: location() }; }
 
@@ -229,7 +225,7 @@ number_expression = value:number { return { type: "number", location: location()
 string_expression = value:string { return { type: "string", location: location(), value }; }
 
 structure_expression
-    = name:type_name _ "{" _ fields:structure_expression_fields _ "}" {
+    = name:type_name __ "{" _ fields:structure_expression_fields _ "}" {
             return { type: "structure", location: location(), name, fields };
         }
 

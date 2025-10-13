@@ -33,8 +33,7 @@ export interface TypeParameter {
 export type TypeRepresentation =
     | MarkerTypeRepresentation
     | StructureTypeRepresentation
-    | EnumerationTypeRepresentation
-    | WrapperTypeRepresentation;
+    | EnumerationTypeRepresentation;
 
 export interface MarkerTypeRepresentation {
     type: "marker";
@@ -63,12 +62,6 @@ export interface VariantDefinition {
     location: LocationRange;
     name: Token;
     elements: Type[];
-}
-
-export interface WrapperTypeRepresentation {
-    type: "wrapper";
-    location: LocationRange;
-    inner: Type;
 }
 
 export interface TraitDefinitionStatement {

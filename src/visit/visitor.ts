@@ -74,7 +74,20 @@ export class Visitor {
     }
 
     popScope() {
-        this.scopes.pop();
+        const scope = this.scopes.pop()!;
+
+        const definitionsByType: {
+            [T in `${AnyDefinition["type"]}s`]: Node[];
+        } = Object.fromEntries(
+            Object.entries(
+                Object.groupBy(
+                    scope.definitions.values().flatMap((definitions) => definitions),
+                    (definition) => definition.type,
+                ),
+            ).map(([type, definitions]) => [`${type}s`, definitions.map(({ node }) => node)]),
+        ) as any;
+
+        return definitionsByType;
     }
 
     resolveName<T>(

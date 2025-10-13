@@ -1,9 +1,14 @@
 import { CodegenItem } from ".";
 
-export const ifStatement = (
+export const ifStatement = (conditions: CodegenItem[], statements: CodegenItem[]): CodegenItem => ({
+    codegen: (codegen) => {
+        throw new Error("TODO");
+    },
+});
+
+export const elseIfStatement = (
     conditions: CodegenItem[],
     statements: CodegenItem[],
-    isElse: boolean,
 ): CodegenItem => ({
     codegen: (codegen) => {
         throw new Error("TODO");

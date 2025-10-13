@@ -19,10 +19,10 @@ export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expr
 
     const output = visitor.visit(expression.output, OutputInFunctionExpression, visitExpression);
 
-    visitor.popScope();
+    const { variables } = visitor.popScope();
 
     visitor.db.add(node, new IsFunctionExpression(null));
     visitor.addConstraints(new TypeConstraint(node, types.function(inputs, output)));
 
-    node.setCodegen(codegen.functionExpression(inputs, [output]));
+    node.setCodegen(codegen.functionExpression(inputs, variables, [output]));
 };
