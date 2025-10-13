@@ -1,8 +1,18 @@
 [intrinsic] Number : type
 [intrinsic] String : type
-[intrinsic] Boolean : type
-[intrinsic] Sequence : element => type ({element})
-[intrinsic] Box : value => type value
+
+Boolean : type {
+    True
+    False
+}
+
+Sequence : element => type {
+    next :: {element}
+}
+
+Box : value => type {
+    value :: value
+}
 
 As-Sequence : collection (infer element) => trait (collection -> Sequence element)
 instance (As-Sequence (Box value) value) : _
