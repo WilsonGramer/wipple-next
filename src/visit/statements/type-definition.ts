@@ -50,6 +50,8 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
             visitor.enqueue("afterTypeDefinitions", () => {
                 switch (statement.representation.type) {
                     case "marker": {
+                        visitor.popScope();
+
                         const markerNode = visitor.node(statement.name);
 
                         visitor.withDefinition(markerNode, () => {
