@@ -4,6 +4,7 @@ import { AssignmentStatement } from "../../syntax";
 import { visitExpression } from "../expressions";
 import { TypeConstraint } from "../../typecheck";
 import { visitPattern } from "../patterns";
+import * as codegen from "../../codegen";
 
 export class PatternInAssignmentStatement extends Fact<Node> {}
 export class ValueInAssignmentStatement extends Fact<Node> {}
@@ -40,7 +41,12 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
         }
     }
 
-    const pattern = visitor.visit(statement.pattern, PatternInAssignmentStatement, visitPattern);
+    const [pattern, conditions] = visitor.withMatchValue(value, () =>
+        visitor.visit(statement.pattern, PatternInAssignmentStatement, visitPattern),
+    );
+
     visitor.db.add(pattern, new AssignedTo(value));
     visitor.addConstraints(new TypeConstraint(value, pattern));
+
+    node.setCodegen(codegen.ifStatement(value, conditions, []));
 };

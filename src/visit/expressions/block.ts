@@ -15,7 +15,7 @@ export const visitBlockExpression: Visit<BlockExpression> = (visitor, expression
         visitor.visit(statement, StatementInBlockExpression, visitStatement),
     );
 
-    const { variables } = visitor.popScope();
+    const { variables = [] } = visitor.popScope();
 
     visitor.db.add(node, new IsBlockExpression(null));
     visitor.addConstraints(

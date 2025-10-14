@@ -17,4 +17,6 @@ export const visitAnnotatePattern: Visit<AnnotatePattern> = (visitor, expression
 
     visitor.db.add(node, new IsAnnotatePattern(null));
     visitor.addConstraints(new TypeConstraint(value, type), new TypeConstraint(node, value));
+
+    node.setCodegen(value.codegen);
 };

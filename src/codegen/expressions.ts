@@ -4,67 +4,115 @@ import { Type } from "../typecheck/constraints/type";
 
 export const variableExpression = (id: Node): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(codegen.node(id));
     },
 });
 
 export const constantExpression = (id: Node, substitutions: Map<Node, Type>): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(`await runtime.constant(${codegen.node(id)}, types, {`);
+
+        substitutions.forEach((type, parameter) => {
+            codegen.write(`${codegen.node(parameter)}: `);
+            codegen.write(type);
+            codegen.write(", ");
+        });
+
+        codegen.write("})");
     },
 });
 
 export const traitExpression = (id: Node, substitutions: Map<Node, Type>): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(`await runtime.trait(${codegen.node(id)}, types, {`);
+
+        substitutions.forEach((type, parameter) => {
+            codegen.write(`${codegen.node(parameter)}: `);
+            codegen.write(type);
+            codegen.write(", ");
+        });
+
+        codegen.write("})");
     },
 });
 
 export const callExpression = (func: CodegenItem, inputs: CodegenItem[]): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write("await (");
+        codegen.write(func);
+        codegen.write(")(");
+
+        inputs.forEach((input) => {
+            codegen.write(input);
+            codegen.write(", ");
+        });
+
+        codegen.write(")");
     },
 });
 
 export const doExpression = (block: CodegenItem): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write("(");
+        codegen.write(block);
+        codegen.write(")");
     },
 });
 
 export const markerExpression = (): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write("null");
     },
 });
 
 export const listExpression = (elements: CodegenItem[]): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write("[");
+
+        elements.forEach((element) => {
+            codegen.write(element);
+            codegen.write(", ");
+        });
+
+        codegen.write("]");
     },
 });
 
 export const variantExpression = (index: number, elements: CodegenItem[]): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(`runtime.variant(${index}, [`);
+
+        elements.forEach((element) => {
+            codegen.write(element);
+            codegen.write(", ");
+        });
+
+        codegen.write("])");
     },
 });
 
 export const intrinsicExpression = (name: string, inputs: CodegenItem[]): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(`await runtime[${JSON.stringify(name)}](`);
+
+        inputs.forEach((input) => {
+            codegen.write(input);
+            codegen.write(", ");
+        });
+
+        codegen.write(")");
     },
 });
 
 export const stringExpression = (value: string): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(JSON.stringify(value));
     },
 });
 
 export const numberExpression = (value: string): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(value);
     },
 });
 
@@ -73,31 +121,56 @@ export const formatExpression = (
     trailing: string,
 ): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write("(");
+
+        segments.forEach(([text, input], index) => {
+            if (index > 0) {
+                codegen.write(" + ");
+            }
+
+            codegen.write(`${JSON.stringify(text)} + `);
+            codegen.write(input);
+        });
+
+        codegen.write(` + ${JSON.stringify(trailing)})`);
     },
 });
 
 export const functionExpression = (
-    params: Node[],
-    vars: Node[],
+    parameters: Node[],
+    variables: Node[],
     body: CodegenItem[],
 ): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write("(async (");
+
+        parameters.forEach((parameter) => {
+            codegen.write(`${codegen.node(parameter)},`);
+        });
+
+        codegen.write(") => {\n");
+
+        variables.forEach((variable) => {
+            codegen.write(`let ${codegen.node(variable)};\n`);
+        });
+
+        body.forEach((statement) => {
+            codegen.write(statement);
+        });
+
+        codegen.write("})");
     },
 });
 
 export const tupleExpression = (elements: CodegenItem[]): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
-    },
-});
+        codegen.write("[");
 
-export const whenExpression = (
-    input: CodegenItem,
-    arms: [CodegenItem, CodegenItem][],
-): CodegenItem => ({
-    codegen: (codegen) => {
-        throw new Error("TODO");
+        elements.forEach((element) => {
+            codegen.write(element);
+            codegen.write(", ");
+        });
+
+        codegen.write("]");
     },
 });

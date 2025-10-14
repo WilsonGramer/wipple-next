@@ -1,42 +1,68 @@
 import { CodegenItem } from ".";
 import { Node } from "../db";
 
-export const assignCondition = (matching: Node, variable: Node): CodegenItem => ({
+export const emptyCondition = (): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write("true");
     },
 });
 
-export const elementCondition = (
-    matching: Node,
-    element: CodegenItem,
-    index: number,
-): CodegenItem => ({
+export const assignCondition = (matching: Node, value: Node): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(`((${codegen.node(matching)} = `);
+        codegen.write(codegen.node(value));
+        codegen.write(`) || true)`); // ensure assignments never fail in case `value` is falsy
+    },
+});
+
+export const elementCondition = (matching: Node, parent: Node, index: number): CodegenItem => ({
+    codegen: (codegen) => {
+        codegen.write(`((${codegen.node(matching)} = `);
+        codegen.write(codegen.node(parent));
+        codegen.write(`[${index}]) || true)`); // ensure assignments never fail in case `parent` is falsy
     },
 });
 
 export const isVariantCondition = (matching: Node, variantIndex: number): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(`(${codegen.node(matching)}[runtime.variant] === ${variantIndex})`);
     },
 });
 
 export const isNumberCondition = (matching: Node, value: string): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(`${codegen.node(matching)} === ${value}`);
     },
 });
 
 export const isStringCondition = (matching: Node, value: string): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write(`${codegen.node(matching)} === ${JSON.stringify(value)}`);
     },
 });
 
 export const orCondition = (left: CodegenItem[], right: CodegenItem[]): CodegenItem => ({
     codegen: (codegen) => {
-        throw new Error("TODO");
+        codegen.write("(");
+
+        left.forEach((condition, index) => {
+            if (index > 0) {
+                codegen.write(" && ");
+            }
+
+            codegen.write(condition);
+        });
+
+        codegen.write(") || (");
+
+        right.forEach((condition, index) => {
+            if (index > 0) {
+                codegen.write(" && ");
+            }
+
+            codegen.write(condition);
+        });
+
+        codegen.write(")");
     },
 });

@@ -18,6 +18,7 @@ import { inspect } from "node:util";
 import { nodeFilter } from "./db/filter";
 import lsp from "./lsp";
 import { boolean, flag } from "cmd-ts";
+import { Codegen } from "./codegen";
 
 inspect.defaultOptions.depth = null;
 
@@ -29,7 +30,6 @@ const cmd = subcommands({
             args: {
                 path: positional({ type: string }),
                 filterLines: multioption({ long: "filter-lines", short: "l", type: array(number) }),
-                // query
             },
             handler: (args) => {
                 const code = readFileSync(args.path, "utf8");
@@ -93,6 +93,23 @@ const cmd = subcommands({
                     console.log(
                         `${chalk.underline(feedback.on.toString())}${chalk.underline(` (${feedback.id}):`)}\n\n${rendered}\n`,
                     );
+                }
+
+                let script: string | undefined;
+                try {
+                    const codegen = new Codegen(db, {
+                        format: { type: "module" },
+                        debug: true,
+                    });
+
+                    script = codegen.run();
+                } catch (e) {
+                    // Compile error
+                    console.error(e);
+                }
+
+                if (script != null) {
+                    console.log(script);
                 }
             },
         }),

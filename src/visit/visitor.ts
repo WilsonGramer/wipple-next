@@ -2,6 +2,7 @@ import { LocationRange } from "peggy";
 import { Db, Fact, Node, Span } from "../db";
 import { AnyDefinition, InstanceDefinition } from "./definitions";
 import { Constraint } from "../typecheck";
+import { CodegenItem } from "../codegen";
 
 export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 
@@ -12,6 +13,7 @@ export class Visitor {
 
     scopes = [new Scope()];
     currentNode!: Node;
+    currentMatch!: VisitorCurrentMatch;
     currentDefinition?: VisitorCurrentDefinition;
 
     nodes = new Set<Node>();
@@ -81,7 +83,7 @@ export class Visitor {
         const scope = this.scopes.pop()!;
 
         const definitionsByType: {
-            [T in `${AnyDefinition["type"]}s`]: Node[];
+            [T in `${AnyDefinition["type"]}s`]?: Node[];
         } = Object.fromEntries(
             Object.entries(
                 Object.groupBy(
@@ -143,6 +145,17 @@ export class Visitor {
         this.instances.get(trait)!.push(definition);
     }
 
+    withMatchValue<T>(value: Node, f: () => T): [T, CodegenItem[]] {
+        const existingMatch = this.currentMatch;
+        const conditions = existingMatch?.conditions ?? [];
+
+        this.currentMatch = { value, conditions };
+        const result = f();
+        this.currentMatch = existingMatch;
+
+        return [result, conditions];
+    }
+
     withDefinition(node: Node, f: () => AnyDefinition | undefined) {
         const existingDefinitionInfo = this.currentDefinition;
         const newDefinitionInfo = new VisitorCurrentDefinition(node);
@@ -161,17 +174,20 @@ export class Visitor {
         this.queue[key].push({
             scopes: [...this.scopes],
             currentNode: this.currentNode,
+            currentMatch: { ...this.currentMatch },
             currentDefinition: this.currentDefinition,
             f,
         });
     }
 
-    finish() {
+    runQueue() {
         for (const { f, ...props } of this.queue) {
             Object.assign(this, props);
             f();
         }
+    }
 
+    finish() {
         for (const [node, constraints] of [...this.definitionConstraints, ...this.constraints]) {
             this.db.add(node, new HasConstraints(constraints));
         }
@@ -189,6 +205,11 @@ export class Visitor {
 
 export class Scope {
     definitions = new Map<string, AnyDefinition[]>();
+}
+
+export interface VisitorCurrentMatch {
+    value: Node;
+    conditions: CodegenItem[];
 }
 
 export class VisitorCurrentDefinition {

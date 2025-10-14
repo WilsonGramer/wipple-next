@@ -118,14 +118,17 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                                               elementInputs,
                                               elementVariables,
                                               [
-                                                  codegen.ifStatement(
-                                                      elementInputs.map((input, index) =>
-                                                          codegen.assignCondition(
-                                                              input,
-                                                              elementVariables[index],
-                                                          ),
+                                                  ...elementInputs.map((input, index) =>
+                                                      codegen.ifStatement(
+                                                          input,
+                                                          [
+                                                              codegen.assignCondition(
+                                                                  elementVariables[index],
+                                                                  input,
+                                                              ),
+                                                          ],
+                                                          [],
                                                       ),
-                                                      [],
                                                   ),
                                                   codegen.returnStatement(
                                                       codegen.variantExpression(

@@ -51,7 +51,7 @@ export interface InstanceDefinition {
     comments: Comments;
     attributes: InstanceAttributes;
     value: () => Node | undefined;
-    // substitutions are added via facts
+    // substitutions and other trait information is added via the `HasInstance` fact
 }
 
 export interface TypeParameterDefinition {

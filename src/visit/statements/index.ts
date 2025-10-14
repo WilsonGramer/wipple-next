@@ -9,10 +9,9 @@ import { visitInstanceDefinition } from "./instance-definition";
 import { Fact } from "../../db";
 
 export class IsStatement extends Fact<null> {}
+export class IsTopLevelExecutableStatement extends Fact<null> {}
 
 export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
-    visitor.db.add(node, new IsStatement(null));
-
     node.code = node.code.slice(
         statement.comments.location.end.offset - statement.comments.location.start.offset,
     );
@@ -22,6 +21,10 @@ export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
             statement.attributes.location.end.offset - statement.attributes.location.start.offset,
         );
     }
+
+    visitor.db.add(node, new IsStatement(null));
+
+    const isTopLevelStatement = visitor.scopes.length === 1;
 
     switch (statement.type) {
         case "constantDefinition": {
@@ -43,6 +46,10 @@ export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
         case "assignment": {
             node.isHidden = true;
 
+            if (isTopLevelStatement) {
+                visitor.db.add(node, new IsTopLevelExecutableStatement(null));
+            }
+
             visitor.enqueue("afterAllDefinitions", () => {
                 visitAssignmentStatement(visitor, statement, node);
             });
@@ -51,6 +58,10 @@ export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
         }
         case "expression": {
             node.isHidden = true;
+
+            if (isTopLevelStatement) {
+                visitor.db.add(node, new IsTopLevelExecutableStatement(null));
+            }
 
             visitor.enqueue("afterAllDefinitions", () => {
                 visitExpressionStatement(visitor, statement, node);

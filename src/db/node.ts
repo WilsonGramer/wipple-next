@@ -23,6 +23,7 @@ export class Node {
         this.id = `<${counter++}>`;
         this.span = span;
         this.code = code;
+        this.codegen = undefined as any;
     }
 
     static instantiatedFrom(other: Node, source: Node | undefined): Node {
