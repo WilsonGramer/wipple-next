@@ -1,7 +1,6 @@
 import { Score } from ".";
 import { Node } from "../../db";
 import { Solver } from "../solve";
-import { Type } from "./type";
 
 /**
  * Constraints are produced during the `visit` stage and add type information to
@@ -16,6 +15,11 @@ export abstract class Constraint {
      * resolution has access to concrete type information.
      */
     abstract score(): Score;
+
+    /**
+     * Used to deduplicate constraints.
+     */
+    abstract equals(other: Constraint): boolean;
 
     /**
      * Produce a deep copy of this constraint, ignoring type parameters. This is

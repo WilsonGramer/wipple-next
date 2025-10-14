@@ -44,10 +44,6 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
             }),
         );
 
-        visitor.addConstraints(
-            new TypeConstraint(definitionNode, types.named(definitionNode, parameters)),
-        );
-
         // Types don't have additional constraints
 
         if (!attributes.intrinsic) {
@@ -90,6 +86,7 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
 
                         // Structures are created via structure expressions instead of a
                         // constructor function
+
                         break;
                     }
                     case "enumeration": {

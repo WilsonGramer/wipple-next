@@ -24,6 +24,14 @@ export class InstantiateConstraint extends Constraint {
         return "instantiate";
     }
 
+    equals(other: Constraint): boolean {
+        if (!(other instanceof InstantiateConstraint)) {
+            return false;
+        }
+
+        return this.instantiation === other.instantiation;
+    }
+
     instantiate(
         _source: Node,
         _replacements: Map<Node, Node>,

@@ -18,6 +18,14 @@ export class TypeConstraint extends Constraint {
         return this.referencedNodes().length > 0 ? "group" : "type";
     }
 
+    equals(other: Constraint): boolean {
+        if (!(other instanceof TypeConstraint)) {
+            return false;
+        }
+
+        return this.node === other.node && typesAreEqual(this.type, other.type);
+    }
+
     instantiate(
         source: Node,
         replacements: Map<Node, Node>,

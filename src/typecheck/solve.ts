@@ -74,6 +74,10 @@ export class Solver {
                 if (rightNode != null) {
                     this.insert(rightNode, left, right);
                 }
+
+                if (leftNode == null && rightNode == null) {
+                    throw new Error("encountered conflict without any nodes");
+                }
             }
         }
     }
@@ -131,11 +135,14 @@ export class Solver {
 
         this.unionFind.union(leftRepresentative, rightRepresentative);
 
-        const rightTypes = this.groups.get(rightRepresentative) ?? ImmutableList();
-        this.groups = this.groups.delete(rightRepresentative);
+        const rightTypes = this.groups.get(rightRepresentative);
 
-        for (const type of rightTypes) {
-            this.unify(leftRepresentative, type);
+        if (rightTypes != null) {
+            this.groups = this.groups.delete(rightRepresentative);
+
+            for (const type of rightTypes) {
+                this.unify(leftRepresentative, type);
+            }
         }
     }
 

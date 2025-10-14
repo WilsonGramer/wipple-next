@@ -22,7 +22,13 @@ export class Constraints {
     }
 
     add(...constraints: Constraint[]) {
-        this.constraints.push(...constraints);
+        for (const constraint of constraints) {
+            // Skip duplicate constraints
+            if (!this.constraints.some((existing) => existing.equals(constraint))) {
+                this.constraints.push(constraint);
+            }
+        }
+
         this.constraints.sort((a, b) => scores.indexOf(a.score()) - scores.indexOf(b.score()));
     }
 

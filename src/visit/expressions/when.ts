@@ -2,7 +2,7 @@ import { Visit } from "../visitor";
 import { Fact, Node } from "../../db";
 import { WhenExpression } from "../../syntax";
 import { visitExpression } from ".";
-import { TypeConstraint, types } from "../../typecheck";
+import { TypeConstraint } from "../../typecheck";
 import * as codegen from "../../codegen";
 import { visitPattern } from "../patterns";
 
@@ -15,20 +15,19 @@ export const visitWhenExpression: Visit<WhenExpression> = (visitor, expression, 
     const input = visitor.visit(expression.input, InputInWhenExpression, visitExpression);
 
     const variables: Node[] = [];
-    const temporaries: Node[] = [];
     const branches = expression.arms.map((arm) => {
         visitor.pushScope();
 
-        const [pattern, { conditions, temporaries }] = visitor.withMatchValue(input, () =>
-            visitor.visit(arm.pattern, PatternInWhenExpression, visitPattern),
+        const [_pattern, { conditions, temporaries: armTemporaries }] = visitor.withMatchValue(
+            input,
+            () => visitor.visit(arm.pattern, PatternInWhenExpression, visitPattern),
         );
 
         const value = visitor.visit(arm.value, ValueInWhenExpression, visitExpression);
 
         const { variables: armVariables = [] } = visitor.popScope();
-        variables.push(...armVariables, ...temporaries);
+        variables.push(...armVariables, ...armTemporaries);
 
-        visitor.addConstraints(new TypeConstraint(pattern, input));
         visitor.addConstraints(new TypeConstraint(value, node));
 
         return { conditions, value };

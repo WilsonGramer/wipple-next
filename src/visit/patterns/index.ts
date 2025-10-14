@@ -11,12 +11,15 @@ import { visitSetPattern } from "./set";
 import { visitUnitPattern } from "./unit";
 import { visitVariantPattern } from "./variant";
 import { visitOrPattern } from "./or";
+import { TypeConstraint } from "../../typecheck";
 
 export class IsPattern extends Fact<null> {}
 
 export const visitPattern = (visitor: Visitor, pattern: Pattern, node: Node) => {
     visitor.db.add(node, new IsPattern(null));
     visitor.db.add(node, new IsTyped(null));
+
+    visitor.addConstraints(new TypeConstraint(node, visitor.currentMatch.value));
 
     switch (pattern.type) {
         case "number":

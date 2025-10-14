@@ -4,6 +4,7 @@ import { VariantPattern } from "../../syntax";
 import * as codegen from "../../codegen";
 import { visitPattern } from ".";
 import { MarkerConstructorDefinition, VariantConstructorDefinition } from "../definitions";
+import { InstantiateConstraint, TypeConstraint, types } from "../../typecheck";
 
 export class IsVariantPattern extends Fact<null> {}
 export class ResolvedMarker extends Fact<Node> {}
@@ -27,16 +28,27 @@ export const visitVariantPattern: Visit<VariantPattern> = (visitor, pattern, nod
         }
     });
 
-    const elements = pattern.elements.map((element) =>
-        visitor.visit(element, ElementInVariantPattern, visitPattern),
-    );
-
     if (definition != null) {
         // TODO: Ensure `elements` has the right length
+
+        const constructorNode = visitor.node(pattern);
+        constructorNode.isHidden = true;
+
+        visitor.addConstraints(
+            new InstantiateConstraint({
+                source: constructorNode,
+                definition: definition.node,
+                substitutions: new Map(),
+                replacements: new Map([[definition.node, constructorNode]]),
+            }),
+        );
 
         switch (definition.type) {
             case "markerConstructor": {
                 // No need to add a condition; markers only have one value
+
+                visitor.addConstraints(new TypeConstraint(constructorNode, node));
+
                 break;
             }
             case "variantConstructor": {
@@ -44,11 +56,27 @@ export const visitVariantPattern: Visit<VariantPattern> = (visitor, pattern, nod
                     codegen.isVariantCondition(visitor.currentMatch.value, definition.index),
                 );
 
-                elements.forEach((element, index) => {
+                const elements = pattern.elements.map((pattern, index) => {
+                    const temporary = visitor.node(pattern);
+                    visitor.currentMatch.temporaries.push(temporary);
                     visitor.currentMatch.conditions.push(
-                        codegen.elementCondition(element, visitor.currentMatch.value, index),
+                        codegen.elementCondition(temporary, visitor.currentMatch.value, index),
                     );
+
+                    const [element, { conditions, temporaries }] = visitor.withMatchValue(
+                        temporary,
+                        () => visitor.visit(pattern, ElementInVariantPattern, visitPattern),
+                    );
+
+                    visitor.currentMatch.conditions.push(...conditions);
+                    visitor.currentMatch.temporaries.push(...temporaries);
+
+                    return element;
                 });
+
+                visitor.addConstraints(
+                    new TypeConstraint(constructorNode, types.function(elements, node)),
+                );
 
                 break;
             }

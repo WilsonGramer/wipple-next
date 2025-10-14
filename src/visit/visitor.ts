@@ -152,7 +152,6 @@ export class Visitor {
         const existingMatch = this.currentMatch;
         const conditions: CodegenItem[] = [];
         const temporaries: Node[] = [];
-
         this.currentMatch = { value, conditions, temporaries };
         const result = f();
         this.currentMatch = existingMatch;

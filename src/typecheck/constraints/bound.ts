@@ -4,7 +4,7 @@ import { HasInstance } from "../../visit/visitor";
 import { displayType, Type } from "./type";
 import chalk from "chalk";
 import { IsInferredTypeParameter } from "../../visit/statements/trait-definition";
-import { getOrInstantiate, InstantiateConstraint, Score, TypeConstraint } from ".";
+import { getOrInstantiate, InstantiateConstraint, Score } from ".";
 import { Constraint } from "./constraint";
 
 export interface Bound<S = Node> {
@@ -48,6 +48,14 @@ export class BoundConstraint extends Constraint {
 
     score(): Score {
         return "bound";
+    }
+
+    equals(other: Constraint): boolean {
+        if (!(other instanceof BoundConstraint)) {
+            return false;
+        }
+
+        return this.node === other.node && this.bound === other.bound;
     }
 
     instantiate(
@@ -147,13 +155,11 @@ export class BoundConstraint extends Constraint {
                 for (const [parameter, instanceType] of instanceSubstitutions) {
                     const boundType = boundSubstitutions.get(parameter);
                     if (boundType != null) {
-                        copy.add(new TypeConstraint(instanceType, boundType));
+                        copy.unify(instanceType, boundType);
                     } else if (!instanceInferred.has(parameter)) {
                         throw new Error("missing parameter in bound substitutions");
                     }
                 }
-
-                copy.run();
 
                 if (!copy.error) {
                     candidates.push([instance.node, copy, instanceInferred]);
@@ -181,7 +187,7 @@ export class BoundConstraint extends Constraint {
                         throw new Error("missing parameter in bound substitutions");
                     }
 
-                    solver.add(new TypeConstraint(boundType, instanceType));
+                    solver.unify(boundType, instanceType);
                 }
 
                 solver.db.add(

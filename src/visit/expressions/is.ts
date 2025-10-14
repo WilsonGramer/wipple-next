@@ -16,11 +16,9 @@ export class IsUnresolvedIsExpression extends Fact<null> {}
 export const visitIsExpression: Visit<IsExpression> = (visitor, expression, node) => {
     const value = visitor.visit(expression.left, ValueInIsExpression, visitExpression);
 
-    const [pattern, { conditions, temporaries }] = visitor.withMatchValue(value, () =>
+    const [_pattern, { conditions, temporaries }] = visitor.withMatchValue(value, () =>
         visitor.visit(expression.right, PatternInIsExpression, visitPattern),
     );
-
-    visitor.addConstraints(new TypeConstraint(pattern, value));
 
     const booleanType = visitor.resolveName("Boolean", node, (definition) => {
         if (definition.type !== "type") {

@@ -18,7 +18,7 @@ export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expr
     const inputs = expression.inputs.map((pattern) => {
         const inputNode = visitor.node(pattern);
 
-        const [input, { conditions: inputConditions, temporaries: inputTemporaries }] =
+        const [_input, { conditions: inputConditions, temporaries: inputTemporaries }] =
             visitor.withMatchValue(inputNode, () =>
                 visitor.visit(pattern, InputInFunctionExpression, visitPattern),
             );
@@ -26,7 +26,7 @@ export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expr
         conditions.push(...inputConditions);
         temporaries.push(...inputTemporaries);
 
-        return input;
+        return inputNode;
     });
 
     const output = visitor.visit(expression.output, OutputInFunctionExpression, visitExpression);

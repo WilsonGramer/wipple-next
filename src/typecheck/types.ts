@@ -18,11 +18,8 @@ export const named = (name: Node, parameters: Type[]): ConstructedType => ({
 
 const func = (inputs: Type[], output: Type): ConstructedType => ({
     tag: func,
-    children: [...inputs, output],
-    display: (children, root) => {
-        const output = children.pop()!;
-        const inputs = children;
-
+    children: [output, ...inputs],
+    display: ([output, ...inputs], root) => {
         const display = `${inputs.map((i) => i()).join(" ")} -> ${output(true)}`;
         return root ? display : `(${display})`;
     },

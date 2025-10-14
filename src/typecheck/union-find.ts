@@ -2,38 +2,37 @@ import { Set as ImmutableSet, List as ImmutableList } from "immutable";
 import { Node } from "../db";
 
 export class UnionFind {
-    private sets = ImmutableList<ImmutableSet<Node>>();
+    private sets = ImmutableList<[Node, ImmutableSet<Node>]>();
 
     static from(other: UnionFind) {
         const unionFind = new UnionFind();
-        unionFind.sets = ImmutableList(other.sets);
+        unionFind.sets = other.sets;
         return unionFind;
     }
 
     union(left: Node, right: Node) {
         const toUnify: ImmutableSet<Node>[] = [];
-        const toKeep: ImmutableSet<Node>[] = [];
-        for (const set of this.sets) {
+        const toKeep: [Node, ImmutableSet<Node>][] = [];
+        for (const [setRepresentative, set] of this.sets) {
             if (set.has(left) || set.has(right)) {
                 toUnify.push(set);
             } else {
-                toKeep.push(set);
+                toKeep.push([setRepresentative, set]);
             }
         }
 
-        const union = toUnify.reduce(
-            (result, set) => result.union(set),
-            ImmutableSet([left, right]),
-        );
+        const union = ImmutableSet([left, right]).union(...toUnify);
 
-        this.sets = ImmutableList([...toKeep, union]);
+        // Make `left` (ie. a more recent node) the new representative. This
+        // helps form better groups
+        this.sets = ImmutableList([...toKeep, [left, union]]);
     }
 
     tryFind(node: Node) {
         const result: Node[] = [];
-        for (const set of this.sets) {
+        for (const [representative, set] of this.sets) {
             if (set.has(node)) {
-                result.push([...set][0]); // will be consistent because sets are ordered
+                result.push(representative);
             }
         }
 
@@ -49,14 +48,14 @@ export class UnionFind {
         if (representative != null) {
             return representative;
         } else {
-            this.sets = this.sets.push(ImmutableSet([node]));
+            this.sets = this.sets.push([node, ImmutableSet([node])]);
             return node;
         }
     }
 
     nodes() {
         return Iterator.from(this.sets.values())
-            .flatMap((nodes) => nodes)
+            .flatMap(([, nodes]) => nodes)
             .toArray();
     }
 }
