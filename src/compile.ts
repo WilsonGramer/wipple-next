@@ -52,7 +52,7 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
 
     const groups = solver.toGroups();
 
-    for (const group of groups.all()) {
+    for (const group of groups) {
         for (const node of group.nodes) {
             if (info.definitions.has(node)) {
                 continue;

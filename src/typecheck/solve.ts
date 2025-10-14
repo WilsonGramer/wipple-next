@@ -146,58 +146,38 @@ export class Solver {
         }
     }
 
-    toGroups(): Groups {
-        const groups = new Map<Node, Group>();
+    toGroups(): Group[] {
+        const groups: Group[] = [];
         for (const [representative, types] of this.groups) {
             const group: Group = {
-                nodes: new Set([representative]),
+                nodes: [representative, ...this.unionFind.findAll(representative)],
                 types:
                     types.size > 0
                         ? types.toArray().map((type) => this.apply(type))
                         : [representative],
             };
 
-            groups.set(representative, group);
+            groups.push(group);
         }
 
-        const nodes = this.unionFind.nodes();
-
-        for (const node of nodes) {
-            const representative = this.unionFind.find(node);
-
-            if (groups.has(representative)) {
-                const group = groups.get(representative)!;
-                group.nodes.add(node);
-                groups.set(node, group);
-            } else {
-                groups.set(node, {
-                    nodes: new Set([node]),
+        for (const node of this.unionFind.nodes()) {
+            if (!groups.some((group) => group.nodes.includes(node))) {
+                groups.push({
+                    nodes: [node],
                     types: [node],
                 });
             }
         }
 
-        return new Groups(groups);
+        for (const group of groups) {
+            group.nodes.sort((a, b) => a.span.sort(b.span));
+        }
+
+        return groups;
     }
 }
 
 export interface Group {
-    nodes: Set<Node>;
+    nodes: Node[];
     types: Type[];
-}
-
-export class Groups {
-    groups: Map<Node, Group>;
-
-    constructor(groups: Map<Node, Group>) {
-        this.groups = groups;
-    }
-
-    all() {
-        return this.groups.values();
-    }
-
-    typesForNode(node: Node) {
-        return this.groups.get(node)?.types ?? [];
-    }
 }

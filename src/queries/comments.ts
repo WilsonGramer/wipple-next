@@ -59,13 +59,8 @@ const getLinks = (db: Db, node: Node, source: Node | undefined) => {
             continue;
         }
 
-        const uses = group.nodes
-            .difference(new Set([instantiated]))
-            .values()
-            .filter((node) => db.has(node, IsTyped))
-            .toArray();
-
-        if (uses == null) {
+        const uses = group.nodes.filter((node) => node !== instantiated && db.has(node, IsTyped));
+        if (uses.length === 0) {
             continue;
         }
 

@@ -1,5 +1,5 @@
 export * as types from "./types";
-export { Solver, Group, Groups } from "./solve";
+export { Solver, Group } from "./solve";
 export {
     Constraint,
     BoundConstraint,

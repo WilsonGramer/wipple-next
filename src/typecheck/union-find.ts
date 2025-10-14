@@ -28,6 +28,15 @@ export class UnionFind {
         this.sets = ImmutableList([...toKeep, [left, union]]);
     }
 
+    findAll(node: Node) {
+        return (
+            this.sets
+                .map(([, set]) => set)
+                .findEntry((set) => set.has(node))?.[1]
+                .values() ?? Iterator.from([node])
+        );
+    }
+
     tryFind(node: Node) {
         const result: Node[] = [];
         for (const [representative, set] of this.sets) {
