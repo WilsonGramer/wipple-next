@@ -93,48 +93,48 @@ show (add 1 2)
 
 | Name                                                                          | Parsing | Visiting | Codegen |
 | ----------------------------------------------------------------------------- | ------- | -------- | ------- |
-| [`as` expressions](docs/Language.md#as-expressions)                           | ☑️      | ☑️       |         |
-| [`do` expressions](docs/Language.md#do-expressions)                           | ☑️      |          |         |
+| [`as` expressions](docs/Language.md#as-expressions)                           | ☑️      | ☑️       | ☑️      |
+| [`do` expressions](docs/Language.md#do-expressions)                           | ☑️      | ☑️       | ☑️      |
 | [`intrinsic` expressions](docs/Language.md#intrinsic-expressions)             | ☑️      |          |         |
 | [`is` expressions](docs/Language.md#is-expressions)                           | ☑️      |          |         |
 | [`when` expressions](docs/Language.md#when-expressions)                       | ☑️      |          |         |
-| [Annotate expressions](docs/Language.md#annotate-expressions)                 | ☑️      | ☑️       |         |
-| [Block expressions](docs/Language.md#block-expressions)                       | ☑️      | ☑️       |         |
-| [Call expressions](docs/Language.md#call-expressions)                         | ☑️      | ☑️       |         |
+| [Annotate expressions](docs/Language.md#annotate-expressions)                 | ☑️      | ☑️       | ☑️      |
+| [Block expressions](docs/Language.md#block-expressions)                       | ☑️      | ☑️       | ☑️      |
+| [Call expressions](docs/Language.md#call-expressions)                         | ☑️      | ☑️       | ☑️      |
 | [Collection expressions](docs/Language.md#collection-expressions)             | ☑️      |          |         |
 | [Formatted string expressions](docs/Language.md#formatted-string-expressions) | ☑️      |          |         |
-| [Function expressions](docs/Language.md#function-expressions)                 | ☑️      | ☑️       |         |
-| [Number expressions](docs/Language.md#number-expressions)                     | ☑️      | ☑️       |         |
-| [Placeholder expressions](docs/Language.md#placeholder-expressions)           | ☑️      | ☑️       |         |
-| [String expressions](docs/Language.md#string-expressions)                     | ☑️      | ☑️       |         |
+| [Function expressions](docs/Language.md#function-expressions)                 | ☑️      | ☑️       | ☑️      |
+| [Number expressions](docs/Language.md#number-expressions)                     | ☑️      | ☑️       | ☑️      |
+| [Placeholder expressions](docs/Language.md#placeholder-expressions)           | ☑️      | ☑️       | ☑️      |
+| [String expressions](docs/Language.md#string-expressions)                     | ☑️      | ☑️       | ☑️      |
 | [Structure expressions](docs/Language.md#structure-expressions)               | ☑️      |          |         |
-| [Trait expressions](docs/Language.md#trait-expressions)                       | ☑️      | ☑️       |         |
+| [Trait expressions](docs/Language.md#trait-expressions)                       | ☑️      | ☑️       | ☑️      |
 | [Tuple expressions](docs/Language.md#tuple-expressions)                       | ☑️      |          |         |
-| [Unit expressions](docs/Language.md#unit-expressions)                         | ☑️      | ☑️       |         |
-| [Variable expressions](docs/Language.md#variable-expressions)                 | ☑️      | ☑️       |         |
+| [Unit expressions](docs/Language.md#unit-expressions)                         | ☑️      | ☑️       | ☑️      |
+| [Variable expressions](docs/Language.md#variable-expressions)                 | ☑️      | ☑️       | ☑️      |
 | [`or` patterns](docs/Language.md#or-patterns)                                 | ☑️      |          |         |
 | [`set` patterns](docs/Language.md#set-patterns)                               | ☑️      | ☑️       |         |
-| [Annotate patterns](docs/Language.md#annotate-patterns)                       | ☑️      | ☑️       |         |
+| [Annotate patterns](docs/Language.md#annotate-patterns)                       | ☑️      | ☑️       | ☑️      |
 | [Destructure patterns](docs/Language.md#destructure-patterns)                 | ☑️      |          |         |
 | [Number patterns](docs/Language.md#number-patterns)                           | ☑️      | ☑️       |         |
 | [String patterns](docs/Language.md#string-patterns)                           | ☑️      | ☑️       |         |
 | [Tuple patterns](docs/Language.md#tuple-patterns)                             | ☑️      |          |         |
-| [Unit patterns](docs/Language.md#unit-patterns)                               | ☑️      | ☑️       |         |
+| [Unit patterns](docs/Language.md#unit-patterns)                               | ☑️      | ☑️       | ☑️      |
 | [Variable patterns](docs/Language.md#variable-patterns)                       | ☑️      | ☑️       |         |
 | [Variant patterns](docs/Language.md#variant-patterns)                         | ☑️      |          |         |
-| [Wildcard patterns](docs/Language.md#wildcard-patterns)                       | ☑️      | ☑️       |         |
-| [Block types](docs/Language.md#block-types)                                   | ☑️      | ☑️       |         |
-| [Function types](docs/Language.md#function-types)                             | ☑️      | ☑️       |         |
-| [Named types](docs/Language.md#named-types)                                   | ☑️      | ☑️       |         |
-| [Parameter types](docs/Language.md#parameter-types)                           | ☑️      | ☑️       |         |
-| [Placeholder types](docs/Language.md#placeholder-types)                       | ☑️      | ☑️       |         |
-| [Tuple types](docs/Language.md#tuple-types)                                   | ☑️      | ☑️       |         |
-| [Unit types](docs/Language.md#unit-types)                                     | ☑️      | ☑️       |         |
+| [Wildcard patterns](docs/Language.md#wildcard-patterns)                       | ☑️      | ☑️       | ☑️      |
+| [Block types](docs/Language.md#block-types)                                   | ☑️      | ☑️       | ☑️      |
+| [Function types](docs/Language.md#function-types)                             | ☑️      | ☑️       | ☑️      |
+| [Named types](docs/Language.md#named-types)                                   | ☑️      | ☑️       | ☑️      |
+| [Parameter types](docs/Language.md#parameter-types)                           | ☑️      | ☑️       | ☑️      |
+| [Placeholder types](docs/Language.md#placeholder-types)                       | ☑️      | ☑️       | ☑️      |
+| [Tuple types](docs/Language.md#tuple-types)                                   | ☑️      | ☑️       | ☑️      |
+| [Unit types](docs/Language.md#unit-types)                                     | ☑️      | ☑️       | ☑️      |
 | [Bound constraints](docs/Language.md#bound-constraints)                       | ☑️      | ☑️       |         |
 | [Default constraints](docs/Language.md#default-constraints)                   | ☑️      | ☑️       |         |
 | [Constant definitions](docs/Language.md#constant-definitions)                 | ☑️      | ☑️       |         |
 | [Instance definitions](docs/Language.md#instance-definitions)                 | ☑️      | ☑️       |         |
-| [Trait definitions](docs/Language.md#trait-definitions)                       | ☑️      | ☑️       |         |
-| [Type definitions](docs/Language.md#type-definitions)                         | ☑️      |          |         |
-| [Assignment statements](docs/Language.md#assignment-statements)               | ☑️      | ☑️       |         |
-| [Expression statements](docs/Language.md#expression-statements)               | ☑️      | ☑️       |         |
+| [Trait definitions](docs/Language.md#trait-definitions)                       | ☑️      | ☑️       | ☑️      |
+| [Type definitions](docs/Language.md#type-definitions)                         | ☑️      | ☑️       | ☑️      |
+| [Assignment statements](docs/Language.md#assignment-statements)               | ☑️      | ☑️       | ☑️      |
+| [Expression statements](docs/Language.md#expression-statements)               | ☑️      | ☑️       | ☑️      |
