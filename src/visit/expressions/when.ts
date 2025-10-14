@@ -15,17 +15,18 @@ export const visitWhenExpression: Visit<WhenExpression> = (visitor, expression, 
     const input = visitor.visit(expression.input, InputInWhenExpression, visitExpression);
 
     const variables: Node[] = [];
+    const temporaries: Node[] = [];
     const branches = expression.arms.map((arm) => {
         visitor.pushScope();
 
-        const [pattern, conditions] = visitor.withMatchValue(input, () =>
+        const [pattern, { conditions, temporaries }] = visitor.withMatchValue(input, () =>
             visitor.visit(arm.pattern, PatternInWhenExpression, visitPattern),
         );
 
         const value = visitor.visit(arm.value, ValueInWhenExpression, visitExpression);
 
         const { variables: armVariables = [] } = visitor.popScope();
-        variables.push(...armVariables);
+        variables.push(...armVariables, ...temporaries);
 
         visitor.addConstraints(new TypeConstraint(pattern, input));
         visitor.addConstraints(new TypeConstraint(value, node));
@@ -38,9 +39,9 @@ export const visitWhenExpression: Visit<WhenExpression> = (visitor, expression, 
     node.setCodegen(
         codegen.callExpression(
             codegen.functionExpression([], variables, [
-                codegen.temporaryStatement(input),
-                ...branches.map((branch) =>
-                    codegen.ifStatement(branch.conditions, [codegen.returnStatement(branch.value)]),
+                codegen.temporaryStatement(input, input),
+                ...branches.map(({ conditions, value }) =>
+                    codegen.ifStatement(conditions, [codegen.returnStatement(value)]),
                 ),
             ]),
             [],

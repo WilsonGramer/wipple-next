@@ -145,15 +145,19 @@ export class Visitor {
         this.instances.get(trait)!.push(definition);
     }
 
-    withMatchValue<T>(value: Node, f: () => T): [T, CodegenItem[]] {
+    withMatchValue<T>(
+        value: Node,
+        f: () => T,
+    ): [T, { conditions: CodegenItem[]; temporaries: Node[] }] {
         const existingMatch = this.currentMatch;
-        const conditions = existingMatch?.conditions ?? [];
+        const conditions: CodegenItem[] = [];
+        const temporaries: Node[] = [];
 
-        this.currentMatch = { value, conditions };
+        this.currentMatch = { value, conditions, temporaries };
         const result = f();
         this.currentMatch = existingMatch;
 
-        return [result, conditions];
+        return [result, { conditions, temporaries }];
     }
 
     withDefinition(node: Node, f: () => AnyDefinition | undefined) {
@@ -210,6 +214,7 @@ export class Scope {
 export interface VisitorCurrentMatch {
     value: Node;
     conditions: CodegenItem[];
+    temporaries: Node[];
 }
 
 export class VisitorCurrentDefinition {

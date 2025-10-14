@@ -35,26 +35,30 @@ export const isStringCondition = (value: Node, string: string): CodegenItem => (
     },
 });
 
-export const orCondition = (left: CodegenItem[], right: CodegenItem[]): CodegenItem => ({
+export const orCondition = (branches: CodegenItem[][]): CodegenItem => ({
     codegen: (codegen) => {
         codegen.write("(");
 
-        left.forEach((condition, index) => {
+        branches.forEach((conditions, index) => {
             if (index > 0) {
-                codegen.write(" && ");
+                codegen.write(" || ");
             }
 
-            codegen.write(condition);
-        });
+            if (conditions.length === 0) {
+                codegen.write("true");
+            } else {
+                codegen.write("(");
 
-        codegen.write(") || (");
+                conditions.forEach((condition, index) => {
+                    if (index > 0) {
+                        codegen.write(" && ");
+                    }
 
-        right.forEach((condition, index) => {
-            if (index > 0) {
-                codegen.write(" && ");
+                    codegen.write(condition);
+                });
+
+                codegen.write(")");
             }
-
-            codegen.write(condition);
         });
 
         codegen.write(")");

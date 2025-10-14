@@ -14,14 +14,17 @@ export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expr
     visitor.pushScope();
 
     const conditions: codegen.CodegenItem[] = [];
+    const temporaries: Node[] = [];
     const inputs = expression.inputs.map((pattern) => {
         const inputNode = visitor.node(pattern);
 
-        const [input, inputConditions] = visitor.withMatchValue(inputNode, () =>
-            visitor.visit(pattern, InputInFunctionExpression, visitPattern),
-        );
+        const [input, { conditions: inputConditions, temporaries: inputTemporaries }] =
+            visitor.withMatchValue(inputNode, () =>
+                visitor.visit(pattern, InputInFunctionExpression, visitPattern),
+            );
 
         conditions.push(...inputConditions);
+        temporaries.push(...inputTemporaries);
 
         return input;
     });
@@ -29,6 +32,7 @@ export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expr
     const output = visitor.visit(expression.output, OutputInFunctionExpression, visitExpression);
 
     const { variables = [] } = visitor.popScope();
+    variables.push(...temporaries);
 
     visitor.db.add(node, new IsFunctionExpression(null));
     visitor.addConstraints(new TypeConstraint(node, types.function(inputs, output)));

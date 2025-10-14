@@ -16,7 +16,7 @@ export class IsUnresolvedIsExpression extends Fact<null> {}
 export const visitIsExpression: Visit<IsExpression> = (visitor, expression, node) => {
     const value = visitor.visit(expression.left, ValueInIsExpression, visitExpression);
 
-    const [pattern, conditions] = visitor.withMatchValue(value, () =>
+    const [pattern, { conditions, temporaries }] = visitor.withMatchValue(value, () =>
         visitor.visit(expression.right, PatternInIsExpression, visitPattern),
     );
 
@@ -55,19 +55,15 @@ export const visitIsExpression: Visit<IsExpression> = (visitor, expression, node
 
     node.setCodegen(
         codegen.callExpression(
-            codegen.functionExpression(
-                [],
-                [],
+            codegen.functionExpression([], temporaries, [
+                codegen.temporaryStatement(value, value),
                 [
-                    codegen.temporaryStatement(value),
-                    [
-                        codegen.ifStatement(conditions, [
-                            codegen.returnStatement(codegen.variantExpression(trueVariant, [])),
-                        ]),
-                        codegen.returnStatement(codegen.variantExpression(falseVariant, [])),
-                    ],
+                    codegen.ifStatement(conditions, [
+                        codegen.returnStatement(codegen.variantExpression(trueVariant, [])),
+                    ]),
+                    codegen.returnStatement(codegen.variantExpression(falseVariant, [])),
                 ],
-            ),
+            ]),
             [],
         ),
     );

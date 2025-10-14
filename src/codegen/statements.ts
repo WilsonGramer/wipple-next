@@ -1,10 +1,15 @@
 import { CodegenItem } from ".";
 import { Node } from "../db";
 
-export const temporaryStatement = (value: Node): CodegenItem => ({
+export const temporaryStatement = (temporary: Node, value: Node | undefined): CodegenItem => ({
     codegen: (codegen) => {
-        codegen.write(`const ${codegen.node(value)} = `);
-        codegen.write(value);
+        if (value != null) {
+            codegen.write(`const ${codegen.node(temporary)} = `);
+            codegen.write(value);
+        } else {
+            codegen.write(`let ${codegen.node(temporary)}`);
+        }
+
         codegen.write(";\n");
     },
 });

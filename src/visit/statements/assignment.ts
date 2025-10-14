@@ -41,12 +41,16 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
         }
     }
 
-    const [pattern, conditions] = visitor.withMatchValue(value, () =>
+    const [pattern, { conditions, temporaries }] = visitor.withMatchValue(value, () =>
         visitor.visit(statement.pattern, PatternInAssignmentStatement, visitPattern),
     );
 
     visitor.db.add(pattern, new AssignedTo(value));
     visitor.addConstraints(new TypeConstraint(value, pattern));
 
-    node.setCodegen([codegen.temporaryStatement(value), codegen.ifStatement(conditions, [])]);
+    node.setCodegen([
+        codegen.temporaryStatement(value, value),
+        ...temporaries.map((temporary) => codegen.temporaryStatement(temporary, undefined)),
+        codegen.ifStatement(conditions, []),
+    ]);
 };

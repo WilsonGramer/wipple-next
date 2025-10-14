@@ -10,6 +10,7 @@ import { visitStringExpression } from "../expressions/string";
 import { visitSetPattern } from "./set";
 import { visitUnitPattern } from "./unit";
 import { visitVariantPattern } from "./variant";
+import { visitOrPattern } from "./or";
 
 export class IsPattern extends Fact<null> {}
 
@@ -35,7 +36,7 @@ export const visitPattern = (visitor: Visitor, pattern: Pattern, node: Node) => 
         case "variant":
             return visitVariantPattern(visitor, pattern, node);
         case "or":
-            throw new Error("TODO");
+            return visitOrPattern(visitor, pattern, node);
         case "tuple":
             throw new Error("TODO");
         case "annotate":
