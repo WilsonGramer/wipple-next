@@ -174,7 +174,7 @@ export class Visitor {
         this.queue[key].push({
             scopes: [...this.scopes],
             currentNode: this.currentNode,
-            currentMatch: { ...this.currentMatch },
+            currentMatch: this.currentMatch,
             currentDefinition: this.currentDefinition,
             f,
         });

@@ -5,6 +5,7 @@ import { displayType, Type } from "../typecheck/constraints/type";
 import { Bound, displayBound } from "../typecheck/constraints/bound";
 import { Comments } from "../syntax";
 import { nodeDisplayOptions } from "../db/node";
+import { Links } from "../queries";
 
 export interface RenderedFeedback {
     strings: readonly string[];
@@ -22,11 +23,7 @@ export const render = (strings: readonly string[], ...values: Renderable[]): Ren
         ).trim(),
 });
 
-export const renderComments = (
-    comments: Comments,
-    links: Record<string, Renderable>,
-    suffix = "",
-) => {
+export const renderComments = (comments: Comments, links: Links, suffix = "") => {
     const string = comments.comments.map((comment) => comment.value).join("\n");
 
     const items = string.split(/\[`([^`]+)`\]/);
@@ -35,7 +32,22 @@ export const renderComments = (
     const values: Renderable[] = [];
     for (let i = 0; i < items.length - 1; i += 2) {
         segments.push(items[i]);
-        values.push(links[items[i + 1]] ?? render.code("_"));
+
+        const link = links[items[i + 1]];
+        if (link == null) {
+            values.push(render.code("_"));
+            continue;
+        }
+
+        if ("and" in link) {
+            values.push(render.list(link.and, "and"));
+        } else if ("or" in link) {
+            values.push(render.list(link.or, "or"));
+        } else if (link instanceof Node) {
+            values.push(link);
+        } else {
+            link satisfies never;
+        }
     }
 
     segments.push(items[items.length - 1] + suffix);

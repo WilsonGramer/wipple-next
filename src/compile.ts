@@ -1,11 +1,11 @@
 import { LocationRange } from "peggy";
-import { Fact, Db } from "./db";
+import { Fact, Db, Node } from "./db";
 import parse from "./syntax";
 import { visit } from "./visit";
 import { Group, Solver } from "./typecheck";
 import { displayType, Type } from "./typecheck/constraints/type";
 import chalk from "chalk";
-import { HasConstraints } from "./visit/visitor";
+import { HasConstraints, HasInstance } from "./visit/visitor";
 
 export interface CompileOptions {
     path: string;
@@ -63,6 +63,15 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
             for (const type of group.types) {
                 db.add(node, new HasType(type));
             }
+        }
+    }
+
+    // Also apply substitutions within definitions for codegen
+    for (const [_trait, instance] of db.list(HasInstance)) {
+        for (const [parameter, substitution] of instance.substitutions) {
+            const appliedNode = new Node(substitution.span, substitution.code);
+            appliedNode.setCodegen(solver.apply(substitution));
+            instance.substitutions.set(parameter, appliedNode);
         }
     }
 

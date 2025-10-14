@@ -13,9 +13,18 @@ export class OutputInFunctionExpression extends Fact<Node> {}
 export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expression, node) => {
     visitor.pushScope();
 
-    const inputs = expression.inputs.map((input) =>
-        visitor.visit(input, InputInFunctionExpression, visitPattern),
-    );
+    const conditions: codegen.CodegenItem[] = [];
+    const inputs = expression.inputs.map((pattern) => {
+        const inputNode = visitor.node(pattern);
+
+        const [input, inputConditions] = visitor.withMatchValue(inputNode, () =>
+            visitor.visit(pattern, InputInFunctionExpression, visitPattern),
+        );
+
+        conditions.push(...inputConditions);
+
+        return input;
+    });
 
     const output = visitor.visit(expression.output, OutputInFunctionExpression, visitExpression);
 
@@ -24,5 +33,10 @@ export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expr
     visitor.db.add(node, new IsFunctionExpression(null));
     visitor.addConstraints(new TypeConstraint(node, types.function(inputs, output)));
 
-    node.setCodegen(codegen.functionExpression(inputs, variables, [output]));
+    node.setCodegen(
+        codegen.functionExpression(inputs, variables, [
+            codegen.ifStatement(conditions, []),
+            output,
+        ]),
+    );
 };

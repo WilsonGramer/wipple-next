@@ -9,6 +9,7 @@ import { ResolvedConstant, ResolvedVariable } from "../visit/expressions/variabl
 import { ResolvedTrait } from "../visit/expressions/trait";
 import { ResolvedNamedType } from "../visit/types/named";
 import { Definition } from "../visit/visitor";
+import { render, Renderable } from "../feedback/render";
 
 export const errorInstance = query(function* (db) {
     for (const [node, [bound, instanceNode]] of db.list(HasResolvedBound)) {
@@ -36,8 +37,10 @@ export const comments = query(function* (db) {
     }
 });
 
+export type Links = ReturnType<typeof getLinks>;
+
 const getLinks = (db: Db, node: Node, source: Node | undefined) => {
-    const links: Record<string, Node> = {};
+    const links: Record<string, Node | { or: Renderable[] } | { and: Renderable[] }> = {};
     for (const typeParameter of db.list(node, HasTypeParameter)) {
         const instantiated = db
             .nodes()
@@ -51,18 +54,28 @@ const getLinks = (db: Db, node: Node, source: Node | undefined) => {
             continue;
         }
 
-        const firstUse = db
-            .get(instantiated, InTypeGroup)
-            ?.nodes.difference(new Set([instantiated]))
-            .values()
-            .filter((node) => db.has(node, IsTyped))
-            .toArray()[0];
-
-        if (firstUse == null) {
+        const group = db.get(instantiated, InTypeGroup);
+        if (group == null) {
             continue;
         }
 
-        links[typeParameter.name] = firstUse;
+        const uses = group.nodes
+            .difference(new Set([instantiated]))
+            .values()
+            .filter((node) => db.has(node, IsTyped))
+            .toArray();
+
+        if (uses == null) {
+            continue;
+        }
+
+        links[typeParameter.name] = uses[0];
+
+        links[typeParameter.name + "@related"] = { and: uses };
+
+        links[typeParameter.name + "@type"] = {
+            or: group.types.map((type) => render.type(type)),
+        };
     }
 
     return links;
