@@ -15,6 +15,7 @@ import { visitDoExpression } from "./do";
 import { visitTraitExpression } from "./trait";
 import { visitAsExpression } from "./as";
 import { visitWhenExpression } from "./when";
+import { visitIsExpression } from "./is";
 
 export class IsExpression extends Fact<null> {}
 
@@ -32,7 +33,7 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
         case "collection":
             throw new Error("TODO");
         case "is":
-            throw new Error("TODO");
+            return visitIsExpression(visitor, expression, node);
         case "as":
             return visitAsExpression(visitor, expression, node);
         case "annotate":

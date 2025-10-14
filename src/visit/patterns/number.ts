@@ -2,11 +2,12 @@ import { Visit } from "../visitor";
 import { Fact, Node } from "../../db";
 import { NumberPattern } from "../../syntax";
 import { TypeConstraint, types } from "../../typecheck";
+import * as codegen from "../../codegen";
 
 export class ResolvedNumberPattern extends Fact<Node> {}
 export class IsUnresolvedNumberPattern extends Fact<null> {}
 
-export const visitNumberPattern: Visit<NumberPattern> = (visitor, _expression, node) => {
+export const visitNumberPattern: Visit<NumberPattern> = (visitor, expression, node) => {
     const numberType = visitor.resolveName("Number", node, (definition) => {
         if (definition.type !== "type") {
             return undefined;
@@ -20,4 +21,8 @@ export const visitNumberPattern: Visit<NumberPattern> = (visitor, _expression, n
     } else {
         visitor.db.add(node, new IsUnresolvedNumberPattern(null));
     }
+
+    visitor.currentMatch.conditions.push(
+        codegen.isNumberCondition(visitor.currentMatch.value, expression.value.value),
+    );
 };
