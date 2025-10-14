@@ -116,12 +116,12 @@ show (add 1 2)
 | [`set` patterns](docs/Language.md#set-patterns)                               | ☑️      | ☑️       | ☑️      |
 | [Annotate patterns](docs/Language.md#annotate-patterns)                       | ☑️      | ☑️       | ☑️      |
 | [Destructure patterns](docs/Language.md#destructure-patterns)                 | ☑️      |          |         |
-| [Number patterns](docs/Language.md#number-patterns)                           | ☑️      | ☑️       |         |
-| [String patterns](docs/Language.md#string-patterns)                           | ☑️      | ☑️       |         |
+| [Number patterns](docs/Language.md#number-patterns)                           | ☑️      | ☑️       | ☑️      |
+| [String patterns](docs/Language.md#string-patterns)                           | ☑️      | ☑️       | ☑️      |
 | [Tuple patterns](docs/Language.md#tuple-patterns)                             | ☑️      |          |         |
 | [Unit patterns](docs/Language.md#unit-patterns)                               | ☑️      | ☑️       | ☑️      |
-| [Variable patterns](docs/Language.md#variable-patterns)                       | ☑️      | ☑️       |         |
-| [Variant patterns](docs/Language.md#variant-patterns)                         | ☑️      |          |         |
+| [Variable patterns](docs/Language.md#variable-patterns)                       | ☑️      | ☑️       | ☑️      |
+| [Variant patterns](docs/Language.md#variant-patterns)                         | ☑️      | ☑️       | ☑️      |
 | [Wildcard patterns](docs/Language.md#wildcard-patterns)                       | ☑️      | ☑️       | ☑️      |
 | [Block types](docs/Language.md#block-types)                                   | ☑️      | ☑️       | ☑️      |
 | [Function types](docs/Language.md#function-types)                             | ☑️      | ☑️       | ☑️      |
