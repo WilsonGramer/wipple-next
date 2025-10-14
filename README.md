@@ -97,7 +97,7 @@ show (add 1 2)
 | [`do` expressions](docs/Language.md#do-expressions)                           | ☑️      | ☑️       | ☑️      |
 | [`intrinsic` expressions](docs/Language.md#intrinsic-expressions)             | ☑️      |          |         |
 | [`is` expressions](docs/Language.md#is-expressions)                           | ☑️      |          |         |
-| [`when` expressions](docs/Language.md#when-expressions)                       | ☑️      |          |         |
+| [`when` expressions](docs/Language.md#when-expressions)                       | ☑️      | ☑️       | ☑️      |
 | [Annotate expressions](docs/Language.md#annotate-expressions)                 | ☑️      | ☑️       | ☑️      |
 | [Block expressions](docs/Language.md#block-expressions)                       | ☑️      | ☑️       | ☑️      |
 | [Call expressions](docs/Language.md#call-expressions)                         | ☑️      | ☑️       | ☑️      |
@@ -113,7 +113,7 @@ show (add 1 2)
 | [Unit expressions](docs/Language.md#unit-expressions)                         | ☑️      | ☑️       | ☑️      |
 | [Variable expressions](docs/Language.md#variable-expressions)                 | ☑️      | ☑️       | ☑️      |
 | [`or` patterns](docs/Language.md#or-patterns)                                 | ☑️      |          |         |
-| [`set` patterns](docs/Language.md#set-patterns)                               | ☑️      | ☑️       |         |
+| [`set` patterns](docs/Language.md#set-patterns)                               | ☑️      | ☑️       | ☑️      |
 | [Annotate patterns](docs/Language.md#annotate-patterns)                       | ☑️      | ☑️       | ☑️      |
 | [Destructure patterns](docs/Language.md#destructure-patterns)                 | ☑️      |          |         |
 | [Number patterns](docs/Language.md#number-patterns)                           | ☑️      | ☑️       |         |

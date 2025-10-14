@@ -36,7 +36,8 @@ export const visitTraitExpression: Visit<TraitExpression> = (visitor, expression
                         ResolvedTrait,
                     ];
                 }
-                case "constructor": {
+                case "markerConstructor":
+                case "variantConstructor": {
                     node.setCodegen(definition.node);
 
                     return [

@@ -90,7 +90,7 @@ variant_definition
             return { location: location(), name, elements };
         }
 
-variant_definition_element = subtype
+variant_definition_element = atomic_type
 
 marker_type_representation = "type" { return { type: "marker", location: location() }; }
 
@@ -118,7 +118,7 @@ trait_definition_statement
         }
 
 trait_constraints
-    = "trait" __ type:subtype constraints:constraints? {
+    = "trait" __ type:atomic_type constraints:constraints? {
             return { location: location(), type, constraints: constraints ?? [] };
         }
 
@@ -199,9 +199,9 @@ expression_element "expression"
     / do_expression
     / when_expression
     / intrinsic_expression
-    / subexpression
+    / atomic_expression
 
-subexpression "expression"
+atomic_expression "expression"
     = placeholder_expression
     / variable_expression
     / trait_expression
@@ -245,31 +245,32 @@ block_expression
 unit_expression = "(" _ ")" { return { type: "unit", location: location() }; }
 
 formatted_string_expression
-    = string:string inputs:(__ @subexpression)+ {
+    = string:string inputs:(__ @atomic_expression)+ {
             return { type: "formattedString", location: location(), string, inputs };
         }
 
 call_expression
-    = func:subexpression inputs:(__ @subexpression)+ {
+    = func:atomic_expression inputs:(__ @atomic_expression)+ {
             return { type: "call", location: location(), function: func, inputs };
         }
 
-do_expression = "do" _ input:subexpression { return { type: "do", location: location(), input }; }
+do_expression
+    = "do" _ input:atomic_expression { return { type: "do", location: location(), input }; }
 
 when_expression
-    = "when" _ input:subexpression _ "{" _ arms:arms? _ "}" {
+    = "when" _ input:atomic_expression _ "{" _ arms:arms? _ "}" {
             return { type: "when", location: location(), input, arms: arms ?? [] };
         }
 
 arms = first:arm rest:(__ "\n" _ @arm)* { return [first, ...rest]; }
 
 arm
-    = pattern:subpattern __ "->" _ value:subexpression {
+    = pattern:pattern __ "->" _ value:expression {
             return { location: location(), pattern, value };
         }
 
 intrinsic_expression
-    = "intrinsic" _ name:string inputs:(_ @subexpression)* {
+    = "intrinsic" _ name:string inputs:(_ @atomic_expression)* {
             return { type: "intrinsic", location: location(), name, inputs };
         }
 
@@ -279,7 +280,7 @@ function_expression
         }
 
 function_expression_inputs
-    = first:subpattern rest:(__ @subpattern)* __ "->" { return [first, ...rest]; }
+    = first:atomic_pattern rest:(__ @atomic_pattern)* __ "->" { return [first, ...rest]; }
 
 tuple_expression
     = "(" _ ";" _ ")" { return { type: "tuple", location: location(), elements: [] }; }
@@ -378,14 +379,14 @@ pattern "pattern"
     = tuple_pattern
     / or_pattern
     / annotate_pattern
-    / set_pattern
     / pattern_element
 
 pattern_element "pattern"
     = variant_pattern
-    / subpattern
+    / set_pattern
+    / atomic_pattern
 
-subpattern "pattern"
+atomic_pattern "pattern"
     = wildcard_pattern
     / variable_pattern
     / number_pattern
@@ -439,7 +440,7 @@ set_pattern
     = "set" __ variable:variable_name { return { type: "set", location: location(), variable }; }
 
 variant_pattern
-    = variant:variant_name elements:(__ @element:subpattern)* {
+    = variant:variant_name elements:(__ @element:atomic_pattern)* {
             return { type: "variant", location: location(), variant, elements };
         }
 
@@ -453,9 +454,9 @@ type "type"
 
 type_element "type"
     = parameterized_type
-    / subtype
+    / atomic_type
 
-subtype "type"
+atomic_type "type"
     = placeholder_type
     / parameter_type
     / named_type
@@ -483,7 +484,8 @@ function_type
             return { type: "function", location: location(), inputs, output };
         }
 
-function_type_inputs = first:subtype rest:(__ @subtype)* __ "->" { return [first, ...rest]; }
+function_type_inputs
+    = first:atomic_type rest:(__ @atomic_type)* __ "->" { return [first, ...rest]; }
 
 block_type
     = "{" _ output:type_element _ "}" { return { type: "block", location: location(), output }; }
@@ -497,7 +499,7 @@ tuple_type
         }
 
 parameterized_type
-    = name:type_name parameters:(__ @subtype+) {
+    = name:type_name parameters:(__ @atomic_type+) {
             return { type: "named", location: location(), name, parameters };
         }
 
@@ -517,7 +519,7 @@ constraint "constraint"
     / default_constraint
 
 bound_constraint
-    = "(" _ trait:type_name parameters:(_ @subtype)* _ ")" {
+    = "(" _ trait:type_name parameters:(_ @atomic_type)* _ ")" {
             return { type: "bound", location: location(), trait, parameters };
         }
 

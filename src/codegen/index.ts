@@ -43,8 +43,12 @@ export class Codegen {
             } else {
                 throw new Error(`cannot codegen ${item}`);
             }
-        } else {
+        } else if (typeof item === "function") {
             item(this);
+        } else if (Array.isArray(item)) {
+            item.forEach((item) => this.write(item));
+        } else {
+            throw new Error(`cannot codegen ${item}`);
         }
     }
 
@@ -154,7 +158,7 @@ export class Codegen {
 }
 
 type CodegenFunction = (codegen: Codegen) => void;
-export type CodegenItem = CodegenFunction | { codegen: CodegenItem };
+export type CodegenItem = CodegenFunction | { codegen: CodegenItem } | CodegenItem[];
 
 export * from "./conditions";
 export * from "./expressions";

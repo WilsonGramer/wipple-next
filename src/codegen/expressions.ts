@@ -51,14 +51,6 @@ export const callExpression = (func: CodegenItem, inputs: CodegenItem[]): Codege
     },
 });
 
-export const doExpression = (block: CodegenItem): CodegenItem => ({
-    codegen: (codegen) => {
-        codegen.write("(");
-        codegen.write(block);
-        codegen.write(")");
-    },
-});
-
 export const markerExpression = (): CodegenItem => ({
     codegen: (codegen) => {
         codegen.write("null");
@@ -78,12 +70,12 @@ export const listExpression = (elements: CodegenItem[]): CodegenItem => ({
     },
 });
 
-export const variantExpression = (index: number, elements: CodegenItem[]): CodegenItem => ({
+export const variantExpression = (index: number, elements: Node[]): CodegenItem => ({
     codegen: (codegen) => {
         codegen.write(`runtime.variant(${index}, [`);
 
         elements.forEach((element) => {
-            codegen.write(element);
+            codegen.write(codegen.node(element));
             codegen.write(", ");
         });
 

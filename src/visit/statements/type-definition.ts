@@ -3,7 +3,11 @@ import { Fact, Node } from "../../db";
 import { TypeDefinitionStatement } from "../../syntax";
 import { TypeConstraint, types } from "../../typecheck";
 import { parseTypeAttributes } from "../attributes";
-import { ConstructorDefinition, TypeDefinition } from "../definitions";
+import {
+    MarkerConstructorDefinition,
+    VariantConstructorDefinition,
+    TypeDefinition,
+} from "../definitions";
 import { visitType } from "../types";
 import * as codegen from "../../codegen";
 
@@ -64,8 +68,8 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                                 ),
                             );
 
-                            const constructorDefinition: ConstructorDefinition = {
-                                type: "constructor",
+                            const constructorDefinition: MarkerConstructorDefinition = {
+                                type: "markerConstructor",
                                 node: markerNode,
                                 comments: statement.comments,
                             };
@@ -120,7 +124,6 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                                               [
                                                   ...elementInputs.map((input, index) =>
                                                       codegen.ifStatement(
-                                                          input,
                                                           [
                                                               codegen.assignCondition(
                                                                   elementVariables[index],
@@ -153,10 +156,11 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                                     ),
                                 );
 
-                                const constructorDefinition: ConstructorDefinition = {
-                                    type: "constructor",
+                                const constructorDefinition: VariantConstructorDefinition = {
+                                    type: "variantConstructor",
                                     node: variantNode,
                                     comments: statement.comments,
+                                    index,
                                 };
 
                                 visitor.defineName(variant.name.value, constructorDefinition);

@@ -14,5 +14,5 @@ export const visitDoExpression: Visit<DoExpression> = (visitor, expression, node
     visitor.db.add(node, new IsDoExpression(null));
     visitor.addConstraints(new TypeConstraint(input, types.block(node)));
 
-    node.setCodegen(codegen.doExpression(input));
+    node.setCodegen(codegen.callExpression(input, []));
 };

@@ -48,5 +48,5 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
     visitor.db.add(pattern, new AssignedTo(value));
     visitor.addConstraints(new TypeConstraint(value, pattern));
 
-    node.setCodegen(codegen.ifStatement(value, conditions, []));
+    node.setCodegen([codegen.temporaryStatement(value), codegen.ifStatement(conditions, [])]);
 };

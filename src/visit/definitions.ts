@@ -14,7 +14,8 @@ export type AnyDefinition =
     | TraitDefinition
     | InstanceDefinition
     | TypeParameterDefinition
-    | ConstructorDefinition;
+    | MarkerConstructorDefinition
+    | VariantConstructorDefinition;
 
 export interface VariableDefinition {
     type: "variable";
@@ -61,8 +62,15 @@ export interface TypeParameterDefinition {
     infer?: boolean;
 }
 
-export interface ConstructorDefinition {
-    type: "constructor";
+export interface MarkerConstructorDefinition {
+    type: "markerConstructor";
     node: Node;
     comments: Comments;
+}
+
+export interface VariantConstructorDefinition {
+    type: "variantConstructor";
+    node: Node;
+    comments: Comments;
+    index: number;
 }

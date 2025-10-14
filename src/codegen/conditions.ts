@@ -23,21 +23,21 @@ export const elementCondition = (matching: Node, parent: Node, index: number): C
     },
 });
 
-export const isVariantCondition = (matching: Node, variantIndex: number): CodegenItem => ({
+export const isVariantCondition = (value: Node, variantIndex: number): CodegenItem => ({
     codegen: (codegen) => {
-        codegen.write(`(${codegen.node(matching)}[runtime.variant] === ${variantIndex})`);
+        codegen.write(`(${codegen.node(value)}[runtime.variant] === ${variantIndex})`);
     },
 });
 
-export const isNumberCondition = (matching: Node, value: string): CodegenItem => ({
+export const isNumberCondition = (value: Node, number: string): CodegenItem => ({
     codegen: (codegen) => {
-        codegen.write(`${codegen.node(matching)} === ${value}`);
+        codegen.write(`${codegen.node(value)} === ${number}`);
     },
 });
 
-export const isStringCondition = (matching: Node, value: string): CodegenItem => ({
+export const isStringCondition = (value: Node, string: string): CodegenItem => ({
     codegen: (codegen) => {
-        codegen.write(`${codegen.node(matching)} === ${JSON.stringify(value)}`);
+        codegen.write(`${codegen.node(value)} === ${JSON.stringify(string)}`);
     },
 });
 
