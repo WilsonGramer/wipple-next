@@ -1,12 +1,6 @@
 import { CodegenItem } from ".";
 import { Node } from "../db";
 
-export const emptyCondition = (): CodegenItem => ({
-    codegen: (codegen) => {
-        codegen.write("true");
-    },
-});
-
 export const assignCondition = (matching: Node, value: Node): CodegenItem => ({
     codegen: (codegen) => {
         codegen.write(`((${codegen.node(matching)} = `);

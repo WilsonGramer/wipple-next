@@ -31,4 +31,6 @@ export const visitSetPattern: Visit<SetPattern> = (visitor, pattern, node) => {
     } else {
         visitor.db.add(node, new IsUnresolvedSetPattern(null));
     }
+
+    visitor.currentMatch.conditions.push(codegen.assignCondition(node, visitor.currentMatch.value));
 };
