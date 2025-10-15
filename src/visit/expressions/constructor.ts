@@ -1,14 +1,17 @@
 import { Visit } from "../visitor";
 import { Fact, Node } from "../../db";
-import { TraitExpression } from "../../syntax";
+import { ConstructorExpression } from "../../syntax";
 import { BoundConstraint, Constraint, InstantiateConstraint } from "../../typecheck";
 import * as codegen from "../../codegen";
 
-export class ResolvedTrait extends Fact<Node> {}
 export class ResolvedConstructor extends Fact<Node> {}
-export class IsUnresolvedTrait extends Fact<null> {}
+export class IsUnresolvedConstructor extends Fact<null> {}
 
-export const visitTraitExpression: Visit<TraitExpression> = (visitor, expression, node) => {
+export const visitConstructorExpression: Visit<ConstructorExpression> = (
+    visitor,
+    expression,
+    node,
+) => {
     const constraints = visitor.resolveName<Constraint[]>(
         expression.trait.value,
         node,
@@ -33,7 +36,7 @@ export const visitTraitExpression: Visit<TraitExpression> = (visitor, expression
                                 substitutions,
                             }),
                         ],
-                        ResolvedTrait,
+                        ResolvedConstructor,
                     ];
                 }
                 case "markerConstructor":
@@ -61,6 +64,6 @@ export const visitTraitExpression: Visit<TraitExpression> = (visitor, expression
     if (constraints != null) {
         visitor.addConstraints(...constraints);
     } else {
-        visitor.db.add(node, new IsUnresolvedTrait(null));
+        visitor.db.add(node, new IsUnresolvedConstructor(null));
     }
 };

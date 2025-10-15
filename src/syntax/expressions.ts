@@ -19,7 +19,7 @@ export type Expression =
     | IntrinsicExpression
     | PlaceholderExpression
     | VariableExpression
-    | TraitExpression
+    | ConstructorExpression
     | NumberExpression
     | StringExpression
     | StructureExpression
@@ -37,8 +37,8 @@ export interface VariableExpression {
     variable: Token;
 }
 
-export interface TraitExpression {
-    type: "trait";
+export interface ConstructorExpression {
+    type: "constructor";
     location: LocationRange;
     trait: Token;
 }

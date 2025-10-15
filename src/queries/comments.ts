@@ -6,7 +6,7 @@ import { IsTyped } from "../visit";
 import { IsErrorInstance, ResolvedInstance } from "../visit/statements/instance-definition";
 import { HasTypeParameter } from "../visit/types/parameter";
 import { ResolvedConstant, ResolvedVariable } from "../visit/expressions/variable";
-import { ResolvedTrait } from "../visit/expressions/trait";
+import { ResolvedConstructor } from "../visit/expressions/constructor";
 import { ResolvedNamedType } from "../visit/types/named";
 import { Definition } from "../visit/visitor";
 import { render, Renderable } from "../feedback/render";
@@ -25,7 +25,7 @@ export const comments = query(function* (db) {
     for (const [node, definitionNode] of [
         ...db.list(ResolvedVariable),
         ...db.list(ResolvedNamedType),
-        ...db.list(ResolvedTrait),
+        ...db.list(ResolvedConstructor),
         ...db.list(ResolvedConstant),
         ...db.list(ResolvedInstance),
     ]) {

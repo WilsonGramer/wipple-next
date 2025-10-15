@@ -82,7 +82,7 @@ String literals.
 
 Create a structure value.
 
-### Trait expressions
+### Constructor expressions
 
 Retrieve an instance of a trait.
 

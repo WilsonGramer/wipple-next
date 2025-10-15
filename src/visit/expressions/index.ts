@@ -12,7 +12,7 @@ import { visitVariableExpression } from "./variable";
 import { visitCallExpression } from "./call";
 import { visitFunctionExpression } from "./function";
 import { visitDoExpression } from "./do";
-import { visitTraitExpression } from "./trait";
+import { visitConstructorExpression } from "./constructor";
 import { visitAsExpression } from "./as";
 import { visitWhenExpression } from "./when";
 import { visitIsExpression } from "./is";
@@ -57,8 +57,8 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
             return visitPlaceholderExpression(visitor, expression, node);
         case "variable":
             return visitVariableExpression(visitor, expression, node);
-        case "trait":
-            return visitTraitExpression(visitor, expression, node);
+        case "constructor":
+            return visitConstructorExpression(visitor, expression, node);
         case "string":
             return visitStringExpression(visitor, expression, node);
         case "structure":

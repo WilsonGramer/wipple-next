@@ -204,7 +204,7 @@ expression_element "expression"
 atomic_expression "expression"
     = placeholder_expression
     / variable_expression
-    / trait_expression
+    / constructor_expression
     / number_expression
     / string_expression
     / block_expression
@@ -218,7 +218,8 @@ placeholder_expression = "_" { return { type: "placeholder", location: location(
 variable_expression
     = variable:variable_name { return { type: "variable", location: location(), variable }; }
 
-trait_expression = trait:type_name { return { type: "trait", location: location(), trait }; }
+constructor_expression
+    = trait:type_name { return { type: "constructor", location: location(), trait }; }
 
 number_expression = value:number { return { type: "number", location: location(), value }; }
 
