@@ -17,6 +17,8 @@ import { visitAsExpression } from "./as";
 import { visitWhenExpression } from "./when";
 import { visitIsExpression } from "./is";
 import { visitIntrinsicExpression } from "./intrinsic";
+import { visitTupleExpression } from "./tuple";
+import { visitCollectionExpression } from "./collection";
 
 export class IsExpression extends Fact<null> {}
 
@@ -30,9 +32,9 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
         case "function":
             return visitFunctionExpression(visitor, expression, node);
         case "tuple":
-            throw new Error("TODO");
+            return visitTupleExpression(visitor, expression, node);
         case "collection":
-            throw new Error("TODO");
+            return visitCollectionExpression(visitor, expression, node);
         case "is":
             return visitIsExpression(visitor, expression, node);
         case "as":

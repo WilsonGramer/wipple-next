@@ -101,7 +101,7 @@ show (add 1 2)
 | [Annotate expressions](docs/Language.md#annotate-expressions)                 | ☑️      | ☑️       | ☑️      |
 | [Block expressions](docs/Language.md#block-expressions)                       | ☑️      | ☑️       | ☑️      |
 | [Call expressions](docs/Language.md#call-expressions)                         | ☑️      | ☑️       | ☑️      |
-| [Collection expressions](docs/Language.md#collection-expressions)             | ☑️      |          |         |
+| [Collection expressions](docs/Language.md#collection-expressions)             | ☑️      | ☑️       | ☑️      |
 | [Formatted string expressions](docs/Language.md#formatted-string-expressions) | ☑️      |          |         |
 | [Function expressions](docs/Language.md#function-expressions)                 | ☑️      | ☑️       | ☑️      |
 | [Number expressions](docs/Language.md#number-expressions)                     | ☑️      | ☑️       | ☑️      |
@@ -109,7 +109,7 @@ show (add 1 2)
 | [String expressions](docs/Language.md#string-expressions)                     | ☑️      | ☑️       | ☑️      |
 | [Structure expressions](docs/Language.md#structure-expressions)               | ☑️      |          |         |
 | [Trait expressions](docs/Language.md#trait-expressions)                       | ☑️      | ☑️       | ☑️      |
-| [Tuple expressions](docs/Language.md#tuple-expressions)                       | ☑️      |          |         |
+| [Tuple expressions](docs/Language.md#tuple-expressions)                       | ☑️      | ☑️       | ☑️      |
 | [Unit expressions](docs/Language.md#unit-expressions)                         | ☑️      | ☑️       | ☑️      |
 | [Variable expressions](docs/Language.md#variable-expressions)                 | ☑️      | ☑️       | ☑️      |
 | [`or` patterns](docs/Language.md#or-patterns)                                 | ☑️      | ☑️       | ☑️      |
@@ -118,7 +118,7 @@ show (add 1 2)
 | [Destructure patterns](docs/Language.md#destructure-patterns)                 | ☑️      |          |         |
 | [Number patterns](docs/Language.md#number-patterns)                           | ☑️      | ☑️       | ☑️      |
 | [String patterns](docs/Language.md#string-patterns)                           | ☑️      | ☑️       | ☑️      |
-| [Tuple patterns](docs/Language.md#tuple-patterns)                             | ☑️      |          |         |
+| [Tuple patterns](docs/Language.md#tuple-patterns)                             | ☑️      | ☑️       | ☑️      |
 | [Unit patterns](docs/Language.md#unit-patterns)                               | ☑️      | ☑️       | ☑️      |
 | [Variable patterns](docs/Language.md#variable-patterns)                       | ☑️      | ☑️       | ☑️      |
 | [Variant patterns](docs/Language.md#variant-patterns)                         | ☑️      | ☑️       | ☑️      |

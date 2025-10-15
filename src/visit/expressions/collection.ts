@@ -1,0 +1,89 @@
+import { Visit } from "../visitor";
+import { Fact, Node } from "../../db";
+import { CollectionExpression } from "../../syntax";
+import { visitExpression } from ".";
+import * as codegen from "../../codegen";
+import { BoundConstraint, InstantiateConstraint } from "../../typecheck";
+
+export class ResolvedBuildCollectionInCollectionExpression extends Fact<Node> {}
+export class ResolvedInitialCollectionInCollectionExpression extends Fact<Node> {}
+export class IsUnresolvedCollectionExpression extends Fact<null> {}
+export class ElementInCollectionExpression extends Fact<Node> {}
+
+export const visitCollectionExpression: Visit<CollectionExpression> = (
+    visitor,
+    expression,
+    node,
+) => {
+    const elements = expression.elements.map((element) =>
+        visitor.visit(element, ElementInCollectionExpression, visitExpression),
+    );
+
+    const buildCollectionNode = visitor.resolveName("Build-Collection", node, (definition) => {
+        if (definition.type !== "trait") {
+            return undefined;
+        }
+
+        const buildCollectionNode = visitor.node(expression);
+
+        const substitutions = new Map<Node, Node>();
+
+        buildCollectionNode.setCodegen(codegen.traitExpression(definition.node, substitutions));
+
+        visitor.addConstraints(
+            new InstantiateConstraint({
+                source: buildCollectionNode,
+                definition: definition.node,
+                substitutions,
+                replacements: new Map([[definition.node, buildCollectionNode]]),
+            }),
+            new BoundConstraint(buildCollectionNode, {
+                source: buildCollectionNode,
+                trait: definition.node,
+                substitutions,
+            }),
+        );
+
+        return [buildCollectionNode, ResolvedBuildCollectionInCollectionExpression];
+    });
+
+    const initialCollectionNode = visitor.resolveName("Initial-Collection", node, (definition) => {
+        if (definition.type !== "trait") {
+            return undefined;
+        }
+
+        const initialCollectionNode = visitor.node(expression);
+
+        const substitutions = new Map<Node, Node>();
+
+        initialCollectionNode.setCodegen(codegen.traitExpression(definition.node, substitutions));
+
+        visitor.addConstraints(
+            new InstantiateConstraint({
+                source: initialCollectionNode,
+                definition: definition.node,
+                substitutions,
+                replacements: new Map([[definition.node, initialCollectionNode]]),
+            }),
+            new BoundConstraint(initialCollectionNode, {
+                source: initialCollectionNode,
+                trait: definition.node,
+                substitutions,
+            }),
+        );
+
+        return [initialCollectionNode, ResolvedBuildCollectionInCollectionExpression];
+    });
+
+    if (buildCollectionNode == null || initialCollectionNode == null) {
+        visitor.db.add(node, new IsUnresolvedCollectionExpression(null));
+        return;
+    }
+
+    node.setCodegen(
+        elements.reduce<codegen.CodegenItem>(
+            (result, element) => codegen.callExpression(buildCollectionNode, [element, result]),
+            initialCollectionNode,
+        ),
+    );
+};
