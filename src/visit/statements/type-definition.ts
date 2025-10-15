@@ -7,6 +7,7 @@ import {
     MarkerConstructorDefinition,
     VariantConstructorDefinition,
     TypeDefinition,
+    StructureConstructorDefinition,
 } from "../definitions";
 import { visitType } from "../types";
 import * as codegen from "../../codegen";
@@ -78,14 +79,49 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                         break;
                     }
                     case "structure": {
+                        const fields = new Map<string, Node>();
                         for (const field of statement.representation.fields) {
-                            visitor.visit(field.type, FieldInTypeDefinition, visitType);
+                            const type = visitor.visit(
+                                field.type,
+                                FieldInTypeDefinition,
+                                visitType,
+                            );
+
+                            fields.set(field.name.value, type);
+
+                            // TODO: Handle duplicate fields
                         }
 
                         visitor.popScope();
 
-                        // Structures are created via structure expressions instead of a
-                        // constructor function
+                        const structureNode = visitor.node(statement.name);
+
+                        visitor.withDefinition(structureNode, () => {
+                            visitor.addConstraints(
+                                new TypeConstraint(
+                                    structureNode,
+                                    types.named(definitionNode, parameters),
+                                ),
+                            );
+
+                            visitor.addConstraints(
+                                new TypeConstraint(
+                                    definition.node,
+                                    types.named(definitionNode, parameters),
+                                ),
+                            );
+
+                            const constructorDefinition: StructureConstructorDefinition = {
+                                type: "structureConstructor",
+                                node: definition.node,
+                                comments: statement.comments,
+                                fields,
+                            };
+
+                            visitor.defineName(statement.name.value, constructorDefinition);
+
+                            return constructorDefinition;
+                        });
 
                         break;
                     }

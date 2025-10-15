@@ -15,6 +15,7 @@ export type AnyDefinition =
     | InstanceDefinition
     | TypeParameterDefinition
     | MarkerConstructorDefinition
+    | StructureConstructorDefinition
     | VariantConstructorDefinition;
 
 export interface VariableDefinition {
@@ -66,6 +67,13 @@ export interface MarkerConstructorDefinition {
     type: "markerConstructor";
     node: Node;
     comments: Comments;
+}
+
+export interface StructureConstructorDefinition {
+    type: "structureConstructor";
+    node: Node;
+    comments: Comments;
+    fields: Map<string, Node>;
 }
 
 export interface VariantConstructorDefinition {

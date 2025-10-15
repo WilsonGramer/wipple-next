@@ -57,16 +57,17 @@ export const markerExpression = (): CodegenItem => ({
     },
 });
 
-export const listExpression = (elements: CodegenItem[]): CodegenItem => ({
+export const structureExpression = (fields: Map<string, CodegenItem>): CodegenItem => ({
     codegen: (codegen) => {
-        codegen.write("[");
+        codegen.write("{");
 
-        elements.forEach((element) => {
-            codegen.write(element);
+        for (const [key, value] of fields) {
+            codegen.write(`${JSON.stringify(key)}: `);
+            codegen.write(value);
             codegen.write(", ");
-        });
+        }
 
-        codegen.write("]");
+        codegen.write("}");
     },
 });
 

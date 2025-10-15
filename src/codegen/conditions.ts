@@ -9,11 +9,19 @@ export const assignCondition = (matching: Node, value: Node): CodegenItem => ({
     },
 });
 
+export const fieldCondition = (matching: Node, parent: Node, field: string): CodegenItem => ({
+    codegen: (codegen) => {
+        codegen.write(`((${codegen.node(matching)} = `);
+        codegen.write(codegen.node(parent));
+        codegen.write(`[${JSON.stringify(field)}]) || true)`);
+    },
+});
+
 export const elementCondition = (matching: Node, parent: Node, index: number): CodegenItem => ({
     codegen: (codegen) => {
         codegen.write(`((${codegen.node(matching)} = `);
         codegen.write(codegen.node(parent));
-        codegen.write(`[${index}]) || true)`); // ensure assignments never fail in case `parent` is falsy
+        codegen.write(`[${index}]) || true)`);
     },
 });
 

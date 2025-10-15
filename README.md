@@ -107,7 +107,7 @@ show (add 1 2)
 | [Number expressions](docs/Language.md#number-expressions)           | ☑️      | ☑️       | ☑️      |
 | [Placeholder expressions](docs/Language.md#placeholder-expressions) | ☑️      | ☑️       | ☑️      |
 | [String expressions](docs/Language.md#string-expressions)           | ☑️      | ☑️       | ☑️      |
-| [Structure expressions](docs/Language.md#structure-expressions)     | ☑️      |          |         |
+| [Structure expressions](docs/Language.md#structure-expressions)     | ☑️      | ☑️       | ☑️      |
 | [Constructor expressions](docs/Language.md#constructor-expressions) | ☑️      | ☑️       | ☑️      |
 | [Tuple expressions](docs/Language.md#tuple-expressions)             | ☑️      | ☑️       | ☑️      |
 | [Unit expressions](docs/Language.md#unit-expressions)               | ☑️      | ☑️       | ☑️      |
