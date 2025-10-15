@@ -95,8 +95,8 @@ show (add 1 2)
 | ----------------------------------------------------------------------------- | ------- | -------- | ------- |
 | [`as` expressions](docs/Language.md#as-expressions)                           | ☑️      | ☑️       | ☑️      |
 | [`do` expressions](docs/Language.md#do-expressions)                           | ☑️      | ☑️       | ☑️      |
-| [`intrinsic` expressions](docs/Language.md#intrinsic-expressions)             | ☑️      |          |         |
-| [`is` expressions](docs/Language.md#is-expressions)                           | ☑️      |          |         |
+| [`intrinsic` expressions](docs/Language.md#intrinsic-expressions)             | ☑️      | ☑️       | ☑️      |
+| [`is` expressions](docs/Language.md#is-expressions)                           | ☑️      | ☑️       | ☑️      |
 | [`when` expressions](docs/Language.md#when-expressions)                       | ☑️      | ☑️       | ☑️      |
 | [Annotate expressions](docs/Language.md#annotate-expressions)                 | ☑️      | ☑️       | ☑️      |
 | [Block expressions](docs/Language.md#block-expressions)                       | ☑️      | ☑️       | ☑️      |

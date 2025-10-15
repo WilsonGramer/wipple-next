@@ -16,6 +16,7 @@ import { visitTraitExpression } from "./trait";
 import { visitAsExpression } from "./as";
 import { visitWhenExpression } from "./when";
 import { visitIsExpression } from "./is";
+import { visitIntrinsicExpression } from "./intrinsic";
 
 export class IsExpression extends Fact<null> {}
 
@@ -49,7 +50,7 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
         case "when":
             return visitWhenExpression(visitor, expression, node);
         case "intrinsic":
-            throw new Error("TODO");
+            return visitIntrinsicExpression(visitor, expression, node);
         case "placeholder":
             return visitPlaceholderExpression(visitor, expression, node);
         case "variable":
