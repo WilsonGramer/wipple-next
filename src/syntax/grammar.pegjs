@@ -193,7 +193,7 @@ expression "expression"
     / binary_expression
 
 expression_element "expression"
-    = formatted_string_expression
+    = format_expression
     / structure_expression
     / call_expression
     / do_expression
@@ -244,9 +244,9 @@ block_expression
 
 unit_expression = "(" _ ")" { return { type: "unit", location: location() }; }
 
-formatted_string_expression
+format_expression
     = string:string inputs:(__ @atomic_expression)+ {
-            return { type: "formattedString", location: location(), string, inputs };
+            return { type: "format", location: location(), string, inputs };
         }
 
 call_expression

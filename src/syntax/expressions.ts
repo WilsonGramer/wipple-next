@@ -12,7 +12,7 @@ export type Expression =
     | AsExpression
     | AnnotateExpression
     | BinaryExpression
-    | FormattedStringExpression
+    | FormatExpression
     | CallExpression
     | DoExpression
     | WhenExpression
@@ -79,8 +79,8 @@ export interface UnitExpression {
     location: LocationRange;
 }
 
-export interface FormattedStringExpression {
-    type: "formattedString";
+export interface FormatExpression {
+    type: "format";
     location: LocationRange;
     string: Token;
     inputs: Expression[];

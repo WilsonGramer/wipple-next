@@ -43,7 +43,7 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
             return visitAnnotateExpression(visitor, expression, node);
         case "binary":
             throw new Error("TODO");
-        case "formattedString":
+        case "format":
             throw new Error("TODO");
         case "call":
             return visitCallExpression(visitor, expression, node);

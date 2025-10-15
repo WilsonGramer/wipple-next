@@ -54,7 +54,7 @@ Create a list, set, etc. using `,`.
 
 - `,` desugars to a call to `Build-Collection` for each element, aka. `a, b, c` becomes `Build-Collection c (Build-Collection b (Build-Collection a Initial-Collection))`. Requires the `Build-Collection` and `Initial-Collection` traits to be in scope.
 
-### Formatted string expressions
+### Format expressions
 
 String interpolation.
 

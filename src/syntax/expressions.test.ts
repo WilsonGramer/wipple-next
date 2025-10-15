@@ -22,9 +22,9 @@ test("string expression", () => {
     });
 });
 
-test("formatted string expression", () => {
+test("format expression", () => {
     testParse("expression", `"Hello, _!" name`, {
-        type: "formattedString",
+        type: "format",
         string: { value: "Hello, _!" },
         inputs: [
             {
