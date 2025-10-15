@@ -112,7 +112,7 @@ show (add 1 2)
 | [Tuple expressions](docs/Language.md#tuple-expressions)                       | ☑️      |          |         |
 | [Unit expressions](docs/Language.md#unit-expressions)                         | ☑️      | ☑️       | ☑️      |
 | [Variable expressions](docs/Language.md#variable-expressions)                 | ☑️      | ☑️       | ☑️      |
-| [`or` patterns](docs/Language.md#or-patterns)                                 | ☑️      |          |         |
+| [`or` patterns](docs/Language.md#or-patterns)                                 | ☑️      | ☑️       | ☑️      |
 | [`set` patterns](docs/Language.md#set-patterns)                               | ☑️      | ☑️       | ☑️      |
 | [Annotate patterns](docs/Language.md#annotate-patterns)                       | ☑️      | ☑️       | ☑️      |
 | [Destructure patterns](docs/Language.md#destructure-patterns)                 | ☑️      |          |         |
@@ -130,10 +130,10 @@ show (add 1 2)
 | [Placeholder types](docs/Language.md#placeholder-types)                       | ☑️      | ☑️       | ☑️      |
 | [Tuple types](docs/Language.md#tuple-types)                                   | ☑️      | ☑️       | ☑️      |
 | [Unit types](docs/Language.md#unit-types)                                     | ☑️      | ☑️       | ☑️      |
-| [Bound constraints](docs/Language.md#bound-constraints)                       | ☑️      | ☑️       |         |
-| [Default constraints](docs/Language.md#default-constraints)                   | ☑️      | ☑️       |         |
-| [Constant definitions](docs/Language.md#constant-definitions)                 | ☑️      | ☑️       |         |
-| [Instance definitions](docs/Language.md#instance-definitions)                 | ☑️      | ☑️       |         |
+| [Bound constraints](docs/Language.md#bound-constraints)                       | ☑️      | ☑️       | ☑️      |
+| [Default constraints](docs/Language.md#default-constraints)                   | ☑️      | ☑️       | ☑️      |
+| [Constant definitions](docs/Language.md#constant-definitions)                 | ☑️      | ☑️       | ☑️      |
+| [Instance definitions](docs/Language.md#instance-definitions)                 | ☑️      | ☑️       | ☑️      |
 | [Trait definitions](docs/Language.md#trait-definitions)                       | ☑️      | ☑️       | ☑️      |
 | [Type definitions](docs/Language.md#type-definitions)                         | ☑️      | ☑️       | ☑️      |
 | [Assignment statements](docs/Language.md#assignment-statements)               | ☑️      | ☑️       | ☑️      |
