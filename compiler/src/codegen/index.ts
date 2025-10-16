@@ -88,9 +88,9 @@ export class Codegen {
                 this.write(`/**! ${node.span.toString()} */ `);
             }
 
-            this.write(`async function ${this.node(node)}(types) {\n`);
+            this.write(`async function ${this.node(node)}(types) {\nreturn `);
             this.write(body);
-            this.write(`}\n`);
+            this.write(`;\n}\n`);
         }
     }
 
@@ -130,6 +130,8 @@ export class Codegen {
         }
 
         this.writeDefinitions();
+
+        this.write("const types = {};\n");
 
         for (const [variable, _] of this.db.list(IsTopLevelVariableDefinition)) {
             this.write(`let ${this.node(variable)};\n`);

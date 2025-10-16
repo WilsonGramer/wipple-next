@@ -11,6 +11,7 @@ import {
     subcommands,
     option,
     optional,
+    oneOf,
 } from "cmd-ts";
 import { readFileSync, writeFileSync } from "node:fs";
 import { compile } from "./compile";
@@ -32,8 +33,13 @@ const cmd = subcommands({
             name: "compile",
             args: {
                 path: positional({ type: string }),
-                facts: flag({ long: "facts", short: "f", type: boolean }),
+                facts: flag({ long: "facts", type: boolean }),
                 output: option({ long: "output", short: "o", type: optional(string) }),
+                format: option({
+                    long: "format",
+                    short: "f",
+                    type: optional(oneOf(["module", "iife"] as const)),
+                }),
                 filterLines: multioption({ long: "filter-lines", short: "l", type: array(number) }),
                 debugCodegen: flag({ long: "debug-codegen", type: boolean }),
             },
@@ -107,7 +113,7 @@ const cmd = subcommands({
                     let script: string | undefined;
                     try {
                         const codegen = new Codegen(db, {
-                            format: { type: "module" },
+                            format: { type: args.format ?? "module", arg: "runtime" },
                             debug: args.debugCodegen,
                         });
 

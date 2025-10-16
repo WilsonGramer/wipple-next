@@ -147,7 +147,11 @@ export const functionExpression = (
             codegen.write(`let ${codegen.node(variable)};\n`);
         });
 
-        body.forEach((statement) => {
+        body.forEach((statement, index) => {
+            if (index === body.length - 1) {
+                codegen.write("return ");
+            }
+
             codegen.write(statement);
         });
 
