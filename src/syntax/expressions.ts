@@ -11,7 +11,7 @@ export type Expression =
     | IsExpression
     | AsExpression
     | AnnotateExpression
-    | BinaryExpression
+    | OperatorExpression
     | FormatExpression
     | CallExpression
     | DoExpression
@@ -119,28 +119,26 @@ export interface IntrinsicExpression {
     inputs: Expression[];
 }
 
-export type BinaryExpression =
-    | BinaryExpressionInner<"to">
-    | BinaryExpressionInner<"by">
-    | BinaryExpressionInner<"^">
-    | BinaryExpressionInner<"*">
-    | BinaryExpressionInner<"/">
-    | BinaryExpressionInner<"%">
-    | BinaryExpressionInner<"+">
-    | BinaryExpressionInner<"-">
-    | BinaryExpressionInner<"<">
-    | BinaryExpressionInner<"<=">
-    | BinaryExpressionInner<">">
-    | BinaryExpressionInner<">=">
-    | BinaryExpressionInner<"=">
-    | BinaryExpressionInner<"/=">
-    | BinaryExpressionInner<"and">
-    | BinaryExpressionInner<"or">
-    | BinaryExpressionInner<".">;
-
-export interface BinaryExpressionInner<O extends string> {
-    type: "binary";
-    operator: O;
+export interface OperatorExpression {
+    type: "operator";
+    operator:
+        | "to"
+        | "by"
+        | "^"
+        | "*"
+        | "/"
+        | "%"
+        | "+"
+        | "-"
+        | "<"
+        | "<="
+        | ">"
+        | ">="
+        | "="
+        | "/="
+        | "and"
+        | "or"
+        | ".";
     location: LocationRange;
     left: Expression;
     right: Expression;

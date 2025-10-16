@@ -156,7 +156,7 @@ test("annotate expression", () => {
 
 test("simple apply expression", () => {
     testParse("expression", "x . f", {
-        type: "binary",
+        type: "operator",
         operator: ".",
         left: { type: "variable", variable: { value: "x" } },
         right: { type: "variable", variable: { value: "f" } },
@@ -165,7 +165,7 @@ test("simple apply expression", () => {
 
 test("complex apply expression", () => {
     testParse("expression", "a b . c d", {
-        type: "binary",
+        type: "operator",
         operator: ".",
         left: {
             type: "call",
@@ -190,7 +190,7 @@ test("as expression", () => {
 
 test("add expression", () => {
     testParse("expression", "a + b", {
-        type: "binary",
+        type: "operator",
         operator: "+",
         left: { type: "variable", variable: { value: "a" } },
         right: { type: "variable", variable: { value: "b" } },

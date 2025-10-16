@@ -21,6 +21,7 @@ import { visitTupleExpression } from "./tuple";
 import { visitCollectionExpression } from "./collection";
 import { visitStructureExpression } from "./structure";
 import { visitFormatExpression } from "./format";
+import { visitOperatorExpression } from "./operator";
 
 export class IsExpression extends Fact<null> {}
 
@@ -43,8 +44,8 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
             return visitAsExpression(visitor, expression, node);
         case "annotate":
             return visitAnnotateExpression(visitor, expression, node);
-        case "binary":
-            throw new Error("TODO");
+        case "operator":
+            return visitOperatorExpression(visitor, expression, node);
         case "format":
             return visitFormatExpression(visitor, expression, node);
         case "call":

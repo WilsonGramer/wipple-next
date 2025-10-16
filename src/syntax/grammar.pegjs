@@ -1,10 +1,10 @@
 {{
-    const buildBinaryExpression = (first, rest, { associativity }) => {
+    const buildOperatorExpression = (first, rest, { associativity }) => {
         switch (associativity) {
             case "left": {
                 return rest.reduce(
                     (left, { operator, value: right }) => ({
-                        type: "binary",
+                        type: "operator",
                         location: { start: left.location.start, end: right.location.end },
                         operator,
                         left,
@@ -16,7 +16,7 @@
             case "right": {
                 return rest.reduceRight(
                     (right, { operator, value: left }) => ({
-                        type: "binary",
+                        type: "operator",
                         location: { start: left.location.start, end: right.location.end },
                         operator,
                         left,
@@ -190,7 +190,7 @@ expression "expression"
     / is_expression
     / as_expression
     / annotate_expression
-    / binary_expression
+    / operator_expression
 
 expression_element "expression"
     = format_expression
@@ -285,13 +285,13 @@ function_expression_inputs
 
 tuple_expression
     = "(" _ ";" _ ")" { return { type: "tuple", location: location(), elements: [] }; }
-    / first:expression_element rest:(_ ";" _ @expression_element)+ _ ";"? {
+    / first:expression_element rest:(_ ";" _ @expression_element)+ (_ ";")? {
             return { type: "tuple", location: location(), elements: [first, ...rest] };
         }
 
 collection_expression
     = "(" _ "," _ ")" { return { type: "collection", location: location(), elements: [] }; }
-    / first:expression_element rest:(_ "," _ @expression_element)+ _ ","? {
+    / first:expression_element rest:(_ "," _ @expression_element)+ (_ ",")? {
             return { type: "collection", location: location(), elements: [first, ...rest] };
         }
 
@@ -310,31 +310,31 @@ annotate_expression
             return { type: "annotate", location: location(), left, right };
         }
 
-binary_expression = apply_expression
+operator_expression = apply_expression
 
 apply_expression
     = first:or_expression
         rest:(_ operator:$"." _ value:or_expression { return { operator, value }; })* {
-            return buildBinaryExpression(first, rest, { associativity: "left" });
+            return buildOperatorExpression(first, rest, { associativity: "left" });
         }
 
 or_expression
     = first:and_expression
         rest:(_ operator:$"or" _ value:and_expression { return { operator, value }; })* {
-            return buildBinaryExpression(first, rest, { associativity: "left" });
+            return buildOperatorExpression(first, rest, { associativity: "left" });
         }
 
 and_expression
     = first:equal_expression
         rest:(_ operator:$"and" _ value:equal_expression { return { operator, value }; })* {
-            return buildBinaryExpression(first, rest, { associativity: "left" });
+            return buildOperatorExpression(first, rest, { associativity: "left" });
         }
 
 equal_expression
     = first:compare_expression
         rest:(
             _ operator:$("=" / "/=") _ value:compare_expression { return { operator, value }; }
-        )* { return buildBinaryExpression(first, rest, { associativity: "left" }); }
+        )* { return buildOperatorExpression(first, rest, { associativity: "left" }); }
 
 compare_expression
     = first:add_expression
@@ -342,36 +342,36 @@ compare_expression
             _ operator:$("<=" / "<" / ">=" / ">") _ value:add_expression {
                     return { operator, value };
                 }
-        )* { return buildBinaryExpression(first, rest, { associativity: "left" }); }
+        )* { return buildOperatorExpression(first, rest, { associativity: "left" }); }
 
 add_expression
     = first:multiply_expression
         rest:(
             _ operator:$("+" / "-") _ value:multiply_expression { return { operator, value }; }
-        )* { return buildBinaryExpression(first, rest, { associativity: "left" }); }
+        )* { return buildOperatorExpression(first, rest, { associativity: "left" }); }
 
 multiply_expression
     = first:power_expression
         rest:(
             _ operator:$("*" / "/" / "%") _ value:power_expression { return { operator, value }; }
-        )* { return buildBinaryExpression(first, rest, { associativity: "left" }); }
+        )* { return buildOperatorExpression(first, rest, { associativity: "left" }); }
 
 power_expression
     = first:by_expression
         rest:(_ operator:$"^" _ value:by_expression { return { operator, value }; })* {
-            return buildBinaryExpression(first, rest, { associativity: "right" });
+            return buildOperatorExpression(first, rest, { associativity: "right" });
         }
 
 by_expression
     = first:to_expression
         rest:(_ operator:$"by" _ value:to_expression { return { operator, value }; })* {
-            return buildBinaryExpression(first, rest, { associativity: "left" });
+            return buildOperatorExpression(first, rest, { associativity: "left" });
         }
 
 to_expression
     = first:expression_element
         rest:(_ operator:$"to" _ value:expression_element { return { operator, value }; })* {
-            return buildBinaryExpression(first, rest, { associativity: "left" });
+            return buildOperatorExpression(first, rest, { associativity: "left" });
         }
 
 // Patterns

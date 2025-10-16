@@ -3,7 +3,7 @@ import { Fact, Node } from "../../db";
 import { CollectionExpression } from "../../syntax";
 import { visitExpression } from ".";
 import * as codegen from "../../codegen";
-import { BoundConstraint, InstantiateConstraint } from "../../typecheck";
+import { BoundConstraint, InstantiateConstraint, TypeConstraint, types } from "../../typecheck";
 
 export class ResolvedBuildCollectionInCollectionExpression extends Fact<Node> {}
 export class ResolvedInitialCollectionInCollectionExpression extends Fact<Node> {}
@@ -79,6 +79,17 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
         visitor.db.add(node, new IsUnresolvedCollectionExpression(null));
         return;
     }
+
+    const resultNode = elements.reduce((collection, element) => {
+        const next = visitor.node(expression);
+        visitor.addConstraints(
+            new TypeConstraint(buildCollectionNode, types.function([element, collection], next)),
+        );
+
+        return next;
+    }, initialCollectionNode);
+
+    visitor.addConstraints(new TypeConstraint(node, resultNode));
 
     node.setCodegen(
         elements.reduce<codegen.CodegenItem>(
