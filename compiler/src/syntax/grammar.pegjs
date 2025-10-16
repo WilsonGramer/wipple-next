@@ -271,7 +271,7 @@ arm
         }
 
 intrinsic_expression
-    = "intrinsic" _ name:string inputs:(_ @atomic_expression)* {
+    = "intrinsic" __ name:string inputs:(__ @atomic_expression)* {
             return { type: "intrinsic", location: location(), name, inputs };
         }
 

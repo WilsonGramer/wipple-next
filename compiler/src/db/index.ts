@@ -118,6 +118,19 @@ export class Db {
             }
         }
     }
+
+    snapshot(): Db {
+        const db = new Db();
+        for (const [fact, nodes] of this.facts) {
+            for (const [node, values] of nodes) {
+                for (const value of values) {
+                    db.add(node, new (fact as any)(value));
+                }
+            }
+        }
+
+        return db;
+    }
 }
 
 export { Fact, Node, Span, Filter };

@@ -6,9 +6,13 @@ import {
     positional,
     run,
     string,
+    boolean,
+    flag,
     subcommands,
-} from "cmd-ts/dist/esm";
-import { readFileSync } from "node:fs";
+    option,
+    optional,
+} from "cmd-ts";
+import { readFileSync, writeFileSync } from "node:fs";
 import { compile } from "./compile";
 import { Db, Node } from "./db";
 import { collectFeedback } from "./feedback";
@@ -17,7 +21,6 @@ import wrapAnsi from "wrap-ansi";
 import { inspect } from "node:util";
 import { nodeFilter } from "./db/filter";
 import lsp from "./lsp";
-import { boolean, flag } from "cmd-ts";
 import { Codegen } from "./codegen";
 
 inspect.defaultOptions.depth = null;
@@ -29,7 +32,10 @@ const cmd = subcommands({
             name: "compile",
             args: {
                 path: positional({ type: string }),
+                facts: flag({ long: "facts", short: "f", type: boolean }),
+                output: option({ long: "output", short: "o", type: optional(string) }),
                 filterLines: multioption({ long: "filter-lines", short: "l", type: array(number) }),
+                debugCodegen: flag({ long: "debug-codegen", type: boolean }),
             },
             handler: (args) => {
                 const code = readFileSync(args.path, "utf8");
@@ -58,10 +64,12 @@ const cmd = subcommands({
                     }
                 }
 
-                console.log(`${chalk.bold.underline("Facts:")}\n`);
-                db.log(filter);
+                if (args.facts) {
+                    console.log(`${chalk.bold.underline("Facts:")}\n`);
+                    db.log(filter);
 
-                console.log(`\n${chalk.bold.underline("Feedback:")}\n`);
+                    console.log(`\n${chalk.bold.underline("Feedback:")}\n`);
+                }
 
                 const seenFeedback = new Map<Node, Set<string>>();
                 for (const feedback of collectFeedback(db)) {
@@ -95,21 +103,26 @@ const cmd = subcommands({
                     );
                 }
 
-                let script: string | undefined;
-                try {
-                    const codegen = new Codegen(db, {
-                        format: { type: "module" },
-                        debug: true,
-                    });
+                if (args.output != null) {
+                    let script: string | undefined;
+                    try {
+                        const codegen = new Codegen(db, {
+                            format: { type: "module" },
+                            debug: args.debugCodegen,
+                        });
 
-                    script = codegen.run();
-                } catch (e) {
-                    // Compile error
-                    console.error(e);
-                }
+                        script = codegen.run();
+                    } catch (e) {
+                        if (args.debugCodegen) {
+                            console.error(e);
+                        } else {
+                            console.error(chalk.bold("Compilation failed"));
+                        }
+                    }
 
-                if (script != null) {
-                    console.log(script);
+                    if (script != null) {
+                        writeFileSync(args.output, script);
+                    }
                 }
             },
         }),
