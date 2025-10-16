@@ -85,7 +85,7 @@ export class Codegen {
             }
 
             if (this.options.debug) {
-                this.write(`/**! ${JSON.stringify(node.span)} */ `);
+                this.write(`/**! ${node.span.toString()} */ `);
             }
 
             this.write(`async function ${this.node(node)}(types) {\n`);

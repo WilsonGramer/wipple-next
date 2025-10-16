@@ -1,4 +1,4 @@
-import { Visit } from "../visitor";
+import { Visit, Visitor } from "../visitor";
 import { Statement } from "../../syntax";
 import { visitExpressionStatement } from "./expression";
 import { visitAssignmentStatement } from "./assignment";
@@ -6,7 +6,7 @@ import { visitConstantDefinition } from "./constant-definition";
 import { visitTypeDefinition } from "./type-definition";
 import { visitTraitDefinition } from "./trait-definition";
 import { visitInstanceDefinition } from "./instance-definition";
-import { Fact } from "../../db";
+import { Fact, Node } from "../../db";
 
 export class IsStatement extends Fact<null> {}
 export class IsTopLevelExecutableStatement extends Fact<null> {}
@@ -23,8 +23,6 @@ export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
     }
 
     visitor.db.add(node, new IsStatement(null));
-
-    const isTopLevelStatement = visitor.scopes.length === 1;
 
     switch (statement.type) {
         case "constantDefinition": {
@@ -46,10 +44,6 @@ export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
         case "assignment": {
             node.isHidden = true;
 
-            if (isTopLevelStatement) {
-                visitor.db.add(node, new IsTopLevelExecutableStatement(null));
-            }
-
             visitor.enqueue("afterAllDefinitions", () => {
                 visitAssignmentStatement(visitor, statement, node);
             });
@@ -58,10 +52,6 @@ export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
         }
         case "expression": {
             node.isHidden = true;
-
-            if (isTopLevelStatement) {
-                visitor.db.add(node, new IsTopLevelExecutableStatement(null));
-            }
 
             visitor.enqueue("afterAllDefinitions", () => {
                 visitExpressionStatement(visitor, statement, node);
@@ -73,5 +63,13 @@ export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
             node.isHidden = true;
             break;
         }
+    }
+};
+
+export const trySetTopLevelExecutableStatement = (visitor: Visitor, node: Node) => {
+    const isTopLevelStatement = visitor.scopes.length === 1;
+
+    if (isTopLevelStatement) {
+        visitor.db.add(node, new IsTopLevelExecutableStatement(null));
     }
 };

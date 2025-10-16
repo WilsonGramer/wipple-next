@@ -50,7 +50,7 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
     solver.add(...constraints);
     solver.run();
 
-    const groups = solver.toGroups();
+    const groups = solver.finish();
 
     for (const group of groups) {
         for (const node of group.nodes) {

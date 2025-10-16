@@ -202,5 +202,7 @@ export class BoundConstraint extends Constraint {
                 solver.db.add(source, new HasUnresolvedBound(applyBound(resolvedBound, solver)));
             }
         }
+
+        solver.applyQueue.push(this.bound.substitutions);
     }
 }

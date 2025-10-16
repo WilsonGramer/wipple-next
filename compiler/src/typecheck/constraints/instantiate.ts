@@ -62,5 +62,6 @@ export class InstantiateConstraint extends Constraint {
         }
 
         solver.add(...instantiatedConstraints);
+        solver.applyQueue.push(substitutions);
     }
 }

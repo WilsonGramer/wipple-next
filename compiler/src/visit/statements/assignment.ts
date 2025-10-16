@@ -5,6 +5,7 @@ import { visitExpression } from "../expressions";
 import { TypeConstraint } from "../../typecheck";
 import { visitPattern } from "../patterns";
 import * as codegen from "../../codegen";
+import { trySetTopLevelExecutableStatement } from ".";
 
 export class PatternInAssignmentStatement extends Fact<Node> {}
 export class ValueInAssignmentStatement extends Fact<Node> {}
@@ -52,4 +53,6 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
         ...temporaries.map((temporary) => codegen.temporaryStatement(temporary, undefined)),
         codegen.ifStatement(conditions, []),
     ]);
+
+    trySetTopLevelExecutableStatement(visitor, node);
 };

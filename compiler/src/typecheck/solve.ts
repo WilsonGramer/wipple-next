@@ -9,6 +9,7 @@ export class Solver {
     private constraints = new Constraints();
     private unionFind = new UnionFind();
     private groups = ImmutableMap<Node, ImmutableList<Type>>();
+    applyQueue: Map<Node, Type>[] = [];
     error = false;
 
     constructor(db: Db) {
@@ -24,6 +25,7 @@ export class Solver {
     replaceWith(other: Solver) {
         this.unionFind = UnionFind.from(other.unionFind);
         this.groups = other.groups;
+        this.applyQueue = other.applyQueue;
     }
 
     add(...constraints: Constraint[]) {
@@ -146,7 +148,13 @@ export class Solver {
         }
     }
 
-    toGroups(): Group[] {
+    finish(): Group[] {
+        for (const substitutions of this.applyQueue) {
+            for (const [node, type] of substitutions) {
+                substitutions.set(node, this.apply(type));
+            }
+        }
+
         const groups: Group[] = [];
         for (const [representative, types] of this.groups) {
             const group: Group = {
