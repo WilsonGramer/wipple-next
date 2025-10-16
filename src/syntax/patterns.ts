@@ -8,9 +8,9 @@ export type Pattern =
     | VariablePattern
     | NumberPattern
     | StringPattern
-    | DestructurePattern
+    | StructurePattern
     | SetPattern
-    | VariantPattern
+    | ConstructorPattern
     | OrPattern
     | TuplePattern
     | AnnotatePattern;
@@ -38,13 +38,14 @@ export interface StringPattern {
     value: Token;
 }
 
-export interface DestructurePattern {
-    type: "destructure";
+export interface StructurePattern {
+    type: "structure";
     location: LocationRange;
-    fields: DestructurePatternField[];
+    name: Token;
+    fields: StructurePatternField[];
 }
 
-export interface DestructurePatternField {
+export interface StructurePatternField {
     location: LocationRange;
     name: Token;
     value: Pattern;
@@ -73,10 +74,10 @@ export interface SetPattern {
     variable: Token;
 }
 
-export interface VariantPattern {
-    type: "variant";
+export interface ConstructorPattern {
+    type: "constructor";
     location: LocationRange;
-    variant: Token;
+    constructor: Token;
     elements: Pattern[];
 }
 

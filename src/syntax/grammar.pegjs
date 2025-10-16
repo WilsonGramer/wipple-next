@@ -86,7 +86,7 @@ enumeration_type_representation
         }
 
 variant_definition
-    = name:variant_name elements:(__ @variant_definition_element)* {
+    = name:constructor_name elements:(__ @variant_definition_element)* {
             return { location: location(), name, elements };
         }
 
@@ -383,7 +383,8 @@ pattern "pattern"
     / pattern_element
 
 pattern_element "pattern"
-    = variant_pattern
+    = structure_pattern
+    / constructor_pattern
     / set_pattern
     / atomic_pattern
 
@@ -392,7 +393,6 @@ atomic_pattern "pattern"
     / variable_pattern
     / number_pattern
     / string_pattern
-    / destructure_pattern
     / unit_pattern
     / parenthesized_pattern
 
@@ -407,12 +407,12 @@ number_pattern = value:number { return { type: "number", location: location(), v
 
 string_pattern = value:string { return { type: "string", location: location(), value }; }
 
-destructure_pattern
-    = "{" _ fields:destructure_pattern_field* _ "}" {
-            return { type: "destructure", location: location(), fields };
+structure_pattern
+    = name:type_name __ "{" _ fields:structure_pattern_field* _ "}" {
+            return { type: "structure", location: location(), name, fields };
         }
 
-destructure_pattern_field
+structure_pattern_field
     = name:variable_name _ ":" _ value:pattern { return { location: location(), name, value }; }
 
 unit_pattern = "(" _ ")" { return { type: "unit", location: location() }; }
@@ -440,9 +440,9 @@ annotate_pattern
 set_pattern
     = "set" __ variable:variable_name { return { type: "set", location: location(), variable }; }
 
-variant_pattern
-    = variant:variant_name elements:(__ @element:atomic_pattern)* {
-            return { type: "variant", location: location(), variant, elements };
+constructor_pattern
+    = constructor:constructor_name elements:(__ @element:atomic_pattern)* {
+            return { type: "constructor", location: location(), constructor, elements };
         }
 
 // Types
@@ -561,7 +561,8 @@ lowercase_name = !(number / capital_name / keyword) [A-Za-z0-9_]+ ("-" [A-Za-z0-
 
 type_name "type name" = value:$capital_name { return { location: location(), value }; }
 
-variant_name "variant name" = value:$capital_name { return { location: location(), value }; }
+constructor_name "constructor name"
+    = value:$capital_name { return { location: location(), value }; }
 
 variable_name "variable name" = value:$lowercase_name { return { location: location(), value }; }
 

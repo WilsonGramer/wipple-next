@@ -23,8 +23,7 @@ export const visitStructureExpression: Visit<StructureExpression> = (visitor, ex
             switch (definition.type) {
                 case "structureConstructor": {
                     const replacements = new Map([[definition.node, node]]);
-
-                    for (const [name, type] of definition.fields.entries()) {
+                    for (const [name, type] of definition.fields) {
                         const value = fields.get(name);
 
                         if (value != null) {

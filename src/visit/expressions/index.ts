@@ -20,6 +20,7 @@ import { visitIntrinsicExpression } from "./intrinsic";
 import { visitTupleExpression } from "./tuple";
 import { visitCollectionExpression } from "./collection";
 import { visitStructureExpression } from "./structure";
+import { visitFormatExpression } from "./format";
 
 export class IsExpression extends Fact<null> {}
 
@@ -45,7 +46,7 @@ export const visitExpression = (visitor: Visitor, expression: Expression, node: 
         case "binary":
             throw new Error("TODO");
         case "format":
-            throw new Error("TODO");
+            return visitFormatExpression(visitor, expression, node);
         case "call":
             return visitCallExpression(visitor, expression, node);
         case "do":

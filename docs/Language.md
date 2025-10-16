@@ -112,7 +112,7 @@ Update the value of a variable.
 
 Annotate the type of a pattern.
 
-### Destructure patterns
+### Structure patterns
 
 Extract the fields in a structure value.
 
@@ -136,9 +136,9 @@ Match the empty tuple.
 
 Define a new variable.
 
-### Variant patterns
+### Constructor patterns
 
-Match one variant of an enumeration.
+Match a marker type or one variant of an enumeration.
 
 ### Wildcard patterns
 

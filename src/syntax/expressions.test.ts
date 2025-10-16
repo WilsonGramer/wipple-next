@@ -258,8 +258,8 @@ test("complex input function expression", () => {
         type: "function",
         inputs: [
             {
-                type: "variant",
-                variant: { value: "X" },
+                type: "constructor",
+                constructor: { value: "X" },
                 elements: [{ type: "variable", variable: { value: "y" } }],
             },
         ],
@@ -272,8 +272,8 @@ test("simple is expression", () => {
         type: "is",
         left: { type: "variable", variable: { value: "x" } },
         right: {
-            type: "variant",
-            variant: { value: "None" },
+            type: "constructor",
+            constructor: { value: "None" },
             elements: [],
         },
     });
@@ -284,8 +284,8 @@ test("complex is expression", () => {
         type: "is",
         left: { type: "variable", variable: { value: "x" } },
         right: {
-            type: "variant",
-            variant: { value: "Some" },
+            type: "constructor",
+            constructor: { value: "Some" },
             elements: [{ type: "number", value: { value: "3.14" } }],
         },
     });

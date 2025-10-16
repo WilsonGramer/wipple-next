@@ -9,9 +9,11 @@ import { visitNumberPattern } from "./number";
 import { visitStringExpression } from "../expressions/string";
 import { visitSetPattern } from "./set";
 import { visitUnitPattern } from "./unit";
-import { visitVariantPattern } from "./variant";
+import { visitConstructorPattern } from "./constructor";
 import { visitOrPattern } from "./or";
 import { TypeConstraint } from "../../typecheck";
+import { visitStructurePattern } from "./structure";
+import { visitTuplePattern } from "./tuple";
 
 export class IsPattern extends Fact<null> {}
 
@@ -32,16 +34,16 @@ export const visitPattern = (visitor: Visitor, pattern: Pattern, node: Node) => 
             return visitVariablePattern(visitor, pattern, node);
         case "string":
             return visitStringExpression(visitor, pattern, node);
-        case "destructure":
-            throw new Error("TODO");
+        case "structure":
+            return visitStructurePattern(visitor, pattern, node);
         case "set":
             return visitSetPattern(visitor, pattern, node);
-        case "variant":
-            return visitVariantPattern(visitor, pattern, node);
+        case "constructor":
+            return visitConstructorPattern(visitor, pattern, node);
         case "or":
             return visitOrPattern(visitor, pattern, node);
         case "tuple":
-            throw new Error("TODO");
+            return visitTuplePattern(visitor, pattern, node);
         case "annotate":
             return visitAnnotatePattern(visitor, pattern, node);
         default:

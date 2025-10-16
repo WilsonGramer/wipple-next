@@ -14,9 +14,10 @@ test("variable pattern", () => {
     });
 });
 
-test("destructure pattern", () => {
-    testParse("pattern", "{x : y}", {
-        type: "destructure",
+test("structure pattern", () => {
+    testParse("pattern", "Foo {x : y}", {
+        type: "structure",
+        name: { value: "Foo" },
         fields: [
             {
                 name: { value: "x" },
@@ -36,18 +37,18 @@ test("set pattern", () => {
     });
 });
 
-test("simple variant pattern", () => {
+test("simple constructor pattern", () => {
     testParse("pattern", "None", {
-        type: "variant",
-        variant: { value: "None" },
+        type: "constructor",
+        constructor: { value: "None" },
         elements: [],
     });
 });
 
-test("complex variant pattern", () => {
+test("complex constructor pattern", () => {
     testParse("pattern", "Some x y z", {
-        type: "variant",
-        variant: { value: "Some" },
+        type: "constructor",
+        constructor: { value: "Some" },
         elements: [
             { type: "variable", variable: { value: "x" } },
             { type: "variable", variable: { value: "y" } },

@@ -1,28 +1,25 @@
 import { Visit } from "../visitor";
 import { Fact, Node } from "../../db";
-import { VariantPattern } from "../../syntax";
+import { ConstructorPattern } from "../../syntax";
 import * as codegen from "../../codegen";
 import { visitPattern } from ".";
 import { MarkerConstructorDefinition, VariantConstructorDefinition } from "../definitions";
 import { InstantiateConstraint, TypeConstraint, types } from "../../typecheck";
 
-export class IsVariantPattern extends Fact<null> {}
-export class ResolvedMarker extends Fact<Node> {}
-export class ResolvedVariant extends Fact<Node> {}
-export class HasUnresolvedVariant extends Fact<null> {}
-export class ElementInVariantPattern extends Fact<Node> {}
+export class IsUnresolvedConstructorPattern extends Fact<null> {}
+export class ResolvedMarkerInConstructorPattern extends Fact<Node> {}
+export class ResolvedVariantInConstructorPattern extends Fact<Node> {}
+export class ElementInConstructorPattern extends Fact<Node> {}
 
-export const visitVariantPattern: Visit<VariantPattern> = (visitor, pattern, node) => {
-    visitor.db.add(node, new IsVariantPattern(null));
-
+export const visitConstructorPattern: Visit<ConstructorPattern> = (visitor, pattern, node) => {
     const definition = visitor.resolveName<
         MarkerConstructorDefinition | VariantConstructorDefinition
-    >(pattern.variant.value, node, (definition) => {
+    >(pattern.constructor.value, node, (definition) => {
         switch (definition.type) {
             case "markerConstructor":
-                return [definition, ResolvedMarker];
+                return [definition, ResolvedMarkerInConstructorPattern];
             case "variantConstructor":
-                return [definition, ResolvedVariant];
+                return [definition, ResolvedVariantInConstructorPattern];
             default:
                 return undefined;
         }
@@ -65,7 +62,7 @@ export const visitVariantPattern: Visit<VariantPattern> = (visitor, pattern, nod
 
                     const [element, { conditions, temporaries }] = visitor.withMatchValue(
                         temporary,
-                        () => visitor.visit(pattern, ElementInVariantPattern, visitPattern),
+                        () => visitor.visit(pattern, ElementInConstructorPattern, visitPattern),
                     );
 
                     visitor.currentMatch.conditions.push(...conditions);
@@ -84,6 +81,6 @@ export const visitVariantPattern: Visit<VariantPattern> = (visitor, pattern, nod
                 definition satisfies never;
         }
     } else {
-        visitor.db.add(node, new HasUnresolvedVariant(null));
+        visitor.db.add(node, new IsUnresolvedConstructorPattern(null));
     }
 };
