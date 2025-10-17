@@ -1,6 +1,5 @@
-import { LocationRange } from "peggy";
 import { Fact, Db, Node } from "./db";
-import parse from "./syntax";
+import parse, { SourceFile, SyntaxError, LocationRange } from "./syntax";
 import { visit } from "./visit";
 import { Group, Solver } from "./typecheck";
 import { displayType, Type } from "./typecheck/constraints/type";
@@ -10,7 +9,6 @@ import { HasConstraints, HasInstance } from "./visit/visitor";
 export interface CompileOptions {
     path: string;
     code: string;
-    // queries: ...
 }
 
 export type CompileResult =
@@ -31,18 +29,23 @@ export class InTypeGroup extends Fact<Group> {
 }
 
 export const compile = (db: Db, options: CompileOptions): CompileResult => {
-    const parsed = parse(options.path, options.code);
+    let parsed: SourceFile;
+    try {
+        parsed = parse(options.path, options.code);
+    } catch (e) {
+        if (!(e instanceof SyntaxError)) {
+            throw e;
+        }
 
-    if (!parsed.success) {
         return {
             success: false,
             type: "parse",
-            location: parsed.location,
-            message: parsed.message,
+            location: e.location,
+            message: e.message,
         };
     }
 
-    const info = visit(parsed.value, db);
+    const info = visit(parsed, db);
 
     const solver = new Solver(db);
 

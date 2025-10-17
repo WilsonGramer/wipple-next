@@ -1,5 +1,5 @@
 import { Fact } from "../db";
-import { Attributes, AttributeValue } from "../syntax";
+import { Attribute, AttributeValue } from "../syntax";
 import { Visitor } from "./visitor";
 
 export class IsAttribute extends Fact<null> {}
@@ -14,7 +14,7 @@ export interface ConstantAttributes {
 
 export const parseConstantAttributes = (
     visitor: Visitor,
-    attributes: Attributes,
+    attributes: Attribute[],
 ): ConstantAttributes => ({
     unit: parseNameAttribute(visitor, "unit", attributes),
 });
@@ -23,7 +23,7 @@ export interface TypeAttributes {
     intrinsic?: boolean;
 }
 
-export const parseTypeAttributes = (visitor: Visitor, attributes: Attributes): TypeAttributes => ({
+export const parseTypeAttributes = (visitor: Visitor, attributes: Attribute[]): TypeAttributes => ({
     intrinsic: parseNameAttribute(visitor, "intrinsic", attributes),
 });
 
@@ -31,8 +31,8 @@ export interface TraitAttributes {}
 
 export const parseTraitAttributes = (
     visitor: Visitor,
-    attributes: Attributes,
-): TypeAttributes => ({});
+    attributes: Attribute[],
+): TraitAttributes => ({});
 
 export interface InstanceAttributes {
     default?: boolean;
@@ -41,15 +41,15 @@ export interface InstanceAttributes {
 
 export const parseInstanceAttributes = (
     visitor: Visitor,
-    attributes: Attributes,
+    attributes: Attribute[],
 ): InstanceAttributes => ({
     default: parseNameAttribute(visitor, "default", attributes),
     error: parseNameAttribute(visitor, "error", attributes),
 });
 
-const parseNameAttribute = (visitor: Visitor, name: string, attributes: Attributes) => {
+const parseNameAttribute = (visitor: Visitor, name: string, attributes: Attribute[]) => {
     let found = false;
-    for (const attribute of attributes.attributes) {
+    for (const attribute of attributes) {
         if (attribute.name.value === name) {
             const node = visitor.node(attribute);
 
@@ -67,7 +67,7 @@ const parseNameAttribute = (visitor: Visitor, name: string, attributes: Attribut
     return found;
 };
 
-const parseStringValueAttribute = (visitor: Visitor, name: string, attributes: Attributes) =>
+const parseStringValueAttribute = (visitor: Visitor, name: string, attributes: Attribute[]) =>
     parseAssignmentAttribute(visitor, name, attributes, (value) => {
         switch (value.type) {
             case "string":
@@ -80,11 +80,11 @@ const parseStringValueAttribute = (visitor: Visitor, name: string, attributes: A
 const parseAssignmentAttribute = <T>(
     visitor: Visitor,
     name: string,
-    attributes: Attributes,
+    attributes: Attribute[],
     f: (value: AttributeValue) => T | undefined,
 ) => {
     let result: T | undefined = undefined;
-    for (const attribute of attributes.attributes) {
+    for (const attribute of attributes) {
         if (attribute.name.value === name) {
             const node = visitor.node(attribute);
 

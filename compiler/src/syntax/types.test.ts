@@ -1,28 +1,28 @@
-import test from "node:test";
-import { testParse } from ".";
+import { test } from "mocha";
+import { parseType, testParse } from ".";
 
-test("placeholder type", () => {
-    testParse("type", "_", {
+test("parsing placeholder type", () => {
+    testParse(parseType, "_", {
         type: "placeholder",
     });
 });
 
-test("unit type", () => {
-    testParse("type", "()", {
+test("parsing unit type", () => {
+    testParse(parseType, "()", {
         type: "unit",
     });
 });
 
-test("simple named type", () => {
-    testParse("type", "Number", {
+test("parsing simple named type", () => {
+    testParse(parseType, "Number", {
         type: "named",
         name: { value: "Number" },
         parameters: [],
     });
 });
 
-test("complex named type", () => {
-    testParse("type", "Maybe Number", {
+test("parsing complex named type", () => {
+    testParse(parseType, "Maybe Number", {
         type: "named",
         name: { value: "Maybe" },
         parameters: [
@@ -35,8 +35,8 @@ test("complex named type", () => {
     });
 });
 
-test("block type", () => {
-    testParse("type", "{Number}", {
+test("parsing block type", () => {
+    testParse(parseType, "{Number}", {
         type: "block",
         output: {
             type: "named",
@@ -46,8 +46,8 @@ test("block type", () => {
     });
 });
 
-test("single input function type", () => {
-    testParse("type", "Number -> ()", {
+test("parsing single input function type", () => {
+    testParse(parseType, "Number -> ()", {
         type: "function",
         inputs: [
             {
@@ -62,8 +62,8 @@ test("single input function type", () => {
     });
 });
 
-test("multi input function type", () => {
-    testParse("type", "Number Number -> ()", {
+test("parsing multi input function type", () => {
+    testParse(parseType, "Number Number -> ()", {
         type: "function",
         inputs: [
             {
@@ -83,8 +83,8 @@ test("multi input function type", () => {
     });
 });
 
-test("complex input function type", () => {
-    testParse("type", "(Maybe Number) Number -> ()", {
+test("parsing complex input function type", () => {
+    testParse(parseType, "(Maybe Number) Number -> ()", {
         type: "function",
         inputs: [
             {

@@ -1,5 +1,5 @@
 import { Node } from "../db";
-import { Comments } from "../syntax";
+import { Token } from "../syntax/parser";
 import {
     ConstantAttributes,
     InstanceAttributes,
@@ -26,7 +26,7 @@ export interface VariableDefinition {
 export interface ConstantDefinition {
     type: "constant";
     node: Node;
-    comments: Comments;
+    comments: Token[];
     attributes: ConstantAttributes;
     value: { assigned: true; node: Node } | { assigned: false; type: () => Node };
 }
@@ -34,7 +34,7 @@ export interface ConstantDefinition {
 export interface TypeDefinition {
     type: "type";
     node: Node;
-    comments: Comments;
+    comments: Token[];
     attributes: TypeAttributes;
     parameters: Node[];
 }
@@ -42,7 +42,7 @@ export interface TypeDefinition {
 export interface TraitDefinition {
     type: "trait";
     node: Node;
-    comments: Comments;
+    comments: Token[];
     attributes: TraitAttributes;
     parameters: Node[];
 }
@@ -50,7 +50,7 @@ export interface TraitDefinition {
 export interface InstanceDefinition {
     type: "instance";
     node: Node;
-    comments: Comments;
+    comments: Token[];
     attributes: InstanceAttributes;
     value: () => Node | undefined;
     // substitutions and other trait information is added via the `HasInstance` fact
@@ -66,19 +66,19 @@ export interface TypeParameterDefinition {
 export interface MarkerConstructorDefinition {
     type: "markerConstructor";
     node: Node;
-    comments: Comments;
+    comments: Token[];
 }
 
 export interface StructureConstructorDefinition {
     type: "structureConstructor";
     node: Node;
-    comments: Comments;
+    comments: Token[];
     fields: Map<string, Node>;
 }
 
 export interface VariantConstructorDefinition {
     type: "variantConstructor";
     node: Node;
-    comments: Comments;
+    comments: Token[];
     index: number;
 }

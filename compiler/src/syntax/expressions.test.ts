@@ -1,29 +1,29 @@
-import test from "node:test";
-import { testParse } from ".";
+import { test } from "mocha";
+import { parseExpression, testParse } from ".";
 
-test("variable expression", () => {
-    testParse("expression", "foo", {
+test("parsing variable expression", () => {
+    testParse(parseExpression, "foo", {
         type: "variable",
         variable: { value: "foo" },
     });
 });
 
-test("number expression", () => {
-    testParse("expression", "3.14", {
+test("parsing number expression", () => {
+    testParse(parseExpression, "3.14", {
         type: "number",
         value: { value: "3.14" },
     });
 });
 
-test("string expression", () => {
-    testParse("expression", `"abc"`, {
+test("parsing string expression", () => {
+    testParse(parseExpression, `"abc"`, {
         type: "string",
         value: { value: "abc" },
     });
 });
 
-test("format expression", () => {
-    testParse("expression", `"Hello, _!" name`, {
+test("parsing format expression", () => {
+    testParse(parseExpression, `"Hello, _!" name`, {
         type: "format",
         string: { value: "Hello, _!" },
         inputs: [
@@ -35,9 +35,9 @@ test("format expression", () => {
     });
 });
 
-test("structure expression", () => {
+test("parsing structure expression", () => {
     testParse(
-        "expression",
+        parseExpression,
         `Foo {
         a : b
         c : d
@@ -55,17 +55,17 @@ test("structure expression", () => {
                     value: { type: "variable", variable: { value: "d" } },
                 },
             ],
-        },
+        }
     );
 });
 
-test("block expression", () => {
-    testParse("expression", "{foo}", {
+test("parsing block expression", () => {
+    testParse(parseExpression, "{foo}", {
         type: "block",
         statements: [
             {
                 type: "expression",
-                comments: { comments: [] },
+                comments: [],
                 expression: {
                     type: "variable",
                     variable: { value: "foo" },
@@ -75,8 +75,8 @@ test("block expression", () => {
     });
 });
 
-test("do expression", () => {
-    testParse("expression", "do foo", {
+test("parsing do expression", () => {
+    testParse(parseExpression, "do foo", {
         type: "do",
         input: {
             type: "variable",
@@ -85,16 +85,16 @@ test("do expression", () => {
     });
 });
 
-test("simple intrinsic expression", () => {
-    testParse("expression", `intrinsic "message"`, {
+test("parsing simple intrinsic expression", () => {
+    testParse(parseExpression, `intrinsic "message"`, {
         type: "intrinsic",
         name: { value: "message" },
         inputs: [],
     });
 });
 
-test("complex intrinsic expression", () => {
-    testParse("expression", `intrinsic "message" x y`, {
+test("parsing complex intrinsic expression", () => {
+    testParse(parseExpression, `intrinsic "message" x y`, {
         type: "intrinsic",
         name: { value: "message" },
         inputs: [
@@ -104,9 +104,9 @@ test("complex intrinsic expression", () => {
     });
 });
 
-test("when expression", () => {
+test("parsing when expression", () => {
     testParse(
-        "expression",
+        parseExpression,
         `when x {
         a -> b
         c -> d
@@ -124,12 +124,12 @@ test("when expression", () => {
                     value: { type: "variable", variable: { value: "d" } },
                 },
             ],
-        },
+        }
     );
 });
 
-test("call expression", () => {
-    testParse("expression", "f x y", {
+test("parsing call expression", () => {
+    testParse(parseExpression, "f x y", {
         type: "call",
         function: { type: "variable", variable: { value: "f" } },
         inputs: [
@@ -139,8 +139,8 @@ test("call expression", () => {
     });
 });
 
-test("annotate expression", () => {
-    testParse("expression", "(3.14 :: Number)", {
+test("parsing annotate expression", () => {
+    testParse(parseExpression, "(3.14 :: Number)", {
         type: "annotate",
         left: {
             type: "number",
@@ -154,19 +154,19 @@ test("annotate expression", () => {
     });
 });
 
-test("simple apply expression", () => {
-    testParse("expression", "x . f", {
+test("parsing simple apply expression", () => {
+    testParse(parseExpression, "x . f", {
         type: "operator",
-        operator: ".",
+        operator: "applyOperator",
         left: { type: "variable", variable: { value: "x" } },
         right: { type: "variable", variable: { value: "f" } },
     });
 });
 
-test("complex apply expression", () => {
-    testParse("expression", "a b . c d", {
+test("parsing complex apply expression", () => {
+    testParse(parseExpression, "a b . c d", {
         type: "operator",
-        operator: ".",
+        operator: "applyOperator",
         left: {
             type: "call",
             function: { type: "variable", variable: { value: "a" } },
@@ -180,32 +180,32 @@ test("complex apply expression", () => {
     });
 });
 
-test("as expression", () => {
-    testParse("expression", "x as T", {
+test("parsing as expression", () => {
+    testParse(parseExpression, "x as T", {
         type: "as",
         left: { type: "variable", variable: { value: "x" } },
         right: { type: "named", name: { value: "T" }, parameters: [] },
     });
 });
 
-test("add expression", () => {
-    testParse("expression", "a + b", {
+test("parsing add expression", () => {
+    testParse(parseExpression, "a + b", {
         type: "operator",
-        operator: "+",
+        operator: "addOperator",
         left: { type: "variable", variable: { value: "a" } },
         right: { type: "variable", variable: { value: "b" } },
     });
 });
 
-test("empty collection expression", () => {
-    testParse("expression", "(,)", {
+test("parsing empty collection expression", () => {
+    testParse(parseExpression, "(,)", {
         type: "collection",
         elements: [],
     });
 });
 
-test("single line collection expression", () => {
-    testParse("expression", "a , b , c", {
+test("parsing single line collection expression", () => {
+    testParse(parseExpression, "a , b , c", {
         type: "collection",
         elements: [
             { type: "variable", variable: { value: "a" } },
@@ -215,9 +215,9 @@ test("single line collection expression", () => {
     });
 });
 
-test("multiline collection expression", () => {
+test("parsing multiline collection expression", () => {
     testParse(
-        "expression",
+        parseExpression,
         `(
         a ,
         b ,
@@ -230,20 +230,20 @@ test("multiline collection expression", () => {
                 { type: "variable", variable: { value: "b" } },
                 { type: "variable", variable: { value: "c" } },
             ],
-        },
+        }
     );
 });
 
-test("single input function expression", () => {
-    testParse("expression", "x -> y", {
+test("parsing single input function expression", () => {
+    testParse(parseExpression, "x -> y", {
         type: "function",
         inputs: [{ type: "variable", variable: { value: "x" } }],
         output: { type: "variable", variable: { value: "y" } },
     });
 });
 
-test("multi input function expression", () => {
-    testParse("expression", "x y -> z", {
+test("parsing multi input function expression", () => {
+    testParse(parseExpression, "x y -> z", {
         type: "function",
         inputs: [
             { type: "variable", variable: { value: "x" } },
@@ -253,8 +253,8 @@ test("multi input function expression", () => {
     });
 });
 
-test("complex input function expression", () => {
-    testParse("expression", "(X y) -> z", {
+test("parsing complex input function expression", () => {
+    testParse(parseExpression, "(X y) -> z", {
         type: "function",
         inputs: [
             {
@@ -267,8 +267,8 @@ test("complex input function expression", () => {
     });
 });
 
-test("simple is expression", () => {
-    testParse("expression", "x is None", {
+test("parsing simple is expression", () => {
+    testParse(parseExpression, "x is None", {
         type: "is",
         left: { type: "variable", variable: { value: "x" } },
         right: {
@@ -279,8 +279,8 @@ test("simple is expression", () => {
     });
 });
 
-test("complex is expression", () => {
-    testParse("expression", "x is Some 3.14", {
+test("parsing complex is expression", () => {
+    testParse(parseExpression, "x is Some 3.14", {
         type: "is",
         left: { type: "variable", variable: { value: "x" } },
         right: {

@@ -1,12 +1,13 @@
 import { HasInstance, Visit } from "../visitor";
 import { Fact, Node } from "../../db";
-import { Comments, InstanceDefinitionStatement } from "../../syntax";
+import { InstanceDefinitionStatement } from "../../syntax";
 import { InstantiateConstraint, TypeConstraint } from "../../typecheck";
 import { parseInstanceAttributes } from "../attributes";
 import { visitType } from "../types";
 import { visitConstraint } from "../constraints";
 import { visitExpression } from "../expressions";
 import { InstanceDefinition } from "../definitions";
+import { Token } from "../../syntax/parser";
 
 export class ParameterInInstanceDefinition extends Fact<Node> {}
 export class TraitInInstanceDefinition extends Fact<Node> {}
@@ -15,12 +16,12 @@ export class ValueInInstanceDefinition extends Fact<Node> {}
 export class IsUnresolvedInstance extends Fact<null> {}
 export class MissingValueInInstance extends Fact<null> {}
 export class ResolvedInstance extends Fact<Node> {}
-export class IsErrorInstance extends Fact<Comments> {}
+export class IsErrorInstance extends Fact<Token[]> {}
 
 export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
     visitor,
     statement,
-    definitionNode,
+    definitionNode
 ) => {
     visitor.withDefinition(definitionNode, () => {
         const attributes = parseInstanceAttributes(visitor, statement.attributes);
@@ -40,7 +41,7 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
                         default:
                             return undefined;
                     }
-                },
+                }
             );
 
             if (traitDefinition == null) {
@@ -55,15 +56,12 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
             visitor.currentDefinition!.implicitTypeParameters = true;
 
             const parameters = statement.constraints.bound.parameters.map((type) =>
-                visitor.visit(type, ParameterInInstanceDefinition, visitType),
+                visitor.visit(type, ParameterInInstanceDefinition, visitType)
             );
 
             // TODO: Ensure `parameters` has the right length
             const substitutions = new Map(
-                traitDefinition.parameters.map((parameter, index) => [
-                    parameter,
-                    parameters[index],
-                ]),
+                traitDefinition.parameters.map((parameter, index) => [parameter, parameters[index]])
             );
 
             visitor.currentDefinition!.implicitTypeParameters = false;
@@ -78,7 +76,7 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
                     definition: traitDefinition.node,
                     replacements: new Map([[traitDefinition.node, definitionNode]]),
                     substitutions,
-                }),
+                })
             );
 
             if (statement.value != null) {
@@ -95,7 +93,7 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
                     substitutions,
                     default: attributes.default,
                     error: attributes.error,
-                }),
+                })
             );
 
             visitor.defineInstance(trait, definition);

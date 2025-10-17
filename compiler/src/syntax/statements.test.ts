@@ -1,54 +1,50 @@
-import test from "node:test";
-import { testParse } from ".";
+import { test } from "mocha";
+import { parseStatement, testParse } from ".";
 
-test("type definition", () => {
-    testParse("statement", "-- Documentation comment\n[foo]\nFoo : type", {
+test("parsing type definition", () => {
+    testParse(parseStatement, "-- Documentation comment\n[foo]\nFoo : type", {
         type: "typeDefinition",
-        comments: {
-            comments: [{ value: " Documentation comment" }],
-        },
-        attributes: {
-            attributes: [{ name: { value: "foo" }, value: null }],
-        },
+        comments: [{ value: " Documentation comment" }],
+        attributes: [{ name: { value: "foo" }, value: undefined }],
         name: { value: "Foo" },
         parameters: [],
         representation: { type: "marker" },
     });
 });
 
-test("generic type definition", () => {
-    testParse("statement", "Foo : value => type", {
+test("parsing generic type definition", () => {
+    testParse(parseStatement, "Foo : value => type", {
         type: "typeDefinition",
-        comments: { comments: [] },
-        attributes: { attributes: [] },
+        comments: [],
+        attributes: [],
         name: { value: "Foo" },
         parameters: [{ name: { value: "value" } }],
         representation: { type: "marker" },
     });
 });
 
-test("marker type definition", () => {
-    testParse("statement", "Foo : type", {
+test("parsing marker type definition", () => {
+    testParse(parseStatement, "Foo : type", {
         type: "typeDefinition",
-        comments: { comments: [] },
-        attributes: { attributes: [] },
+        comments: [],
+        attributes: [],
         name: { value: "Foo" },
         parameters: [],
         representation: { type: "marker" },
     });
 });
 
-test("structure type definition", () => {
+test("parsing structure type definition", () => {
     testParse(
-        "statement",
+        parseStatement,
         `Foo : type {
             a :: A
             b :: B
         }`,
         {
             type: "typeDefinition",
-            comments: { comments: [] },
-            attributes: { attributes: [] },
+            comments: [],
+            attributes: [],
             name: { value: "Foo" },
             parameters: [],
             representation: {
@@ -64,21 +60,21 @@ test("structure type definition", () => {
                     },
                 ],
             },
-        },
+        }
     );
 });
 
-test("enumeration type definition", () => {
+test("parsing enumeration type definition", () => {
     testParse(
-        "statement",
+        parseStatement,
         `Foo : type {
             Some Number
             None
         }`,
         {
             type: "typeDefinition",
-            comments: { comments: [] },
-            attributes: { attributes: [] },
+            comments: [],
+            attributes: [],
             name: { value: "Foo" },
             parameters: [],
             representation: {
@@ -94,15 +90,15 @@ test("enumeration type definition", () => {
                     },
                 ],
             },
-        },
+        }
     );
 });
 
-test("trait definition", () => {
-    testParse("statement", "Foo : trait Number", {
+test("parsing trait definition", () => {
+    testParse(parseStatement, "Foo : trait Number", {
         type: "traitDefinition",
-        comments: { comments: [] },
-        attributes: { attributes: [] },
+        comments: [],
+        attributes: [],
         name: { value: "Foo" },
         parameters: [],
         constraints: {
@@ -112,11 +108,11 @@ test("trait definition", () => {
     });
 });
 
-test("generic trait definition", () => {
-    testParse("statement", "Foo : value => trait (value -> Number)", {
+test("parsing generic trait definition", () => {
+    testParse(parseStatement, "Foo : value => trait (value -> Number)", {
         type: "traitDefinition",
-        comments: { comments: [] },
-        attributes: { attributes: [] },
+        comments: [],
+        attributes: [],
         name: { value: "Foo" },
         parameters: [{ name: { value: "value" } }],
         constraints: {
@@ -130,11 +126,11 @@ test("generic trait definition", () => {
     });
 });
 
-test("constant definition", () => {
-    testParse("statement", "show :: value -> Unit where (Show value)", {
+test("parsing constant definition", () => {
+    testParse(parseStatement, "show :: value -> Unit where (Show value)", {
         type: "constantDefinition",
-        comments: { comments: [] },
-        attributes: { attributes: [] },
+        comments: [],
+        attributes: [],
         name: { value: "show" },
         constraints: {
             type: {
@@ -153,11 +149,11 @@ test("constant definition", () => {
     });
 });
 
-test("simple valued instance definition", () => {
-    testParse("statement", "instance (Foo Number) : 3.14", {
+test("parsing simple valued instance definition", () => {
+    testParse(parseStatement, "instance (Foo Number) : 3.14", {
         type: "instanceDefinition",
-        comments: { comments: [] },
-        attributes: { attributes: [] },
+        comments: [],
+        attributes: [],
         constraints: {
             bound: {
                 type: "bound",
@@ -170,11 +166,11 @@ test("simple valued instance definition", () => {
     });
 });
 
-test("complex valued instance definition", () => {
-    testParse("statement", "instance (Foo (Maybe value)) where (Foo value) : 3.14", {
+test("parsing complex valued instance definition", () => {
+    testParse(parseStatement, "instance (Foo (Maybe value)) where (Foo value) : 3.14", {
         type: "instanceDefinition",
-        comments: { comments: [] },
-        attributes: { attributes: [] },
+        comments: [],
+        attributes: [],
         constraints: {
             bound: {
                 type: "bound",

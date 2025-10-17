@@ -1,4 +1,4 @@
-import test from "node:test";
+import { test } from "mocha";
 import { compileTest } from ".";
 import assert from "node:assert";
 import { HasType } from "../src/compile";

@@ -1,0 +1,4 @@
+{
+    "require": ["esbuild-runner/register", "source-map-support/register"],
+    "spec": "dist/**/*.test.js"
+}

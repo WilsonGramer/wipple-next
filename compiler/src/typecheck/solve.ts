@@ -108,7 +108,7 @@ export class Solver {
                     result.every((other) => !typesAreEqual(type, other))
                         ? [...result, type]
                         : result,
-                [] as Type[],
+                [] as Type[]
             );
 
         // Prevent recursive types

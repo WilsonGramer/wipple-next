@@ -12,16 +12,6 @@ export class IsStatement extends Fact<null> {}
 export class IsTopLevelExecutableStatement extends Fact<null> {}
 
 export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
-    node.code = node.code.slice(
-        statement.comments.location.end.offset - statement.comments.location.start.offset,
-    );
-
-    if ("attributes" in statement) {
-        node.code = node.code.slice(
-            statement.attributes.location.end.offset - statement.attributes.location.start.offset,
-        );
-    }
-
     visitor.db.add(node, new IsStatement(null));
 
     switch (statement.type) {

@@ -1,21 +1,21 @@
-import test from "node:test";
-import { testParse } from ".";
+import { test } from "mocha";
+import { parsePattern, testParse } from ".";
 
-test("wildcard pattern", () => {
-    testParse("pattern", "_", {
+test("parsing wildcard pattern", () => {
+    testParse(parsePattern, "_", {
         type: "wildcard",
     });
 });
 
-test("variable pattern", () => {
-    testParse("pattern", "x", {
+test("parsing variable pattern", () => {
+    testParse(parsePattern, "x", {
         type: "variable",
         variable: { value: "x" },
     });
 });
 
-test("structure pattern", () => {
-    testParse("pattern", "Foo {x : y}", {
+test("parsing structure pattern", () => {
+    testParse(parsePattern, "Foo {x : y}", {
         type: "structure",
         name: { value: "Foo" },
         fields: [
@@ -30,23 +30,23 @@ test("structure pattern", () => {
     });
 });
 
-test("set pattern", () => {
-    testParse("pattern", "set x", {
+test("parsing set pattern", () => {
+    testParse(parsePattern, "set x", {
         type: "set",
         variable: { value: "x" },
     });
 });
 
-test("simple constructor pattern", () => {
-    testParse("pattern", "None", {
+test("parsing simple constructor pattern", () => {
+    testParse(parsePattern, "None", {
         type: "constructor",
         constructor: { value: "None" },
         elements: [],
     });
 });
 
-test("complex constructor pattern", () => {
-    testParse("pattern", "Some x y z", {
+test("parsing complex constructor pattern", () => {
+    testParse(parsePattern, "Some x y z", {
         type: "constructor",
         constructor: { value: "Some" },
         elements: [
@@ -57,8 +57,8 @@ test("complex constructor pattern", () => {
     });
 });
 
-test("simple or pattern", () => {
-    testParse("pattern", "x or y", {
+test("parsing simple or pattern", () => {
+    testParse(parsePattern, "x or y", {
         type: "or",
         patterns: [
             { type: "variable", variable: { value: "x" } },
@@ -67,8 +67,8 @@ test("simple or pattern", () => {
     });
 });
 
-test("complex or pattern", () => {
-    testParse("pattern", "x or y or z", {
+test("parsing complex or pattern", () => {
+    testParse(parsePattern, "x or y or z", {
         type: "or",
         patterns: [
             { type: "variable", variable: { value: "x" } },

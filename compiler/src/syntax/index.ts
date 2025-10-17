@@ -1,8 +1,8 @@
-import assert from "node:assert/strict";
-import { Statement } from "./statements";
-import * as grammar from "./grammar.js";
-import { LocationRange } from "peggy";
+import { expect } from "chai";
+import { parseStatements, Statement } from "./statements";
+import { Parser, LocationRange } from "./parser";
 
+export { SyntaxError, Location, LocationRange } from "./parser";
 export * from "./attributes";
 export * from "./constraints";
 export * from "./expressions";
@@ -18,35 +18,14 @@ export interface SourceFile {
     statements: Statement[];
 }
 
-export type ParseResult<T> =
-    | {
-          success: true;
-          value: T;
-      }
-    | {
-          success: false;
-          location: LocationRange;
-          message: string;
-      };
+type DeepPartial<T> = T extends Record<string, any> ? { [P in keyof T]?: DeepPartial<T[P]> } : T;
 
-export const parse = <T>(source: string, startRule: string): ParseResult<T> => {
-    try {
-        const value = grammar.parse(source, { startRule });
-        return { success: true, value };
-    } catch (error) {
-        if (!(error instanceof grammar.SyntaxError)) {
-            throw error;
-        }
-
-        return { success: false, location: error.location, message: error.message };
-    }
-};
-
-type WithoutLocation<T> =
-    T extends Record<string, any> ? { [K in keyof Omit<T, "location">]: WithoutLocation<T[K]> } : T;
-
-export const testParse = <T>(rule: string, source: string, expected: WithoutLocation<T>) => {
-    const parsed = parse<T>(source, rule);
+export const testParse = <T>(
+    rule: (parser: Parser) => T,
+    source: string,
+    expected: DeepPartial<T>
+) => {
+    const parsed = rule(new Parser(source));
 
     const removeLocation = (x: any) => {
         if (x !== null && typeof x === "object") {
@@ -58,21 +37,23 @@ export const testParse = <T>(rule: string, source: string, expected: WithoutLoca
         }
     };
 
-    if (!parsed.success) {
-        throw new grammar.SyntaxError(parsed.message, null, null, parsed.location);
-    }
-
     removeLocation(parsed);
 
-    assert.deepStrictEqual(parsed, { success: true, value: expected });
+    expect(parsed).to.containSubset(expected);
 };
 
-export default (path: string, code: string) => {
-    const result = parse<SourceFile>(code, "source_file");
-    if (result.success) {
-        result.value.path = path;
-        result.value.code = code;
-    }
+const parseSourceFile = (path: string, code: string): SourceFile => {
+    const parser = new Parser(code);
 
-    return result;
+    const sourceFile = parser.withLocation<SourceFile>(() => ({
+        path,
+        code,
+        statements: parseStatements(parser),
+    }));
+
+    parser.finish();
+
+    return sourceFile;
 };
+
+export default parseSourceFile;

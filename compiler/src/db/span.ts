@@ -1,5 +1,5 @@
-import { LocationRange } from "peggy";
 import { inspect } from "node:util";
+import { LocationRange } from "../syntax";
 
 export class Span {
     path: string;

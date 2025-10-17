@@ -3,9 +3,9 @@ import { Node } from "../db";
 import dedent from "dedent";
 import { displayType, Type } from "../typecheck/constraints/type";
 import { Bound, displayBound } from "../typecheck/constraints/bound";
-import { Comments } from "../syntax";
 import { nodeDisplayOptions } from "../db/node";
 import { Links } from "../queries";
+import { Token } from "../syntax/parser";
 
 export interface RenderedFeedback {
     strings: readonly string[];
@@ -19,12 +19,12 @@ export const render = (strings: readonly string[], ...values: Renderable[]): Ren
     toString: () =>
         dedent(
             values.map((value, index) => strings[index] + value.toString()).join("") +
-                strings[strings.length - 1],
+                strings[strings.length - 1]
         ).trim(),
 });
 
-export const renderComments = (comments: Comments, links: Links, suffix = "") => {
-    const string = comments.comments.map((comment) => comment.value).join("\n");
+export const renderComments = (comments: Token[], links: Links, suffix = "") => {
+    const string = comments.map((comment) => comment.value).join("\n");
 
     const items = string.split(/\[`([^`]+)`\]/);
 

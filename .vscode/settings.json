@@ -1,0 +1,5 @@
+{
+    "mochaExplorer.cwd": "compiler",
+    "mochaExplorer.require": ["source-map-support/register"],
+    "mochaExplorer.files": ["dist/**/*.test.js"]
+}

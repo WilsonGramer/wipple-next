@@ -1,8 +1,8 @@
-import { LocationRange } from "peggy";
 import { Db, Fact, Node, Span } from "../db";
 import { AnyDefinition, InstanceDefinition } from "./definitions";
 import { Constraint } from "../typecheck";
 import { CodegenItem } from "../codegen";
+import { LocationRange } from "../syntax";
 
 export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 
@@ -31,8 +31,7 @@ export class Visitor {
 
     node(value: { location: LocationRange }) {
         const span = new Span(this.path, value.location);
-        const code = this.code.slice(value.location.start.offset, value.location.end.offset);
-        const node = new Node(span, code);
+        const node = new Node(span, value.location.source);
         this.nodes.add(node);
         return node;
     }
@@ -40,7 +39,7 @@ export class Visitor {
     visit<T extends { location: LocationRange }>(
         value: T,
         relation: typeof Fact<Node>,
-        f: Visit<T>,
+        f: Visit<T>
     ) {
         const node = this.node(value);
         this.db.add(node, new (relation as any)(this.currentNode));
@@ -88,9 +87,9 @@ export class Visitor {
             Object.entries(
                 Object.groupBy(
                     scope.definitions.values().flatMap((definitions) => definitions),
-                    (definition) => definition.type,
-                ),
-            ).map(([type, definitions]) => [`${type}s`, definitions.map(({ node }) => node)]),
+                    (definition) => definition.type
+                )
+            ).map(([type, definitions]) => [`${type}s`, definitions.map(({ node }) => node)])
         ) as any;
 
         return definitionsByType;
@@ -99,7 +98,7 @@ export class Visitor {
     resolveName<T>(
         name: string,
         from: Node,
-        filter: (definition: AnyDefinition) => [T, typeof Fact<Node>] | undefined,
+        filter: (definition: AnyDefinition) => [T, typeof Fact<Node>] | undefined
     ): T | undefined {
         for (const scope of this.scopes.toReversed()) {
             for (const definition of scope.definitions.get(name)?.toReversed() ?? []) {
@@ -147,7 +146,7 @@ export class Visitor {
 
     withMatchValue<T>(
         value: Node,
-        f: () => T,
+        f: () => T
     ): [T, { conditions: CodegenItem[]; temporaries: Node[] }] {
         const existingMatch = this.currentMatch;
         const conditions: CodegenItem[] = [];

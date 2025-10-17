@@ -10,6 +10,6 @@ tasks:
       NODE_OPTIONS: "--enable-source-maps"
   test:
     dir: compiler
-    cmd: npm test
+    cmd: npm test -- {{.CLI_ARGS}}
   install:
     cmd: (cd compiler && npm run exe)

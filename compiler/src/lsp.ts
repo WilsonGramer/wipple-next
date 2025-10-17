@@ -5,10 +5,10 @@ import { compile } from "./compile";
 import { collectFeedback } from "./feedback";
 import { nodeFilter } from "./db/filter";
 import { nodeDisplayOptions } from "./db/node";
-import { LocationRange } from "peggy";
 import * as queries from "./queries";
 import { displayType } from "./typecheck/constraints/type";
 import { renderComments } from "./feedback/render";
+import { LocationRange } from "./syntax";
 
 const tokenTypes = ["type", "function", "typeParameter"] as const;
 

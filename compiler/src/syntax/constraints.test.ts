@@ -1,8 +1,8 @@
-import test from "node:test";
-import { testParse } from ".";
+import { test } from "mocha";
+import { parseConstraint, testParse } from ".";
 
-test("bound constraint", () => {
-    testParse("constraint", `(Foo value)`, {
+test("parsing bound constraint", () => {
+    testParse(parseConstraint, `(Foo value)`, {
         type: "bound",
         trait: { value: "Foo" },
         parameters: [
@@ -14,8 +14,8 @@ test("bound constraint", () => {
     });
 });
 
-test("default constraint", () => {
-    testParse("constraint", `(value :: Number)`, {
+test("parsing default constraint", () => {
+    testParse(parseConstraint, `(value :: Number)`, {
         type: "default",
         parameter: {
             type: "parameter",
