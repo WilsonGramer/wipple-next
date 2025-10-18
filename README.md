@@ -4,6 +4,10 @@
 
 A new implementation of the [Wipple](https://github.com/wipplelang/wipple) compiler.
 
+## Setup
+
+Make sure you have the latest versions of [`node`](https://nodejs.org) and [`task`](https://taskfile.dev) installed. Then run `task setup`.
+
 ## Using the CLI
 
 1.  Create a `test.wipple` file at the top level. All `test*.wipple` files are ignored by Git.
