@@ -14,6 +14,8 @@ A new implementation of the [Wipple](https://github.com/wipplelang/wipple) compi
 
 4.  To execute a source file, use `task compiler -- run test.wipple`.
 
+You can also install the CLI globally with `task install`. Then, you can simply use `wipple run test.wipple`.
+
 ## Running tests
 
 You can run the compiler tests with `task test`.
