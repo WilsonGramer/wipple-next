@@ -28,6 +28,7 @@
         "@types/node": "^24.5.2",
         "chai": "^6.2.0",
         "esbuild": "^0.25.10",
+        "esbuild-plugin-inline-import": "^1.1.0",
         "esbuild-runner": "^2.2.2",
         "mocha": "^11.7.4",
         "source-map-support": "^0.5.21"

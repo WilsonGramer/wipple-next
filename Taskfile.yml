@@ -4,8 +4,8 @@ tasks:
     cmds:
       - cd compiler && npm install
       - cd vscode && npm install
-  compile:
-    cmd: (cd compiler && npm run build) && node compiler compile {{.CLI_ARGS}}
+  compiler:
+    cmd: (cd compiler && npm run build) && node compiler {{.CLI_ARGS}}
     env:
       NODE_OPTIONS: "--enable-source-maps"
   test:

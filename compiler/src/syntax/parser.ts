@@ -307,7 +307,7 @@ export class Parser {
         if (token == null) {
             throw new SyntaxError(
                 `expected ${types.join(" or ")} here`,
-                this.tokens[this.tokens.length - 1].location ?? nullLocationRange
+                this.tokens[this.tokens.length - 1]?.location ?? nullLocationRange
             );
         }
 
