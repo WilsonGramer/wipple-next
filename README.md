@@ -20,6 +20,10 @@ Make sure you have the latest versions of [`node`](https://nodejs.org) and [`tas
 
 You can also install the CLI globally with `task install`. Then, you can simply use `wipple run test.wipple`.
 
+## Using the VS Code extension
+
+To install the VS Code extension, run `task install` followed by `task vscode`. Then restart VS Code.
+
 ## Running tests
 
 You can run the compiler tests with `task test`.

@@ -13,3 +13,6 @@ tasks:
     cmd: npm test -- {{.CLI_ARGS}}
   install:
     cmd: (cd compiler && npm run exe)
+  vscode:
+    dir: vscode
+    cmd: npm run extension
