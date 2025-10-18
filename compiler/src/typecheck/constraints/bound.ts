@@ -1,6 +1,6 @@
 import { Solver } from "../solve";
 import { Fact, Node } from "../../db";
-import { HasInstance } from "../../visit/visitor";
+import { HasConstraints, HasInstance, Instance } from "../../visit/visitor";
 import { displayType, Type } from "./type";
 import chalk from "chalk";
 import { IsInferredTypeParameter } from "../../visit/statements/trait-definition";
@@ -9,6 +9,7 @@ import { Constraint } from "./constraint";
 
 export interface Bound<S = Node> {
     source: Node | undefined;
+    definition: Node | undefined;
     trait: Node;
     substitutions: Map<Node, S>;
 }
@@ -65,6 +66,7 @@ export class BoundConstraint extends Constraint {
     ): this | undefined {
         return new BoundConstraint(this.node, {
             source,
+            definition: undefined, // only used on the generic definition
             trait: this.bound.trait,
             substitutions: new Map(
                 this.bound.substitutions
@@ -78,16 +80,11 @@ export class BoundConstraint extends Constraint {
     }
 
     run(solver: Solver) {
-        // Ignore bounds on generic definitions in favor of the ones created
-        // during instantiation (which have a source attached)
-        if (this.bound.source == null) {
-            return;
-        }
+        const { source, definition, trait } = this.bound;
 
         const isInferredParameter = (parameter: Node) =>
             solver.db.has(parameter, IsInferredTypeParameter);
 
-        const { source, trait } = this.bound;
         const boundSubstitutions = new Map<Node, Node>();
         const boundInferred = new Map<Node, Node>();
         for (const [parameter, type] of this.bound.substitutions) {
@@ -107,10 +104,31 @@ export class BoundConstraint extends Constraint {
             (instance) => (instance.default ? "defaultInstances" : "nonDefaultInstances"),
         );
 
-        const instanceGroups = [nonDefaultInstances, defaultInstances];
+        // Also consider bounds within the current definition (if applicable)
+        const boundInstances =
+            definition != null
+                ? solver.db
+                      .list(definition, HasConstraints)
+                      .flatMap((constraints) => constraints)
+                      .filter((constraint) => constraint instanceof BoundConstraint)
+                      .filter((constraint) => constraint.bound.trait === this.bound.trait)
+                      .map(
+                          (constraint): Instance => ({
+                              node: constraint.node,
+                              substitutions: new Map(constraint.bound.substitutions),
+                          }),
+                      )
+                      .toArray()
+                : [];
+
+        const instanceGroups = [
+            { instances: boundInstances, instantiate: false },
+            { instances: nonDefaultInstances, instantiate: true },
+            { instances: defaultInstances, instantiate: true },
+        ];
 
         for (let i = 0; i < instanceGroups.length; i++) {
-            const instances = instanceGroups[i];
+            const { instances, instantiate } = instanceGroups[i];
             const isLastInstanceSet = i + 1 === instanceGroups.length;
 
             const candidates: [
@@ -124,23 +142,28 @@ export class BoundConstraint extends Constraint {
 
                 // These are for the *instance's own* parameters, not
                 // the trait parameters like with the bound
-                const replacements = new Map<Node, Node>();
-                const substitutions = new Map<Node, Node>();
-                copy.add(
-                    new InstantiateConstraint({
-                        source,
-                        definition: instance.node,
-                        replacements,
-                        substitutions,
-                    }),
-                );
-                copy.run(); // needed here to populate `replacements`
+                const replacements = instantiate ? new Map<Node, Node>() : undefined;
+                if (replacements != null && source != null) {
+                    copy.add(
+                        new InstantiateConstraint({
+                            source,
+                            definition: instance.node,
+                            replacements,
+                            substitutions: new Map<Node, Node>(),
+                        }),
+                    );
+                    copy.run(); // needed here to populate `replacements`
+                }
 
                 // These are for the *trait's* parameters
                 const instanceSubstitutions = new Map<Node, Node>();
                 const instanceInferred = new Map<Node, Node>();
                 for (const [parameter, substitution] of instance.substitutions) {
-                    const replacement = getOrInstantiate(substitution, source, replacements);
+                    const replacement =
+                        replacements != null && source != null
+                            ? getOrInstantiate(substitution, source, replacements)
+                            : substitution;
+
                     if (replacement == null) {
                         throw new Error("missing replacement in instantiated instance");
                     }
@@ -168,6 +191,7 @@ export class BoundConstraint extends Constraint {
 
             const resolvedBound: Bound = {
                 source,
+                definition,
                 trait,
                 substitutions: boundSubstitutions,
             };
@@ -190,15 +214,17 @@ export class BoundConstraint extends Constraint {
                     solver.unify(boundType, instanceType);
                 }
 
-                solver.db.add(
-                    source,
-                    new HasResolvedBound([applyBound(resolvedBound, solver), instanceNode]),
-                );
+                if (source != null) {
+                    solver.db.add(
+                        source,
+                        new HasResolvedBound([applyBound(resolvedBound, solver), instanceNode]),
+                    );
+                }
 
                 break;
             }
 
-            if (isLastInstanceSet) {
+            if (isLastInstanceSet && source != null) {
                 solver.db.add(source, new HasUnresolvedBound(applyBound(resolvedBound, solver)));
             }
         }

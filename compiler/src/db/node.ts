@@ -28,7 +28,9 @@ export class Node {
 
     static instantiatedFrom(other: Node, source: Node | undefined): Node {
         if (other.instantiatedFrom != null) {
-            throw new Error("already instantiated");
+            throw new Error(
+                `already instantiated from ${other.instantiatedFrom.id} as ${other.id}`,
+            );
         }
 
         const node = new Node(other.span, other.code);
@@ -52,6 +54,8 @@ export class Node {
             }
 
             s += chalk.black.dim(` @ ${this.span}`);
+
+            s += chalk.black.dim(` ${this.id}`);
         }
 
         return s;

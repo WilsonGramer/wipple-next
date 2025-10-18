@@ -13,7 +13,8 @@ export class ValueInConstantDefinition extends Fact<Node> {}
 export class AssignedTo extends Fact<Node> {}
 
 export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, statement, node) => {
-    const value = visitor.visit(statement.value, ValueInAssignmentStatement, visitExpression);
+    const visitValue = () =>
+        visitor.visit(statement.value, ValueInAssignmentStatement, visitExpression);
 
     // Try assigning to an existing constant if possible
     if (statement.pattern.type === "variable") {
@@ -29,6 +30,12 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
         });
 
         if (definition != null) {
+            let value!: Node;
+            visitor.withDefinition(definition.node, () => {
+                value = visitValue();
+                return undefined;
+            });
+
             if (!definition.value.assigned) {
                 // Ensure the value is assignable to the constant's type
                 visitor.addConstraints(new TypeConstraint(value, definition.value.type()));
@@ -41,6 +48,8 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
             return;
         }
     }
+
+    const value = visitValue();
 
     const [pattern, { conditions, temporaries }] = visitor.withMatchValue(value, () =>
         visitor.visit(statement.pattern, PatternInAssignmentStatement, visitPattern),

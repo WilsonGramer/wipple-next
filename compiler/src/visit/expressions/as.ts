@@ -50,6 +50,7 @@ export const visitAsExpression: Visit<AsExpression> = (visitor, expression, node
                         }),
                         new BoundConstraint(asFunction, {
                             source: asFunction,
+                            definition: visitor.currentDefinition?.node,
                             trait: definition.node,
                             substitutions,
                         }),

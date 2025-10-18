@@ -32,6 +32,7 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
                             }),
                             new BoundConstraint(node, {
                                 source: node,
+                                definition: visitor.currentDefinition?.node,
                                 trait: definition.node,
                                 substitutions,
                             }),

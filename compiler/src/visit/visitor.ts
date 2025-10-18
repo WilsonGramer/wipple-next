@@ -39,7 +39,7 @@ export class Visitor {
     visit<T extends { location: LocationRange }>(
         value: T,
         relation: typeof Fact<Node>,
-        f: Visit<T>
+        f: Visit<T>,
     ) {
         const node = this.node(value);
         this.db.add(node, new (relation as any)(this.currentNode));
@@ -87,9 +87,9 @@ export class Visitor {
             Object.entries(
                 Object.groupBy(
                     scope.definitions.values().flatMap((definitions) => definitions),
-                    (definition) => definition.type
-                )
-            ).map(([type, definitions]) => [`${type}s`, definitions.map(({ node }) => node)])
+                    (definition) => definition.type,
+                ),
+            ).map(([type, definitions]) => [`${type}s`, definitions.map(({ node }) => node)]),
         ) as any;
 
         return definitionsByType;
@@ -98,7 +98,7 @@ export class Visitor {
     resolveName<T>(
         name: string,
         from: Node,
-        filter: (definition: AnyDefinition) => [T, typeof Fact<Node>] | undefined
+        filter: (definition: AnyDefinition) => [T, typeof Fact<Node>] | undefined,
     ): T | undefined {
         for (const scope of this.scopes.toReversed()) {
             for (const definition of scope.definitions.get(name)?.toReversed() ?? []) {
@@ -146,7 +146,7 @@ export class Visitor {
 
     withMatchValue<T>(
         value: Node,
-        f: () => T
+        f: () => T,
     ): [T, { conditions: CodegenItem[]; temporaries: Node[] }] {
         const existingMatch = this.currentMatch;
         const conditions: CodegenItem[] = [];
@@ -165,9 +165,8 @@ export class Visitor {
         const resultDefinition = f();
         this.currentDefinition = existingDefinitionInfo;
 
-        this.definitionConstraints.set(node, newDefinitionInfo.constraints);
-
         if (resultDefinition != null) {
+            this.definitionConstraints.set(node, newDefinitionInfo.constraints);
             this.definitions.set(node, resultDefinition);
         }
     }

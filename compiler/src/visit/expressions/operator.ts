@@ -36,6 +36,7 @@ export const visitOperatorExpression: Visit<OperatorExpression> = (visitor, expr
                 }),
                 new BoundConstraint(operatorNode, {
                     source: operatorNode,
+                    definition: visitor.currentDefinition?.node,
                     trait: definition.node,
                     substitutions,
                 }),

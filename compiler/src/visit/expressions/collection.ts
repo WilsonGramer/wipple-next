@@ -39,6 +39,7 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
             }),
             new BoundConstraint(buildCollectionNode, {
                 source: buildCollectionNode,
+                definition: visitor.currentDefinition?.node,
                 trait: definition.node,
                 substitutions,
             }),
@@ -67,6 +68,7 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
             }),
             new BoundConstraint(initialCollectionNode, {
                 source: initialCollectionNode,
+                definition: visitor.currentDefinition?.node,
                 trait: definition.node,
                 substitutions,
             }),
