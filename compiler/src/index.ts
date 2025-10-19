@@ -1,5 +1,5 @@
 import * as cmd from "cmd-ts";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { compile } from "./compile";
 import { Db, Node } from "./db";
 import { collectFeedback } from "./feedback";
@@ -12,6 +12,7 @@ import { Codegen } from "./codegen";
 import runtime from "inline:../runtime/runtime.js";
 import nodePrelude from "inline:../runtime/node-prelude.js";
 import { execSync } from "node:child_process";
+import { extname, join } from "node:path";
 
 inspect.defaultOptions.depth = null;
 
@@ -19,6 +20,10 @@ const compileCommand = (options: { run: boolean }) =>
     cmd.command({
         name: "compile",
         args: {
+            lib: cmd.multioption({
+                long: "lib",
+                type: cmd.array(cmd.string),
+            }),
             facts: cmd.flag({
                 long: "facts",
                 type: cmd.boolean,
@@ -42,10 +47,25 @@ const compileCommand = (options: { run: boolean }) =>
             }),
         },
         handler: (args) => {
+            const libs = args.lib.map((libPath) =>
+                readdirSync(libPath)
+                    .filter((fileName) => extname(fileName) === ".wipple")
+                    .map((fileName) => {
+                        const filePath = join(libPath, fileName);
+
+                        return {
+                            path: filePath,
+                            code: readFileSync(filePath, "utf8"),
+                        };
+                    }),
+            );
+
             const files = args.paths.map((path) => ({
                 path,
                 code: readFileSync(path, "utf8"),
             }));
+
+            const layers = [...libs, files];
 
             const filters =
                 args.filterLines.length > 0
@@ -55,20 +75,22 @@ const compileCommand = (options: { run: boolean }) =>
             const filter = nodeFilter(filters);
 
             const db = new Db();
-            const result = compile(db, { files });
+            for (const files of layers) {
+                const result = compile(db, { files });
 
-            if (!result.success) {
-                switch (result.type) {
-                    case "parse": {
-                        console.error(
-                            `${result.location.start.line}:${result.location.start.column}: syntax error: ${result.message}`,
-                        );
+                if (!result.success) {
+                    switch (result.type) {
+                        case "parse": {
+                            console.error(
+                                `${result.location.start.line}:${result.location.start.column}: syntax error: ${result.message}`,
+                            );
 
-                        return;
+                            return;
+                        }
+                        default:
+                            result.type satisfies never;
+                            throw new Error("unknown error");
                     }
-                    default:
-                        result.type satisfies never;
-                        throw new Error("unknown error");
                 }
             }
 

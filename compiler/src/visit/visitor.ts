@@ -9,7 +9,7 @@ export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 export class Visitor {
     db: Db;
 
-    scopes = [new Scope()];
+    scopes: Scope[];
     currentNode!: Node;
     currentMatch!: VisitorCurrentMatch;
     currentDefinition?: VisitorCurrentDefinition;
@@ -23,6 +23,13 @@ export class Visitor {
 
     constructor(db: Db) {
         this.db = db;
+
+        const existingScopes = this.db
+            .list(HasTopLevelScope)
+            .map(([, scope]) => scope)
+            .toArray();
+
+        this.scopes = existingScopes.length > 0 ? existingScopes : [new Scope()];
     }
 
     node(value: { location: LocationRange }) {
@@ -75,20 +82,7 @@ export class Visitor {
     }
 
     popScope() {
-        const scope = this.scopes.pop()!;
-
-        const definitionsByType: {
-            [T in `${AnyDefinition["type"]}s`]?: Node[];
-        } = Object.fromEntries(
-            Object.entries(
-                Object.groupBy(
-                    scope.definitions.values().flatMap((definitions) => definitions),
-                    (definition) => definition.type,
-                ),
-            ).map(([type, definitions]) => [`${type}s`, definitions.map(({ node }) => node)]),
-        ) as any;
-
-        return definitionsByType;
+        return this.scopes.pop()!;
     }
 
     resolveName<T>(
@@ -193,6 +187,8 @@ export class Visitor {
             this.db.add(node, new Definition(definition));
         }
 
+        this.db.add(this.currentNode, new HasTopLevelScope(this.scopes.pop()!));
+
         return {
             definitions: this.definitions,
             instances: this.instances,
@@ -202,6 +198,19 @@ export class Visitor {
 
 export class Scope {
     definitions = new Map<string, AnyDefinition[]>();
+
+    getDefinitions() {
+        return Object.fromEntries(
+            Object.entries(
+                Object.groupBy(
+                    this.definitions.values().flatMap((definitions) => definitions),
+                    (definition) => definition.type,
+                ),
+            ).map(([type, definitions]) => [`${type}s`, definitions.map(({ node }) => node)]),
+        ) as {
+            [T in `${AnyDefinition["type"]}s`]?: Node[];
+        };
+    }
 }
 
 export interface VisitorCurrentMatch {
@@ -241,6 +250,8 @@ interface QueuedVisit extends Partial<Visitor> {
 }
 
 type QueueKey = { [K in keyof Queue]: Queue[K] extends QueuedVisit[] ? K : never }[keyof Queue];
+
+export class HasTopLevelScope extends Fact<Scope> {}
 
 export class HasNode extends Fact<Node> {}
 

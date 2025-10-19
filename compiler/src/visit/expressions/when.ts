@@ -25,7 +25,7 @@ export const visitWhenExpression: Visit<WhenExpression> = (visitor, expression, 
 
         const value = visitor.visit(arm.value, ValueInWhenExpression, visitExpression);
 
-        const { variables: armVariables = [] } = visitor.popScope();
+        const { variables: armVariables = [] } = visitor.popScope().getDefinitions();
         variables.push(...armVariables, ...armTemporaries);
 
         visitor.addConstraints(new TypeConstraint(value, node));

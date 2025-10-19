@@ -51,7 +51,6 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
     visit(parsedFiles, db);
 
     const solver = new Solver(db);
-
     for (const [representative, group] of db.list(InTypeGroup)) {
         solver.setGroup(representative, group);
     }

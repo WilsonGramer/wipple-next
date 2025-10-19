@@ -31,7 +31,7 @@ export const visitFunctionExpression: Visit<FunctionExpression> = (visitor, expr
 
     const output = visitor.visit(expression.output, OutputInFunctionExpression, visitExpression);
 
-    const { variables = [] } = visitor.popScope();
+    const { variables = [] } = visitor.popScope().getDefinitions();
     variables.push(...temporaries);
 
     visitor.db.add(node, new IsFunctionExpression(null));
