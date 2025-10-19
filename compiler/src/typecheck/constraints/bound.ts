@@ -115,7 +115,7 @@ export class BoundConstraint extends Constraint {
             (instance) => (instance.default ? "defaultInstances" : "nonDefaultInstances"),
         );
 
-        // Also consider bounds within the current definition (if applicable)
+        // Assume bounds within the current definition have instances available
         const boundInstances =
             definition != null
                 ? solver.db
@@ -142,7 +142,7 @@ export class BoundConstraint extends Constraint {
             const { instances, instantiate } = instanceGroups[i];
             const isLastInstanceSet = i + 1 === instanceGroups.length;
 
-            const candidates: [
+            let candidates: [
                 instanceNode: Node,
                 copy: Solver,
                 inferredParameters: Map<Node, Type>,
@@ -150,6 +150,21 @@ export class BoundConstraint extends Constraint {
 
             for (const instance of instances) {
                 const copy = Solver.from(solver);
+
+                const recursiveInstance = copy.instanceStack.find(
+                    (entry) => entry.instance === instance.node,
+                );
+
+                if (recursiveInstance != null) {
+                    // Override any other candidates
+                    candidates = [[recursiveInstance.node, copy, new Map()]];
+                    break;
+                }
+
+                copy.instanceStack.push({
+                    node: this.node,
+                    instance: instance.node,
+                });
 
                 // These are for the *instance's own* parameters, not
                 // the trait parameters like with the bound
@@ -194,6 +209,8 @@ export class BoundConstraint extends Constraint {
                         throw new Error("missing parameter in bound substitutions");
                     }
                 }
+
+                copy.instanceStack.pop();
 
                 if (!copy.error) {
                     candidates.push([instance.node, copy, instanceInferred]);

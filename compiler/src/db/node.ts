@@ -22,7 +22,7 @@ export class Node {
     constructor(span: Span, code: string) {
         this.id = `<${counter++}>`;
         this.span = span;
-        this.code = code;
+        this.code = code?.trim();
         this.codegen = undefined as any;
     }
 
@@ -54,8 +54,6 @@ export class Node {
             }
 
             s += chalk.black.dim(` @ ${this.span}`);
-
-            s += chalk.black.dim(` ${this.id}`);
         }
 
         return s;

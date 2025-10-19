@@ -15,6 +15,7 @@ export class Solver {
     private constraints = new Constraints();
     private unionFind = new UnionFind();
     private groups = ImmutableMap<Node, ImmutableList<Type>>();
+    instanceStack: { node: Node; instance: Node }[] = [];
     applyQueue: Map<Node, Type>[] = [];
     error = false;
 
@@ -31,6 +32,7 @@ export class Solver {
     replaceWith(other: Solver) {
         this.unionFind = UnionFind.from(other.unionFind);
         this.groups = other.groups;
+        this.instanceStack = [...other.instanceStack];
         this.applyQueue = other.applyQueue;
     }
 
@@ -93,20 +95,23 @@ export class Solver {
                 if (rightNode != null) {
                     this.insert(rightNode, left, right);
                 }
-
-                if (leftNode == null && rightNode == null) {
-                    throw new Error("encountered conflict without any nodes");
-                }
             }
         }
     }
 
     apply(type: Type) {
-        return traverseType(type, (type) => this.applyShallow(type));
+        const seen = new Set<Node>();
+        return traverseType(type, (type) => this.applyShallow(type, seen));
     }
 
-    private applyShallow(type: Type) {
+    private applyShallow(type: Type, seen = new Set<Node>()): Type {
         if (type instanceof Node) {
+            if (seen.has(type)) {
+                return type;
+            }
+
+            seen.add(type);
+
             const representative = this.unionFind.find(type);
             return this.groups.get(representative)?.first() ?? representative;
         } else {

@@ -48,7 +48,7 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         };
     }
 
-    visit(parsedFiles, db);
+    const info = visit(parsedFiles, db);
 
     const solver = new Solver(db);
     for (const [representative, group] of db.list(InTypeGroup)) {
@@ -63,6 +63,10 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
 
     for (const group of groups) {
         for (const node of group.nodes) {
+            if (info.definitions.has(node)) {
+                continue;
+            }
+
             db.add(node, new InTypeGroup(group));
 
             for (const type of group.types) {

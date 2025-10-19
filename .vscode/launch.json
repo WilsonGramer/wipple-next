@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "Compiler",
+            "program": "${workspaceFolder}/compiler/dist/src/index.js",
+            "request": "launch",
+            "skipFiles": ["<node_internals>/**"],
+            "type": "node",
+            "args": ["compile", "test.wipple"]
+        }
+    ]
+}
