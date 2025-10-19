@@ -2,16 +2,14 @@ import { inspect } from "node:util";
 import { LocationRange } from "../syntax";
 
 export class Span {
-    path: string;
     range: LocationRange;
 
-    constructor(path: string, range: LocationRange) {
-        this.path = path;
+    constructor(range: LocationRange) {
         this.range = range;
     }
 
     toString() {
-        return `${this.path}:${this.range.start.line}:${this.range.start.column}-${this.range.end.line}:${this.range.end.column}`;
+        return `${this.range.path}:${this.range.start.line}:${this.range.start.column}-${this.range.end.line}:${this.range.end.column}`;
     }
 
     [inspect.custom]() {
@@ -19,8 +17,8 @@ export class Span {
     }
 
     sort(other: Span): number {
-        if (this.path !== other.path) {
-            return this.path.localeCompare(other.path);
+        if (this.range.path !== other.range.path) {
+            return this.range.path.localeCompare(other.range.path);
         }
 
         if (this.range.start.offset !== other.range.start.offset) {

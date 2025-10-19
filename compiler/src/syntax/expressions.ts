@@ -323,6 +323,7 @@ const operatorParser =
         const [[first], ...rest] = parser.collection("expression", operators, parseElement, true);
 
         const location = (left: Expression, right: Expression): LocationRange => ({
+            path: left.location.path,
             source: parser.slice(left.location.start.offset, right.location.end.offset),
             start: left.location.start,
             end: right.location.end,

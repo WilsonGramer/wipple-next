@@ -7,8 +7,6 @@ import { LocationRange } from "../syntax";
 export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 
 export class Visitor {
-    path: string;
-    code: string;
     db: Db;
 
     scopes = [new Scope()];
@@ -23,14 +21,12 @@ export class Visitor {
     instances = new Map<Node, InstanceDefinition[]>();
     queue = new Queue();
 
-    constructor(path: string, code: string, db: Db) {
-        this.path = path;
-        this.code = code;
+    constructor(db: Db) {
         this.db = db;
     }
 
     node(value: { location: LocationRange }) {
-        const span = new Span(this.path, value.location);
+        const span = new Span(value.location);
         const node = new Node(span, value.location.source);
         this.nodes.add(node);
         return node;

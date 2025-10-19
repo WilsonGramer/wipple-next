@@ -25,7 +25,7 @@ export const testParse = <T>(
     source: string,
     expected: DeepPartial<T>,
 ) => {
-    const parsed = rule(new Parser(source));
+    const parsed = rule(new Parser("test", source));
 
     const removeLocation = (x: any) => {
         if (x !== null && typeof x === "object") {
@@ -43,7 +43,7 @@ export const testParse = <T>(
 };
 
 const parseSourceFile = (path: string, code: string): SourceFile => {
-    const parser = new Parser(code);
+    const parser = new Parser(path, code);
 
     const sourceFile = parser.withLocation<SourceFile>(() => ({
         path,

@@ -19,9 +19,6 @@ const compileCommand = (options: { run: boolean }) =>
     cmd.command({
         name: "compile",
         args: {
-            path: cmd.positional({
-                type: cmd.string,
-            }),
             facts: cmd.flag({
                 long: "facts",
                 type: cmd.boolean,
@@ -40,16 +37,25 @@ const compileCommand = (options: { run: boolean }) =>
                 long: "debug-codegen",
                 type: cmd.boolean,
             }),
+            paths: cmd.restPositionals({
+                type: cmd.string,
+            }),
         },
         handler: (args) => {
-            const code = readFileSync(args.path, "utf8");
+            const files = args.paths.map((path) => ({
+                path,
+                code: readFileSync(path, "utf8"),
+            }));
+
             const filters =
-                args.filterLines.length > 0 ? [{ path: args.path, lines: args.filterLines }] : [];
+                args.filterLines.length > 0
+                    ? [{ path: args.paths.at(-1)!, lines: args.filterLines }]
+                    : [];
 
             const filter = nodeFilter(filters);
 
             const db = new Db();
-            const result = compile(db, { path: args.path, code });
+            const result = compile(db, { files });
 
             if (!result.success) {
                 switch (result.type) {

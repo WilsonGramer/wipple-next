@@ -12,7 +12,7 @@ export const compileTest = (path: string) => {
     const code = readFileSync(resolve(__dirname, path), "utf8");
 
     const db = new Db();
-    const result = compile(db, { path, code });
+    const result = compile(db, { files: [{ path, code }] });
 
     if (!result.success) {
         throw new AssertionError({

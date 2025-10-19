@@ -8,8 +8,7 @@ import { HasConstraints, HasInstance } from "./visit/visitor";
 import { cloneGroup } from "./typecheck/solve";
 
 export interface CompileOptions {
-    path: string;
-    code: string;
+    files: { path: string; code: string }[];
 }
 
 export type CompileResult =
@@ -33,9 +32,9 @@ export class InTypeGroup extends Fact<Group> {
 }
 
 export const compile = (db: Db, options: CompileOptions): CompileResult => {
-    let parsed: SourceFile;
+    let parsedFiles: SourceFile[];
     try {
-        parsed = parse(options.path, options.code);
+        parsedFiles = options.files.map(({ path, code }) => parse(path, code));
     } catch (e) {
         if (!(e instanceof SyntaxError)) {
             throw e;
@@ -49,9 +48,13 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         };
     }
 
-    const info = visit(parsed, db);
+    visit(parsedFiles, db);
 
     const solver = new Solver(db);
+
+    for (const [representative, group] of db.list(InTypeGroup)) {
+        solver.setGroup(representative, group);
+    }
 
     const constraints = db.list(HasConstraints).flatMap(([_node, constraints]) => constraints);
     solver.add(...constraints);
@@ -61,10 +64,6 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
 
     for (const group of groups) {
         for (const node of group.nodes) {
-            if (info.definitions.has(node)) {
-                continue;
-            }
-
             db.add(node, new InTypeGroup(group));
 
             for (const type of group.types) {

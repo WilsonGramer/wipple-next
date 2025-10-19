@@ -38,6 +38,17 @@ export class Solver {
         this.constraints.add(...constraints);
     }
 
+    setGroup(representative: Node, group: Group) {
+        for (const node of group.nodes) {
+            this.unionFind.union(representative, node);
+        }
+
+        this.groups = this.groups.set(
+            this.unionFind.find(representative),
+            ImmutableList(group.types),
+        );
+    }
+
     run() {
         this.constraints.run(this);
     }

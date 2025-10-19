@@ -7,6 +7,7 @@ export interface Location {
 }
 
 export interface LocationRange {
+    path: string;
     source: any;
     start: Location;
     end: Location;
@@ -86,13 +87,15 @@ const lexer = moo.compile({
 });
 
 export class Parser {
+    private path: string;
     private source: string;
     private tokens: Token[];
     private index = 0;
     private stack: { committed: boolean }[] = [];
     private allowLineBreaks = true;
 
-    constructor(source: string) {
+    constructor(path: string, source: string) {
+        this.path = path;
         this.source = source;
         lexer.reset(source);
 
@@ -102,6 +105,7 @@ export class Parser {
                 (token): Token => ({
                     type: token.type!,
                     location: {
+                        path,
                         start: {
                             offset: token.offset,
                             line: token.line,
@@ -127,13 +131,18 @@ export class Parser {
         const result = f();
         const endIndex = this.index;
 
-        const start = this.tokens[startIndex]?.location.start ?? nullLocationRange.start;
-        const end = this.tokens[endIndex - 1]?.location.end ?? nullLocationRange.end;
+        const start = this.tokens[startIndex]?.location.start ?? nullLocationRange(this.path).start;
+        const end = this.tokens[endIndex - 1]?.location.end ?? nullLocationRange(this.path).end;
         const source = this.slice(start.offset, end.offset);
 
         return {
             ...(result as any),
-            location: { source, start, end },
+            location: {
+                path: this.path,
+                source,
+                start,
+                end,
+            } satisfies LocationRange,
         };
     }
 
@@ -195,7 +204,7 @@ export class Parser {
             if (elements.length < minElements) {
                 throw new SyntaxError(
                     `expected ${expected} here`,
-                    this.tokens[this.index - 1]?.location ?? nullLocationRange,
+                    this.tokens[this.index - 1]?.location ?? nullLocationRange(this.path),
                 );
             }
 
@@ -237,7 +246,7 @@ export class Parser {
         if (results.length === 0) {
             throw new SyntaxError(
                 `expected ${expected} here`,
-                this.tokens[this.index - 1]?.location ?? nullLocationRange,
+                this.tokens[this.index - 1]?.location ?? nullLocationRange(this.path),
             );
         }
 
@@ -270,7 +279,7 @@ export class Parser {
 
         throw new SyntaxError(
             `expected ${expected} here`,
-            this.tokens[this.index - 1]?.location ?? nullLocationRange,
+            this.tokens[this.index - 1]?.location ?? nullLocationRange(this.path),
         );
     }
 
@@ -307,7 +316,7 @@ export class Parser {
         if (token == null) {
             throw new SyntaxError(
                 `expected ${types.join(" or ")} here`,
-                this.tokens[this.tokens.length - 1]?.location ?? nullLocationRange,
+                this.tokens[this.tokens.length - 1]?.location ?? nullLocationRange(this.path),
             );
         }
 
@@ -355,8 +364,9 @@ export class Parser {
     }
 }
 
-const nullLocationRange: LocationRange = {
+const nullLocationRange = (path: string): LocationRange => ({
+    path,
     source: "",
     start: { line: 1, column: 1, offset: 0 },
     end: { line: 1, column: 1, offset: 0 },
-};
+});

@@ -19,7 +19,7 @@ export const nodeFilter =
         const { start, end } = node.span.range;
 
         return filters.some((filter) => {
-            if ("path" in filter && filter.path !== node.span.path) {
+            if ("path" in filter && filter.path !== node.span.range.path) {
                 return false;
             }
 
