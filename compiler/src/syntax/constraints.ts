@@ -40,8 +40,14 @@ export const parseConstraints = (parser: Parser): Constraint[] => {
 
 export type Constraint = BoundConstraint | DefaultConstraint;
 
-export const parseConstraint = (parser: Parser) =>
-    parser.alternatives<Constraint>("constraint", [parseBoundConstraint, parseDefaultConstraint]);
+let constraints: ((parser: Parser) => Constraint)[];
+export const parseConstraint = (parser: Parser) => {
+    if (constraints === undefined) {
+        constraints = [parseBoundConstraint, parseDefaultConstraint];
+    }
+
+    return parser.alternatives<Constraint>("constraint", constraints);
+};
 
 export interface BoundConstraint {
     type: "bound";

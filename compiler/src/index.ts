@@ -9,8 +9,8 @@ import { inspect } from "node:util";
 import { nodeFilter } from "./db/filter";
 import lsp from "./lsp";
 import { Codegen } from "./codegen";
-import runtime from "inline:../runtime/runtime.js";
-import nodePrelude from "inline:../runtime/node-prelude.js";
+import runtime from "inline:../../runtime/runtime.js";
+import nodePrelude from "inline:../../runtime/node-prelude.js";
 import { execSync } from "node:child_process";
 import { extname, join } from "node:path";
 
@@ -81,9 +81,7 @@ const compileCommand = (options: { run: boolean }) =>
                 if (!result.success) {
                     switch (result.type) {
                         case "parse": {
-                            console.error(
-                                `${result.location.start.line}:${result.location.start.column}: syntax error: ${result.message}`,
-                            );
+                            console.error(result.message);
 
                             return;
                         }

@@ -26,39 +26,57 @@ export type Expression =
     | BlockExpression
     | UnitExpression;
 
-export const parseExpression = (parser: Parser): Expression =>
-    parser.alternatives<Expression>("expression", [
-        parseFunctionExpression,
-        parseTupleExpression,
-        parseCollectionExpression,
-        parseIsExpression,
-        parseAsExpression,
-        parseAnnotateExpression,
-        parseOperatorExpression,
-    ]);
+let expressions: ((parser: Parser) => Expression)[];
+export const parseExpression = (parser: Parser): Expression => {
+    if (expressions === undefined) {
+        expressions = [
+            parseFunctionExpression,
+            parseTupleExpression,
+            parseCollectionExpression,
+            parseIsExpression,
+            parseAsExpression,
+            parseAnnotateExpression,
+            parseOperatorExpression,
+        ];
+    }
 
-export const parseExpressionElement = (parser: Parser): Expression =>
-    parser.alternatives<Expression>("expression", [
-        parseFormatExpression,
-        parseStructureExpression,
-        parseCallExpression,
-        parseDoExpression,
-        parseWhenExpression,
-        parseIntrinsicExpression,
-        parseAtomicExpression,
-    ]);
+    return parser.alternatives<Expression>("expression", expressions);
+};
 
-export const parseAtomicExpression = (parser: Parser): Expression =>
-    parser.alternatives<Expression>("expression", [
-        parsePlaceholderExpression,
-        parseVariableExpression,
-        parseConstructorExpression,
-        parseNumberExpression,
-        parseStringExpression,
-        parseBlockExpression,
-        parseUnitExpression,
-        parseParenthesizedExpression,
-    ]);
+let expressionElements: ((parser: Parser) => Expression)[];
+export const parseExpressionElement = (parser: Parser): Expression => {
+    if (expressionElements === undefined) {
+        expressionElements = [
+            parseFormatExpression,
+            parseStructureExpression,
+            parseCallExpression,
+            parseDoExpression,
+            parseWhenExpression,
+            parseIntrinsicExpression,
+            parseAtomicExpression,
+        ];
+    }
+
+    return parser.alternatives<Expression>("expression", expressionElements);
+};
+
+let atomicExpressions: ((parser: Parser) => Expression)[];
+export const parseAtomicExpression = (parser: Parser): Expression => {
+    if (atomicExpressions === undefined) {
+        atomicExpressions = [
+            parsePlaceholderExpression,
+            parseVariableExpression,
+            parseConstructorExpression,
+            parseNumberExpression,
+            parseStringExpression,
+            parseBlockExpression,
+            parseUnitExpression,
+            parseParenthesizedExpression,
+        ];
+    }
+
+    return parser.alternatives<Expression>("expression", atomicExpressions);
+};
 
 export const parseParenthesizedExpression = (parser: Parser): Expression =>
     parser.withLocation(() =>
@@ -132,16 +150,14 @@ export interface StructureExpression {
 }
 
 export const parseStructureExpression = (parser: Parser): StructureExpression =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => {
-            const name = parseTypeName(parser);
-            return parser.delimited("leftBrace", "rightBrace", () => ({
-                type: "structure",
-                name,
-                fields: parseStructureExpressionFields(parser),
-            }));
-        }),
-    );
+    parser.withLocation(() => {
+        const name = parseTypeName(parser);
+        return parser.delimited("leftBrace", "rightBrace", () => ({
+            type: "structure",
+            name,
+            fields: parseStructureExpressionFields(parser),
+        }));
+    });
 
 export interface StructureExpressionField {
     location: LocationRange;
@@ -158,11 +174,8 @@ export const parseStructureExpressionField = (parser: Parser): StructureExpressi
         return { name, value };
     });
 
-export const parseStructureExpressionFields = (parser: Parser): StructureExpressionField[] => {
-    return parser.allowingLineBreaks(false, () =>
-        parser.many("field", parseStructureExpressionField, "lineBreak"),
-    );
-};
+export const parseStructureExpressionFields = (parser: Parser): StructureExpressionField[] =>
+    parser.many("field", parseStructureExpressionField, ["lineBreak"]);
 
 export interface BlockExpression {
     type: "block";
@@ -172,13 +185,10 @@ export interface BlockExpression {
 
 export const parseBlockExpression = (parser: Parser): BlockExpression =>
     parser.withLocation(() =>
-        parser.delimited("leftBrace", "rightBrace", () => {
-            parser.commit();
-            return {
-                type: "block",
-                statements: parser.optional("statements", parseStatements, []),
-            };
-        }),
+        parser.delimited("leftBrace", "rightBrace", () => ({
+            type: "block",
+            statements: parser.optional(parseStatements, []),
+        })),
     );
 
 export interface UnitExpression {
@@ -201,13 +211,11 @@ export interface FormatExpression {
 }
 
 export const parseFormatExpression = (parser: Parser): FormatExpression =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => {
-            const string = parseString(parser);
-            const inputs = parser.many("expression", parseAtomicExpression);
-            return { type: "format", string, inputs };
-        }),
-    );
+    parser.withLocation(() => {
+        const string = parseString(parser);
+        const inputs = parser.many("expression", parseAtomicExpression);
+        return { type: "format", string, inputs };
+    });
 
 export interface CallExpression {
     type: "call";
@@ -217,13 +225,11 @@ export interface CallExpression {
 }
 
 export const parseCallExpression = (parser: Parser): CallExpression =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => ({
-            type: "call",
-            function: parseAtomicExpression(parser),
-            inputs: parser.many("expression", parseAtomicExpression),
-        })),
-    );
+    parser.withLocation(() => ({
+        type: "call",
+        function: parseAtomicExpression(parser),
+        inputs: parser.many("expression", parseAtomicExpression),
+    }));
 
 export interface DoExpression {
     type: "do";
@@ -232,13 +238,11 @@ export interface DoExpression {
 }
 
 export const parseDoExpression = (parser: Parser): DoExpression =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => {
-            parser.next("doKeyword");
-            parser.commit();
-            return { type: "do", input: parseAtomicExpression(parser) };
-        }),
-    );
+    parser.withLocation(() => {
+        parser.next("doKeyword");
+        parser.commit();
+        return { type: "do", input: parseAtomicExpression(parser) };
+    });
 
 export interface WhenExpression {
     type: "when";
@@ -248,19 +252,15 @@ export interface WhenExpression {
 }
 
 export const parseWhenExpression = (parser: Parser): WhenExpression =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => {
-            parser.next("whenKeyword");
-            parser.commit();
-            return {
-                type: "when",
-                input: parseAtomicExpression(parser),
-                arms: parser.delimited("leftBrace", "rightBrace", () =>
-                    parser.optional("arms", parseArms, []),
-                ),
-            };
-        }),
-    );
+    parser.withLocation(() => {
+        parser.next("whenKeyword");
+        parser.commit();
+        return {
+            type: "when",
+            input: parseAtomicExpression(parser),
+            arms: parser.delimited("leftBrace", "rightBrace", () => parser.optional(parseArms, [])),
+        };
+    });
 
 export interface Arm {
     location: LocationRange;
@@ -269,17 +269,14 @@ export interface Arm {
 }
 
 export const parseArm = (parser: Parser): Arm =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => {
-            const pattern = parsePattern(parser);
-            parser.next("functionOperator");
-            const value = parseExpression(parser);
-            return { pattern, value };
-        }),
-    );
+    parser.withLocation(() => {
+        const pattern = parsePattern(parser);
+        parser.next("functionOperator");
+        const value = parseExpression(parser);
+        return { pattern, value };
+    });
 
-export const parseArms = (parser: Parser): Arm[] =>
-    parser.allowingLineBreaks(false, () => parser.many("arm", parseArm, "lineBreak"));
+export const parseArms = (parser: Parser): Arm[] => parser.many("arm", parseArm, ["lineBreak"]);
 
 export interface IntrinsicExpression {
     type: "intrinsic";
@@ -289,21 +286,15 @@ export interface IntrinsicExpression {
 }
 
 export const parseIntrinsicExpression = (parser: Parser): IntrinsicExpression =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => {
-            parser.next("intrinsicKeyword");
-            parser.commit();
-            return {
-                type: "intrinsic",
-                name: parseString(parser),
-                inputs: parser.optional(
-                    "expressions",
-                    () => parser.many("expression", parseAtomicExpression),
-                    [],
-                ),
-            };
-        }),
-    );
+    parser.withLocation(() => {
+        parser.next("intrinsicKeyword");
+        parser.commit();
+        return {
+            type: "intrinsic",
+            name: parseString(parser),
+            inputs: parser.optional(() => parser.many("expression", parseAtomicExpression), []),
+        };
+    });
 
 export interface OperatorExpression {
     type: "operator";
@@ -399,14 +390,12 @@ export interface TupleExpression {
 }
 
 export const parseTupleExpression = (parser: Parser): TupleExpression =>
-    parser.allowingLineBreaks(true, () =>
-        parser.withLocation(() => ({
-            type: "tuple",
-            elements: parser
-                .collection("tuple", ["tupleOperator"], parseExpressionElement)
-                .map(([element]) => element),
-        })),
-    );
+    parser.withLocation(() => ({
+        type: "tuple",
+        elements: parser
+            .collection("tuple", ["tupleOperator"], parseExpressionElement)
+            .map(([element]) => element),
+    }));
 
 export interface CollectionExpression {
     type: "collection";
@@ -415,14 +404,12 @@ export interface CollectionExpression {
 }
 
 export const parseCollectionExpression = (parser: Parser): CollectionExpression =>
-    parser.allowingLineBreaks(true, () =>
-        parser.withLocation(() => ({
-            type: "collection",
-            elements: parser
-                .collection("collection", ["collectionOperator"], parseExpressionElement)
-                .map(([element]) => element),
-        })),
-    );
+    parser.withLocation(() => ({
+        type: "collection",
+        elements: parser
+            .collection("collection", ["collectionOperator"], parseExpressionElement)
+            .map(([element]) => element),
+    }));
 
 export interface IsExpression {
     type: "is";
@@ -486,10 +473,9 @@ export const parseFunctionExpression = (parser: Parser): FunctionExpression =>
         output: parseExpression(parser),
     }));
 
-export const parseFunctionExpressionInputs = (parser: Parser): Pattern[] =>
-    parser.allowingLineBreaks(false, () => {
-        const inputs = parser.many("pattern", parseAtomicPattern);
-        parser.next("functionOperator");
-        parser.commit();
-        return inputs;
-    });
+export const parseFunctionExpressionInputs = (parser: Parser): Pattern[] => {
+    const inputs = parser.many("pattern", parseAtomicPattern);
+    parser.next("functionOperator");
+    parser.commit();
+    return inputs;
+};

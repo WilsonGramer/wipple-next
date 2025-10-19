@@ -21,31 +21,44 @@ export type Pattern =
     | TuplePattern
     | AnnotatePattern;
 
-export const parsePattern = (parser: Parser): Pattern =>
-    parser.alternatives<Pattern>("pattern", [
-        parseTuplePattern,
-        parseOrPattern,
-        parseAnnotatePattern,
-        parsePatternElement,
-    ]);
+let patterns: ((parser: Parser) => Pattern)[];
+export const parsePattern = (parser: Parser): Pattern => {
+    if (patterns === undefined) {
+        patterns = [parseTuplePattern, parseOrPattern, parseAnnotatePattern, parsePatternElement];
+    }
 
-export const parsePatternElement = (parser: Parser): Pattern =>
-    parser.alternatives<Pattern>("pattern", [
-        parseStructurePattern,
-        parseConstructorPattern,
-        parseSetPattern,
-        parseAtomicPattern,
-    ]);
+    return parser.alternatives<Pattern>("pattern", patterns);
+};
 
-export const parseAtomicPattern = (parser: Parser): Pattern =>
-    parser.alternatives<Pattern>("pattern", [
-        parseWildcardPattern,
-        parseVariablePattern,
-        parseNumberPattern,
-        parseStringPattern,
-        parseUnitPattern,
-        parseParenthesizedPattern,
-    ]);
+let patternElements: ((parser: Parser) => Pattern)[];
+export const parsePatternElement = (parser: Parser): Pattern => {
+    if (patternElements === undefined) {
+        patternElements = [
+            parseStructurePattern,
+            parseConstructorPattern,
+            parseSetPattern,
+            parseAtomicPattern,
+        ];
+    }
+
+    return parser.alternatives<Pattern>("pattern", patternElements);
+};
+
+let atomicPatterns: ((parser: Parser) => Pattern)[];
+export const parseAtomicPattern = (parser: Parser): Pattern => {
+    if (atomicPatterns === undefined) {
+        atomicPatterns = [
+            parseWildcardPattern,
+            parseVariablePattern,
+            parseNumberPattern,
+            parseStringPattern,
+            parseUnitPattern,
+            parseParenthesizedPattern,
+        ];
+    }
+
+    return parser.alternatives<Pattern>("pattern", atomicPatterns);
+};
 
 export const parseParenthesizedPattern = (parser: Parser): Pattern =>
     parser.withLocation(() =>
@@ -111,9 +124,7 @@ export const parseStructurePattern = (parser: Parser): StructurePattern =>
         type: "structure",
         name: parseTypeName(parser),
         fields: parser.delimited("leftBrace", "rightBrace", () =>
-            parser.allowingLineBreaks(false, () =>
-                parser.many("field", parseStructurePatternField, "lineBreak"),
-            ),
+            parser.many("field", parseStructurePatternField, ["lineBreak"]),
         ),
     }));
 
@@ -127,6 +138,7 @@ export const parseStructurePatternField = (parser: Parser): StructurePatternFiel
     parser.withLocation(() => {
         const name = parseVariableName(parser);
         parser.next("assignOperator");
+        parser.commit();
         const value = parsePattern(parser);
         return { name, value };
     });
@@ -178,12 +190,10 @@ export interface SetPattern {
 }
 
 export const parseSetPattern = (parser: Parser): SetPattern =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => {
-            parser.next("setKeyword");
-            return { type: "set", variable: parseVariableName(parser) };
-        }),
-    );
+    parser.withLocation(() => {
+        parser.next("setKeyword");
+        return { type: "set", variable: parseVariableName(parser) };
+    });
 
 export interface ConstructorPattern {
     type: "constructor";
@@ -193,17 +203,11 @@ export interface ConstructorPattern {
 }
 
 export const parseConstructorPattern = (parser: Parser): ConstructorPattern =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => ({
-            type: "constructor",
-            constructor: parseConstructorName(parser),
-            elements: parser.optional(
-                "inputs",
-                () => parser.many("pattern", parseAtomicPattern),
-                [],
-            ),
-        })),
-    );
+    parser.withLocation(() => ({
+        type: "constructor",
+        constructor: parseConstructorName(parser),
+        elements: parser.optional(() => parser.many("pattern", parseAtomicPattern), []),
+    }));
 
 export interface AnnotatePattern {
     type: "annotate";

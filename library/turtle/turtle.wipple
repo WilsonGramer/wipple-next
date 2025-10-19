@@ -1,0 +1,69 @@
+-- The distance (in pixels) the turtle should move.
+Distance : type Number
+
+instance (Describe-Type Distance "distance")
+
+-- Specify a distance in pixels.
+pixels :: Number -> Distance
+pixels : Distance
+
+_ where (Error ("Missing `pixels` after `_`" Source ; Error-Description ("Try rewriting this code as `(_ pixels)`, or double-check your parentheses." Source))) =>
+  instance (Mismatch Number Distance)
+
+-- Move the turtle forward by a distance.
+forward :: Distance -> ()
+forward : (Distance pixels) -> external "forward" pixels
+
+-- Move the turtle backward by a distance.
+backward :: Distance -> ()
+backward : (Distance pixels) -> external "backward" pixels
+
+-- An arc.
+Arc : type {
+  radius :: Distance
+  angle :: Angle
+}
+
+-- Move the turtle along an arc.
+arc :: Arc -> ()
+arc : {
+  radius : (Distance radius)
+  angle : (Angle angle)
+} -> external "arc" (radius ; angle)
+
+-- Rotate the turtle counterclockwise by an angle.
+left :: Angle -> ()
+left : (Angle degrees) -> external "left" degrees
+
+-- Rotate the turtle clockwise by an angle.
+right :: Angle -> ()
+right : (Angle degrees) -> external "right" degrees
+
+-- Go to a position on the screen without drawing.
+go :: Distance Distance -> ()
+go : (Distance x) (Distance y) -> external "go" (x ; y)
+
+-- Set the pen color.
+color :: Color -> ()
+color : (Color color) -> external "color" color
+
+-- Draw a path and fill it with a color.
+fill :: result => Color {result} -> result
+fill : (Color color) body -> do {
+  external "beginPath" ()
+  result : do body
+  external "endPath" color
+  result
+}
+
+-- Set the speed of the turtle, from `0` to `100`. The default speed is `50`.
+speed :: Number -> ()
+speed : value -> external "speed" value
+
+-- An animal to use instead of the turtle.
+Animal : type Text
+instance (Describe-Type Animal "animal")
+
+-- Change the animal being displayed.
+animal :: Animal -> ()
+animal : (Animal name) -> external "animal" name

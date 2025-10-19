@@ -92,7 +92,7 @@ export class Parser {
     private tokens: Token[];
     private index = 0;
     private stack: { committed: boolean }[] = [];
-    private allowLineBreaks = true;
+    private cache: Map<number, Map<any, [any, number]>> = new Map();
 
     constructor(path: string, source: string) {
         this.path = path;
@@ -122,8 +122,6 @@ export class Parser {
                 }),
             )
             .toArray();
-
-        this.consume();
     }
 
     withLocation<T>(f: () => Omit<T, "location">): T & { location: LocationRange } {
@@ -147,18 +145,12 @@ export class Parser {
     }
 
     delimited<T>(left: string, right: string, f: () => T): T {
-        const initialIndex = this.index;
-        try {
-            this.next(left);
-            this.allowingLineBreaks(true, () => this.consume());
-            const result = f();
-            this.allowingLineBreaks(true, () => this.consume());
-            this.next(right);
-            return result;
-        } catch (e) {
-            this.index = initialIndex;
-            throw e;
-        }
+        this.next(left);
+        this.try("lineBreak");
+        const result = f();
+        this.try("lineBreak");
+        this.next(right);
+        return result;
     }
 
     collection<T, S extends string[]>(
@@ -169,26 +161,38 @@ export class Parser {
     ): [T, S[number] | undefined][] {
         const empty = (parser: Parser) =>
             parser.delimited("leftParenthesis", "rightParenthesis", () => {
+                parser.try("lineBreak");
                 parser.next(...separators);
+                parser.try("lineBreak");
                 return [];
             });
 
         const nonEmpty = (parser: Parser) => {
+            const initialIndex = parser.index;
+
+            parser.try("lineBreak");
+
             const elements: [T, S[number] | undefined][] = [[f(parser), undefined]];
+            let hasTrailingSeparator = false;
             while (true) {
-                const separator = parser.allowingLineBreaks(true, () => parser.try(...separators));
+                parser.try("lineBreak");
+
+                const separator = parser.try(...separators);
                 if (separator == null) {
                     break;
+                } else {
+                    hasTrailingSeparator = true;
                 }
 
+                parser.try("lineBreak");
+
+                const initialIndex = parser.index;
                 try {
                     const element = f(parser);
                     elements.push([element, separator]);
-                } catch (e) {
-                    if (!(e instanceof SyntaxError)) {
-                        throw e;
-                    }
-
+                    hasTrailingSeparator = false;
+                } catch {
+                    parser.index = initialIndex;
                     break;
                 }
             }
@@ -197,14 +201,15 @@ export class Parser {
                 return elements;
             }
 
-            const hasTrailingSeparator = parser.try(...separators); // trailing separator
-
             const minElements = hasTrailingSeparator ? 1 : 2;
 
             if (elements.length < minElements) {
+                const token = parser.tokens[parser.index - 1];
+                parser.index = initialIndex;
+
                 throw new SyntaxError(
                     `expected ${expected} here`,
-                    this.tokens[this.index - 1]?.location ?? nullLocationRange(this.path),
+                    token?.location ?? nullLocationRange(this.path),
                 );
             }
 
@@ -214,15 +219,12 @@ export class Parser {
         return operator ? nonEmpty(this) : this.alternatives(expected, [empty, nonEmpty]);
     }
 
-    many<T>(expected: string, f: (parser: Parser) => T, separator?: string): T[] {
+    many<T>(expected: string, f: (parser: Parser) => T, separators: string[] = []): T[] {
+        const initialIndex = this.index;
+
         const results: T[] = [];
         while (true) {
-            if (separator != null) {
-                while (this.try(separator));
-            }
-
-            const entry = { committed: false };
-            this.stack.push(entry);
+            this.try(...separators);
 
             const initialIndex = this.index;
 
@@ -230,8 +232,7 @@ export class Parser {
             try {
                 result = f(this);
             } catch (e) {
-                if (!(e instanceof SyntaxError) || entry.committed) {
-                    this.stack.pop();
+                if (!(e instanceof SyntaxError)) {
                     throw e;
                 } else {
                     this.index = initialIndex;
@@ -239,14 +240,16 @@ export class Parser {
                 }
             }
 
-            this.stack.pop();
             results.push(result);
         }
 
         if (results.length === 0) {
+            const token = this.tokens[this.index - 1];
+            this.index = initialIndex;
+
             throw new SyntaxError(
                 `expected ${expected} here`,
-                this.tokens[this.index - 1]?.location ?? nullLocationRange(this.path),
+                token?.location ?? nullLocationRange(this.path),
             );
         }
 
@@ -254,22 +257,35 @@ export class Parser {
     }
 
     alternatives<T>(expected: string, alternatives: ((parser: Parser) => T)[]): T {
+        const initialIndex = this.index;
+
+        if (!this.cache.has(initialIndex)) {
+            this.cache.set(initialIndex, new Map());
+        }
+
+        const cached = this.cache.get(initialIndex)!;
+        if (cached.has(alternatives)) {
+            const [result, index] = cached.get(alternatives)!;
+            this.index = index;
+            return result;
+        }
+
         const entry = { committed: false };
         this.stack.push(entry);
 
         for (const f of alternatives) {
-            const initialIndex = this.index;
+            this.index = initialIndex;
 
             try {
                 const result = f(this);
                 this.stack.pop();
+                cached.set(alternatives, [result, this.index]);
                 return result;
             } catch (e) {
                 if (!(e instanceof SyntaxError) || entry.committed) {
                     this.stack.pop();
                     throw e;
                 } else {
-                    this.index = initialIndex;
                     continue;
                 }
             }
@@ -277,26 +293,31 @@ export class Parser {
 
         this.stack.pop();
 
+        const token = this.tokens[this.index - 1];
+        this.index = initialIndex;
+
         throw new SyntaxError(
             `expected ${expected} here`,
-            this.tokens[this.index - 1]?.location ?? nullLocationRange(this.path),
+            token?.location ?? nullLocationRange(this.path),
         );
     }
 
-    optional<T>(expected: string, f: (parser: Parser) => T, defaultValue: T): T {
-        return this.alternatives(expected, [f, () => defaultValue]);
+    optional<T>(f: (parser: Parser) => T, defaultValue: T): T {
+        const initialIndex = this.index;
+        try {
+            return f(this);
+        } catch (e) {
+            if (!(e instanceof SyntaxError)) {
+                throw e;
+            }
+
+            this.index = initialIndex;
+            return defaultValue;
+        }
     }
 
     commit() {
         this.stack.at(-1)!.committed = true;
-    }
-
-    allowingLineBreaks<T>(allow: boolean, f: () => T): T {
-        const prevAllowLineBreaks = this.allowLineBreaks;
-        this.allowLineBreaks = allow;
-        const result = f();
-        this.allowLineBreaks = prevAllowLineBreaks;
-        return result;
     }
 
     try<S extends string[]>(...types: [...S]): S[number] | undefined {
@@ -306,7 +327,6 @@ export class Parser {
         }
 
         this.index++;
-        this.consume();
 
         return token.type;
     }
@@ -328,7 +348,6 @@ export class Parser {
         }
 
         this.index++;
-        this.consume();
 
         return {
             type: token.type,
@@ -345,21 +364,6 @@ export class Parser {
         const token = this.tokens[this.index];
         if (token != null) {
             throw new SyntaxError(`unexpected ${token.type}`, token.location);
-        }
-    }
-
-    private consume() {
-        while (true) {
-            const token = this.tokens[this.index];
-            if (token == null) {
-                break;
-            }
-
-            if (this.allowLineBreaks && token.type === "lineBreak") {
-                this.index++;
-            } else {
-                break;
-            }
         }
     }
 }

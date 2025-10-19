@@ -13,7 +13,8 @@ export abstract class Fact<T> {
         if (this.value === null) {
             return this.constructor.name;
         } else {
-            const displayed = this.display != null ? this.display(this.value) ?? "..." : this.value;
+            const displayed =
+                this.display != null ? (this.display(this.value) ?? "...") : this.value;
 
             return `${this.constructor.name}(${displayed})`;
         }

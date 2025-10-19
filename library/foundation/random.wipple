@@ -1,0 +1,22 @@
+Random : range result => trait (range -> result)
+
+-- Produce a random value within the provided range.
+random-in :: range -> result where (Random range result)
+random-in : Random
+
+-- Produce a random value.
+random :: result where (Random () result)
+random : Random ()
+
+instance (Random (Range Number) Number) : {
+  min : min
+  max : max
+} -> do {
+  (max >= min) . assert "`max` must be greater than `min`"
+  intrinsic "random-number" min max
+}
+
+element => instance (Random (List element) (Maybe element)) :
+  list -> list . nth (random-in (0 to count list))
+
+instance (Random () Boolean) : () -> floor (random-in (0 to 2)) = 1

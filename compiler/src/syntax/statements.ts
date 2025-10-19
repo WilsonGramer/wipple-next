@@ -23,13 +23,7 @@ export type Statement =
     | EmptyStatement;
 
 export const parseStatements = (parser: Parser): Statement[] =>
-    parser.allowingLineBreaks(false, () =>
-        parser.optional(
-            "statements",
-            () => parser.many("statement", parseStatement, "lineBreak"),
-            [],
-        ),
-    );
+    parser.optional(() => parser.many("statement", parseStatement, ["lineBreak"]), []);
 
 export const parseStatement = (parser: Parser): Statement =>
     parser.alternatives<Statement>("statement", [
@@ -57,7 +51,7 @@ export const parseTypeDefinitionStatement = (parser: Parser): TypeDefinitionStat
         const attributes = parseAttributes(parser);
         const name = parseTypeName(parser);
         parser.next("assignOperator");
-        const parameters = parser.optional("type parameters", parseTypeParameters, []);
+        const parameters = parser.optional(parseTypeParameters, []);
         const representation = parseTypeRepresentation(parser);
         return { type: "typeDefinition", comments, attributes, name, parameters, representation };
     });
@@ -97,9 +91,7 @@ export const parseStructureTypeRepresentation = (parser: Parser): StructureTypeR
         return {
             type: "structure",
             fields: parser.delimited("leftBrace", "rightBrace", () =>
-                parser.allowingLineBreaks(false, () =>
-                    parser.many("field definition", parseFieldDefinition, "lineBreak"),
-                ),
+                parser.many("field definition", parseFieldDefinition, ["lineBreak"]),
             ),
         };
     });
@@ -131,9 +123,7 @@ export const parseEnumerationTypeRepresentation = (parser: Parser): EnumerationT
         return {
             type: "enumeration",
             variants: parser.delimited("leftBrace", "rightBrace", () =>
-                parser.allowingLineBreaks(false, () =>
-                    parser.many("variant definition", parseVariantDefinition, "lineBreak"),
-                ),
+                parser.many("variant definition", parseVariantDefinition, ["lineBreak"]),
             ),
         };
     });
@@ -145,20 +135,14 @@ export interface VariantDefinition {
 }
 
 export const parseVariantDefinition = (parser: Parser): VariantDefinition =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => {
-            const name = parseConstructorName(parser);
-            parser.commit();
-            return {
-                name,
-                elements: parser.optional(
-                    "elements",
-                    () => parser.many("type", parseAtomicType),
-                    [],
-                ),
-            };
-        }),
-    );
+    parser.withLocation(() => {
+        const name = parseConstructorName(parser);
+        parser.commit();
+        return {
+            name,
+            elements: parser.optional(() => parser.many("type", parseAtomicType), []),
+        };
+    });
 
 export interface TraitDefinitionStatement {
     type: "traitDefinition";
@@ -176,7 +160,7 @@ export const parseTraitDefinitionStatement = (parser: Parser): TraitDefinitionSt
         const attributes = parseAttributes(parser);
         const name = parseTypeName(parser);
         parser.next("assignOperator");
-        const parameters = parser.optional("type parameters", parseTypeParameters, []);
+        const parameters = parser.optional(parseTypeParameters, []);
         const constraints = parseTraitConstraints(parser);
         return { type: "traitDefinition", comments, attributes, name, parameters, constraints };
     });
@@ -193,7 +177,7 @@ export const parseTraitConstraints = (parser: Parser): TraitConstraints =>
         parser.commit();
         return {
             type: parseAtomicType(parser),
-            constraints: parser.optional("constraints", parseConstraints, []),
+            constraints: parser.optional(parseConstraints, []),
         };
     });
 
@@ -227,7 +211,7 @@ export const parseConstantConstraints = (parser: Parser): ConstantConstraints =>
         parser.commit();
         return {
             type: parseType(parser),
-            constraints: parser.optional("constraints", parseConstraints, []),
+            constraints: parser.optional(parseConstraints, []),
         };
     });
 
@@ -241,23 +225,17 @@ export interface InstanceDefinitionStatement {
 }
 
 export const parseInstanceDefinitionStatement = (parser: Parser): InstanceDefinitionStatement =>
-    parser.withLocation(() => {
-        return {
-            type: "instanceDefinition",
-            comments: parseComments(parser),
-            attributes: parseAttributes(parser),
-            constraints: parseInstanceConstraints(parser),
-            value: parser.optional(
-                "value",
-                () => {
-                    parser.next("assignOperator");
-                    parser.commit();
-                    return parseExpression(parser);
-                },
-                undefined,
-            ),
-        };
-    });
+    parser.withLocation(() => ({
+        type: "instanceDefinition",
+        comments: parseComments(parser),
+        attributes: parseAttributes(parser),
+        constraints: parseInstanceConstraints(parser),
+        value: parser.optional(() => {
+            parser.next("assignOperator");
+            parser.commit();
+            return parseExpression(parser);
+        }, undefined),
+    }));
 
 export interface InstanceConstraints {
     location: LocationRange;
@@ -270,7 +248,7 @@ export const parseInstanceConstraints = (parser: Parser): InstanceConstraints =>
         parser.next("instanceKeyword");
         return {
             bound: parseBoundConstraint(parser),
-            constraints: parser.optional("constraints", parseConstraints, []),
+            constraints: parser.optional(parseConstraints, []),
         };
     });
 
@@ -287,6 +265,7 @@ export const parseAssignmentStatement = (parser: Parser): AssignmentStatement =>
         const comments = parseComments(parser);
         const pattern = parsePattern(parser);
         parser.next("assignOperator");
+        parser.commit();
         const value = parseExpression(parser);
         return { type: "assignment", comments, pattern, value };
     });
@@ -312,4 +291,4 @@ export interface EmptyStatement {
 }
 
 export const parseComments = (parser: Parser): Token[] =>
-    parser.optional("comments", () => parser.many("comment", parseComment, "lineBreak"), []);
+    parser.optional(() => parser.many("comment", parseComment, ["lineBreak"]), []);

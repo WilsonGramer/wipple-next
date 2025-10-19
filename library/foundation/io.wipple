@@ -1,0 +1,42 @@
+-- Produce a piece of `Text` describing the value.
+@(language : "describe")
+Describe : (value : Text) => trait (value -> Text)
+
+value => default instance (Describe value) : ... where (Error ("Can't describe _" value ; Error-Description ("You can't display _ on the screen or use it in placeholders because it can't be converted into text." value)))
+
+-- Produce a piece of `Text` describing the value.
+describe :: (value : Text) => value -> Text where (Describe value)
+describe : Describe
+
+-- Display a value on the screen.
+show :: (value : Text) => value -> () where (Describe value)
+show : value -> intrinsic "display" (describe value)
+
+print :: (value : Text) => value -> () where (Error ("Output is written using `show` in Wipple, not `_`" Source ; Error-Description ("Output is written using `show` in Wipple, not `_`" Source)))
+print : ...
+
+println :: (value : Text) => value -> () where (Error ("Output is written using `show` in Wipple, not `_`" Source ; Error-Description ("Output is written using `show` in Wipple, not `_`" Source)))
+println : ...
+
+display :: (value : Text) => value -> () where (Error ("Output is written using `show` in Wipple, not `_`" Source ; Error-Description ("Output is written using `show` in Wipple, not `_`" Source)))
+display : ...
+
+instance (Describe Text) : text -> text
+instance (Describe Number) : n -> intrinsic "number-to-text" n
+instance (Describe Boolean) : b -> if b {"True"} {"False"}
+value => instance (Describe (Maybe value)) : m -> when m {
+  Some value -> "Some _" value
+  None -> "None"
+} where (Describe value)
+
+-- Convert from a piece of `Text` to a value.
+Read : value => trait (Text -> Maybe value)
+
+value => default instance (Read value) : ... where (Error ("Can't read _ from input" value ; Error-Description ("You can't use `prompt` with _ because there's no way to convert the contents of a text field into _." value value)))
+
+instance (Read Text) : Some
+instance (Read Number) : text -> intrinsic "text-to-number" text
+
+-- Ask the user to enter a value.
+prompt :: Text -> value where (Read value)
+prompt : prompt -> intrinsic "prompt" prompt Read

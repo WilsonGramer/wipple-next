@@ -2,7 +2,7 @@ import { Parser, LocationRange, Token } from "./parser";
 import { parseAttributeName, parseString } from "./tokens";
 
 export const parseAttributes = (parser: Parser): Attribute[] =>
-    parser.optional("attributes", () => parser.many("attribute", parseAttribute), []);
+    parser.optional(() => parser.many("attribute", parseAttribute, ["lineBreak"]), []);
 
 export interface Attribute {
     location: LocationRange;

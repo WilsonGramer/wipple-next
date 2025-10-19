@@ -1,0 +1,17 @@
+@(language : "build-collection")
+Build-Collection : (infer element) collection => trait (element -> collection -> collection)
+
+-- Can't create [`collection`] from items that are [`element`].
+--
+-- Creating [`collection`] from these items isn't supported. Double-check that
+-- you're providing the right kinds of items here.
+[default] [error] instance (Build-Collection element collection) where (collection :: List element)
+
+Initial-Collection : (infer element) collection => trait collection
+
+instance (Build-Collection element (List element)) : append
+
+instance (Build-Collection (key ; value) (Dictionary key value)) where (Equal key) (Hash key) :
+  (key ; value) -> insert-entry key value
+
+instance (Build-Collection element (Set element)) where (Equal element) (Hash element) : insert

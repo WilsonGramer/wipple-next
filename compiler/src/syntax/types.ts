@@ -10,26 +10,39 @@ export type Type =
     | ParameterType
     | TupleType;
 
-export const parseType = (parser: Parser): Type =>
-    parser.alternatives<Type>("type", [
-        parseTupleType,
-        parseFunctionType,
-        parseAnnotatedParameterType,
-        parseTypeElement,
-    ]);
+let types: ((parser: Parser) => Type)[];
+export const parseType = (parser: Parser): Type => {
+    if (types === undefined) {
+        types = [parseTupleType, parseFunctionType, parseAnnotatedParameterType, parseTypeElement];
+    }
 
-export const parseTypeElement = (parser: Parser): Type =>
-    parser.alternatives<Type>("type", [parseParameterizedType, parseAtomicType]);
+    return parser.alternatives<Type>("type", types);
+};
 
-export const parseAtomicType = (parser: Parser): Type =>
-    parser.alternatives<Type>("type", [
-        parsePlaceholderType,
-        parseParameterType,
-        parseNamedType,
-        parseBlockType,
-        parseUnitType,
-        parseParenthesizedType,
-    ]);
+let typeElements: ((parser: Parser) => Type)[];
+export const parseTypeElement = (parser: Parser): Type => {
+    if (typeElements === undefined) {
+        typeElements = [parseParameterizedType, parseAtomicType];
+    }
+
+    return parser.alternatives<Type>("type", typeElements);
+};
+
+let atomicTypes: ((parser: Parser) => Type)[];
+export const parseAtomicType = (parser: Parser): Type => {
+    if (atomicTypes === undefined) {
+        atomicTypes = [
+            parsePlaceholderType,
+            parseParameterType,
+            parseNamedType,
+            parseBlockType,
+            parseUnitType,
+            parseParenthesizedType,
+        ];
+    }
+
+    return parser.alternatives<Type>("type", atomicTypes);
+};
 
 export const parseParenthesizedType = (parser: Parser): Type =>
     parser.withLocation(() =>
@@ -96,13 +109,12 @@ export const parseFunctionType = (parser: Parser): FunctionType =>
         return { type: "function", inputs, output };
     });
 
-export const parseFunctionTypeInputs = (parser: Parser): Type[] =>
-    parser.allowingLineBreaks(false, () => {
-        const inputs = parser.many("type", parseAtomicType);
-        parser.next("functionOperator");
-        parser.commit();
-        return inputs;
-    });
+export const parseFunctionTypeInputs = (parser: Parser): Type[] => {
+    const inputs = parser.many("type", parseAtomicType);
+    parser.next("functionOperator");
+    parser.commit();
+    return inputs;
+};
 
 export interface BlockType {
     type: "block";
@@ -145,10 +157,8 @@ export const parseTupleType = (parser: Parser): TupleType =>
     }));
 
 export const parseParameterizedType = (parser: Parser): NamedType =>
-    parser.withLocation(() =>
-        parser.allowingLineBreaks(false, () => ({
-            type: "named",
-            name: parseTypeName(parser),
-            parameters: parser.many("type", parseAtomicType),
-        })),
-    );
+    parser.withLocation(() => ({
+        type: "named",
+        name: parseTypeName(parser),
+        parameters: parser.many("type", parseAtomicType),
+    }));

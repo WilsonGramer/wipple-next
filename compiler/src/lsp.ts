@@ -57,7 +57,7 @@ export default () => {
                         diagnostics.push({
                             severity: lsp.DiagnosticSeverity.Error,
                             range: convertRange(result.location),
-                            message: `syntax error: ${result.message}`,
+                            message: result.message,
                             source: "wipple",
                         });
 

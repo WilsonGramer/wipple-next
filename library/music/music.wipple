@@ -1,0 +1,18 @@
+Music : type Text
+
+-- Play a melody or rhythm on an instrument.
+play :: Dropdown Music -> ()
+play : (Dropdown instrument) (Music music) ->
+  external "play" (instrument ; music)
+
+-- Set the tempo of your song, in beats per minute. The default tempo is 120.
+tempo :: Number -> ()
+tempo : tempo -> external "tempo" tempo
+
+-- Play all the melodies in the block at the same time.
+together :: body => {body} -> ()
+together : body -> do {
+  external "beginTogether" ()
+  do body
+  external "endTogether" ()
+}

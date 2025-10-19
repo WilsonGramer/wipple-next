@@ -15,9 +15,7 @@ export const compileTest = (path: string) => {
     const result = compile(db, { files: [{ path, code }] });
 
     if (!result.success) {
-        throw new AssertionError({
-            message: `${result.location.start.line}:${result.location.start.column}: syntax error: ${result.message}`,
-        });
+        throw new AssertionError({ message: result.message });
     }
 
     const placeholders = [
