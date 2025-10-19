@@ -2,9 +2,10 @@ import { Fact, Db, Node } from "./db";
 import parse, { SourceFile, SyntaxError, LocationRange } from "./syntax";
 import { visit } from "./visit";
 import { Group, Solver } from "./typecheck";
-import { displayType, Type } from "./typecheck/constraints/type";
+import { cloneType, displayType, Type } from "./typecheck/constraints/type";
 import chalk from "chalk";
 import { HasConstraints, HasInstance } from "./visit/visitor";
+import { cloneGroup } from "./typecheck/solve";
 
 export interface CompileOptions {
     path: string;
@@ -16,10 +17,13 @@ export type CompileResult =
     | { success: false; type: "parse"; location: LocationRange; message: string };
 
 export class HasType extends Fact<Type> {
+    clone = cloneType;
     display = (type: Type) => chalk.blue(displayType(type));
 }
 
 export class InTypeGroup extends Fact<Group> {
+    clone = cloneGroup;
+
     display = (group: Group) =>
         group.nodes
             .values()

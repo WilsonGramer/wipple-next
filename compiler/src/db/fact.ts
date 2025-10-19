@@ -5,6 +5,8 @@ export abstract class Fact<T> {
         this.value = value;
     }
 
+    clone?(value: T & {}): T & {};
+
     display?(value: (T & {}) | null): string | undefined;
 
     toString() {

@@ -2,7 +2,13 @@ import { Map as ImmutableMap, List as ImmutableList } from "immutable";
 import { UnionFind } from "./union-find";
 import { Db, Node } from "../db";
 import { Constraint, Constraints } from "./constraints";
-import { traverseType, typeReferencesNode, typesAreEqual, Type } from "./constraints/type";
+import {
+    traverseType,
+    typeReferencesNode,
+    typesAreEqual,
+    Type,
+    cloneType,
+} from "./constraints/type";
 
 export class Solver {
     db: Db;
@@ -189,3 +195,8 @@ export interface Group {
     nodes: Node[];
     types: Type[];
 }
+
+export const cloneGroup = (group: Group): Group => ({
+    nodes: [...group.nodes],
+    types: group.types.map(cloneType),
+});

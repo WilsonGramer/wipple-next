@@ -124,7 +124,12 @@ export class Db {
         for (const [fact, nodes] of this.facts) {
             for (const [node, values] of nodes) {
                 for (const value of values) {
-                    db.add(node, new (fact as any)(value));
+                    let newFact = new (fact as any)(value);
+                    if ("clone" in newFact) {
+                        newFact.value = newFact.clone(value);
+                    }
+
+                    db.add(node, newFact);
                 }
             }
         }

@@ -65,6 +65,9 @@ export interface ConstructedType {
 
 export type Type = Node | ConstructedType;
 
+export const cloneType = (type: Type): Type =>
+    type instanceof Node ? type : { ...type, children: type.children.map(cloneType) };
+
 export const displayType = (type: Type, root = true): string => {
     if (type instanceof Node) {
         return "_";

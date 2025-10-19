@@ -14,6 +14,11 @@ export interface Bound<S = Node> {
     substitutions: Map<Node, S>;
 }
 
+export const cloneBound = (bound: Bound<Type>) => ({
+    ...bound,
+    substitutions: new Map(bound.substitutions),
+});
+
 export const displayBound = (bound: Bound<Type>) =>
     `${bound.trait.code}${bound.substitutions
         .values()
@@ -29,12 +34,18 @@ export const applyBound = (bound: Bound, solver: Solver) => ({
 });
 
 export class HasResolvedBound extends Fact<[bound: Bound<Type>, instance: Node]> {
-    display = ([bound, instance]: [Bound, Node]) =>
+    clone = ([bound, instance]: [Bound<Type>, Node]): [Bound<Type>, Node] => [
+        cloneBound(bound),
+        instance,
+    ];
+
+    display = ([bound, instance]: [Bound<Type>, Node]) =>
         `${chalk.blue(displayBound(bound))}, ${instance}`;
 }
 
 export class HasUnresolvedBound extends Fact<Bound<Type>> {
-    display = (bound: Bound) => chalk.blue(displayBound(bound));
+    clone = cloneBound;
+    display = (bound: Bound<Type>) => chalk.blue(displayBound(bound));
 }
 
 export class BoundConstraint extends Constraint {
