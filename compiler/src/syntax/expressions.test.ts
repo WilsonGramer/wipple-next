@@ -55,7 +55,7 @@ test("parsing structure expression", () => {
                     value: { type: "variable", variable: { value: "d" } },
                 },
             ],
-        }
+        },
     );
 });
 
@@ -124,7 +124,7 @@ test("parsing when expression", () => {
                     value: { type: "variable", variable: { value: "d" } },
                 },
             ],
-        }
+        },
     );
 });
 
@@ -230,7 +230,7 @@ test("parsing multiline collection expression", () => {
                 { type: "variable", variable: { value: "b" } },
                 { type: "variable", variable: { value: "c" } },
             ],
-        }
+        },
     );
 });
 

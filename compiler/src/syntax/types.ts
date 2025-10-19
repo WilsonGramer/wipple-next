@@ -33,7 +33,7 @@ export const parseAtomicType = (parser: Parser): Type =>
 
 export const parseParenthesizedType = (parser: Parser): Type =>
     parser.withLocation(() =>
-        parser.delimited("leftParenthesis", "rightParenthesis", () => parseType(parser))
+        parser.delimited("leftParenthesis", "rightParenthesis", () => parseType(parser)),
     );
 
 export interface PlaceholderType {
@@ -115,7 +115,7 @@ export const parseBlockType = (parser: Parser): BlockType =>
         parser.delimited("leftBrace", "rightBrace", () => ({
             type: "block",
             output: parseTypeElement(parser),
-        }))
+        })),
     );
 
 export interface UnitType {
@@ -127,7 +127,7 @@ export const parseUnitType = (parser: Parser): UnitType =>
     parser.withLocation(() =>
         parser.delimited("leftParenthesis", "rightParenthesis", () => ({
             type: "unit",
-        }))
+        })),
     );
 
 export interface TupleType {
@@ -150,5 +150,5 @@ export const parseParameterizedType = (parser: Parser): NamedType =>
             type: "named",
             name: parseTypeName(parser),
             parameters: parser.many("type", parseAtomicType),
-        }))
+        })),
     );

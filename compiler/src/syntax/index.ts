@@ -23,7 +23,7 @@ type DeepPartial<T> = T extends Record<string, any> ? { [P in keyof T]?: DeepPar
 export const testParse = <T>(
     rule: (parser: Parser) => T,
     source: string,
-    expected: DeepPartial<T>
+    expected: DeepPartial<T>,
 ) => {
     const parsed = rule(new Parser(source));
 

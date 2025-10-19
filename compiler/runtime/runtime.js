@@ -152,7 +152,7 @@ const buildRuntime = (env, proxy = (f) => f) => {
                 right.type === "function" &&
                 left.inputs.length === right.inputs.length &&
                 left.inputs.every((leftInput, index) =>
-                    unify(leftInput, right.inputs[index], substitutions)
+                    unify(leftInput, right.inputs[index], substitutions),
                 ) &&
                 unify(left.output, right.output, substitutions)
             );
@@ -164,7 +164,7 @@ const buildRuntime = (env, proxy = (f) => f) => {
                 left.name === right.name &&
                 left.parameters.length === right.parameters.length &&
                 left.parameters.every((leftParameter, index) =>
-                    unify(leftParameter, right.parameters[index], substitutions)
+                    unify(leftParameter, right.parameters[index], substitutions),
                 )
             );
         }
@@ -174,7 +174,7 @@ const buildRuntime = (env, proxy = (f) => f) => {
                 right.type === "tuple" &&
                 left.elements.length === right.elements.length &&
                 left.elements.every((leftElement, index) =>
-                    unify(leftElement, right.elements[index], substitutions)
+                    unify(leftElement, right.elements[index], substitutions),
                 )
             );
         }
@@ -213,7 +213,7 @@ const buildRuntime = (env, proxy = (f) => f) => {
                     const validated = await validate(input);
                     value = toMaybe(validated);
                     return validated !== undefined;
-                })
+                }),
             );
 
             if (value === undefined) {
@@ -356,7 +356,7 @@ const buildRuntime = (env, proxy = (f) => f) => {
             return fromMaybe(
                 isValidListIndex(index, list, true)
                     ? [...list.slice(0, index), element, ...list.slice(index)]
-                    : undefined
+                    : undefined,
             );
         },
 
@@ -364,7 +364,7 @@ const buildRuntime = (env, proxy = (f) => f) => {
             return fromMaybe(
                 isValidListIndex(index, list)
                     ? [...list.slice(0, index), ...list.slice(index + 1)]
-                    : undefined
+                    : undefined,
             );
         },
 
@@ -376,7 +376,7 @@ const buildRuntime = (env, proxy = (f) => f) => {
             return fromMaybe(
                 isValidListIndex(start, list) && isValidListIndex(end, list, true) && start <= end
                     ? list.slice(start, end)
-                    : undefined
+                    : undefined,
             );
         },
 

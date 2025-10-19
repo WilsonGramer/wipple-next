@@ -115,7 +115,7 @@ export class Parser {
                         source: token.text,
                     },
                     value: token.value,
-                })
+                }),
             )
             .toArray();
 
@@ -156,7 +156,7 @@ export class Parser {
         expected: string,
         separators: [...S],
         f: (parser: Parser) => T,
-        operator = false
+        operator = false,
     ): [T, S[number] | undefined][] {
         const empty = (parser: Parser) =>
             parser.delimited("leftParenthesis", "rightParenthesis", () => {
@@ -195,7 +195,7 @@ export class Parser {
             if (elements.length < minElements) {
                 throw new SyntaxError(
                     `expected ${expected} here`,
-                    this.tokens[this.index - 1]?.location ?? nullLocationRange
+                    this.tokens[this.index - 1]?.location ?? nullLocationRange,
                 );
             }
 
@@ -237,7 +237,7 @@ export class Parser {
         if (results.length === 0) {
             throw new SyntaxError(
                 `expected ${expected} here`,
-                this.tokens[this.index - 1]?.location ?? nullLocationRange
+                this.tokens[this.index - 1]?.location ?? nullLocationRange,
             );
         }
 
@@ -270,7 +270,7 @@ export class Parser {
 
         throw new SyntaxError(
             `expected ${expected} here`,
-            this.tokens[this.index - 1]?.location ?? nullLocationRange
+            this.tokens[this.index - 1]?.location ?? nullLocationRange,
         );
     }
 
@@ -307,14 +307,14 @@ export class Parser {
         if (token == null) {
             throw new SyntaxError(
                 `expected ${types.join(" or ")} here`,
-                this.tokens[this.tokens.length - 1]?.location ?? nullLocationRange
+                this.tokens[this.tokens.length - 1]?.location ?? nullLocationRange,
             );
         }
 
         if (!types.includes(token.type)) {
             throw new SyntaxError(
                 `expected ${types.join(" or ")} but found ${token.type}`,
-                token.location
+                token.location,
             );
         }
 

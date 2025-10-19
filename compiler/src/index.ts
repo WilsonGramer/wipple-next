@@ -55,7 +55,7 @@ const compileCommand = (options: { run: boolean }) =>
                 switch (result.type) {
                     case "parse": {
                         console.error(
-                            `${result.location.start.line}:${result.location.start.column}: syntax error: ${result.message}`
+                            `${result.location.start.line}:${result.location.start.column}: syntax error: ${result.message}`,
                         );
 
                         return;
@@ -96,14 +96,14 @@ const compileCommand = (options: { run: boolean }) =>
                         wrapAnsi(s, 100 - indent.length)
                             .split("\n")
                             .map((line) => indent + line)
-                            .join("\n")
+                            .join("\n"),
                     )
                     .join("\n\n");
 
                 console.log(
                     `${chalk.underline(feedback.on.toString())}${chalk.underline(
-                        ` (${feedback.id}):`
-                    )}\n\n${rendered}\n`
+                        ` (${feedback.id}):`,
+                    )}\n\n${rendered}\n`,
                 );
             }
 
@@ -163,5 +163,5 @@ cmd.run(
             lsp: lspCommand,
         },
     }),
-    process.argv.slice(2)
+    process.argv.slice(2),
 );

@@ -27,8 +27,8 @@ export const parseStatements = (parser: Parser): Statement[] =>
         parser.optional(
             "statements",
             () => parser.many("statement", parseStatement, "lineBreak"),
-            []
-        )
+            [],
+        ),
     );
 
 export const parseStatement = (parser: Parser): Statement =>
@@ -98,8 +98,8 @@ export const parseStructureTypeRepresentation = (parser: Parser): StructureTypeR
             type: "structure",
             fields: parser.delimited("leftBrace", "rightBrace", () =>
                 parser.allowingLineBreaks(false, () =>
-                    parser.many("field definition", parseFieldDefinition, "lineBreak")
-                )
+                    parser.many("field definition", parseFieldDefinition, "lineBreak"),
+                ),
             ),
         };
     });
@@ -132,8 +132,8 @@ export const parseEnumerationTypeRepresentation = (parser: Parser): EnumerationT
             type: "enumeration",
             variants: parser.delimited("leftBrace", "rightBrace", () =>
                 parser.allowingLineBreaks(false, () =>
-                    parser.many("variant definition", parseVariantDefinition, "lineBreak")
-                )
+                    parser.many("variant definition", parseVariantDefinition, "lineBreak"),
+                ),
             ),
         };
     });
@@ -154,10 +154,10 @@ export const parseVariantDefinition = (parser: Parser): VariantDefinition =>
                 elements: parser.optional(
                     "elements",
                     () => parser.many("type", parseAtomicType),
-                    []
+                    [],
                 ),
             };
-        })
+        }),
     );
 
 export interface TraitDefinitionStatement {
@@ -254,7 +254,7 @@ export const parseInstanceDefinitionStatement = (parser: Parser): InstanceDefini
                     parser.commit();
                     return parseExpression(parser);
                 },
-                undefined
+                undefined,
             ),
         };
     });

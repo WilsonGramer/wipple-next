@@ -49,7 +49,7 @@ export const parseAtomicPattern = (parser: Parser): Pattern =>
 
 export const parseParenthesizedPattern = (parser: Parser): Pattern =>
     parser.withLocation(() =>
-        parser.delimited("leftParenthesis", "rightParenthesis", () => parsePattern(parser))
+        parser.delimited("leftParenthesis", "rightParenthesis", () => parsePattern(parser)),
     );
 
 export interface WildcardPattern {
@@ -112,8 +112,8 @@ export const parseStructurePattern = (parser: Parser): StructurePattern =>
         name: parseTypeName(parser),
         fields: parser.delimited("leftBrace", "rightBrace", () =>
             parser.allowingLineBreaks(false, () =>
-                parser.many("field", parseStructurePatternField, "lineBreak")
-            )
+                parser.many("field", parseStructurePatternField, "lineBreak"),
+            ),
         ),
     }));
 
@@ -140,7 +140,7 @@ export const parseUnitPattern = (parser: Parser): UnitPattern =>
     parser.withLocation(() =>
         parser.delimited("leftParenthesis", "rightParenthesis", () => ({
             type: "unit",
-        }))
+        })),
     );
 
 export interface TuplePattern {
@@ -182,7 +182,7 @@ export const parseSetPattern = (parser: Parser): SetPattern =>
         parser.allowingLineBreaks(false, () => {
             parser.next("setKeyword");
             return { type: "set", variable: parseVariableName(parser) };
-        })
+        }),
     );
 
 export interface ConstructorPattern {
@@ -200,9 +200,9 @@ export const parseConstructorPattern = (parser: Parser): ConstructorPattern =>
             elements: parser.optional(
                 "inputs",
                 () => parser.many("pattern", parseAtomicPattern),
-                []
+                [],
             ),
-        }))
+        })),
     );
 
 export interface AnnotatePattern {

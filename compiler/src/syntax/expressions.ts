@@ -62,7 +62,7 @@ export const parseAtomicExpression = (parser: Parser): Expression =>
 
 export const parseParenthesizedExpression = (parser: Parser): Expression =>
     parser.withLocation(() =>
-        parser.delimited("leftParenthesis", "rightParenthesis", () => parseExpression(parser))
+        parser.delimited("leftParenthesis", "rightParenthesis", () => parseExpression(parser)),
     );
 
 export interface PlaceholderExpression {
@@ -140,7 +140,7 @@ export const parseStructureExpression = (parser: Parser): StructureExpression =>
                 name,
                 fields: parseStructureExpressionFields(parser),
             }));
-        })
+        }),
     );
 
 export interface StructureExpressionField {
@@ -160,7 +160,7 @@ export const parseStructureExpressionField = (parser: Parser): StructureExpressi
 
 export const parseStructureExpressionFields = (parser: Parser): StructureExpressionField[] => {
     return parser.allowingLineBreaks(false, () =>
-        parser.many("field", parseStructureExpressionField, "lineBreak")
+        parser.many("field", parseStructureExpressionField, "lineBreak"),
     );
 };
 
@@ -178,7 +178,7 @@ export const parseBlockExpression = (parser: Parser): BlockExpression =>
                 type: "block",
                 statements: parser.optional("statements", parseStatements, []),
             };
-        })
+        }),
     );
 
 export interface UnitExpression {
@@ -190,7 +190,7 @@ export const parseUnitExpression = (parser: Parser): UnitExpression =>
     parser.withLocation(() =>
         parser.delimited("leftParenthesis", "rightParenthesis", () => ({
             type: "unit",
-        }))
+        })),
     );
 
 export interface FormatExpression {
@@ -206,7 +206,7 @@ export const parseFormatExpression = (parser: Parser): FormatExpression =>
             const string = parseString(parser);
             const inputs = parser.many("expression", parseAtomicExpression);
             return { type: "format", string, inputs };
-        })
+        }),
     );
 
 export interface CallExpression {
@@ -222,7 +222,7 @@ export const parseCallExpression = (parser: Parser): CallExpression =>
             type: "call",
             function: parseAtomicExpression(parser),
             inputs: parser.many("expression", parseAtomicExpression),
-        }))
+        })),
     );
 
 export interface DoExpression {
@@ -237,7 +237,7 @@ export const parseDoExpression = (parser: Parser): DoExpression =>
             parser.next("doKeyword");
             parser.commit();
             return { type: "do", input: parseAtomicExpression(parser) };
-        })
+        }),
     );
 
 export interface WhenExpression {
@@ -256,10 +256,10 @@ export const parseWhenExpression = (parser: Parser): WhenExpression =>
                 type: "when",
                 input: parseAtomicExpression(parser),
                 arms: parser.delimited("leftBrace", "rightBrace", () =>
-                    parser.optional("arms", parseArms, [])
+                    parser.optional("arms", parseArms, []),
                 ),
             };
-        })
+        }),
     );
 
 export interface Arm {
@@ -275,7 +275,7 @@ export const parseArm = (parser: Parser): Arm =>
             parser.next("functionOperator");
             const value = parseExpression(parser);
             return { pattern, value };
-        })
+        }),
     );
 
 export const parseArms = (parser: Parser): Arm[] =>
@@ -299,10 +299,10 @@ export const parseIntrinsicExpression = (parser: Parser): IntrinsicExpression =>
                 inputs: parser.optional(
                     "expressions",
                     () => parser.many("expression", parseAtomicExpression),
-                    []
+                    [],
                 ),
             };
-        })
+        }),
     );
 
 export interface OperatorExpression {
@@ -317,7 +317,7 @@ const operatorParser =
     (
         operators: string[],
         associativity: "left" | "right",
-        parseElement: (parser: Parser) => Expression
+        parseElement: (parser: Parser) => Expression,
     ) =>
     (parser: Parser): Expression => {
         const [[first], ...rest] = parser.collection("expression", operators, parseElement, true);
@@ -338,7 +338,7 @@ const operatorParser =
                         left,
                         right,
                     }),
-                    first
+                    first,
                 );
             }
             case "right": {
@@ -350,7 +350,7 @@ const operatorParser =
                         left,
                         right,
                     }),
-                    first
+                    first,
                 );
             }
         }
@@ -363,12 +363,12 @@ const parsePowerExpression = operatorParser(["powerOperator"], "right", parseByE
 const parseMultiplyExpression = operatorParser(
     ["multiplyOperator", "divideOperator", "remainderOperator"],
     "left",
-    parsePowerExpression
+    parsePowerExpression,
 );
 const parseAddExpression = operatorParser(
     ["addOperator", "subtractOperator"],
     "left",
-    parseMultiplyExpression
+    parseMultiplyExpression,
 );
 const parseCompareExpression = operatorParser(
     [
@@ -378,12 +378,12 @@ const parseCompareExpression = operatorParser(
         "greaterThanOperator",
     ],
     "left",
-    parseAddExpression
+    parseAddExpression,
 );
 const parseEqualExpression = operatorParser(
     ["equalOperator", "notEqualOperator"],
     "left",
-    parseCompareExpression
+    parseCompareExpression,
 );
 const parseAndExpression = operatorParser(["andOperator"], "left", parseEqualExpression);
 const parseOrExpression = operatorParser(["orOperator"], "left", parseAndExpression);
@@ -404,7 +404,7 @@ export const parseTupleExpression = (parser: Parser): TupleExpression =>
             elements: parser
                 .collection("tuple", ["tupleOperator"], parseExpressionElement)
                 .map(([element]) => element),
-        }))
+        })),
     );
 
 export interface CollectionExpression {
@@ -420,7 +420,7 @@ export const parseCollectionExpression = (parser: Parser): CollectionExpression 
             elements: parser
                 .collection("collection", ["collectionOperator"], parseExpressionElement)
                 .map(([element]) => element),
-        }))
+        })),
     );
 
 export interface IsExpression {

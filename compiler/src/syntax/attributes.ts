@@ -15,7 +15,7 @@ export const parseAttribute = (parser: Parser): Attribute =>
         parser.delimited("leftBracket", "rightBracket", () => ({
             name: parseAttributeName(parser),
             value: parser.try("assignOperator") ? parseAttributeValue(parser) : undefined,
-        }))
+        })),
     );
 
 export type AttributeValue = StringAttributeValue;

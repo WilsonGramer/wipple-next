@@ -29,7 +29,7 @@ const parseInferTypeParameter = (parser: Parser): TypeParameter =>
                 infer: true,
                 name: parseTypeParameterName(parser),
             };
-        })
+        }),
     );
 
 export const parseConstraints = (parser: Parser): Constraint[] => {
@@ -56,7 +56,7 @@ export const parseBoundConstraint = (parser: Parser): BoundConstraint =>
             type: "bound",
             trait: parseTypeName(parser),
             parameters: parser.many("type", parseAtomicType),
-        }))
+        })),
     );
 
 export interface DefaultConstraint {
@@ -76,5 +76,5 @@ export const parseDefaultConstraint = (parser: Parser): DefaultConstraint =>
             parser.next("annotateOperator");
             parser.commit();
             return { type: "default", parameter, value: parseType(parser) };
-        })
+        }),
     );

@@ -19,7 +19,7 @@ export const render = (strings: readonly string[], ...values: Renderable[]): Ren
     toString: () =>
         dedent(
             values.map((value, index) => strings[index] + value.toString()).join("") +
-                strings[strings.length - 1]
+                strings[strings.length - 1],
         ).trim(),
 });
 

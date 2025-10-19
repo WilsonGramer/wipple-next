@@ -60,7 +60,7 @@ test("parsing structure type definition", () => {
                     },
                 ],
             },
-        }
+        },
     );
 });
 
@@ -90,7 +90,7 @@ test("parsing enumeration type definition", () => {
                     },
                 ],
             },
-        }
+        },
     );
 });
 
