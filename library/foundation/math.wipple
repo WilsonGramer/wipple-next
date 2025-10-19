@@ -4,7 +4,6 @@ nan :: Number
 nan : intrinsic "nan"
 
 -- Add two values together, returning the sum.
-@(language : "add")
 Add : (left : Number) (right : Number) (infer sum) => trait (left right -> sum)
 instance (Add Number Number Number) : left right -> intrinsic "add-number" left right
 
@@ -13,7 +12,6 @@ left right sum => default instance (Add left right sum) : ... where (Error ("Can
 right sum => instance (Add () right sum) : ... where (Error ("Missing parentheses around the inputs to `+`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `+`.")))
 
 -- Subtract the one value from another, returning the difference.
-@(language : "subtract")
 Subtract : (left : Number) (right : Number) (infer difference) => trait (left right -> difference)
 instance (Subtract Number Number Number) : left right -> intrinsic "subtract-number" left right
 
@@ -22,7 +20,6 @@ left right difference => default instance (Subtract left right difference) : ...
 right difference => instance (Subtract () right difference) : ... where (Error ("Missing parentheses around the inputs to `-`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `-`.")))
 
 -- Multiply two values together, returning the product.
-@(language : "multiply")
 Multiply : (left : Number) (right : Number) (infer product) => trait (left right -> product)
 instance (Multiply Number Number Number) : left right -> intrinsic "multiply-number" left right
 
@@ -31,7 +28,6 @@ left right product => default instance (Multiply left right product) : ... where
 right product => instance (Multiply () right product) : ... where (Error ("Missing parentheses around the inputs to `*`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `*`.")))
 
 -- Divide two numbers, returning the quotient.
-@(language : "divide")
 Divide : (left : Number) (right : Number) (infer quotient) => trait (left right -> quotient)
 instance (Divide Number Number Number) : left right -> intrinsic "divide-number" left right
 
@@ -40,7 +36,6 @@ left right quotient => default instance (Divide left right quotient) : ... where
 right quotient => instance (Divide () right quotient) : ... where (Error ("Missing parentheses around the inputs to `/`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `/`.")))
 
 -- Divide two numbers, returning the remainder.
-@(language : "remainder")
 Remainder : (left : Number) (right : Number) (infer remainder) => trait (left right -> remainder)
 instance (Remainder Number Number Number) : left right -> intrinsic "remainder-number" left right
 
@@ -49,7 +44,6 @@ left right remainder => default instance (Remainder left right remainder) : ... 
 right remainder => instance (Remainder () right remainder) : ... where (Error ("Missing parentheses around the inputs to `%`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `%`.")))
 
 -- Raise one number to the power of the other number.
-@(language : "power")
 Power : (left : Number) (right : Number) (infer power) => trait (left right -> power)
 instance (Power Number Number Number) : left right -> intrinsic "power-number" left right
 

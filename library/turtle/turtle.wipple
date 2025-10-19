@@ -61,7 +61,7 @@ speed :: Number -> ()
 speed : value -> external "speed" value
 
 -- An animal to use instead of the turtle.
-Animal : type Text
+Animal : type String
 instance (Describe-Type Animal "animal")
 
 -- Change the animal being displayed.

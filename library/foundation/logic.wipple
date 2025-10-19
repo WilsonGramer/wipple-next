@@ -1,10 +1,6 @@
 -- Represents either `True` or `False`.
-@(language : "boolean")
 Boolean : type {
-  @(language : "false")
   False
-
-  @(language : "true")
   True
 }
 
@@ -18,22 +14,21 @@ if : condition then else -> when condition {
 -- Represents the logical inverse of a value.
 Not : value => trait (value -> value)
 instance (Not Boolean) : boolean -> if boolean {False} {True}
-a (b : Boolean) => instance (Not (a -> b)) : f -> x -> not (f x) where (Not b)
+instance (Not (a -> b)) where (Not b) (b :: Boolean) : f -> x -> not (f x)
 
--- Returns `False` if provided `True`, and vice versa. Can also be used on boolean functions and any other value that implements `Not`.
-not :: (value : Boolean) => value -> value where (Not value)
+-- Returns `False` if provided `True`, and vice versa. Can also be used on
+-- boolean functions and any other value that implements `Not`.
+not :: value -> value where (Not value) (value :: Boolean)
 not : Not
 
 -- Returns `True` if both sides are `True`.
-@(language : "and")
 And : left right (infer output) => trait (left {right} -> output)
 instance (And Boolean Boolean Boolean) : a b -> if a b {False}
 
 -- Returns `True` if either side is `True`.
-@(language : "or")
 Or : left right (infer output) => trait (left {right} -> output)
 instance (Or Boolean Boolean Boolean) : a b -> if a {True} b
-value => instance (Or (Maybe value) value value) : maybe other -> when maybe {
+instance (Or (Maybe value) value value) : maybe other -> when maybe {
   Some value -> value
   None -> do other
 }
@@ -47,41 +42,38 @@ Ordering : type {
 
 -- Implement this trait to enable comparisons between two values of your type.
 Order : value => trait (value value -> Ordering)
-value => default instance (Order value) : ... where (Error ("Can't put items that are _ into order" value ; Error-Description ("You can't use `>` or `<` with _ because it doesn't support ordering." value)))
+-- Cannot put items that are [`value`] into order.
+-- You can't use comparison operators like `>` or `<` with [`value`]
+-- because it doesn't support ordering.
+[default] [error] instance (Order value)
 instance (Order Number) : a b -> intrinsic "number-ordering" a b
 
 -- Returns `True` if the left side is less than the right side.
-@(language : "less-than")
 Less-Than : value => trait (value value -> Boolean)
-value => instance (Less-Than value) : a b -> (Order a b) is Is-Less-Than where (Order value)
+instance (Less-Than value) where (Order value) : a b -> (Order a b) is Is-Less-Than
 
 -- Returns `True` if the left side is less than or equal to the right side.
-@(language : "less-than-or-equal")
 Less-Than-Or-Equal : value => trait (value value -> Boolean)
-value => instance (Less-Than-Or-Equal value) : a b -> (Order a b) is (Is-Less-Than or Is-Equal-To) where (Order value)
+instance (Less-Than-Or-Equal value) where (Order value) : a b -> (Order a b) is (Is-Less-Than or Is-Equal-To)
 
 -- Returns `True` if the left side is greater than the right side.
-@(language : "greater-than")
 Greater-Than : value => trait (value value -> Boolean)
-value => instance (Greater-Than value) : a b -> (Order a b) is Is-Greater-Than where (Order value)
+instance (Greater-Than value) where (Order value) : a b -> (Order a b) is Is-Greater-Than
 
 -- Returns `True` if the left side is greater than or equal to the right side.
-@(language : "greater-than-or-equal")
 Greater-Than-Or-Equal : value => trait (value value -> Boolean)
-value => instance (Greater-Than-Or-Equal value) : a b -> (Order a b) is (Is-Greater-Than or Is-Equal-To) where (Order value)
+instance (Greater-Than-Or-Equal value) where (Order value) : a b -> (Order a b) is (Is-Greater-Than or Is-Equal-To)
 
 -- Returns `True` if two values are equal.
-@(language : "equal")
 Equal : value => trait (value value -> Boolean)
-instance (Equal Text) : a b -> intrinsic "text-equality" a b
+instance (Equal String) : a b -> intrinsic "text-equality" a b
 instance (Equal Number) : a b -> intrinsic "number-equality" a b
 instance (Equal ()) : () () -> True
 instance (Equal Boolean) : a b -> if a {b} {not b}
 
 -- Returns `True` if two values are not equal.
-@(language : "not-equal")
 Not-Equal : value => trait (value value -> Boolean)
-value => instance (Not-Equal value) : a b -> not (Equal a b) where (Equal value)
+instance (Not-Equal value) where (Equal value) : a b -> not (Equal a b)
 
 -- Returns the larger of the two inputs.
 max :: a -> a -> a where (Order a)

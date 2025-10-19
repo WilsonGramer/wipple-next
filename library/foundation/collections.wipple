@@ -1,4 +1,3 @@
-@(language : "build-collection")
 Build-Collection : (infer element) collection => trait (element -> collection -> collection)
 
 -- Can't create [`collection`] from items that are [`element`].
@@ -11,7 +10,6 @@ Initial-Collection : (infer element) collection => trait collection
 
 instance (Build-Collection element (List element)) : append
 
-instance (Build-Collection (key ; value) (Dictionary key value)) where (Equal key) (Hash key) :
-  (key ; value) -> insert-entry key value
+instance (Build-Collection (key ; value) (Dictionary key value)) where (Equal key) (Hash key) : (key ; value) -> insert-entry key value
 
 instance (Build-Collection element (Set element)) where (Equal element) (Hash element) : insert

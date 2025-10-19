@@ -1,4 +1,4 @@
-Music : type Text
+Music : type String
 
 -- Play a melody or rhythm on an instrument.
 play :: Dropdown Music -> ()

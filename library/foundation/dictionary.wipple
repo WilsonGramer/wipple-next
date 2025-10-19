@@ -2,7 +2,7 @@
 -- `Set` to organize their elements.
 Hash : value => trait (value -> Number)
 instance (Hash Number) : number -> number
-instance (Hash Text) : text -> intrinsic "hash-text" text
+instance (Hash String) : text -> intrinsic "hash-text" text
 instance (Hash ()) : () -> Hash 0
 
 -- A collection of unique keys associated with values.

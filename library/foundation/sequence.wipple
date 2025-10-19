@@ -410,9 +410,9 @@ element => instance (Container (List element) element) where (Equal element) :
   }
 }
 
-instance (Add Text Text Text) : a b -> "__" a b
+instance (Add String String String) : a b -> "__" a b
 
-instance (As-Sequence Text Text) : text ->
-  As-Sequence (intrinsic "text-characters" text :: List Text)
+instance (As-Sequence String String) : text ->
+  As-Sequence (intrinsic "text-characters" text :: List String)
 
-instance (From-Sequence Text Text) : reduce "" (right -> left -> left + right)
+instance (From-Sequence String String) : reduce "" (right -> left -> left + right)
