@@ -70,7 +70,7 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
             db.add(node, new InTypeGroup(group));
 
             for (const type of group.types) {
-                db.add(node, new HasType(type));
+                db.add(node, new HasType(solver.apply(type)));
             }
         }
     }

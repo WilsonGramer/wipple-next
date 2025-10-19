@@ -5,7 +5,7 @@ Boolean : type {
 }
 
 -- Make a choice based on whether the input is `True` or `False`.
-if :: Boolean {a} {a} -> a
+if :: Boolean {value} {value} -> value
 if : condition then else -> when condition {
   True -> do then
   False -> do else
@@ -76,9 +76,9 @@ Not-Equal : value => trait (value value -> Boolean)
 instance (Not-Equal value) where (Equal value) : a b -> not (Equal a b)
 
 -- Returns the larger of the two inputs.
-max :: a -> a -> a where (Order a)
+max :: n n -> n where (Order n)
 max : a b -> if (a >= b) {a} {b}
 
 -- Returns the smaller of the two inputs.
-min :: a -> a -> a where (Order a)
+min :: n n -> n where (Order n)
 min : a b -> if (a <= b) {a} {b}

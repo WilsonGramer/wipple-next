@@ -23,7 +23,9 @@ export class SyntaxError extends Error {
     location: LocationRange;
 
     constructor(message: string, location: LocationRange) {
-        super(`${location.start.line}:${location.start.column}: syntax error: ${message}`);
+        super(
+            `${location.path}:${location.start.line}:${location.start.column}: syntax error: ${message}`,
+        );
         this.location = location;
     }
 }

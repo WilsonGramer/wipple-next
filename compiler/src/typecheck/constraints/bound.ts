@@ -10,6 +10,7 @@ import { Constraint } from "./constraint";
 export interface Bound<S = Node> {
     source: Node | undefined;
     definition: Node | undefined;
+    fromConstraint?: boolean;
     trait: Node;
     substitutions: Map<Node, S>;
 }
@@ -78,6 +79,7 @@ export class BoundConstraint extends Constraint {
         return new BoundConstraint(this.node, {
             source,
             definition: undefined, // only used on the generic definition
+            fromConstraint: this.bound.fromConstraint,
             trait: this.bound.trait,
             substitutions: new Map(
                 this.bound.substitutions
@@ -91,7 +93,14 @@ export class BoundConstraint extends Constraint {
     }
 
     run(solver: Solver) {
-        const { source, definition, trait } = this.bound;
+        const { source, definition, fromConstraint, trait } = this.bound;
+
+        if (fromConstraint && definition == null) {
+            // Assume bounds within the current definition have instances
+            // available, so there's nothing to do for the bound constraint
+            // itself
+            return;
+        }
 
         const isInferredParameter = (parameter: Node) =>
             solver.db.has(parameter, IsInferredTypeParameter);
@@ -122,7 +131,11 @@ export class BoundConstraint extends Constraint {
                       .list(definition, HasConstraints)
                       .flatMap((constraints) => constraints)
                       .filter((constraint) => constraint instanceof BoundConstraint)
-                      .filter((constraint) => constraint.bound.trait === this.bound.trait)
+                      .filter(
+                          (constraint) =>
+                              constraint.bound.trait === this.bound.trait &&
+                              constraint.bound.fromConstraint === true,
+                      )
                       .map(
                           (constraint): Instance => ({
                               node: constraint.node,

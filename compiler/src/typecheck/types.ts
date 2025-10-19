@@ -48,7 +48,7 @@ export const unit = () => tuple([]);
 export const block = (output: Type): ConstructedType => ({
     tag: block,
     children: [output],
-    display: ([output]) => `{${output()}}`,
+    display: ([output]) => `{${output(true)}}`,
     codegen: codegen.blockType(output),
 });
 
