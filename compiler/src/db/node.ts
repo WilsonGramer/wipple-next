@@ -44,12 +44,12 @@ export class Node {
 
         if (nodeDisplayOptions.showLocation) {
             if (this.instantiatedFrom != null) {
-                s += chalk.black.dim(` instantiated`);
+                s += chalk.dim(` instantiated`);
             }
 
-            s += chalk.black.dim(` @ ${this.span}`);
+            s += chalk.dim(` @ ${this.span}`);
 
-            s += chalk.black.dim(` ${this.id}`);
+            s += chalk.dim(` ${this.id}`);
         }
 
         return s;
