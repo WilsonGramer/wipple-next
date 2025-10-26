@@ -33,14 +33,13 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
 
         visitor.addConstraints(
             new InstantiateConstraint({
-                source: buildCollectionNode,
+                sources: [visitor.currentDefinition?.node, buildCollectionNode],
                 definition: definition.node,
                 substitutions,
                 replacements: new Map([[definition.node, buildCollectionNode]]),
             }),
             new BoundConstraint(buildCollectionNode, {
-                source: buildCollectionNode,
-                definition: visitor.currentDefinition?.node,
+                sources: [visitor.currentDefinition?.node, buildCollectionNode],
                 trait: definition.node,
                 substitutions,
             }),
@@ -63,14 +62,13 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
 
         visitor.addConstraints(
             new InstantiateConstraint({
-                source: initialCollectionNode,
+                sources: [visitor.currentDefinition?.node, initialCollectionNode],
                 definition: definition.node,
                 substitutions,
                 replacements,
             }),
             new BoundConstraint(initialCollectionNode, {
-                source: initialCollectionNode,
-                definition: visitor.currentDefinition?.node,
+                sources: [visitor.currentDefinition?.node, initialCollectionNode],
                 trait: definition.node,
                 substitutions,
             }),

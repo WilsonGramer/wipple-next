@@ -45,14 +45,13 @@ export const visitAsExpression: Visit<AsExpression> = (visitor, expression, node
                 return [
                     [
                         new InstantiateConstraint({
-                            source: asFunction,
+                            sources: [visitor.currentDefinition?.node, asFunction],
                             definition: definition.node,
                             substitutions,
                             replacements,
                         }),
                         new BoundConstraint(asFunction, {
-                            source: asFunction,
-                            definition: visitor.currentDefinition?.node,
+                            sources: [visitor.currentDefinition?.node, asFunction],
                             trait: definition.node,
                             substitutions,
                         }),

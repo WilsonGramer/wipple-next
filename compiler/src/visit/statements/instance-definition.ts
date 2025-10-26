@@ -75,7 +75,7 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
 
             visitor.addConstraints(
                 new InstantiateConstraint({
-                    source: definitionNode,
+                    sources: [visitor.currentDefinition!.node, definitionNode],
                     definition: traitDefinition.node,
                     replacements: new Map([[traitDefinition.node, definitionNode]]),
                     substitutions,

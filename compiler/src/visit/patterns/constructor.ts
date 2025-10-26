@@ -33,7 +33,7 @@ export const visitConstructorPattern: Visit<ConstructorPattern> = (visitor, patt
 
         visitor.addConstraints(
             new InstantiateConstraint({
-                source: constructorNode,
+                sources: [visitor.currentDefinition?.node, constructorNode],
                 definition: definition.node,
                 substitutions: new Map(),
                 replacements: new Map([[definition.node, constructorNode]]),

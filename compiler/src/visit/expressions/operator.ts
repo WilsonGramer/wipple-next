@@ -31,14 +31,13 @@ export const visitOperatorExpression: Visit<OperatorExpression> = (visitor, expr
 
             visitor.addConstraints(
                 new InstantiateConstraint({
-                    source: operatorNode,
+                    sources: [visitor.currentDefinition?.node, operatorNode],
                     definition: definition.node,
                     substitutions,
                     replacements,
                 }),
                 new BoundConstraint(operatorNode, {
-                    source: operatorNode,
-                    definition: visitor.currentDefinition?.node,
+                    sources: [visitor.currentDefinition?.node, operatorNode],
                     trait: definition.node,
                     substitutions,
                 }),

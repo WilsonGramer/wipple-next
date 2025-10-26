@@ -6,7 +6,7 @@ import { instantiateType, Type, TypeParameter } from "./type";
 import { Constraint } from "./constraint";
 
 export interface Instantiation {
-    source: Node;
+    sources: (Node | undefined)[];
     definition: Node;
     replacements: Map<Node, Node>;
     substitutions: Map<TypeParameter, Type>;
@@ -25,12 +25,13 @@ export class InstantiateConstraint extends Constraint {
     }
 
     instantiate(
-        source: Node,
+        sources: (Node | undefined)[],
+        _definition: Node,
         _replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
         const instantiation: Instantiation = {
-            source: this.instantiation.source,
+            sources: this.instantiation.sources,
             definition: this.instantiation.definition,
             replacements: this.instantiation.replacements,
             substitutions: new Map(
@@ -40,7 +41,7 @@ export class InstantiateConstraint extends Constraint {
                         parameter,
                         instantiateType(
                             substitution,
-                            source,
+                            sources.find((source) => source != null)!,
                             this.instantiation.replacements,
                             substitutions,
                         ),
@@ -52,7 +53,7 @@ export class InstantiateConstraint extends Constraint {
     }
 
     run(solver: Solver) {
-        const { source, definition, substitutions, replacements } = this.instantiation;
+        const { sources, definition, substitutions, replacements } = this.instantiation;
 
         // NOTE: Types are *not* applied before instantiating; we have access to
         // all related nodes/constraints here, which together will form better
@@ -62,7 +63,8 @@ export class InstantiateConstraint extends Constraint {
             instantiatedConstraints.push(
                 ...constraints.flatMap((constraint) => {
                     const instantiated = constraint.instantiate(
-                        source,
+                        sources,
+                        definition,
                         replacements,
                         substitutions,
                     );

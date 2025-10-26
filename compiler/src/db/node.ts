@@ -28,12 +28,6 @@ export class Node {
     }
 
     static instantiatedFrom(other: Node, source: Node | undefined): Node {
-        if (other.instantiatedFrom != null) {
-            throw new Error(
-                `already instantiated from ${other.instantiatedFrom.id} as ${other.id}`,
-            );
-        }
-
         const node = new Node(other.span, other.code);
         node.codegen = other.codegen;
         node.isHidden = other.isHidden;

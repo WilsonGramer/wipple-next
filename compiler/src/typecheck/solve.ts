@@ -1,4 +1,5 @@
 import { Db, Node } from "../db";
+import { Instance } from "../visit/visitor";
 import { Constraint, Constraints, Score } from "./constraints";
 import {
     traverseType,
@@ -11,8 +12,9 @@ import {
 
 export class Solver {
     db: Db;
-    private constraints = new Constraints();
     private groups = new Map<Set<Node>, ConstructedType[]>();
+    constraints = new Constraints();
+    instanceStack: Node[] = [];
     applyQueue: Map<TypeParameter, Type>[] = [];
     error = false;
 
@@ -27,9 +29,9 @@ export class Solver {
     }
 
     replaceWith(other: Solver) {
-        this.constraints = other.constraints;
         this.groups = new Map(other.groups.entries().map(([nodes, types]) => [nodes, [...types]]));
-        this.applyQueue = other.applyQueue;
+        this.instanceStack = [...other.instanceStack];
+        this.applyQueue = [...other.applyQueue];
     }
 
     add(...constraints: Constraint[]) {

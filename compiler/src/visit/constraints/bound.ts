@@ -34,8 +34,7 @@ export const visitBoundConstraint: Visit<SyntaxBoundConstraint> = (visitor, stat
 
     visitor.currentDefinition!.addConstraints(
         new BoundConstraint(node, {
-            source: undefined, // will be updated during instantiation
-            definition: visitor.currentDefinition!.node,
+            sources: [visitor.currentDefinition!.node],
             fromConstraint: true,
             trait: trait.node,
             substitutions,

@@ -4,18 +4,26 @@ import { Node } from "../../db";
 import { Type, TypeParameter } from "./type";
 
 export class DefaultConstraint extends TypeConstraint {
-    source: Node | undefined;
+    sources: (Node | undefined)[] = [];
+    instantiated = false;
 
     override score(): Score {
         return "default";
     }
 
     override instantiate(
-        source: Node,
+        sources: (Node | undefined)[],
+        definition: Node,
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
-        const instantiatedTypeConstraint = super.instantiate(source, replacements, substitutions);
+        const instantiatedTypeConstraint = super.instantiate(
+            sources,
+            definition,
+            replacements,
+            substitutions,
+        );
+
         if (instantiatedTypeConstraint == null) {
             return undefined;
         }
@@ -25,7 +33,8 @@ export class DefaultConstraint extends TypeConstraint {
             instantiatedTypeConstraint.type,
         );
 
-        constraint.source = source;
+        constraint.sources = sources;
+        constraint.instantiated = true;
 
         return constraint as this;
     }
@@ -33,7 +42,7 @@ export class DefaultConstraint extends TypeConstraint {
     override run(solver: Solver): void {
         // Ignore defaults on generic definitions in favor of the ones created
         // during instantiation (which have a source attached)
-        if (this.source == null) {
+        if (!this.instantiated) {
             return;
         }
 

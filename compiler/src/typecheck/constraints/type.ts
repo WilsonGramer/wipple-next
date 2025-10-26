@@ -20,7 +20,7 @@ export class TypeParameter {
     }
 
     toString() {
-        return this.id;
+        return this.name;
     }
 }
 
@@ -39,13 +39,19 @@ export class TypeConstraint extends Constraint {
     }
 
     instantiate(
-        source: Node,
+        sources: (Node | undefined)[],
+        _definition: Node,
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
         return new TypeConstraint(
-            getOrInstantiate(this.node, source, replacements),
-            instantiateType(this.type, source, replacements, substitutions),
+            getOrInstantiate(this.node, sources.find((source) => source != null)!, replacements),
+            instantiateType(
+                this.type,
+                sources.find((source) => source != null)!,
+                replacements,
+                substitutions,
+            ),
         ) as this;
     }
 

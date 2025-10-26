@@ -37,6 +37,10 @@ export class Constraints {
             constraint.run(solver);
         }
     }
+
+    [Symbol.iterator]() {
+        return this.constraints[Symbol.iterator]();
+    }
 }
 
 /**
