@@ -3,6 +3,7 @@ import { Fact, Node } from "../../db";
 import { VariableExpression } from "../../syntax";
 import { Constraint, InstantiateConstraint, TypeConstraint } from "../../typecheck";
 import * as codegen from "../../codegen";
+import { Type, TypeParameter } from "../../typecheck/constraints/type";
 
 export class ResolvedVariable extends Fact<Node> {}
 export class ResolvedConstant extends Fact<Node> {}
@@ -21,7 +22,7 @@ export const visitVariableExpression: Visit<VariableExpression> = (visitor, expr
 
                     return [new TypeConstraint(node, definition.node), ResolvedVariable];
                 case "constant":
-                    const substitutions = new Map<Node, Node>();
+                    const substitutions = new Map<TypeParameter, Type>();
 
                     node.setCodegen(codegen.constantExpression(definition.node, substitutions));
 

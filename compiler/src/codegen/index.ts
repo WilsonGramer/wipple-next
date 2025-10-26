@@ -103,7 +103,7 @@ export class Codegen {
             this.write(`[${this.node(instance.node)}, {`);
 
             for (const [parameter, substitution] of instance.substitutions) {
-                this.write(`${this.node(parameter)}: `);
+                this.write(`${this.node(parameter.source)}: `);
                 this.write(substitution);
                 this.write(`, `);
             }

@@ -1,22 +1,19 @@
-import { Map as ImmutableMap, List as ImmutableList } from "immutable";
-import { UnionFind } from "./union-find";
 import { Db, Node } from "../db";
-import { Constraint, Constraints } from "./constraints";
+import { Constraint, Constraints, Score } from "./constraints";
 import {
     traverseType,
-    typeReferencesNode,
-    typesAreEqual,
     Type,
     cloneType,
+    ConstructedType,
+    typesAreEqual,
+    TypeParameter,
 } from "./constraints/type";
 
 export class Solver {
     db: Db;
     private constraints = new Constraints();
-    private unionFind = new UnionFind();
-    private groups = ImmutableMap<Node, ImmutableList<Type>>();
-    instanceStack: { node: Node; instance: Node }[] = [];
-    applyQueue: Map<Node, Type>[] = [];
+    private groups = new Map<Set<Node>, ConstructedType[]>();
+    applyQueue: Map<TypeParameter, Type>[] = [];
     error = false;
 
     constructor(db: Db) {
@@ -30,9 +27,8 @@ export class Solver {
     }
 
     replaceWith(other: Solver) {
-        this.unionFind = UnionFind.from(other.unionFind);
-        this.groups = other.groups;
-        this.instanceStack = [...other.instanceStack];
+        this.constraints = other.constraints;
+        this.groups = new Map(other.groups.entries().map(([nodes, types]) => [nodes, [...types]]));
         this.applyQueue = other.applyQueue;
     }
 
@@ -40,19 +36,12 @@ export class Solver {
         this.constraints.add(...constraints);
     }
 
-    setGroup(representative: Node, group: Group) {
-        for (const node of group.nodes) {
-            this.unionFind.union(representative, node);
-        }
-
-        this.groups = this.groups.set(
-            this.unionFind.find(representative),
-            ImmutableList(group.types),
-        );
+    setGroup(group: Group) {
+        this.groups.set(new Set(group.nodes), group.types);
     }
 
-    run() {
-        this.constraints.run(this);
+    run({ until }: { until?: Score } = {}) {
+        this.constraints.run(this, { until });
     }
 
     unify(left: Type, right: Type) {
@@ -100,119 +89,119 @@ export class Solver {
     }
 
     apply(type: Type) {
-        const seen = new Set<Node>();
-        return traverseType(type, (type) => this.applyShallow(type, seen));
+        return traverseType(type, (type) => this.applyShallow(type));
     }
 
-    private applyShallow(type: Type, seen = new Set<Node>()): Type {
-        if (type instanceof Node) {
-            if (seen.has(type)) {
-                return type;
+    groupOf(node: Node): Group | undefined {
+        for (const [nodes, types] of this.groups) {
+            if (nodes.has(node)) {
+                return { nodes, types };
             }
-
-            seen.add(type);
-
-            const representative = this.unionFind.find(type);
-            return this.groups.get(representative)?.first() ?? representative;
-        } else {
-            return type;
         }
+
+        return undefined;
     }
 
-    private insert(node: Node, ...types: Type[]) {
-        const representative = this.unionFind.find(node);
-
-        // Deduplicate types
-        types = types
-            .map((type) => this.apply(type))
-            .reduce(
-                (result, type) =>
-                    result.every((other) => !typesAreEqual(type, other))
-                        ? [...result, type]
-                        : result,
-                [] as Type[],
-            );
-
-        // Prevent recursive types
-        types = types.filter((type) => !typeReferencesNode(type, representative));
-        if (types.length === 0) {
-            return;
-        }
-
-        if (!this.groups.has(representative)) {
-            this.groups = this.groups.set(representative, ImmutableList(types));
-        } else {
-            let group = this.groups.get(representative)!;
-            for (const type of types) {
-                if (group.every((other) => !typesAreEqual(type, other))) {
-                    group = group.push(type);
+    private applyShallow(type: Type): Type {
+        if (type instanceof Node) {
+            for (const [nodes, types] of this.groups) {
+                if (nodes.has(type)) {
+                    return types[0] ?? type;
                 }
             }
-
-            this.groups = this.groups.set(representative, group);
         }
+
+        return type;
+    }
+
+    private insert(node: Node, ...newTypes: Type[]) {
+        for (const [nodes, types] of this.groups) {
+            if (nodes.has(node)) {
+                for (const type of newTypes) {
+                    if (type instanceof Node) {
+                        nodes.add(type);
+                    } else {
+                        types.push(type);
+                    }
+                }
+
+                return;
+            }
+        }
+
+        const groupNodes = new Set<Node>([node]);
+        const groupTypes: ConstructedType[] = [];
+        for (const type of newTypes) {
+            if (type instanceof Node) {
+                groupNodes.add(type);
+            } else {
+                groupTypes.push(type);
+            }
+        }
+
+        this.groups.set(groupNodes, groupTypes);
     }
 
     private merge(left: Node, right: Node) {
-        const leftRepresentative = this.unionFind.find(left);
-        const rightRepresentative = this.unionFind.find(right);
-
-        this.unionFind.union(leftRepresentative, rightRepresentative);
-
-        const rightTypes = this.groups.get(rightRepresentative);
-
-        if (rightTypes != null) {
-            this.groups = this.groups.delete(rightRepresentative);
-
-            for (const type of rightTypes) {
-                this.unify(leftRepresentative, type);
+        let leftGroup: Group = { nodes: new Set([left]), types: [] };
+        let rightGroup: Group = { nodes: new Set([right]), types: [] };
+        for (const [nodes, types] of this.groups) {
+            if (nodes.has(left)) {
+                leftGroup = { nodes, types };
+                this.groups.delete(nodes);
+            } else if (nodes.has(right)) {
+                rightGroup = { nodes, types };
+                this.groups.delete(nodes);
             }
+        }
+
+        this.groups.set(new Set([...leftGroup.nodes, ...rightGroup.nodes]), []);
+
+        for (const type of [...leftGroup.types, ...rightGroup.types]) {
+            this.unify(left, type);
         }
     }
 
     finish(): Group[] {
+        // Forward applied types to any substitution maps created elsewhere
         for (const substitutions of this.applyQueue) {
             for (const [node, type] of substitutions) {
                 substitutions.set(node, this.apply(type));
             }
         }
 
-        const groups: Group[] = [];
-        for (const [representative, types] of this.groups) {
-            const group: Group = {
-                nodes: [representative, ...this.unionFind.findAll(representative)],
-                types:
-                    types.size > 0
-                        ? types.toArray().map((type) => this.apply(type))
-                        : [representative],
-            };
-
-            groups.push(group);
-        }
-
-        for (const node of this.unionFind.nodes()) {
-            if (!groups.some((group) => group.nodes.includes(node))) {
-                groups.push({
-                    nodes: [node],
-                    types: [node],
-                });
-            }
-        }
-
-        for (const group of groups) {
-            group.nodes.sort((a, b) => a.span.sort(b.span));
-        }
-
-        return groups;
+        return this.groups
+            .entries()
+            .map(([nodes, types]): Group => {
+                return {
+                    nodes,
+                    types: deduplicate(
+                        types.map((type) => this.apply(type) as ConstructedType),
+                        typesAreEqual,
+                    ),
+                };
+            })
+            .toArray();
     }
 }
 
 export interface Group {
-    nodes: Node[];
-    types: Type[];
+    nodes: Set<Node>;
+    types: ConstructedType[];
 }
 
 export const cloneGroup = (group: Group): Group => ({
-    nodes: [...group.nodes],
+    nodes: new Set(group.nodes),
     types: group.types.map(cloneType),
 });
+
+const deduplicate = <T>(array: T[], equal: (a: T, b: T) => boolean): T[] => {
+    const result: T[] = [];
+    for (const item of array) {
+        if (!result.some((existing) => equal(existing, item))) {
+            result.push(item);
+        }
+    }
+
+    return result;
+};

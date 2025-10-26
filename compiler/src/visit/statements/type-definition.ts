@@ -11,6 +11,7 @@ import {
 } from "../definitions";
 import { visitType } from "../types";
 import * as codegen from "../../codegen";
+import { TypeParameter } from "../../typecheck/constraints/type";
 
 export class ParameterInTypeDefinition extends Fact<Node> {}
 export class IsInvalidInferredTypeParameter extends Fact<null> {}
@@ -29,21 +30,31 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
 
         const attributes = parseTypeAttributes(visitor, statement.attributes);
 
-        const parameters = statement.parameters.map(({ name, infer }) =>
-            visitor.visit(name, ParameterInTypeDefinition, (visitor, parameter, node) => {
-                visitor.defineName(parameter.value, {
-                    type: "typeParameter",
-                    name: parameter.value,
-                    node,
-                });
+        const parameters = statement.parameters.map(({ name, infer }) => {
+            const source = visitor.visit(
+                name,
+                ParameterInTypeDefinition,
+                (visitor, parameter, node) => {
+                    visitor.defineName(parameter.value, {
+                        type: "typeParameter",
+                        name: parameter.value,
+                        node,
+                    });
 
-                visitor.addConstraints(new TypeConstraint(node, types.parameter(node)));
+                    if (infer) {
+                        visitor.db.add(node, new IsInvalidInferredTypeParameter(null));
+                    }
+                },
+            );
 
-                if (infer) {
-                    visitor.db.add(node, new IsInvalidInferredTypeParameter(null));
-                }
-            }),
-        );
+            const parameter = new TypeParameter(name.value, source, infer ?? false);
+
+            visitor.addConstraints(new TypeConstraint(source, types.parameter(parameter)));
+
+            return parameter;
+        });
+
+        const definitionType = types.named(definitionNode, parameters.map(types.parameter));
 
         // Types don't have additional constraints
 
@@ -58,12 +69,7 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                         visitor.withDefinition(markerNode, () => {
                             markerNode.setCodegen(codegen.markerExpression());
 
-                            visitor.addConstraints(
-                                new TypeConstraint(
-                                    markerNode,
-                                    types.named(definitionNode, parameters),
-                                ),
-                            );
+                            visitor.addConstraints(new TypeConstraint(markerNode, definitionType));
 
                             const constructorDefinition: MarkerConstructorDefinition = {
                                 type: "markerConstructor",
@@ -98,17 +104,8 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
 
                         visitor.withDefinition(structureNode, () => {
                             visitor.addConstraints(
-                                new TypeConstraint(
-                                    structureNode,
-                                    types.named(definitionNode, parameters),
-                                ),
-                            );
-
-                            visitor.addConstraints(
-                                new TypeConstraint(
-                                    definition.node,
-                                    types.named(definitionNode, parameters),
-                                ),
+                                new TypeConstraint(structureNode, definitionType),
+                                new TypeConstraint(definition.node, definitionType),
                             );
 
                             const constructorDefinition: StructureConstructorDefinition = {
@@ -181,11 +178,8 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                                     new TypeConstraint(
                                         variantNode,
                                         elements.length > 0
-                                            ? types.function(
-                                                  elements,
-                                                  types.named(definitionNode, parameters),
-                                              )
-                                            : types.named(definitionNode, parameters),
+                                            ? types.function(elements, definitionType)
+                                            : definitionType,
                                     ),
                                 );
 

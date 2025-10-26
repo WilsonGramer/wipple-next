@@ -9,7 +9,7 @@ import {
     types,
 } from "../../typecheck";
 import * as codegen from "../../codegen";
-import { Type } from "../../typecheck/constraints/type";
+import { Type, TypeParameter } from "../../typecheck/constraints/type";
 import { visitExpression } from ".";
 import { visitType } from "../types";
 
@@ -26,12 +26,14 @@ export const visitAsExpression: Visit<AsExpression> = (visitor, expression, node
     const constraints = visitor.resolveName<Constraint[]>("As", node, (definition) => {
         switch (definition.type) {
             case "trait":
-                const substitutions = new Map<Node, Node>([
+                const asFunction = visitor.node(expression);
+
+                const substitutions = new Map<TypeParameter, Type>([
                     [definition.parameters[0], value], // input
                     [definition.parameters[1], type], // output
                 ]);
 
-                const asFunction = visitor.node(expression);
+                const replacements = new Map([[definition.node, asFunction]]);
 
                 node.setCodegen(
                     codegen.callExpression(
@@ -46,7 +48,7 @@ export const visitAsExpression: Visit<AsExpression> = (visitor, expression, node
                             source: asFunction,
                             definition: definition.node,
                             substitutions,
-                            replacements: new Map([[definition.node, asFunction]]),
+                            replacements,
                         }),
                         new BoundConstraint(asFunction, {
                             source: asFunction,

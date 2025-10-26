@@ -22,20 +22,17 @@ export class Constraints {
     }
 
     add(...constraints: Constraint[]) {
-        for (const constraint of constraints) {
-            // Skip duplicate constraints
-            if (!this.constraints.some((existing) => existing.equals(constraint))) {
-                this.constraints.push(constraint);
-            }
-        }
-
+        this.constraints.push(...constraints);
         this.constraints.sort((a, b) => scores.indexOf(a.score()) - scores.indexOf(b.score()));
     }
 
-    run(solver: Solver) {
+    run(solver: Solver, { until }: { until?: Score } = {}) {
         // Needed instead of a `for` loop because constraints can be added while
         // running.
-        while (this.constraints.length > 0) {
+        while (
+            this.constraints.length > 0 &&
+            (until == null || this.constraints[0].score() !== until)
+        ) {
             const constraint = this.constraints.shift()!;
             constraint.run(solver);
         }

@@ -1,5 +1,5 @@
 import { Node } from "../db";
-import { ConstructedType, Type } from "./constraints/type";
+import { ConstructedType, Type, TypeParameter } from "./constraints/type";
 import * as codegen from "../codegen";
 
 export const named = (name: Node, parameters: Type[]): ConstructedType => ({
@@ -52,10 +52,9 @@ export const block = (output: Type): ConstructedType => ({
     codegen: codegen.blockType(output),
 });
 
-export const parameter = (name: Node): ConstructedType => ({
-    kind: "parameter",
-    tag: name,
+export const parameter = (parameter: TypeParameter): ConstructedType => ({
+    tag: parameter,
     children: [],
-    display: () => name.code,
-    codegen: codegen.parameterType(name),
+    display: () => parameter.toString(),
+    codegen: codegen.parameterType(parameter),
 });

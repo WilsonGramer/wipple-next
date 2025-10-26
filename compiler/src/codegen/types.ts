@@ -1,12 +1,13 @@
 import { CodegenItem } from ".";
 import { Node } from "../db";
+import { TypeParameter } from "../typecheck/constraints/type";
 
-export const parameterType = (name: Node): CodegenItem => ({
+export const parameterType = (parameter: TypeParameter): CodegenItem => ({
     codegen: (codegen) => {
         codegen.write(
             JSON.stringify({
                 type: "parameter",
-                name: codegen.node(name),
+                name: codegen.node(parameter.source),
             }),
         );
     },

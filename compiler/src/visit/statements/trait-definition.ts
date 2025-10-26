@@ -6,11 +6,11 @@ import { parseTraitAttributes } from "../attributes";
 import { visitType } from "../types";
 import { visitConstraint } from "../constraints";
 import { TraitDefinition } from "../definitions";
+import { TypeParameter } from "../../typecheck/constraints/type";
 
 export class ParameterInTraitDefinition extends Fact<Node> {}
 export class TypeInTraitDefinition extends Fact<Node> {}
 export class ConstraintInTraitDefinition extends Fact<Node> {}
-export class IsInferredTypeParameter extends Fact<null> {}
 
 export const visitTraitDefinition: Visit<TraitDefinitionStatement> = (
     visitor,
@@ -24,22 +24,25 @@ export const visitTraitDefinition: Visit<TraitDefinitionStatement> = (
 
         const attributes = parseTraitAttributes(visitor, statement.attributes);
 
-        const parameters = statement.parameters.map(({ name, infer }) =>
-            visitor.visit(name, ParameterInTraitDefinition, (visitor, parameter, node) => {
-                visitor.defineName(parameter.value, {
-                    type: "typeParameter",
-                    name: parameter.value,
-                    node,
-                    infer,
-                });
+        const parameters = statement.parameters.map(({ name, infer }) => {
+            const source = visitor.visit(
+                name,
+                ParameterInTraitDefinition,
+                (visitor, parameter, node) => {
+                    visitor.defineName(parameter.value, {
+                        type: "typeParameter",
+                        name: parameter.value,
+                        node,
+                    });
+                },
+            );
 
-                visitor.addConstraints(new TypeConstraint(node, types.parameter(node)));
+            const parameter = new TypeParameter(name.value, source, infer ?? false);
 
-                if (infer) {
-                    visitor.db.add(node, new IsInferredTypeParameter(null));
-                }
-            }),
-        );
+            visitor.addConstraints(new TypeConstraint(source, types.parameter(parameter)));
+
+            return parameter;
+        });
 
         visitor.enqueue("afterTypeDefinitions", () => {
             const type = visitor.visit(

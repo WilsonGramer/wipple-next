@@ -59,7 +59,11 @@ const getLinks = (db: Db, node: Node, source: Node | undefined) => {
             continue;
         }
 
-        const uses = group.nodes.filter((node) => node !== instantiated && db.has(node, IsTyped));
+        const uses = group.nodes
+            .values()
+            .filter((node) => node !== instantiated && db.has(node, IsTyped))
+            .toArray();
+
         if (uses.length === 0) {
             continue;
         }

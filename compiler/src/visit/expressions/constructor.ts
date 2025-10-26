@@ -3,6 +3,7 @@ import { Fact, Node } from "../../db";
 import { ConstructorExpression } from "../../syntax";
 import { BoundConstraint, Constraint, InstantiateConstraint } from "../../typecheck";
 import * as codegen from "../../codegen";
+import { Type, TypeParameter } from "../../typecheck/constraints/type";
 
 export class ResolvedConstructor extends Fact<Node> {}
 export class IsUnresolvedConstructor extends Fact<null> {}
@@ -18,7 +19,8 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
         (definition) => {
             switch (definition.type) {
                 case "trait": {
-                    const substitutions = new Map<Node, Node>();
+                    const substitutions = new Map<TypeParameter, Type>();
+                    const replacements = new Map([[definition.node, node]]);
 
                     node.setCodegen(codegen.traitExpression(definition.node, substitutions));
 
@@ -28,7 +30,7 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
                                 source: node,
                                 definition: definition.node,
                                 substitutions,
-                                replacements: new Map([[definition.node, node]]),
+                                replacements,
                             }),
                             new BoundConstraint(node, {
                                 source: node,

@@ -4,6 +4,7 @@ import { OperatorExpression } from "../../syntax";
 import { visitExpression } from ".";
 import * as codegen from "../../codegen";
 import { BoundConstraint, InstantiateConstraint, TypeConstraint, types } from "../../typecheck";
+import { Type, TypeParameter } from "../../typecheck/constraints/type";
 
 export class ResolvedOperatorExpression extends Fact<Node> {}
 export class IsUnresolvedOperatorExpression extends Fact<null> {}
@@ -23,7 +24,8 @@ export const visitOperatorExpression: Visit<OperatorExpression> = (visitor, expr
 
             const operatorNode = visitor.node(expression);
 
-            const substitutions = new Map<Node, Node>();
+            const substitutions = new Map<TypeParameter, Type>();
+            const replacements = new Map([[definition.node, operatorNode]]);
 
             operatorNode.setCodegen(codegen.traitExpression(definition.node, substitutions));
 
@@ -32,7 +34,7 @@ export const visitOperatorExpression: Visit<OperatorExpression> = (visitor, expr
                     source: operatorNode,
                     definition: definition.node,
                     substitutions,
-                    replacements: new Map([[definition.node, operatorNode]]),
+                    replacements,
                 }),
                 new BoundConstraint(operatorNode, {
                     source: operatorNode,

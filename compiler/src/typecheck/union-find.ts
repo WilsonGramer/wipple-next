@@ -1,55 +1,43 @@
-import { Set as ImmutableSet, List as ImmutableList } from "immutable";
 import { Node } from "../db";
 
 export class UnionFind {
-    private sets = ImmutableList<[Node, ImmutableSet<Node>]>();
+    private sets: Set<Node>[] = [];
 
-    static from(other: UnionFind) {
-        const unionFind = new UnionFind();
-        unionFind.sets = other.sets;
-        return unionFind;
+    constructor(other?: UnionFind) {
+        this.sets = other?.sets.map((set) => new Set(set)) ?? [];
     }
 
     union(left: Node, right: Node) {
-        const toUnify: ImmutableSet<Node>[] = [];
-        const toKeep: [Node, ImmutableSet<Node>][] = [];
-        for (const [setRepresentative, set] of this.sets) {
+        const toUnify = new Set<Node>();
+        const toKeep: Set<Node>[] = [];
+        for (const set of this.sets) {
             if (set.has(left) || set.has(right)) {
-                toUnify.push(set);
+                for (const node of set) {
+                    toUnify.add(node);
+                }
+
+                toUnify.add(left);
+                toUnify.add(right);
             } else {
-                toKeep.push([setRepresentative, set]);
+                toKeep.push(set);
             }
         }
 
-        const union = ImmutableSet([left, right]).union(...toUnify);
-
-        // Make `left` (ie. a more recent node) the new representative. This
-        // helps form better groups
-        this.sets = ImmutableList([...toKeep, [left, union]]);
+        this.sets = [...toKeep, toUnify];
     }
 
     findAll(node: Node) {
-        return (
-            this.sets
-                .map(([, set]) => set)
-                .findEntry((set) => set.has(node))?.[1]
-                .values() ?? Iterator.from([node])
-        );
-    }
-
-    tryFind(node: Node) {
-        const result: Node[] = [];
-        for (const [representative, set] of this.sets) {
+        for (const set of this.sets) {
             if (set.has(node)) {
-                result.push(representative);
+                return set.values();
             }
         }
 
-        if (result.length > 1) {
-            throw new Error("node belongs to multiple sets");
-        }
+        return undefined;
+    }
 
-        return result[0];
+    tryFind(node: Node) {
+        return this.findAll(node)?.next().value;
     }
 
     find(node: Node) {
@@ -57,14 +45,14 @@ export class UnionFind {
         if (representative != null) {
             return representative;
         } else {
-            this.sets = this.sets.push([node, ImmutableSet([node])]);
+            this.sets.push(new Set([node]));
             return node;
         }
     }
 
     nodes() {
         return Iterator.from(this.sets.values())
-            .flatMap(([, nodes]) => nodes)
+            .flatMap((set) => set)
             .toArray();
     }
 }

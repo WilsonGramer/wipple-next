@@ -1,6 +1,7 @@
 import { Score } from ".";
 import { Solver, TypeConstraint } from "..";
 import { Node } from "../../db";
+import { Type, TypeParameter } from "./type";
 
 export class DefaultConstraint extends TypeConstraint {
     source: Node | undefined;
@@ -12,7 +13,7 @@ export class DefaultConstraint extends TypeConstraint {
     override instantiate(
         source: Node,
         replacements: Map<Node, Node>,
-        substitutions: Map<Node, Node>,
+        substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
         const instantiatedTypeConstraint = super.instantiate(source, replacements, substitutions);
         if (instantiatedTypeConstraint == null) {

@@ -4,6 +4,26 @@ import { getOrInstantiate, Score } from ".";
 import { Constraint } from "./constraint";
 import { CodegenItem } from "../../codegen";
 
+export class TypeParameter {
+    private static counter = 0;
+
+    id: string;
+    name: string;
+    source: Node;
+    infer: boolean;
+
+    constructor(name: string, source: Node, infer: boolean) {
+        this.id = `<parameter ${TypeParameter.counter++}>`;
+        this.name = name;
+        this.source = source;
+        this.infer = infer;
+    }
+
+    toString() {
+        return this.id;
+    }
+}
+
 export class TypeConstraint extends Constraint {
     node: Node;
     type: Type;
@@ -18,18 +38,10 @@ export class TypeConstraint extends Constraint {
         return this.referencedNodes().length > 0 ? "group" : "type";
     }
 
-    equals(other: Constraint): boolean {
-        if (!(other instanceof TypeConstraint)) {
-            return false;
-        }
-
-        return this.node === other.node && typesAreEqual(this.type, other.type);
-    }
-
     instantiate(
         source: Node,
         replacements: Map<Node, Node>,
-        substitutions: Map<Node, Node>,
+        substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
         return new TypeConstraint(
             getOrInstantiate(this.node, source, replacements),
@@ -56,7 +68,6 @@ export class TypeConstraint extends Constraint {
 }
 
 export interface ConstructedType {
-    kind?: "parameter";
     tag: unknown;
     children: Type[];
     display: (children: ((root?: boolean) => string)[], root: boolean) => string;
@@ -65,12 +76,12 @@ export interface ConstructedType {
 
 export type Type = Node | ConstructedType;
 
-export const cloneType = (type: Type): Type =>
+export const cloneType = <T extends Type>(type: T): T =>
     type instanceof Node ? type : { ...type, children: type.children.map(cloneType) };
 
 export const displayType = (type: Type, root = true): string => {
     if (type instanceof Node) {
-        return "_";
+        return type.toString() || "_";
     } else {
         const children = type.children.map(
             (child) =>
@@ -82,34 +93,48 @@ export const displayType = (type: Type, root = true): string => {
     }
 };
 
-export const traverseType = (type: Type, f: (type: Type) => Type): Type => {
+export const traverseType = (type: Type, f: (type: Type) => Type, stack: Node[] = []): Type => {
     type = f(type);
 
-    return type instanceof Node
-        ? type
-        : { ...type, children: type.children.map((child) => traverseType(child, f)) };
+    if (type instanceof Node) {
+        if (stack.includes(type)) {
+            return type; // recursive type
+        }
+
+        stack.push(type);
+    }
+
+    const applied =
+        type instanceof Node
+            ? type
+            : {
+                  ...type,
+                  children: type.children.map((child) => traverseType(child, f, stack)),
+              };
+
+    if (type instanceof Node) {
+        stack.pop();
+    }
+
+    return applied;
 };
 
 export const instantiateType = (
     type: Type,
     source: Node,
     replacements: Map<Node, Node>,
-    substitutions: Map<Node, Node>,
+    substitutions: Map<TypeParameter, Type>,
 ) =>
     traverseType(type, (type) => {
         if (type instanceof Node) {
             return getOrInstantiate(type, source, replacements);
-        } else if (type.kind === "parameter") {
-            if (!(type.tag instanceof Node)) {
-                throw new Error("expected parameter to have a node tag");
-            }
-
+        } else if (type.tag instanceof TypeParameter) {
             if (substitutions.has(type.tag)) {
                 return substitutions.get(type.tag)!;
             } else {
-                const replacement = getOrInstantiate(type.tag, source, replacements);
-                substitutions.set(type.tag, replacement);
-                return replacement;
+                const substitution = Node.instantiatedFrom(type.tag.source, source);
+                substitutions.set(type.tag, substitution);
+                return substitution;
             }
         } else {
             return type;

@@ -1,6 +1,6 @@
 import { CodegenItem } from ".";
 import { Node } from "../db";
-import { Type } from "../typecheck/constraints/type";
+import { Type, TypeParameter } from "../typecheck/constraints/type";
 
 export const variableExpression = (id: Node): CodegenItem => ({
     codegen: (codegen) => {
@@ -8,12 +8,15 @@ export const variableExpression = (id: Node): CodegenItem => ({
     },
 });
 
-export const constantExpression = (id: Node, substitutions: Map<Node, Type>): CodegenItem => ({
+export const constantExpression = (
+    id: Node,
+    substitutions: Map<TypeParameter, Type>,
+): CodegenItem => ({
     codegen: (codegen) => {
         codegen.write(`await runtime.constant(${codegen.node(id)}, types, {`);
 
         substitutions.forEach((type, parameter) => {
-            codegen.write(`${codegen.node(parameter)}: `);
+            codegen.write(`${codegen.node(parameter.source)}: `);
             codegen.write(type);
             codegen.write(", ");
         });
@@ -22,12 +25,15 @@ export const constantExpression = (id: Node, substitutions: Map<Node, Type>): Co
     },
 });
 
-export const traitExpression = (id: Node, substitutions: Map<Node, Type>): CodegenItem => ({
+export const traitExpression = (
+    id: Node,
+    substitutions: Map<TypeParameter, Type>,
+): CodegenItem => ({
     codegen: (codegen) => {
         codegen.write(`await runtime.trait(${codegen.node(id)}, types, {`);
 
         substitutions.forEach((type, parameter) => {
-            codegen.write(`${codegen.node(parameter)}: `);
+            codegen.write(`${codegen.node(parameter.source)}: `);
             codegen.write(type);
             codegen.write(", ");
         });

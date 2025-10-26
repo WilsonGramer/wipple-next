@@ -51,12 +51,8 @@ export const incompleteType = query(function* (db) {
 export const unknownType = query(function* (db) {
     for (const [node, _] of db.list(IsTyped)) {
         const types = db.list(node, HasType).toArray();
-        if (types.length === 1) {
-            const [type] = types;
-
-            if (type instanceof Node) {
-                yield { node };
-            }
+        if (types.length === 0) {
+            yield { node };
         }
     }
 });

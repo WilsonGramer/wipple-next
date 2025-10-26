@@ -87,9 +87,9 @@ export class RenderableType {
 render.type = (type: Type) => new RenderableType(type);
 
 export class RenderableBound {
-    bound: Bound<Type>;
+    bound: Bound;
 
-    constructor(bound: Bound<Type>) {
+    constructor(bound: Bound) {
         this.bound = bound;
     }
 
@@ -99,7 +99,7 @@ export class RenderableBound {
     }
 }
 
-render.bound = (bound: Bound<Type>) => new RenderableBound(bound);
+render.bound = (bound: Bound) => new RenderableBound(bound);
 
 render.list = (values: Renderable[], separator: string) => {
     if (values.length > 2) {

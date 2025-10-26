@@ -1,15 +1,15 @@
 import { Solver } from "../solve";
 import { Node } from "../../db/node";
 import { HasConstraints } from "../../visit/visitor";
-import { Score } from ".";
-import { Type } from "./type";
+import { getOrInstantiate, Score } from ".";
+import { instantiateType, Type, TypeParameter } from "./type";
 import { Constraint } from "./constraint";
 
 export interface Instantiation {
     source: Node;
     definition: Node;
     replacements: Map<Node, Node>;
-    substitutions: Map<Node, Node>;
+    substitutions: Map<TypeParameter, Type>;
 }
 
 export class InstantiateConstraint extends Constraint {
@@ -24,20 +24,31 @@ export class InstantiateConstraint extends Constraint {
         return "instantiate";
     }
 
-    equals(other: Constraint): boolean {
-        if (!(other instanceof InstantiateConstraint)) {
-            return false;
-        }
-
-        return this.instantiation === other.instantiation;
-    }
-
     instantiate(
-        _source: Node,
+        source: Node,
         _replacements: Map<Node, Node>,
-        _substitutions: Map<Node, Node>,
+        substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
-        return undefined; // ignore nested instantiate constraints
+        const instantiation: Instantiation = {
+            source: this.instantiation.source,
+            definition: this.instantiation.definition,
+            replacements: this.instantiation.replacements,
+            substitutions: new Map(
+                this.instantiation.substitutions
+                    .entries()
+                    .map(([parameter, substitution]) => [
+                        parameter,
+                        instantiateType(
+                            substitution,
+                            source,
+                            this.instantiation.replacements,
+                            substitutions,
+                        ),
+                    ]),
+            ),
+        };
+
+        return new InstantiateConstraint(instantiation) as this;
     }
 
     run(solver: Solver) {

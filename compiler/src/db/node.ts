@@ -1,8 +1,7 @@
 import chalk from "chalk";
+import stripAnsi from "strip-ansi";
 import { Span } from "./span";
 import { CodegenItem } from "../codegen";
-
-let counter = 0;
 
 export const nodeDisplayOptions = {
     showLocation: true,
@@ -10,6 +9,8 @@ export const nodeDisplayOptions = {
 };
 
 export class Node {
+    private static counter = 0;
+
     id: string;
     span: Span;
     code: string;
@@ -20,13 +21,19 @@ export class Node {
     instantiatedBy?: Node;
 
     constructor(span: Span, code: string) {
-        this.id = `<${counter++}>`;
+        this.id = `<${Node.counter++}>`;
         this.span = span;
         this.code = code?.trim();
         this.codegen = undefined as any;
     }
 
     static instantiatedFrom(other: Node, source: Node | undefined): Node {
+        if (other.instantiatedFrom != null) {
+            throw new Error(
+                `already instantiated from ${other.instantiatedFrom.id} as ${other.id}`,
+            );
+        }
+
         const node = new Node(other.span, other.code);
         node.codegen = other.codegen;
         node.isHidden = other.isHidden;
@@ -39,19 +46,19 @@ export class Node {
         this.codegen = codegen;
     }
 
-    toString() {
+    toString(color = true) {
         let s = chalk.blue(nodeDisplayOptions.markdown ? "`" + this.code + "`" : this.code);
 
         if (nodeDisplayOptions.showLocation) {
-            if (this.instantiatedFrom != null) {
-                s += chalk.dim(` instantiated`);
-            }
+            // s += chalk.dim(` ${this.id}`);
 
             s += chalk.dim(` @ ${this.span}`);
 
-            s += chalk.dim(` ${this.id}`);
+            if (this.instantiatedFrom != null) {
+                s += chalk.dim(` (instantiated)`);
+            }
         }
 
-        return s;
+        return color ? s : stripAnsi(s);
     }
 }

@@ -51,8 +51,8 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
     const info = visit(parsedFiles, db);
 
     const solver = new Solver(db);
-    for (const [representative, group] of db.list(InTypeGroup)) {
-        solver.setGroup(representative, group);
+    for (const [_node, group] of db.list(InTypeGroup)) {
+        solver.setGroup(group);
     }
 
     const constraints = db.list(HasConstraints).flatMap(([_node, constraints]) => constraints);
@@ -70,17 +70,8 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
             db.add(node, new InTypeGroup(group));
 
             for (const type of group.types) {
-                db.add(node, new HasType(solver.apply(type)));
+                db.add(node, new HasType(type));
             }
-        }
-    }
-
-    // Also apply substitutions within definitions for codegen
-    for (const [_trait, instance] of db.list(HasInstance)) {
-        for (const [parameter, substitution] of instance.substitutions) {
-            const appliedNode = new Node(substitution.span, substitution.code);
-            appliedNode.setCodegen(solver.apply(substitution));
-            instance.substitutions.set(parameter, appliedNode);
         }
     }
 

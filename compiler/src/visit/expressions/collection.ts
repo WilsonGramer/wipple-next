@@ -4,6 +4,7 @@ import { CollectionExpression } from "../../syntax";
 import { visitExpression } from ".";
 import * as codegen from "../../codegen";
 import { BoundConstraint, InstantiateConstraint, TypeConstraint, types } from "../../typecheck";
+import { Type, TypeParameter } from "../../typecheck/constraints/type";
 
 export class ResolvedBuildCollectionInCollectionExpression extends Fact<Node> {}
 export class ResolvedInitialCollectionInCollectionExpression extends Fact<Node> {}
@@ -26,7 +27,7 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
 
         const buildCollectionNode = visitor.node(expression);
 
-        const substitutions = new Map<Node, Node>();
+        const substitutions = new Map<TypeParameter, Type>();
 
         buildCollectionNode.setCodegen(codegen.traitExpression(definition.node, substitutions));
 
@@ -55,7 +56,8 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
 
         const initialCollectionNode = visitor.node(expression);
 
-        const substitutions = new Map<Node, Node>();
+        const substitutions = new Map<TypeParameter, Type>();
+        const replacements = new Map([[definition.node, initialCollectionNode]]);
 
         initialCollectionNode.setCodegen(codegen.traitExpression(definition.node, substitutions));
 
@@ -64,7 +66,7 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
                 source: initialCollectionNode,
                 definition: definition.node,
                 substitutions,
-                replacements: new Map([[definition.node, initialCollectionNode]]),
+                replacements,
             }),
             new BoundConstraint(initialCollectionNode, {
                 source: initialCollectionNode,

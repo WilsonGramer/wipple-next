@@ -1,5 +1,6 @@
 import { Node } from "../db";
 import { Token } from "../syntax/parser";
+import { TypeParameter } from "../typecheck/constraints/type";
 import {
     ConstantAttributes,
     InstanceAttributes,
@@ -36,7 +37,7 @@ export interface TypeDefinition {
     node: Node;
     comments: Token[];
     attributes: TypeAttributes;
-    parameters: Node[];
+    parameters: TypeParameter[];
 }
 
 export interface TraitDefinition {
@@ -44,7 +45,7 @@ export interface TraitDefinition {
     node: Node;
     comments: Token[];
     attributes: TraitAttributes;
-    parameters: Node[];
+    parameters: TypeParameter[];
 }
 
 export interface InstanceDefinition {
@@ -60,7 +61,6 @@ export interface TypeParameterDefinition {
     type: "typeParameter";
     node: Node;
     name: string;
-    infer?: boolean;
 }
 
 export interface MarkerConstructorDefinition {

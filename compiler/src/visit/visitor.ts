@@ -3,6 +3,7 @@ import { AnyDefinition, InstanceDefinition } from "./definitions";
 import { Constraint } from "../typecheck";
 import { CodegenItem } from "../codegen";
 import { LocationRange } from "../syntax";
+import { Type, TypeParameter } from "../typecheck/constraints/type";
 
 export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 
@@ -261,7 +262,7 @@ export class HasConstraints extends Fact<Constraint[]> {
 
 export interface Instance {
     node: Node;
-    substitutions: Map<Node, Node>;
+    substitutions: Map<TypeParameter, Type>;
     default?: boolean;
     error?: boolean;
 }

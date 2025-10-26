@@ -10,8 +10,8 @@ test("custom errors", () => {
 
     assert.deepStrictEqual(db.display(placeholders[2], HasType), ["Number"]);
     assert.deepStrictEqual(db.display(placeholders[3], HasType), ["String"]);
-    assert.deepStrictEqual(db.display(placeholders[4], HasType), ["_"]);
-    assert.deepStrictEqual(db.display(placeholders[5], HasType), ["_"]);
+    assert.deepStrictEqual(db.display(placeholders[4], HasType), []);
+    assert.deepStrictEqual(db.display(placeholders[5], HasType), []);
 
     const valueOfPlaceholder4 = db.get(placeholders[4], AssignedTo)!;
     const functionOfPlaceholder4 = db.find(FunctionInCallExpression, valueOfPlaceholder4)!;

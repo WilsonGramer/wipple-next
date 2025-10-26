@@ -1,6 +1,7 @@
 import { Score } from ".";
 import { Node } from "../../db";
 import { Solver } from "../solve";
+import { Type, TypeParameter } from "./type";
 
 /**
  * Constraints are produced during the `visit` stage and add type information to
@@ -17,11 +18,6 @@ export abstract class Constraint {
     abstract score(): Score;
 
     /**
-     * Used to deduplicate constraints.
-     */
-    abstract equals(other: Constraint): boolean;
-
-    /**
      * Produce a deep copy of this constraint, ignoring type parameters. This is
      * used when resolving generic constants and bounds, so the "concrete" type
      * parameter can be substituted with a real type from the use site. Without
@@ -31,7 +27,7 @@ export abstract class Constraint {
     abstract instantiate(
         source: Node,
         replacements: Map<Node, Node>,
-        substitutions: Map<Node, Node>,
+        substitutions: Map<TypeParameter, Type>,
     ): this | undefined;
 
     /**
