@@ -1,0 +1,13 @@
+[intrinsic] Number : type
+[intrinsic] String : type
+
+A : value => trait (value -> ())
+instance (A Number)
+instance (A String)
+
+B : value => trait (value -> ())
+instance (B value) where (A value)
+
+B 123
+B "abc"
+B ()

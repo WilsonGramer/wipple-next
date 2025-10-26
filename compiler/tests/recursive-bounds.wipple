@@ -1,0 +1,10 @@
+[intrinsic] Number : type
+[intrinsic] String : type
+[intrinsic] Maybe : value => type
+
+Describe : value => trait (value -> String)
+instance (Describe String)
+instance (Describe (Maybe value)) where (Describe value)
+
+Describe (_ :: Maybe String)
+Describe (_ :: Maybe Number)
