@@ -1,6 +1,6 @@
 import { Db, Node } from "../db";
-import { Instance } from "../visit/visitor";
-import { Constraint, Constraints, Score } from "./constraints";
+import { HasDefinitionConstraints, Instance } from "../visit/visitor";
+import { BoundConstraint, Constraint, Constraints, Score } from "./constraints";
 import {
     traverseType,
     Type,
@@ -8,13 +8,15 @@ import {
     ConstructedType,
     typesAreEqual,
     TypeParameter,
+    displayType,
 } from "./constraints/type";
 
 export class Solver {
     db: Db;
     private groups = new Map<Set<Node>, ConstructedType[]>();
     constraints = new Constraints();
-    instanceStack: Node[] = [];
+    implyInstances = true;
+    impliedInstances: Instance[] = [];
     applyQueue: Map<TypeParameter, Type>[] = [];
     error = false;
 
@@ -29,8 +31,9 @@ export class Solver {
     }
 
     replaceWith(other: Solver) {
-        this.groups = new Map(other.groups.entries().map(([nodes, types]) => [nodes, [...types]]));
-        this.instanceStack = [...other.instanceStack];
+        this.groups = new Map(
+            other.groups.entries().map(([nodes, types]) => [new Set(nodes), [...types]]),
+        );
         this.applyQueue = [...other.applyQueue];
     }
 
@@ -44,6 +47,15 @@ export class Solver {
 
     run({ until }: { until?: Score } = {}) {
         this.constraints.run(this, { until });
+    }
+
+    imply(instance: Instance) {
+        if (
+            this.implyInstances &&
+            this.impliedInstances.every((existing) => existing.node !== instance.node)
+        ) {
+            this.impliedInstances.push(instance);
+        }
     }
 
     unify(left: Type, right: Type) {
@@ -157,9 +169,9 @@ export class Solver {
             }
         }
 
-        this.groups.set(new Set([...leftGroup.nodes, ...rightGroup.nodes]), []);
+        this.groups.set(new Set([...leftGroup.nodes, ...rightGroup.nodes]), leftGroup.types);
 
-        for (const type of [...leftGroup.types, ...rightGroup.types]) {
+        for (const type of rightGroup.types) {
             this.unify(left, type);
         }
     }

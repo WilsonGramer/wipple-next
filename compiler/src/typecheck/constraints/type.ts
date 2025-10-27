@@ -39,19 +39,14 @@ export class TypeConstraint extends Constraint {
     }
 
     instantiate(
-        sources: (Node | undefined)[],
-        _definition: Node,
+        _solver: Solver,
+        source: Node,
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
         return new TypeConstraint(
-            getOrInstantiate(this.node, sources.find((source) => source != null)!, replacements),
-            instantiateType(
-                this.type,
-                sources.find((source) => source != null)!,
-                replacements,
-                substitutions,
-            ),
+            getOrInstantiate(this.node, source, replacements),
+            instantiateType(this.type, source, replacements, substitutions),
         ) as this;
     }
 
@@ -87,7 +82,7 @@ export const cloneType = <T extends Type>(type: T): T =>
 
 export const displayType = (type: Type, root = true): string => {
     if (type instanceof Node) {
-        return type.toString() || "_";
+        return "_";
     } else {
         const children = type.children.map(
             (child) =>

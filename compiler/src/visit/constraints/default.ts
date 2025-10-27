@@ -15,5 +15,5 @@ export const visitDefaultConstraint: Visit<SyntaxDefaultConstraint> = (
     const parameter = visitor.visit(statement.parameter, ParameterInDefaultConstraint, visitType);
     const type = visitor.visit(statement.value, TypeInDefaultConstraint, visitType);
 
-    visitor.currentDefinition!.addConstraints(new DefaultConstraint(parameter, type));
+    visitor.addConstraints(new DefaultConstraint(parameter, type));
 };

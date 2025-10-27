@@ -36,7 +36,7 @@ export const visitStructureExpression: Visit<StructureExpression> = (visitor, ex
                     return [
                         [
                             new InstantiateConstraint({
-                                sources: [visitor.currentDefinition?.node, node],
+                                source: node,
                                 definition: definition.node,
                                 substitutions: new Map(),
                                 replacements,

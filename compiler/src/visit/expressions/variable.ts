@@ -28,7 +28,7 @@ export const visitVariableExpression: Visit<VariableExpression> = (visitor, expr
 
                     return [
                         new InstantiateConstraint({
-                            sources: [visitor.currentDefinition?.node, node],
+                            source: node,
                             definition: definition.node,
                             substitutions,
                             replacements: new Map([[definition.node, node]]),

@@ -1,13 +1,14 @@
 import { Solver } from "../solve";
 import { Fact, Node } from "../../db";
-import { HasConstraints, HasInstance, Instance } from "../../visit/visitor";
-import { displayType, instantiateType, Type, TypeParameter } from "./type";
+import { HasInstance, Instance } from "../../visit/visitor";
+import { displayType, instantiateType, Type, TypeParameter, typesAreEqual } from "./type";
 import chalk from "chalk";
 import { InstantiateConstraint, Score } from ".";
 import { Constraint } from "./constraint";
+import stripAnsi from "strip-ansi";
 
 export interface Bound {
-    sources: (Node | undefined)[];
+    source: Node;
     trait: Node;
     substitutions: Map<TypeParameter, Type>;
     fromConstraint?: boolean;
@@ -26,12 +27,25 @@ export const displayBound = (bound: Bound) =>
         .toArray()
         .join("")}`;
 
-export const applyBound = (bound: Bound, solver: Solver) => ({
+export const applyBound = (bound: Bound, solver: Solver): Bound => ({
     ...bound,
     substitutions: new Map(
         bound.substitutions.entries().map(([parameter, type]) => [parameter, solver.apply(type)]),
     ),
 });
+
+interface BoundLike {
+    trait: Node;
+    substitutions: Map<TypeParameter, Type>;
+}
+
+export const boundTypesAreEqual = (left: BoundLike, right: BoundLike) =>
+    left.trait === right.trait &&
+    left.substitutions.size === right.substitutions.size &&
+    Array.from(left.substitutions.entries()).every(([parameter, leftType]) => {
+        const rightType = right.substitutions.get(parameter);
+        return rightType != null && typesAreEqual(leftType, rightType);
+    });
 
 export class HasResolvedBound extends Fact<[bound: Bound, instance: Node]> {
     clone = ([bound, instance]: [Bound, Node]): [Bound, Node] => [cloneBound(bound), instance];
@@ -60,40 +74,54 @@ export class BoundConstraint extends Constraint {
     }
 
     instantiate(
-        sources: (Node | undefined)[],
-        definition: Node,
+        solver: Solver,
+        source: Node,
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
-        if (sources.includes(this.node)) {
+        if (source === this.node) {
             return undefined; // recursive bound
         }
 
         const bound: Bound = {
-            sources: [...sources, ...this.bound.sources, definition],
+            source,
             trait: this.bound.trait,
             substitutions: new Map(
                 this.bound.substitutions
                     .entries()
                     .map(([parameter, substitution]) => [
                         parameter,
-                        instantiateType(
-                            substitution,
-                            sources.find((source) => source != null)!,
-                            replacements,
-                            substitutions,
-                        ),
+                        instantiateType(substitution, source, replacements, substitutions),
                     ]),
             ),
             fromConstraint: this.bound.fromConstraint,
             instantiated: true,
         };
 
-        return new BoundConstraint(this.node, bound) as this;
+        const constraint = new BoundConstraint(this.node, bound) as this;
+
+        if (constraint.bound.fromConstraint) {
+            solver.imply(constraint.asInstance());
+        }
+
+        return constraint;
+    }
+
+    asInstance(): Instance {
+        return {
+            node: this.node,
+            trait: this.bound.trait,
+            substitutions: this.bound.substitutions,
+        };
     }
 
     run(solver: Solver) {
-        const { sources, trait, substitutions, fromConstraint, instantiated } = this.bound;
+        const { source, trait, substitutions, fromConstraint, instantiated } = this.bound;
+
+        if (source === trait && !instantiated) {
+            // Traits themselves stand alone
+            return;
+        }
 
         if (fromConstraint && !instantiated) {
             // Assume bounds within the current definition have instances
@@ -122,30 +150,8 @@ export class BoundConstraint extends Constraint {
             (instance) => (instance.default ? "defaultInstances" : "nonDefaultInstances"),
         );
 
-        // Assume bounds within the current definition have instances available
-        const boundInstances = sources
-            .filter((source) => source != null)
-            .flatMap((source) =>
-                solver.db
-                    .list(source, HasConstraints)
-                    .flatMap((constraints) => constraints)
-                    .filter((constraint) => constraint instanceof BoundConstraint)
-                    .filter(
-                        (constraint) =>
-                            constraint.bound.trait === this.bound.trait &&
-                            constraint.bound.fromConstraint === true,
-                    )
-                    .map(
-                        (constraint): Instance => ({
-                            node: constraint.node,
-                            substitutions: new Map(constraint.bound.substitutions),
-                        }),
-                    )
-                    .toArray(),
-            );
-
         const instanceGroups = [
-            { instances: boundInstances, instantiate: false },
+            { instances: solver.impliedInstances, instantiate: false },
             { instances: nonDefaultInstances, instantiate: true },
             { instances: defaultInstances, instantiate: true },
         ];
@@ -161,49 +167,44 @@ export class BoundConstraint extends Constraint {
             ][] = [];
 
             for (const instance of instances) {
+                if (instance.trait !== trait) {
+                    continue;
+                }
+
                 const copy = Solver.from(solver);
+                copy.implyInstances = false;
+                copy.impliedInstances = [...solver.impliedInstances];
 
                 // These are for the *instance's own* parameters, not the trait
                 // parameters like with the bound
-                const replacements = instantiate ? new Map<Node, Node>() : undefined;
-                if (replacements != null) {
+                const replacements = new Map<Node, Node>();
+                const substitutions = new Map<TypeParameter, Type>();
+                if (instantiate) {
                     copy.add(
                         new InstantiateConstraint({
-                            sources: [...sources, this.node],
+                            source: this.node,
                             definition: instance.node,
                             replacements,
-                            substitutions: new Map<TypeParameter, Type>(),
+                            substitutions,
                         }),
                     );
                 }
 
                 // Run the solver (excluding bounds) to populate `replacements`
-                copy.instanceStack.push(instance.node);
-                copy.run({ until: "bound" }); // this will also store the current instance stack in any bounds (see `instantiate` above)
-                copy.instanceStack.pop();
+                copy.run({ until: "bound" });
 
                 // These are for the *trait's* parameters
                 const instanceSubstitutions = new Map<TypeParameter, Type>();
                 const instanceInferred = new Map<TypeParameter, Type>();
-                for (const [parameter, substitution] of instance.substitutions) {
-                    const replacement =
-                        replacements != null
-                            ? instantiateType(
-                                  substitution,
-                                  this.node,
-                                  replacements,
-                                  instanceSubstitutions,
-                              )
-                            : substitution;
-
-                    if (replacement == null) {
-                        throw new Error("missing replacement in instantiated instance");
-                    }
+                for (let [parameter, substitution] of instance.substitutions) {
+                    substitution = instantiate
+                        ? instantiateType(substitution, this.node, replacements, substitutions)
+                        : substitution;
 
                     if (parameter.infer) {
-                        instanceInferred.set(parameter, replacement);
+                        instanceInferred.set(parameter, substitution);
                     } else {
-                        instanceSubstitutions.set(parameter, replacement);
+                        instanceSubstitutions.set(parameter, substitution);
                     }
                 }
 
@@ -226,7 +227,7 @@ export class BoundConstraint extends Constraint {
             }
 
             const resolvedBound: Bound = {
-                sources,
+                source,
                 trait,
                 substitutions: boundSubstitutions,
             };
@@ -246,19 +247,20 @@ export class BoundConstraint extends Constraint {
                     solver.unify(boundType, instanceType);
                 }
 
-                solver.db.add(
-                    sources.find((source) => source != null)!,
-                    new HasResolvedBound([applyBound(resolvedBound, solver), instanceNode]),
-                );
+                // Don't indicate a resolved instance if this instance is
+                // implied (suppresses custom error messages)
+                if (solver.impliedInstances.every((instance) => instance.node !== instanceNode)) {
+                    solver.db.add(
+                        source,
+                        new HasResolvedBound([applyBound(resolvedBound, solver), instanceNode]),
+                    );
+                }
 
                 break;
             }
 
             if (isLastInstanceSet) {
-                solver.db.add(
-                    sources.find((source) => source != null)!,
-                    new HasUnresolvedBound(applyBound(resolvedBound, solver)),
-                );
+                solver.db.add(source, new HasUnresolvedBound(applyBound(resolvedBound, solver)));
             }
         }
 

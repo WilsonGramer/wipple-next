@@ -30,21 +30,24 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
         });
 
         if (definition != null) {
-            let value!: Node;
             visitor.withDefinition(definition.node, () => {
-                value = visitValue();
+                visitor.currentDefinition!.withinConstantValue = true;
+
+                const value = visitValue();
+
+                if (!definition.value.assigned) {
+                    // Ensure the value is assignable to the constant's type
+                    visitor.addConstraints(new TypeConstraint(value, definition.value.type()));
+
+                    visitor.db.add(value, new ValueInConstantDefinition(definition.node));
+                    definition.value = { assigned: true, node: value };
+                } else {
+                    // TODO: Constant already assigned a value
+                }
+
                 return undefined;
             });
 
-            if (!definition.value.assigned) {
-                // Ensure the value is assignable to the constant's type
-                visitor.addConstraints(new TypeConstraint(value, definition.value.type()));
-
-                visitor.db.add(value, new ValueInConstantDefinition(definition.node));
-                definition.value = { assigned: true, node: value };
-            } else {
-                // TODO: Constant already assigned a value
-            }
             return;
         }
     }

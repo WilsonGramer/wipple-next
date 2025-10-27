@@ -25,8 +25,8 @@ export abstract class Constraint {
      * concrete types, causing errors.
      */
     abstract instantiate(
-        sources: (Node | undefined)[],
-        definition: Node,
+        solver: Solver,
+        source: Node,
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
     ): this | undefined;

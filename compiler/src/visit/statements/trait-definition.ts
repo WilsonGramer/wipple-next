@@ -1,7 +1,7 @@
 import { Visit } from "../visitor";
 import { Fact, Node } from "../../db";
 import { TraitDefinitionStatement } from "../../syntax";
-import { TypeConstraint, types } from "../../typecheck";
+import { BoundConstraint, TypeConstraint, types } from "../../typecheck";
 import { parseTraitAttributes } from "../attributes";
 import { visitType } from "../types";
 import { visitConstraint } from "../constraints";
@@ -51,7 +51,16 @@ export const visitTraitDefinition: Visit<TraitDefinitionStatement> = (
                 visitType,
             );
 
-            visitor.addConstraints(new TypeConstraint(definitionNode, type));
+            visitor.addConstraints(
+                new TypeConstraint(definitionNode, type),
+                new BoundConstraint(definitionNode, {
+                    source: definitionNode,
+                    trait: definitionNode,
+                    substitutions: new Map(
+                        parameters.map((parameter) => [parameter, types.parameter(parameter)]),
+                    ),
+                }),
+            );
 
             for (const constraint of statement.constraints.constraints) {
                 visitor.visit(constraint, ConstraintInTraitDefinition, visitConstraint);

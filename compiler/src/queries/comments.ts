@@ -15,12 +15,7 @@ export const errorInstance = query(function* (db) {
     for (const [node, [bound, instanceNode]] of db.list(HasResolvedBound)) {
         const comments = db.get(instanceNode, IsErrorInstance);
         if (comments != null) {
-            const links = getLinks(
-                db,
-                instanceNode,
-                bound.sources.find((source) => source != null)!,
-            );
-
+            const links = getLinks(db, instanceNode, bound.source);
             yield { node, bound, comments, links };
         }
     }

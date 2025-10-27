@@ -52,7 +52,7 @@ export const visitStructurePattern: Visit<StructurePattern> = (visitor, pattern,
 
     visitor.addConstraints(
         new InstantiateConstraint({
-            sources: [visitor.currentDefinition?.node, node],
+            source: node,
             definition: definition.node,
             substitutions: new Map(),
             replacements,

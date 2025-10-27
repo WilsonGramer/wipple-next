@@ -1,10 +1,15 @@
-import { Fact, Db, Node } from "./db";
+import { Fact, Db } from "./db";
 import parse, { SourceFile, SyntaxError, LocationRange } from "./syntax";
 import { visit } from "./visit";
-import { Group, Solver } from "./typecheck";
+import { BoundConstraint, Group, Solver } from "./typecheck";
 import { cloneType, displayType, Type } from "./typecheck/constraints/type";
 import chalk from "chalk";
-import { HasConstraints, HasInstance } from "./visit/visitor";
+import {
+    HasTopLevelConstraints,
+    HasDefinitionConstraints,
+    HasConstantValueConstraints,
+    HasInstance,
+} from "./visit/visitor";
 import { cloneGroup } from "./typecheck/solve";
 
 export interface CompileOptions {
@@ -55,7 +60,44 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         solver.setGroup(group);
     }
 
-    const constraints = db.list(HasConstraints).flatMap(([_node, constraints]) => constraints);
+    // Solve constraints from each definition, implying all instances and bounds
+
+    for (const [definition, constraints] of [
+        ...db.list(HasDefinitionConstraints),
+        ...db.list(HasConstantValueConstraints),
+    ]) {
+        for (const constraint of constraints) {
+            if (constraint instanceof BoundConstraint) {
+                solver.imply(constraint.asInstance());
+            }
+        }
+
+        // Also imply the generic instance (i.e. without instantiating it)
+        const instanceDefinition = db
+            .list(HasInstance)
+            .find(([_trait, instance]) => instance.node === definition);
+
+        if (instanceDefinition != null) {
+            const [_trait, instance] = instanceDefinition;
+            solver.imply(instance);
+        }
+
+        solver.add(...constraints);
+    }
+
+    solver.run();
+
+    // Solve constraints from top-level expressions
+
+    // Now that we have concrete types, require bounds to be resolved against
+    // actual instances
+    solver.impliedInstances = [];
+    solver.implyInstances = false;
+
+    const constraints = db
+        .list(HasTopLevelConstraints)
+        .flatMap(([_node, constraints]) => constraints);
+
     solver.add(...constraints);
     solver.run();
 

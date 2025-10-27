@@ -32,9 +32,9 @@ export const visitBoundConstraint: Visit<SyntaxBoundConstraint> = (visitor, stat
         trait.parameters.map((parameter, index) => [parameter, parameters[index]]),
     );
 
-    visitor.currentDefinition!.addConstraints(
+    visitor.addConstraints(
         new BoundConstraint(node, {
-            sources: [visitor.currentDefinition!.node],
+            source: node,
             fromConstraint: true,
             trait: trait.node,
             substitutions,

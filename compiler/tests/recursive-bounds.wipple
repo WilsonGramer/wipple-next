@@ -6,5 +6,5 @@ Describe : value => trait (value -> String)
 instance (Describe String)
 instance (Describe (Maybe value)) where (Describe value)
 
-Describe (_ :: Maybe String)
+--Describe (_ :: Maybe String)
 Describe (_ :: Maybe Number)

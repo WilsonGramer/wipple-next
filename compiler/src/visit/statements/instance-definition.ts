@@ -75,7 +75,7 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
 
             visitor.addConstraints(
                 new InstantiateConstraint({
-                    sources: [visitor.currentDefinition!.node, definitionNode],
+                    source: definitionNode,
                     definition: traitDefinition.node,
                     replacements: new Map([[traitDefinition.node, definitionNode]]),
                     substitutions,
@@ -83,6 +83,8 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
             );
 
             if (statement.value != null) {
+                visitor.currentDefinition!.withinConstantValue = true;
+
                 value = visitor.visit(statement.value, ValueInInstanceDefinition, visitExpression);
                 visitor.addConstraints(new TypeConstraint(value, definitionNode));
             } else if (attributes.error == null) {
@@ -93,6 +95,7 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
                 traitDefinition.node,
                 new HasInstance({
                     node: definitionNode,
+                    trait,
                     substitutions,
                     default: attributes.default,
                     error: attributes.error,

@@ -13,7 +13,7 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
     expression,
     node,
 ) => {
-    const constraints = visitor.resolveName<Constraint[]>(
+    const constraint = visitor.resolveName<Constraint>(
         expression.trait.value,
         node,
         (definition) => {
@@ -25,19 +25,12 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
                     node.setCodegen(codegen.traitExpression(definition.node, substitutions));
 
                     return [
-                        [
-                            new InstantiateConstraint({
-                                sources: [visitor.currentDefinition?.node, node],
-                                definition: definition.node,
-                                substitutions,
-                                replacements,
-                            }),
-                            new BoundConstraint(node, {
-                                sources: [visitor.currentDefinition?.node, node],
-                                trait: definition.node,
-                                substitutions,
-                            }),
-                        ],
+                        new InstantiateConstraint({
+                            source: node,
+                            definition: definition.node,
+                            substitutions,
+                            replacements,
+                        }),
                         ResolvedConstructor,
                     ];
                 }
@@ -46,14 +39,12 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
                     node.setCodegen(definition.node);
 
                     return [
-                        [
-                            new InstantiateConstraint({
-                                sources: [visitor.currentDefinition?.node, node],
-                                definition: definition.node,
-                                substitutions: new Map(),
-                                replacements: new Map([[definition.node, node]]),
-                            }),
-                        ],
+                        new InstantiateConstraint({
+                            source: node,
+                            definition: definition.node,
+                            substitutions: new Map(),
+                            replacements: new Map([[definition.node, node]]),
+                        }),
                         ResolvedConstructor,
                     ];
                 }
@@ -63,8 +54,8 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
         },
     );
 
-    if (constraints != null) {
-        visitor.addConstraints(...constraints);
+    if (constraint != null) {
+        visitor.addConstraints(constraint);
     } else {
         visitor.db.add(node, new IsUnresolvedConstructor(null));
     }
