@@ -62,7 +62,7 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
 
     // Solve constraints from each definition, implying all instances and bounds
 
-    for (const [definition, constraints] of [
+    for (const [_definition, constraints] of [
         ...db.list(HasDefinitionConstraints),
         ...db.list(HasConstantValueConstraints),
     ]) {
@@ -72,17 +72,12 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
             }
         }
 
-        // Also imply the generic instance (i.e. without instantiating it)
-        const instanceDefinition = db
-            .list(HasInstance)
-            .find(([_trait, instance]) => instance.node === definition);
-
-        if (instanceDefinition != null) {
-            const [_trait, instance] = instanceDefinition;
-            solver.imply(instance);
-        }
-
         solver.add(...constraints);
+    }
+
+    // Also imply generic (i.e. non-instantiated) instances
+    for (const [_trait, instance] of db.list(HasInstance)) {
+        solver.imply(instance);
     }
 
     solver.run();
