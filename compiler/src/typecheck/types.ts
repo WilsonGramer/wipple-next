@@ -35,9 +35,9 @@ export const tuple = (elements: Type[]): ConstructedType => ({
         if (elements.length === 0) {
             return "()";
         } else if (elements.length === 1) {
-            return `(${elements[0]()} ;)`;
+            return `(${elements[0](true)} ;)`;
         } else {
-            return `(${elements.map((e) => e()).join(" ; ")})`;
+            return `(${elements.map((e) => e(true)).join(" ; ")})`;
         }
     },
     codegen: codegen.tupleType(elements),

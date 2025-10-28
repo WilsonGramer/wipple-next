@@ -4,6 +4,7 @@ import { Constraint } from "../typecheck";
 import { CodegenItem } from "../codegen";
 import { LocationRange } from "../syntax";
 import { Type, TypeParameter } from "../typecheck/constraints/type";
+import { GenericConstraint } from "../typecheck/constraints";
 
 export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 
@@ -18,7 +19,6 @@ export class Visitor {
     nodes = new Set<Node>();
     definitions = new Map<Node, AnyDefinition>();
     definitionConstraints = new Map<Node, Constraint[]>();
-    constantValueConstraints = new Map<Node, Constraint[]>(); // constant value constraints are resolved with definitions but shouldn't be instantiated alongside the constant
     constraints = new Map<Node, Constraint[]>();
     instances = new Map<Node, InstanceDefinition[]>();
     queue = new Queue();
@@ -68,18 +68,14 @@ export class Visitor {
 
         if (this.currentDefinition != null) {
             if (this.currentDefinition.withinConstantValue) {
-                if (!this.constantValueConstraints.has(this.currentNode)) {
-                    this.constantValueConstraints.set(this.currentNode, []);
-                }
-
-                this.constantValueConstraints.get(this.currentNode)!.push(...constraints);
-            } else {
-                if (!this.definitionConstraints.has(this.currentDefinition.node)) {
-                    this.definitionConstraints.set(this.currentDefinition.node, []);
-                }
-
-                this.definitionConstraints.get(this.currentDefinition.node)!.push(...constraints);
+                constraints = constraints.map((constraint) => new GenericConstraint(constraint));
             }
+
+            if (!this.definitionConstraints.has(this.currentDefinition.node)) {
+                this.definitionConstraints.set(this.currentDefinition.node, []);
+            }
+
+            this.definitionConstraints.get(this.currentDefinition.node)!.push(...constraints);
         } else {
             if (!this.constraints.has(this.currentNode)) {
                 this.constraints.set(this.currentNode, []);
@@ -198,10 +194,6 @@ export class Visitor {
             this.db.add(node, new HasDefinitionConstraints(constraints));
         }
 
-        for (const [node, constraints] of this.constantValueConstraints) {
-            this.db.add(node, new HasConstantValueConstraints(constraints));
-        }
-
         for (const [node, constraints] of this.constraints) {
             this.db.add(node, new HasTopLevelConstraints(constraints));
         }
@@ -275,10 +267,6 @@ export class HasTopLevelScope extends Fact<Scope> {}
 export class HasNode extends Fact<Node> {}
 
 export class HasDefinitionConstraints extends Fact<Constraint[]> {
-    display = () => undefined;
-}
-
-export class HasConstantValueConstraints extends Fact<Constraint[]> {
     display = () => undefined;
 }
 

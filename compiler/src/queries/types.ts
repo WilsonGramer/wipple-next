@@ -29,7 +29,10 @@ export const conflictingTypes = query(function* (db) {
                 source,
                 node: instantiatedFrom ?? node,
                 types: group.types,
-                nodes: group.nodes.values().toArray(),
+                nodes: group.nodes
+                    .values()
+                    .filter((node) => !node.isHidden)
+                    .toArray(),
             };
         }
     }

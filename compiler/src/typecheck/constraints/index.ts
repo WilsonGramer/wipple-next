@@ -2,6 +2,7 @@ import { BoundConstraint } from "./bound";
 import { InstantiateConstraint } from "./instantiate";
 import { TypeConstraint } from "./type";
 import { DefaultConstraint } from "./default";
+import { GenericConstraint } from "./generic";
 import { Node } from "../../db";
 import { Constraint } from "./constraint";
 import { Solver } from "../solve";
@@ -57,4 +58,11 @@ export const getOrInstantiate = (node: Node, source: Node, replacements: Map<Nod
     }
 };
 
-export { Constraint, BoundConstraint, InstantiateConstraint, TypeConstraint, DefaultConstraint };
+export {
+    Constraint,
+    BoundConstraint,
+    InstantiateConstraint,
+    TypeConstraint,
+    DefaultConstraint,
+    GenericConstraint,
+};

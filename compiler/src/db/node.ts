@@ -30,7 +30,7 @@ export class Node {
     static instantiatedFrom(other: Node, source: Node | undefined): Node {
         const node = new Node(other.span, other.code);
         node.codegen = other.codegen;
-        node.isHidden = other.isHidden;
+        node.isHidden = true;
         node.instantiatedFrom = other;
         node.instantiatedBy = source;
         return node;

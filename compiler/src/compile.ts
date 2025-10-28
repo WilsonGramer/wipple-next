@@ -4,12 +4,7 @@ import { visit } from "./visit";
 import { BoundConstraint, Group, Solver } from "./typecheck";
 import { cloneType, displayType, Type } from "./typecheck/constraints/type";
 import chalk from "chalk";
-import {
-    HasTopLevelConstraints,
-    HasDefinitionConstraints,
-    HasConstantValueConstraints,
-    HasInstance,
-} from "./visit/visitor";
+import { HasTopLevelConstraints, HasDefinitionConstraints, HasInstance } from "./visit/visitor";
 import { cloneGroup } from "./typecheck/solve";
 
 export interface CompileOptions {
@@ -62,10 +57,7 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
 
     // Solve constraints from each definition, implying all instances and bounds
 
-    for (const [_definition, constraints] of [
-        ...db.list(HasDefinitionConstraints),
-        ...db.list(HasConstantValueConstraints),
-    ]) {
+    for (const [_definition, constraints] of db.list(HasDefinitionConstraints)) {
         for (const constraint of constraints) {
             if (constraint instanceof BoundConstraint) {
                 solver.imply(constraint.asInstance());
