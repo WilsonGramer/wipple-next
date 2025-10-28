@@ -27,7 +27,7 @@ entry : key -> (Dictionary {entries : entries}) -> do {
       Some (existing-key ; value) -> if (key = existing-key) {
         Stop (Some value)
       } {
-        index! : (index + 1) % count entries
+        set index : (index + 1) % count entries
         if (index = initial-index) {Stop None} {Continue ()}
       }
       None -> Stop None
@@ -36,7 +36,7 @@ entry : key -> (Dictionary {entries : entries}) -> do {
 }
 
 -- Add a new entry to a dictionary, returning a new dictionary.
-insert-entry :: key -> value -> (Dictionary key value) -> Dictionary key value where (Equal key) (Hash key)
+insert-entry :: key value -> (Dictionary key value) -> Dictionary key value where (Equal key) (Hash key)
 insert-entry : key value -> (Dictionary {
   size : size
   entries : entries
@@ -90,7 +90,7 @@ set-entry : key value -> (Dictionary {
         if (key = existing) {
           Stop ()
         } {
-          index! : (index + 1) % count entries
+          set index : (index + 1) % count entries
           if (index = initial-index) {Stop ()} {Continue ()}
         }
       }
@@ -117,7 +117,7 @@ instance (From-Sequence (key ; value) (Dictionary key value)) where (Equal key) 
   repeat with-control-flow {
     when (next sequence) {
       Some (key ; value) -> do {
-        dictionary! : dictionary . insert-entry key value
+        set dictionary : dictionary . insert-entry key value
         Continue ()
       }
       None -> Stop ()

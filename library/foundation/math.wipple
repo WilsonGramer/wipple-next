@@ -4,52 +4,94 @@ nan :: Number
 nan : intrinsic "nan"
 
 -- Add two values together, returning the sum.
-Add : (left : Number) (right : Number) (infer sum) => trait (left right -> sum)
+Add : left right (infer sum) => trait (left right -> sum)
 instance (Add Number Number Number) : left right -> intrinsic "add-number" left right
 
-left right sum => default instance (Add left right sum) : ... where (Error ("Can't add _ and _" left right ; Error-Description ("Adding these two items together isn't supported.")))
+-- Can't add [`left`] and [`right`].
+--
+-- Adding these two items together isn't supported.
+[default] [error] instance (Add left right sum)
 
-right sum => instance (Add () right sum) : ... where (Error ("Missing parentheses around the inputs to `+`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `+`.")))
+-- Missing parentheses around the inputs to `+`.
+--
+-- Spaces group before operators do, so you need to put parentheses around just
+-- the inputs to `+`.
+[error] instance (Add () right sum)
 
--- Subtract the one value from another, returning the difference.
-Subtract : (left : Number) (right : Number) (infer difference) => trait (left right -> difference)
+-- Subtract one value from another, returning the difference.
+Subtract : left right (infer difference) => trait (left right -> difference)
 instance (Subtract Number Number Number) : left right -> intrinsic "subtract-number" left right
 
-left right difference => default instance (Subtract left right difference) : ... where (Error ("Can't subtract _ by _" left right ; Error-Description ("Subtracting these two items isn't supported.")))
+-- Can't subtract [`right`] from [`left`].
+--
+-- Subtracting these two items isn't supported.
+[default] [error] instance (Subtract left right difference)
 
-right difference => instance (Subtract () right difference) : ... where (Error ("Missing parentheses around the inputs to `-`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `-`.")))
+-- Missing parentheses around the inputs to `-`.
+--
+-- Spaces group before operators do, so you need to put parentheses around just
+-- the inputs to `-`.
+[error] instance (Subtract () right difference)
 
 -- Multiply two values together, returning the product.
-Multiply : (left : Number) (right : Number) (infer product) => trait (left right -> product)
+Multiply : left right (infer product) => trait (left right -> product)
 instance (Multiply Number Number Number) : left right -> intrinsic "multiply-number" left right
 
-left right product => default instance (Multiply left right product) : ... where (Error ("Can't multiply _ and _" left right ; Error-Description ("Multiplying these two items together isn't supported.")))
+-- Can't multiply [`left`] and [`right`].
+--
+-- Multiplying these two items together isn't supported.
+[default] [error] instance (Multiply left right product)
 
-right product => instance (Multiply () right product) : ... where (Error ("Missing parentheses around the inputs to `*`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `*`.")))
+-- Missing parentheses around the inputs to `*`.
+--
+-- Spaces group before operators do, so you need to put parentheses around just
+-- the inputs to `*`.
+[error] instance (Multiply () right product)
 
 -- Divide two numbers, returning the quotient.
-Divide : (left : Number) (right : Number) (infer quotient) => trait (left right -> quotient)
+Divide : left right (infer quotient) => trait (left right -> quotient)
 instance (Divide Number Number Number) : left right -> intrinsic "divide-number" left right
 
-left right quotient => default instance (Divide left right quotient) : ... where (Error ("Can't divide _ by _" left right ; Error-Description ("Dividing these two items isn't supported.")))
+-- Can't divide [`left`] by [`right`].
+--
+-- Dividing these two items isn't supported.
+[default] [error] instance (Divide left right quotient)
 
-right quotient => instance (Divide () right quotient) : ... where (Error ("Missing parentheses around the inputs to `/`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `/`.")))
+-- Missing parentheses around the inputs to `/`.
+--
+-- Spaces group before operators do, so you need to put parentheses around just
+-- the inputs to `/`.
+[error] instance (Divide () right quotient)
 
 -- Divide two numbers, returning the remainder.
-Remainder : (left : Number) (right : Number) (infer remainder) => trait (left right -> remainder)
+Remainder : left right (infer remainder) => trait (left right -> remainder)
 instance (Remainder Number Number Number) : left right -> intrinsic "remainder-number" left right
 
-left right remainder => default instance (Remainder left right remainder) : ... where (Error ("Can't divide _ by _ and get the remainder" left right ; Error-Description ("Dividing these two items with remainder isn't supported.")))
+-- Can't divide [`left`] by [`right`] and get the remainder.
+--
+-- Dividing these two items with remainder isn't supported.
+[default] [error] instance (Remainder left right remainder)
 
-right remainder => instance (Remainder () right remainder) : ... where (Error ("Missing parentheses around the inputs to `%`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `%`.")))
+-- Missing parentheses around the inputs to `%`.
+--
+-- Spaces group before operators do, so you need to put parentheses around just
+-- the inputs to `%`.
+[error] instance (Remainder () right remainder)
 
 -- Raise one number to the power of the other number.
-Power : (left : Number) (right : Number) (infer power) => trait (left right -> power)
+Power : left right (infer power) => trait (left right -> power)
 instance (Power Number Number Number) : left right -> intrinsic "power-number" left right
 
-left right power => default instance (Power left right power) : ... where (Error ("Can't raise _ to the power of _" left right ; Error-Description ("Exponentiating these two items isn't supported.")))
+-- Can't raise [`left`] to the power of [`right`].
+--
+-- Exponentiating these two items isn't supported.
+[default] [error] instance (Power left right power)
 
-right power => instance (Power () right power) : ... where (Error ("Missing parentheses around the inputs to `^`" ; Error-Description ("Spaces group before operators do, so you need to put parentheses around just the inputs to `^`.")))
+-- Missing parentheses around the inputs to `^`.
+--
+-- Spaces group before operators do, so you need to put parentheses around just
+-- the inputs to `^`.
+[error] instance (Power () right power)
 
 -- Round down a number to the nearest integer.
 floor :: Number -> Number
@@ -64,16 +106,16 @@ sqrt :: Number -> Number
 sqrt : n -> intrinsic "sqrt-number" n
 
 -- An angle represented in degrees.
-Angle : type Number
-
-instance (Describe-Type Angle "angle")
+Angle : type { degrees :: Number}
 
 -- An angle in degrees.
 degrees :: Number -> Angle
-degrees : Angle
+degrees : degrees -> Angle { degrees : degrees }
 
-_ where (Error ("Missing `degrees` after `_`" Source ; Error-Description ("Try rewriting this code as `(_ degrees)`, or double-check your parentheses." Source))) =>
-  instance (Mismatch Number Angle)
+-- Missing `degrees` after `_`.
+--
+-- Try rewriting this code as `([`n`] degrees)`, or double-check your parentheses.
+[error] instance (Mismatch (n :: Number) Angle)
 
 -- Calculate the sine of an angle.
 sin :: Angle -> Number
