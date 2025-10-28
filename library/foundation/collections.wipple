@@ -1,4 +1,4 @@
-Build-Collection : (infer element) collection => trait (element -> collection -> collection)
+Build-Collection : (infer element) collection => trait (element collection -> collection)
 
 -- Can't create [`collection`] from items that are [`element`].
 --
@@ -8,8 +8,8 @@ Build-Collection : (infer element) collection => trait (element -> collection ->
 
 Initial-Collection : (infer element) collection => trait collection
 
-instance (Build-Collection element (List element)) : append
+instance (Build-Collection element (List element)) : element l -> l . append element
 
-instance (Build-Collection (key ; value) (Dictionary key value)) where (Equal key) (Hash key) : (key ; value) -> insert-entry key value
+instance (Build-Collection (key ; value) (Dictionary key value)) where (Equal key) (Hash key) : (key ; value) d -> d . insert-entry key value
 
-instance (Build-Collection element (Set element)) where (Equal element) (Hash element) : insert
+instance (Build-Collection element (Set element)) where (Equal element) (Hash element) : element s -> s . insert element

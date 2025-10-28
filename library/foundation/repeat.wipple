@@ -44,7 +44,7 @@ Times : type {times :: Number}
 instance (Repeat-Predicate Times body ()) where (body :: ()) : (Times {times : n}) -> if (n > 0) {Continue (_ -> (n - 1) times)} {Stop ()}
 
 -- Repeat a certain number of times.
-times :: Number -> Times
+[unit] times :: Number -> Times
 times : times -> Times {times : times}
 
 -- Run code repeatedly.

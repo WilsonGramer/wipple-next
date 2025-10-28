@@ -4,7 +4,7 @@ Distance : type Number
 instance (Describe-Type Distance "distance")
 
 -- Specify a distance in pixels.
-pixels :: Number -> Distance
+[unit] pixels :: Number -> Distance
 pixels : Distance
 
 _ where (Error ("Missing `pixels` after `_`" Source ; Error-Description ("Try rewriting this code as `(_ pixels)`, or double-check your parentheses." Source))) =>

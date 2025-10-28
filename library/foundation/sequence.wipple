@@ -5,9 +5,9 @@ Sequence : element => type {next :: {Maybe element}}
 next :: (Sequence element) -> Maybe element
 next : (Sequence {next : next}) -> do next
 
--- Produce an infinite sequence.
-sequence :: {element} -> Sequence element
-sequence : next -> Sequence {Some (do next)}
+-- Create a sequence.
+sequence :: {Maybe element} -> Sequence element
+sequence : next -> Sequence {next : next}
 
 -- Create a sequence that always produces the provided element.
 --
@@ -20,7 +20,7 @@ sequence : next -> Sequence {Some (do next)}
 -- show (next my-sequence) -- Hello, world!
 -- ```
 always :: element -> Sequence element
-always : element -> Sequence {Some element}
+always : element -> sequence {Some element}
 
 -- Create a sequence that produces the provided element a certain number of
 -- times. `element . replicate n` is equivalent to `always element . take n`.
@@ -32,7 +32,7 @@ build-sequence :: (Maybe element) (element -> Maybe element) -> Sequence element
 build-sequence : initial transform -> do {
   next : initial
 
-  Sequence {
+  sequence {
     when next {
       Some current -> do {
         set next : transform current
@@ -53,7 +53,7 @@ As-Sequence : container (infer element) => trait (container -> Sequence element)
 
 instance (As-Sequence (Sequence element) element) : sequence -> sequence
 
-instance (As-Sequence (Maybe element) element) : maybe -> Sequence {
+instance (As-Sequence (Maybe element) element) : maybe -> sequence {
   when maybe {
     Some value -> do {
       set maybe : None
@@ -67,7 +67,7 @@ transform :: (element -> result) -> container -> Sequence result where (As-Seque
 transform : f -> container -> do {
   base : As-Sequence container
 
-  Sequence {
+  sequence {
     when (next base) {
       Some value -> Some (f value)
       None -> None
@@ -80,7 +80,7 @@ filter :: (element -> Boolean) -> container -> Sequence element where (As-Sequen
 filter : include? -> container -> do {
   base : As-Sequence container
 
-  Sequence {
+  sequence {
     repeat with-control-flow {
       when (next base) {
         Some value -> if (include? value) {Stop (Some value)} {Continue ()}
@@ -95,7 +95,7 @@ filter-by :: (element -> Maybe result) -> container -> Sequence result where (As
 filter-by : transform -> container -> do {
   base : As-Sequence container
 
-  Sequence {
+  sequence {
     repeat with-control-flow {
       when (next base) {
         Some value -> when (transform value) {
@@ -117,7 +117,7 @@ flatten : outer -> do {
     Some inner -> do {
       inner : As-Sequence inner
 
-      Sequence {
+      sequence {
         repeat with-control-flow {
           when (next inner) {
             Some value -> Stop (Some value)
@@ -132,7 +132,7 @@ flatten : outer -> do {
         }
       }
     }
-    None -> Sequence {None}
+    None -> sequence {None}
   }
 }
 
@@ -196,7 +196,7 @@ instance (From-Sequence element (List element)) : sequence -> do {
 instance (As-Sequence (List element) element) : list -> do {
   index : 0
 
-  Sequence {
+  sequence {
     when (list . nth index) {
       Some element -> do {
         set index : index + 1
@@ -224,7 +224,7 @@ split-by : separator -> collection -> do {
   base : As-Sequence collection
   group : Some (,)
 
-  Sequence {
+  sequence {
     repeat with-control-flow {
       when (next base) {
         Some x -> do {
@@ -260,11 +260,11 @@ split : separator -> split-by (item -> item = separator)
 -- Count the number of items in a sequence.
 count :: collection -> Number where (As-Sequence collection element)
 count : collection -> do {
-  sequence : As-Sequence collection
+  base : As-Sequence collection
 
   count : 0
   repeat with-control-flow {
-    when (next sequence) {
+    when (next base) {
       Some _ -> do {
         set count : count + 1
         Continue ()
@@ -284,7 +284,7 @@ take : count -> collection -> do {
   base : As-Sequence collection
 
   counter : 0
-  Sequence {
+  sequence {
     if (counter >= count) {
       None
     } {
@@ -297,10 +297,10 @@ take : count -> collection -> do {
 -- Find the first item in a sequence that satisfies a condition.
 find :: (element -> Boolean) -> collection -> Maybe element where (As-Sequence collection element)
 find : found? -> collection -> do {
-  sequence : As-Sequence collection
+  base : As-Sequence collection
 
   repeat with-control-flow {
-    when (next sequence) {
+    when (next base) {
       Some element -> if (found? element) {Stop (Some element)} {Continue ()}
       None -> Stop None
     }
@@ -310,11 +310,11 @@ find : found? -> collection -> do {
 -- Find the position of the first item in a sequence that satisfies a condition.
 find-position :: (element -> Boolean) -> collection -> Maybe Number where (As-Sequence collection element)
 find-position : found? -> collection -> do {
-  sequence : As-Sequence collection
+  base : As-Sequence collection
   counter : 0
 
   repeat with-control-flow {
-    when (next sequence) {
+    when (next base) {
       Some element -> if (found? element) {
         Stop (Some counter)
       } {
@@ -352,7 +352,7 @@ zip : left right -> do {
   left : As-Sequence left
   right : As-Sequence right
 
-  Sequence {
+  sequence {
     when (next left ; next right) {
       (Some a ; Some b) -> Some (a ; b)
       _ -> None
@@ -399,10 +399,10 @@ contains? :: element -> collection -> Boolean where (Container collection elemen
 contains? : Container
 
 instance (Container (List element) element) where (Equal element) : target -> list -> do {
-  sequence : As-Sequence list
+  base : As-Sequence list
 
   repeat with-control-flow {
-    when (next sequence) {
+    when (next base) {
       Some element -> if (element = target) {Stop True} {Continue ()}
       None -> Stop False
     }
