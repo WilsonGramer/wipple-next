@@ -49,7 +49,11 @@ export const visitParameterType: Visit<ParameterType> = (visitor, type, node) =>
                 visitType,
             );
 
-            visitor.addConstraints(new TypeConstraint(node, annotatedType));
+            visitor.addConstraints(
+                new TypeConstraint(node, annotatedType, {
+                    onlyIfInstantiated: true,
+                }),
+            );
         }
 
         visitor.db.add(node, new IsImplicitlyDefinedParameterType(null));

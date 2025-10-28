@@ -75,7 +75,7 @@ remove-entry : key -> (Dictionary {
   dictionary . set-entry key None
 }
 
-set-entry :: key -> Maybe value -> (Dictionary key value) -> Dictionary key value where (Equal key) (Hash key)
+set-entry :: key (Maybe value) -> (Dictionary key value) -> Dictionary key value where (Equal key) (Hash key)
 set-entry : key value -> (Dictionary {
   size : size
   entries : entries
@@ -134,7 +134,7 @@ instance (Container (Dictionary key value) key) where (Equal key) (Hash key) : t
 -- An unordered collection of unique elements.
 Set : element => type {dictionary :: Dictionary element ()}
 
-instance (Initial (Set element)) : {dictionary : Initial}
+instance (Initial (Set element)) : Set {dictionary : Initial}
 
 -- Add a new element to a set, returning a new set.
 insert :: element -> (Set element) -> Set element where (Equal element) (Hash element)

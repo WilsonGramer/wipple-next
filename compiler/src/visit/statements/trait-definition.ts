@@ -44,7 +44,7 @@ export const visitTraitDefinition: Visit<TraitDefinitionStatement> = (
             return parameter;
         });
 
-        visitor.enqueue("afterTypeDefinitions", () => {
+        visitor.enqueue("afterAllDefinitions", () => {
             const type = visitor.visit(
                 statement.constraints.type,
                 TypeInTraitDefinition,

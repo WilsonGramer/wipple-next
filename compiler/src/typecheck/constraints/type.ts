@@ -27,11 +27,14 @@ export class TypeParameter {
 export class TypeConstraint extends Constraint {
     node: Node;
     type: Type;
+    onlyIfInstantiated: boolean;
+    instantiated = false;
 
-    constructor(node: Node, type: Type) {
+    constructor(node: Node, type: Type, { onlyIfInstantiated = false } = {}) {
         super();
         this.node = node;
         this.type = type;
+        this.onlyIfInstantiated = onlyIfInstantiated;
     }
 
     score(): Score {
@@ -44,13 +47,21 @@ export class TypeConstraint extends Constraint {
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
     ): this | undefined {
-        return new TypeConstraint(
+        const constraint = new TypeConstraint(
             getOrInstantiate(this.node, source, replacements),
             instantiateType(this.type, source, replacements, substitutions),
         ) as this;
+
+        constraint.instantiated = true;
+
+        return constraint;
     }
 
     run(solver: Solver) {
+        if (this.onlyIfInstantiated && !this.instantiated) {
+            return;
+        }
+
         solver.unify(this.node, this.type);
     }
 

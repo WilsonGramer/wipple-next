@@ -9,18 +9,18 @@ Repeat-Predicate : state body result => trait (state -> Control-Flow (body -> st
 
 -- Repeat using the `Control-Flow` produced by the `repeat` body.
 with-control-flow :: With-Control-Flow result
-with-control-flow : {current : Continue ()}
+with-control-flow : With-Control-Flow {current : Continue ()}
 
 With-Control-Flow : result => type {current :: Control-Flow () result}
 
 instance (Repeat-Predicate (With-Control-Flow result) (Control-Flow () result) result) : (With-Control-Flow {current : current}) -> when current {
-    Continue () -> Continue (new -> {current : new})
+    Continue () -> Continue (new -> With-Control-Flow {current : new})
     Stop result -> Stop result
   }
 
 -- Repeat so long as the provided condition is `True`.
 while :: {Boolean} -> While
-while : condition -> {condition : condition}
+while : condition -> While {condition : condition}
 
 While : type {condition :: {Boolean}}
 
@@ -34,18 +34,18 @@ Forever : type
 
 instance (Repeat-Predicate Forever body result) where (result :: ()) : _ -> Continue (_ -> Forever)
 
-Times : type { times :: Number }
+Times : type {times :: Number}
 
 -- Missing `times` after [`state`].
 --
 -- Try rewriting this code as `([`state`] times)`, or double-check your parentheses.
 [error] instance (Repeat-Predicate (state :: Number) body result)
 
-instance (Repeat-Predicate Times body ()) where (body :: ()) : (Times { times : n }) -> if (n > 0) {Continue (_ -> (n - 1) times)} {Stop ()}
+instance (Repeat-Predicate Times body ()) where (body :: ()) : (Times {times : n}) -> if (n > 0) {Continue (_ -> (n - 1) times)} {Stop ()}
 
 -- Repeat a certain number of times.
 times :: Number -> Times
-times : times -> Times { times :: times }
+times : times -> Times {times : times}
 
 -- Run code repeatedly.
 repeat :: state {body} -> result where (Repeat-Predicate state body result)

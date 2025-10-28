@@ -15,13 +15,14 @@ export const visitVariableExpression: Visit<VariableExpression> = (visitor, expr
         node,
         (definition) => {
             switch (definition.type) {
-                case "variable":
+                case "variable": {
                     node.isHidden = true;
 
                     node.setCodegen(codegen.variableExpression(definition.node));
 
                     return [new TypeConstraint(node, definition.node), ResolvedVariable];
-                case "constant":
+                }
+                case "constant": {
                     const substitutions = new Map<TypeParameter, Type>();
 
                     node.setCodegen(codegen.constantExpression(definition.node, substitutions));
@@ -35,6 +36,7 @@ export const visitVariableExpression: Visit<VariableExpression> = (visitor, expr
                         }),
                         ResolvedConstant,
                     ];
+                }
                 default:
                     return undefined;
             }

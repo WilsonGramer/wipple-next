@@ -30,7 +30,7 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
 
         let trait: Node | undefined;
         let value: Node | undefined;
-        visitor.enqueue("afterTypeDefinitions", () => {
+        visitor.enqueue("afterAllDefinitions", () => {
             const traitDefinition = visitor.resolveName(
                 statement.constraints.bound.trait.value,
                 definitionNode,

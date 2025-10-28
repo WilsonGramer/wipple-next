@@ -106,11 +106,11 @@ sqrt :: Number -> Number
 sqrt : n -> intrinsic "sqrt-number" n
 
 -- An angle represented in degrees.
-Angle : type { degrees :: Number}
+Angle : type {degrees :: Number}
 
 -- An angle in degrees.
 degrees :: Number -> Angle
-degrees : degrees -> Angle { degrees : degrees }
+degrees : degrees -> Angle {degrees : degrees}
 
 -- Missing `degrees` after `_`.
 --

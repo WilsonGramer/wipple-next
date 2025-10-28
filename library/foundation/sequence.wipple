@@ -1,9 +1,9 @@
 -- A container for a sequence that produces the next value on demand.
-Sequence : element => type ({Maybe element})
+Sequence : element => type {next :: {Maybe element}}
 
 -- Retrieve the next item in a sequence.
 next :: (Sequence element) -> Maybe element
-next : (Sequence next) -> do next
+next : (Sequence {next : next}) -> do next
 
 -- Produce an infinite sequence.
 sequence :: {element} -> Sequence element
@@ -28,7 +28,7 @@ replicate :: Number -> element -> Sequence element
 replicate : n -> element -> always element . take n
 
 -- Build a sequence from an initial item and a transform function.
-build-sequence :: Maybe element -> (element -> Maybe element) -> Sequence element
+build-sequence :: (Maybe element) (element -> Maybe element) -> Sequence element
 build-sequence : initial transform -> do {
   next : initial
 

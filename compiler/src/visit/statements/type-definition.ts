@@ -123,80 +123,69 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                         break;
                     }
                     case "enumeration": {
-                        const scope = visitor.peekScope();
-
-                        statement.representation.variants.forEach((variant, index) => {
+                        const variants = statement.representation.variants.map((variant, index) => {
                             const variantNode = visitor.node(variant.name);
-                            visitor.withDefinition(variantNode, () => {
-                                const elements = variant.elements.map((element) =>
-                                    visitor.visit(
-                                        element,
-                                        VariantElementInTypeDefinition,
-                                        visitType,
-                                    ),
-                                );
 
-                                visitor.popScope();
+                            const elements = variant.elements.map((element) =>
+                                visitor.visit(element, VariantElementInTypeDefinition, visitType),
+                            );
 
-                                const elementInputs = elements.map((element) =>
-                                    visitor.node({ location: element.span.range }),
-                                );
+                            const elementInputs = elements.map((element) =>
+                                visitor.node({ location: element.span.range }),
+                            );
 
-                                const elementVariables = elements.map((element) =>
-                                    visitor.node({ location: element.span.range }),
-                                );
+                            const elementVariables = elements.map((element) =>
+                                visitor.node({ location: element.span.range }),
+                            );
 
-                                variantNode.setCodegen(
+                            variantNode.setCodegen(
+                                elements.length > 0
+                                    ? codegen.functionExpression(elementInputs, elementVariables, [
+                                          ...elementInputs.map((input, index) =>
+                                              codegen.ifStatement(
+                                                  [
+                                                      codegen.assignCondition(
+                                                          elementVariables[index],
+                                                          input,
+                                                      ),
+                                                  ],
+                                                  [],
+                                              ),
+                                          ),
+                                          codegen.returnStatement(
+                                              codegen.variantExpression(index, elementVariables),
+                                          ),
+                                      ])
+                                    : codegen.variantExpression(index, []),
+                            );
+
+                            visitor.addConstraints(
+                                new TypeConstraint(
+                                    variantNode,
                                     elements.length > 0
-                                        ? codegen.functionExpression(
-                                              elementInputs,
-                                              elementVariables,
-                                              [
-                                                  ...elementInputs.map((input, index) =>
-                                                      codegen.ifStatement(
-                                                          [
-                                                              codegen.assignCondition(
-                                                                  elementVariables[index],
-                                                                  input,
-                                                              ),
-                                                          ],
-                                                          [],
-                                                      ),
-                                                  ),
-                                                  codegen.returnStatement(
-                                                      codegen.variantExpression(
-                                                          index,
-                                                          elementVariables,
-                                                      ),
-                                                  ),
-                                              ],
-                                          )
-                                        : codegen.variantExpression(index, []),
-                                );
+                                        ? types.function(elements, definitionType)
+                                        : definitionType,
+                                ),
+                            );
 
-                                visitor.addConstraints(
-                                    new TypeConstraint(
-                                        variantNode,
-                                        elements.length > 0
-                                            ? types.function(elements, definitionType)
-                                            : definitionType,
-                                    ),
-                                );
+                            const constructorDefinition: VariantConstructorDefinition = {
+                                type: "variantConstructor",
+                                node: variantNode,
+                                comments: statement.comments,
+                                index,
+                            };
 
-                                const constructorDefinition: VariantConstructorDefinition = {
-                                    type: "variantConstructor",
-                                    node: variantNode,
-                                    comments: statement.comments,
-                                    index,
-                                };
-
-                                visitor.defineName(variant.name.value, constructorDefinition);
-
-                                visitor.pushScope(scope); // for the next variant
-
-                                return constructorDefinition;
-                            });
+                            return {
+                                name: variant.name.value,
+                                definition: constructorDefinition,
+                            };
                         });
+
+                        visitor.popScope();
+
+                        for (const { name, definition } of variants) {
+                            visitor.defineName(name, definition);
+                        }
 
                         break;
                     }
