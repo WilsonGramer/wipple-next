@@ -8,10 +8,10 @@ import { FunctionInCallExpression } from "../src/visit/expressions/call";
 test("custom errors", () => {
     const { db, placeholders, feedback } = compileTest("custom-errors.wipple");
 
-    assert.deepStrictEqual(db.display(placeholders[2], HasType), ["Number"]);
-    assert.deepStrictEqual(db.display(placeholders[3], HasType), ["String"]);
-    assert.deepStrictEqual(db.display(placeholders[4], HasType), []);
-    assert.deepStrictEqual(db.display(placeholders[5], HasType), []);
+    assert.deepStrictEqual(db.display(placeholders[2], HasType), new Set(["Number"]));
+    assert.deepStrictEqual(db.display(placeholders[3], HasType), new Set(["String"]));
+    assert.deepStrictEqual(db.display(placeholders[4], HasType), new Set([]));
+    assert.deepStrictEqual(db.display(placeholders[5], HasType), new Set([]));
 
     const valueOfPlaceholder4 = db.get(placeholders[4], AssignedTo)!;
     const functionOfPlaceholder4 = db.find(FunctionInCallExpression, valueOfPlaceholder4)!;

@@ -1,5 +1,5 @@
-import { Db } from "../db";
+import { Db, Node } from "../db";
 
-export type Query<T> = (db: Db) => Generator<T>;
+export type Query<T> = (db: Db, filter: (node: Node) => boolean) => Generator<T>;
 
 export const query = <T>(query: Query<T>) => query;

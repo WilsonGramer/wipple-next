@@ -35,7 +35,7 @@ instance (As-Sequence (Stride Number) Number) : (Stride {
 }) -> when ((min /= nan) ; (max /= nan)) {
   (True ; True) -> do {
     current : min
-    Sequence ({
+    sequence {
       if (current < max) {
         n : current
         set current : current + step
@@ -43,14 +43,14 @@ instance (As-Sequence (Stride Number) Number) : (Stride {
       } {
         None
       }
-    })
+    }
   }
   (True ; False) -> do {
     current : min
-    Sequence ({
+    sequence {
       n : current
       set current : current + step
       Some n
-    })
+    }
   }
 }

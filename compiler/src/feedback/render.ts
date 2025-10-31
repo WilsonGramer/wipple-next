@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { Node } from "../db";
+import { Db, Node } from "../db";
 import dedent from "dedent";
 import { displayType, Type } from "../typecheck/constraints/type";
 import { Bound, displayBound } from "../typecheck/constraints/bound";
@@ -88,18 +88,20 @@ render.type = (type: Type) => new RenderableType(type);
 
 export class RenderableBound {
     bound: Bound;
+    db: Db;
 
-    constructor(bound: Bound) {
+    constructor(bound: Bound, db: Db) {
         this.bound = bound;
+        this.db = db;
     }
 
     toString() {
-        const bound = displayBound(this.bound);
+        const bound = displayBound(this.db, this.bound);
         return chalk.blue(nodeDisplayOptions.markdown ? "`" + bound + "`" : bound);
     }
 }
 
-render.bound = (bound: Bound) => new RenderableBound(bound);
+render.bound = (bound: Bound, db: Db) => new RenderableBound(bound, db);
 
 render.list = (values: Renderable[], separator: string) => {
     if (values.length > 2) {

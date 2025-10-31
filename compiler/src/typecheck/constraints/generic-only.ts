@@ -3,7 +3,7 @@ import { Constraint, Solver } from "..";
 import { Node } from "../../db";
 import { Type, TypeParameter } from "./type";
 
-export class GenericConstraint extends Constraint {
+export class GenericOnlyConstraint extends Constraint {
     constraint: Constraint;
 
     constructor(constraint: Constraint) {
@@ -20,11 +20,12 @@ export class GenericConstraint extends Constraint {
         _source: Node,
         _replacements: Map<Node, Node>,
         _substitutions: Map<TypeParameter, Type>,
-    ): this | undefined {
+    ): this | void {
         return undefined;
     }
 
-    run(solver: Solver): void {
-        this.constraint.run(solver);
+    run(solver: Solver): this | void {
+        const requeued = this.constraint.run(solver);
+        return requeued && (new GenericOnlyConstraint(requeued) as this);
     }
 }

@@ -1,8 +1,7 @@
 import { BoundConstraint } from "./bound";
 import { InstantiateConstraint } from "./instantiate";
 import { TypeConstraint } from "./type";
-import { DefaultConstraint } from "./default";
-import { GenericConstraint } from "./generic";
+import { GenericOnlyConstraint } from "./generic-only";
 import { Node } from "../../db";
 import { Constraint } from "./constraint";
 import { Solver } from "../solve";
@@ -12,7 +11,7 @@ import { Solver } from "../solve";
  * `HasConstraints` fact rather than the solver. Then form groups, add concrete
  * types, and finally resolve bounds.
  */
-export const scores = ["group", "type", "instantiate", "default", "bound"] as const;
+export const scores = ["group", "type", "instantiate", "bound"] as const;
 export type Score = (typeof scores)[number];
 
 export class Constraints {
@@ -22,12 +21,17 @@ export class Constraints {
         this.constraints = constraints;
     }
 
-    add(...constraints: Constraint[]) {
-        this.constraints.push(...constraints);
+    add(constraint: Constraint) {
+        this.constraints.push(constraint);
+    }
+
+    sort() {
         this.constraints.sort((a, b) => scores.indexOf(a.score()) - scores.indexOf(b.score()));
     }
 
     run(solver: Solver, { until }: { until?: Score } = {}) {
+        const requeue: Constraint[] = [];
+
         // Needed instead of a `for` loop because constraints can be added while
         // running.
         while (
@@ -35,8 +39,15 @@ export class Constraints {
             (until == null || this.constraints[0].score() !== until)
         ) {
             const constraint = this.constraints.shift()!;
-            constraint.run(solver);
+
+            const requeued = constraint.run(solver);
+            if (requeued != null) {
+                requeue.push(requeued);
+            }
         }
+
+        for (const constraint of requeue) this.add(constraint);
+        this.sort();
     }
 
     [Symbol.iterator]() {
@@ -63,6 +74,5 @@ export {
     BoundConstraint,
     InstantiateConstraint,
     TypeConstraint,
-    DefaultConstraint,
-    GenericConstraint,
+    GenericOnlyConstraint,
 };

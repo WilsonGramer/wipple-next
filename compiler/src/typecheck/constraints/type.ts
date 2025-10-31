@@ -28,13 +28,16 @@ export class TypeConstraint extends Constraint {
     node: Node;
     type: Type;
     onlyIfInstantiated: boolean;
-    instantiated = false;
+    isDefault: boolean;
 
-    constructor(node: Node, type: Type, { onlyIfInstantiated = false } = {}) {
+    private instantiated = false;
+
+    constructor(node: Node, type: Type, { isDefault = false, onlyIfInstantiated = false } = {}) {
         super();
         this.node = node;
         this.type = type;
         this.onlyIfInstantiated = onlyIfInstantiated;
+        this.isDefault = isDefault;
     }
 
     score(): Score {
@@ -46,19 +49,26 @@ export class TypeConstraint extends Constraint {
         source: Node,
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
-    ): this | undefined {
-        const constraint = new TypeConstraint(
-            getOrInstantiate(this.node, source, replacements),
-            instantiateType(this.type, source, replacements, substitutions),
-        ) as this;
+    ): this | void {
+        const node = getOrInstantiate(this.node, source, replacements);
+        const type = instantiateType(this.type, source, replacements, substitutions);
+
+        const constraint = new TypeConstraint(node, type, {
+            onlyIfInstantiated: this.onlyIfInstantiated,
+            isDefault: this.isDefault,
+        }) as this;
 
         constraint.instantiated = true;
 
         return constraint;
     }
 
-    run(solver: Solver) {
+    run(solver: Solver): this | void {
         if (this.onlyIfInstantiated && !this.instantiated) {
+            return;
+        }
+
+        if (this.isDefault && !(solver.apply(this.node) instanceof Node)) {
             return;
         }
 
@@ -93,7 +103,7 @@ export const cloneType = <T extends Type>(type: T): T =>
 
 export const displayType = (type: Type, root = true): string => {
     if (type instanceof Node) {
-        return "_";
+        return type.toString() || "_";
     } else {
         const children = type.children.map(
             (child) =>

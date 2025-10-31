@@ -1,7 +1,7 @@
 import { Solver } from "../solve";
 import { Node } from "../../db/node";
 import { HasDefinitionConstraints } from "../../visit/visitor";
-import { Score } from ".";
+import { getOrInstantiate, Score } from ".";
 import { instantiateType, Type, TypeParameter } from "./type";
 import { Constraint } from "./constraint";
 
@@ -27,24 +27,26 @@ export class InstantiateConstraint extends Constraint {
     instantiate(
         _solver: Solver,
         source: Node,
-        _replacements: Map<Node, Node>,
+        replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
-    ): this | undefined {
+    ): this | void {
         const instantiation: Instantiation = {
             source,
             definition: this.instantiation.definition,
-            replacements: this.instantiation.replacements,
+            replacements: new Map(
+                this.instantiation.replacements
+                    .entries()
+                    .map(([node, replacement]) => [
+                        node,
+                        getOrInstantiate(replacement, source, replacements),
+                    ]),
+            ),
             substitutions: new Map(
                 this.instantiation.substitutions
                     .entries()
                     .map(([parameter, substitution]) => [
                         parameter,
-                        instantiateType(
-                            substitution,
-                            source,
-                            this.instantiation.replacements,
-                            substitutions,
-                        ),
+                        instantiateType(substitution, source, replacements, substitutions),
                     ]),
             ),
         };
@@ -52,7 +54,7 @@ export class InstantiateConstraint extends Constraint {
         return new InstantiateConstraint(instantiation) as this;
     }
 
-    run(solver: Solver) {
+    run(solver: Solver): this | void {
         const { source, definition, substitutions, replacements } = this.instantiation;
 
         // NOTE: Types are *not* applied before instantiating; we have access to

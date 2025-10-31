@@ -23,16 +23,16 @@ export const visitConstantDefinition: Visit<ConstantDefinitionStatement> = (
         const attributes = parseConstantAttributes(visitor, statement.attributes);
 
         let type: Node;
-        visitor.enqueue("afterAllDefinitions", () => {
+        visitor.enqueue("afterTypeDefinitions", () => {
             visitor.currentDefinition!.implicitTypeParameters = true;
 
             type = visitor.visit(statement.constraints.type, TypeInConstantDefinition, visitType);
 
-            visitor.currentDefinition!.implicitTypeParameters = false;
-
             for (const constraint of statement.constraints.constraints) {
                 visitor.visit(constraint, ConstraintInConstantDefinition, visitConstraint);
             }
+
+            visitor.currentDefinition!.implicitTypeParameters = false;
 
             visitor.addConstraints(new TypeConstraint(definitionNode, type));
         });

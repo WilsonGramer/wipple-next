@@ -45,7 +45,7 @@ insert-entry : key value -> (Dictionary {
     -- Double the size of the dictionary
     resized : Dictionary {
       size : 0
-      entries : Sequence {Some None} . take (count entries * 2) . collect
+      entries : sequence {Some None} . take (count entries * 2) . collect
     }
 
     -- Populate the new dictionary with the entries from the old dictionary
@@ -53,7 +53,7 @@ insert-entry : key value -> (Dictionary {
       Some (key ; value) -> dictionary . insert-entry key value
       None -> dictionary
     })
-  } {{
+  } {Dictionary {
     size : size + 1
     entries : entries
   }}

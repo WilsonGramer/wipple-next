@@ -29,10 +29,11 @@ export abstract class Constraint {
         source: Node,
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
-    ): this | undefined;
+    ): this | void;
 
     /**
-     * Add the type information in this constraint to the solver.
+     * Add the type information in this constraint to the solver. Returning
+     * `this` will re-queue it.
      */
-    abstract run(solver: Solver): void;
+    abstract run(solver: Solver): this | void;
 }

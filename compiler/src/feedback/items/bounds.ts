@@ -6,8 +6,8 @@ registerFeedback({
     id: "unresolved-bound",
     query: queries.unresolvedBound,
     on: ({ node }) => node,
-    render: ({ node, bound }) => render`
-        ${node} requires the instance ${render.bound(bound)}, but this instance isn't defined.
+    render: ({ node, bound }, db) => render`
+        ${node} requires the instance ${render.bound(bound, db)}, but this instance isn't defined.
 
         Double-check that these types are correct.
     `,
@@ -17,10 +17,10 @@ registerFeedback({
     id: "error-instance",
     query: queries.errorInstance,
     on: ({ node }) => node,
-    render: ({ node, bound, comments, links }) =>
+    render: ({ node, bound, comments, links }, db) =>
         renderComments(
             comments,
             { source: node, ...links },
-            `\n\n(This feedback comes from the instance ${render.bound(bound)}.)`,
+            `\n\n(This feedback comes from the instance ${render.bound(bound, db)}.)`,
         ),
 });

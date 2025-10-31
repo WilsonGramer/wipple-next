@@ -4,8 +4,15 @@ import { visit } from "./visit";
 import { BoundConstraint, Group, Solver } from "./typecheck";
 import { cloneType, displayType, Type } from "./typecheck/constraints/type";
 import chalk from "chalk";
-import { HasTopLevelConstraints, HasDefinitionConstraints, HasInstance } from "./visit/visitor";
+import {
+    HasTopLevelConstraints,
+    HasDefinitionConstraints,
+    HasInstance,
+    Definition,
+} from "./visit/visitor";
 import { cloneGroup } from "./typecheck/solve";
+import { applyBound, displayBound } from "./typecheck/constraints/bound";
+import { GenericOnlyConstraint } from "./typecheck/constraints";
 
 export interface CompileOptions {
     files: { path: string; code: string }[];
@@ -48,16 +55,22 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         };
     }
 
-    const info = visit(parsedFiles, db);
+    const _info = visit(parsedFiles, db);
 
-    const solver = new Solver(db);
+    const definitionSolver = new Solver(db);
     for (const [_node, group] of db.list(InTypeGroup)) {
-        solver.setGroup(group);
+        definitionSolver.setGroup(group);
     }
 
-    // Solve constraints from each definition, implying all instances and bounds
+    // Solve constraints from each definition, implying all bounds
+    for (const [definition, constraints] of db.list(HasDefinitionConstraints)) {
+        const solver = Solver.from(definitionSolver);
 
-    for (const [_definition, constraints] of db.list(HasDefinitionConstraints)) {
+        const instance = db.findBy(HasInstance, (instance) => instance.node === definition)?.[1];
+        if (instance != null) {
+            solver.imply(instance);
+        }
+
         for (const constraint of constraints) {
             if (constraint instanceof BoundConstraint) {
                 solver.imply(constraint.asInstance());
@@ -65,21 +78,14 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         }
 
         solver.add(...constraints);
-    }
+        solver.run();
 
-    // Also imply generic (i.e. non-instantiated) instances
-    for (const [_trait, instance] of db.list(HasInstance)) {
-        solver.imply(instance);
+        addGroupsFrom(db, solver);
     }
-
-    solver.run();
 
     // Solve constraints from top-level expressions
 
-    // Now that we have concrete types, require bounds to be resolved against
-    // actual instances
-    solver.impliedInstances = [];
-    solver.implyInstances = false;
+    const solver = new Solver(db); // definition constraints will be retrieved from `db` as needed
 
     const constraints = db
         .list(HasTopLevelConstraints)
@@ -88,13 +94,18 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
     solver.add(...constraints);
     solver.run();
 
+    addGroupsFrom(db, solver);
+
+    return { success: true };
+};
+
+const addGroupsFrom = (db: Db, solver: Solver) => {
     const groups = solver.finish();
 
     for (const group of groups) {
         for (const node of group.nodes) {
-            if (info.definitions.has(node)) {
-                continue;
-            }
+            db.deleteAll(node, InTypeGroup);
+            db.deleteAll(node, HasType);
 
             db.add(node, new InTypeGroup(group));
 
@@ -103,6 +114,4 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
             }
         }
     }
-
-    return { success: true };
 };

@@ -4,7 +4,7 @@ import { Constraint } from "../typecheck";
 import { CodegenItem } from "../codegen";
 import { LocationRange } from "../syntax";
 import { Type, TypeParameter } from "../typecheck/constraints/type";
-import { GenericConstraint } from "../typecheck/constraints";
+import { GenericOnlyConstraint } from "../typecheck/constraints";
 
 export type Visit<T> = (visitor: Visitor, value: T, node: Node) => void;
 
@@ -68,7 +68,9 @@ export class Visitor {
 
         if (this.currentDefinition != null) {
             if (this.currentDefinition.withinConstantValue) {
-                constraints = constraints.map((constraint) => new GenericConstraint(constraint));
+                constraints = constraints.map(
+                    (constraint) => new GenericOnlyConstraint(constraint),
+                );
             }
 
             if (!this.definitionConstraints.has(this.currentDefinition.node)) {
@@ -160,7 +162,7 @@ export class Visitor {
         return [result, { conditions, temporaries }];
     }
 
-    withDefinition(node: Node, f: () => AnyDefinition | undefined) {
+    withDefinition<T extends AnyDefinition | undefined>(node: Node, f: () => T): T {
         const existingDefinitionInfo = this.currentDefinition;
         const newDefinitionInfo = new VisitorCurrentDefinition(node);
         this.currentDefinition = newDefinitionInfo;
@@ -170,6 +172,8 @@ export class Visitor {
         if (resultDefinition != null) {
             this.definitions.set(node, resultDefinition);
         }
+
+        return resultDefinition;
     }
 
     enqueue(key: QueueKey, f: () => void) {
@@ -211,7 +215,9 @@ export class Visitor {
     }
 }
 
+let scopeCounter = 0;
 export class Scope {
+    id = `<scope ${scopeCounter++}>`;
     definitions = new Map<string, AnyDefinition[]>();
 
     getDefinitions() {
@@ -225,6 +231,14 @@ export class Scope {
         ) as {
             [T in `${AnyDefinition["type"]}s`]?: Node[];
         };
+    }
+
+    toString() {
+        return `${this.id} [${this.definitions.keys().toArray().join(", ")}]`;
+    }
+
+    [require("util").inspect.custom]() {
+        return this.toString();
     }
 }
 

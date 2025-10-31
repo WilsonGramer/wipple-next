@@ -29,6 +29,7 @@ export const visitSetPattern: Visit<SetPattern> = (visitor, pattern, node) => {
     if (constraint != null) {
         visitor.addConstraints(constraint);
     } else {
+        node.span.range = pattern.variable.location;
         visitor.db.add(node, new IsUnresolvedSetPattern(null));
     }
 

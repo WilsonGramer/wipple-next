@@ -7,6 +7,7 @@ import { IsPlaceholderExpression } from "../src/visit/expressions/placeholder";
 import { IsPlaceholderType } from "../src/visit/types/placeholder";
 import { collectFeedback } from "../src/feedback";
 import { IsWildcardPattern } from "../src/visit/patterns/wildcard";
+import { nodeFilter } from "../src/db/filter";
 
 export const compileTest = (path: string) => {
     const code = readFileSync(resolve(__dirname, path), "utf8");
@@ -34,7 +35,7 @@ export const compileTest = (path: string) => {
     });
 
     const feedback = new Map<Node, string[]>();
-    for (const feedbackItem of collectFeedback(db)) {
+    for (const feedbackItem of collectFeedback(db, nodeFilter())) {
         if (!feedback.has(feedbackItem.on)) {
             feedback.set(feedbackItem.on, []);
         }

@@ -6,6 +6,6 @@ import { HasType } from "../src/compile";
 test("sequence", () => {
     const { db, placeholders, feedback } = compileTest("sequence.wipple");
 
-    assert.deepStrictEqual(db.display(placeholders[2], HasType), ["Number", "String"]);
+    assert.deepStrictEqual(db.display(placeholders[2], HasType), new Set(["Number", "String"]));
     assert.partialDeepStrictEqual(feedback.get(placeholders[2]), ["conflicting-types"]);
 });

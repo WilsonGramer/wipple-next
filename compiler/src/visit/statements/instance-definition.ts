@@ -8,6 +8,7 @@ import { visitConstraint } from "../constraints";
 import { visitExpression } from "../expressions";
 import { InstanceDefinition } from "../definitions";
 import { Token } from "../../syntax/parser";
+import { Type, TypeParameter } from "../../typecheck/constraints/type";
 
 export class ParameterInInstanceDefinition extends Fact<Node> {}
 export class TraitInInstanceDefinition extends Fact<Node> {}
@@ -23,14 +24,17 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
     statement,
     definitionNode,
 ) => {
+    definitionNode.trimAfter(statement.constraints.bound.location.end);
+
     visitor.withDefinition(definitionNode, () => {
         const attributes = parseInstanceAttributes(visitor, statement.attributes);
 
         visitor.pushScope();
 
+        let substitutions: Map<TypeParameter, Type> | undefined;
         let trait: Node | undefined;
         let value: Node | undefined;
-        visitor.enqueue("afterAllDefinitions", () => {
+        visitor.enqueue("afterTypeDefinitions", () => {
             const traitDefinition = visitor.resolveName(
                 statement.constraints.bound.trait.value,
                 definitionNode,
@@ -60,18 +64,18 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
             );
 
             // TODO: Ensure `parameters` has the right length
-            const substitutions = new Map(
+            substitutions = new Map(
                 traitDefinition.parameters.map((parameter, index) => [
                     parameter,
                     parameters[index],
                 ]),
             );
 
-            visitor.currentDefinition!.implicitTypeParameters = false;
-
             for (const constraint of statement.constraints.constraints) {
                 visitor.visit(constraint, ConstraintInInstanceDefinition, visitConstraint);
             }
+
+            visitor.currentDefinition!.implicitTypeParameters = false;
 
             visitor.addConstraints(
                 new InstantiateConstraint({
@@ -81,6 +85,12 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
                     substitutions,
                 }),
             );
+        });
+
+        visitor.enqueue("afterAllDefinitions", () => {
+            if (!trait || !substitutions) {
+                return;
+            }
 
             if (statement.value != null) {
                 visitor.currentDefinition!.withinConstantValue = true;
@@ -92,7 +102,7 @@ export const visitInstanceDefinition: Visit<InstanceDefinitionStatement> = (
             }
 
             visitor.db.add(
-                traitDefinition.node,
+                trait,
                 new HasInstance({
                     node: definitionNode,
                     trait,

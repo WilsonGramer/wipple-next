@@ -1,11 +1,11 @@
 import { Solver } from "../solve";
-import { Fact, Node } from "../../db";
-import { HasInstance, Instance } from "../../visit/visitor";
+import { Db, Fact, Node } from "../../db";
+import { Definition, HasInstance, Instance } from "../../visit/visitor";
 import { displayType, instantiateType, Type, TypeParameter, typesAreEqual } from "./type";
 import chalk from "chalk";
 import { InstantiateConstraint, Score } from ".";
 import { Constraint } from "./constraint";
-import stripAnsi from "strip-ansi";
+import { TraitDefinition } from "../../visit/definitions";
 
 export interface Bound {
     source: Node;
@@ -20,14 +20,25 @@ export const cloneBound = (bound: Bound) => ({
     substitutions: new Map(bound.substitutions),
 });
 
-export const displayBound = (bound: Bound) =>
-    `${bound.trait.code}${bound.substitutions
-        .values()
-        .map((type) => ` ${displayType(type, false)}`)
-        .toArray()
-        .join("")}`;
+interface BoundLike {
+    trait: Node;
+    substitutions: Map<TypeParameter, Type>;
+}
 
-export const applyBound = (bound: Bound, solver: Solver): Bound => ({
+export const displayBound = (db: Db, bound: BoundLike) => {
+    const traitDefinition = db.get(bound.trait, Definition)! as TraitDefinition;
+
+    // This forces the order of the parameters to match the trait definition
+    const parameterTypes = traitDefinition.parameters.map(
+        (parameter) => bound.substitutions.get(parameter)!,
+    );
+
+    return `${bound.trait.code}${parameterTypes
+        .map((type) => ` ${displayType(type, false)}`)
+        .join("")}`;
+};
+
+export const applyBound = <T extends BoundLike>(bound: T, solver: Solver): T => ({
     ...bound,
     substitutions: new Map(
         bound.substitutions.entries().map(([parameter, type]) => [parameter, solver.apply(type)]),
@@ -50,13 +61,13 @@ export const boundTypesAreEqual = (left: BoundLike, right: BoundLike) =>
 export class HasResolvedBound extends Fact<[bound: Bound, instance: Node]> {
     clone = ([bound, instance]: [Bound, Node]): [Bound, Node] => [cloneBound(bound), instance];
 
-    display = ([bound, instance]: [Bound, Node]) =>
-        `${chalk.blue(displayBound(bound))}, ${instance}`;
+    display = ([bound, instance]: [Bound, Node], db: Db) =>
+        `${chalk.blue(displayBound(db, bound))}, ${instance}`;
 }
 
 export class HasUnresolvedBound extends Fact<Bound> {
     clone = cloneBound;
-    display = (bound: Bound) => chalk.blue(displayBound(bound));
+    display = (bound: Bound, db: Db) => chalk.blue(displayBound(db, bound));
 }
 
 export class BoundConstraint extends Constraint {
@@ -74,11 +85,11 @@ export class BoundConstraint extends Constraint {
     }
 
     instantiate(
-        solver: Solver,
+        _solver: Solver,
         source: Node,
         replacements: Map<Node, Node>,
         substitutions: Map<TypeParameter, Type>,
-    ): this | undefined {
+    ): this | void {
         if (source === this.node) {
             return undefined; // recursive bound
         }
@@ -98,13 +109,7 @@ export class BoundConstraint extends Constraint {
             instantiated: true,
         };
 
-        const constraint = new BoundConstraint(this.node, bound) as this;
-
-        if (constraint.bound.fromConstraint) {
-            solver.imply(constraint.asInstance());
-        }
-
-        return constraint;
+        return new BoundConstraint(this.node, bound) as this;
     }
 
     asInstance(): Instance {
@@ -115,7 +120,7 @@ export class BoundConstraint extends Constraint {
         };
     }
 
-    run(solver: Solver) {
+    run(solver: Solver): this | void {
         const { source, trait, substitutions, fromConstraint, instantiated } = this.bound;
 
         if (source === trait && !instantiated) {
@@ -160,11 +165,7 @@ export class BoundConstraint extends Constraint {
             const { instances, instantiate } = instanceGroups[i];
             const isLastInstanceSet = i + 1 === instanceGroups.length;
 
-            let candidates: [
-                instanceNode: Node,
-                copy: Solver,
-                inferredParameters: Map<TypeParameter, Type>,
-            ][] = [];
+            let candidates: [instanceNode: Node, copy: Solver][] = [];
 
             for (const instance of instances) {
                 if (instance.trait !== trait) {
@@ -172,7 +173,6 @@ export class BoundConstraint extends Constraint {
                 }
 
                 const copy = Solver.from(solver);
-                copy.implyInstances = false;
                 copy.impliedInstances = [...solver.impliedInstances];
 
                 // These are for the *instance's own* parameters, not the trait
@@ -208,48 +208,33 @@ export class BoundConstraint extends Constraint {
                     }
                 }
 
-                for (const [parameter, instanceType] of instanceSubstitutions) {
-                    const boundType = boundSubstitutions.get(parameter);
-                    if (boundType != null) {
-                        copy.unify(instanceType, boundType);
-                    } else if (!instanceInferred.has(parameter)) {
-                        throw new Error("missing parameter in bound substitutions");
-                    }
-                }
-
+                copy.error = false;
+                unifySubstitutions(copy, instanceSubstitutions, boundSubstitutions);
                 if (!copy.error) {
-                    candidates.push([instance.node, copy, instanceInferred]);
+                    unifySubstitutions(copy, instanceInferred, boundInferred);
+                    candidates.push([instance.node, copy]);
                 }
-            }
-
-            for (const [parameter, type] of boundInferred) {
-                boundSubstitutions.set(parameter, type);
             }
 
             const resolvedBound: Bound = {
                 source,
                 trait,
-                substitutions: boundSubstitutions,
+                substitutions: new Map([...boundSubstitutions, ...boundInferred]),
             };
 
             if (candidates.length === 1) {
-                const [[instanceNode, copy, instanceInferred]] = candidates;
+                const [[instanceNode, copy]] = candidates;
 
-                solver.replaceWith(copy);
-                solver.constraints.add(...copy.constraints);
-
-                for (const [parameter, instanceType] of instanceInferred) {
-                    const boundType = boundInferred.get(parameter);
-                    if (boundType == null) {
-                        throw new Error("missing parameter in bound substitutions");
-                    }
-
-                    solver.unify(boundType, instanceType);
-                }
+                solver.inherit(copy);
+                solver.add(...copy.constraints); // add the remaining bound constraints
 
                 // Don't indicate a resolved instance if this instance is
-                // implied (suppresses custom error messages)
-                if (solver.impliedInstances.every((instance) => instance.node !== instanceNode)) {
+                // implied (suppresses custom `[error]` messages)
+                const isImpliedInstance = solver.impliedInstances.some(
+                    (instance) => instance.node === instanceNode,
+                );
+
+                if (!isImpliedInstance) {
                     solver.db.add(
                         source,
                         new HasResolvedBound([applyBound(resolvedBound, solver), instanceNode]),
@@ -260,6 +245,11 @@ export class BoundConstraint extends Constraint {
             }
 
             if (isLastInstanceSet) {
+                // Retry bound after applying defaults
+                if (!solver.appliedDefaults) {
+                    return this;
+                }
+
                 solver.db.add(source, new HasUnresolvedBound(applyBound(resolvedBound, solver)));
             }
         }
@@ -267,3 +257,16 @@ export class BoundConstraint extends Constraint {
         solver.applyQueue.push(substitutions);
     }
 }
+
+const unifySubstitutions = (
+    solver: Solver,
+    left: Map<TypeParameter, Type>,
+    right: Map<TypeParameter, Type>,
+) => {
+    for (const [parameter, leftType] of left) {
+        const rightType = right.get(parameter);
+        if (rightType != null) {
+            solver.unify(leftType, rightType);
+        }
+    }
+};

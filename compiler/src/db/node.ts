@@ -2,6 +2,7 @@ import chalk from "chalk";
 import stripAnsi from "strip-ansi";
 import { Span } from "./span";
 import { CodegenItem } from "../codegen";
+import { Location, LocationRange } from "../syntax";
 
 export const nodeDisplayOptions = {
     showLocation: true,
@@ -41,7 +42,10 @@ export class Node {
     }
 
     toString(color = true) {
-        let s = chalk.blue(nodeDisplayOptions.markdown ? "`" + this.code + "`" : this.code);
+        // Collapse multiple lines
+        const code = this.code.replace(/\n.*$/s, "⋯");
+
+        let s = chalk.blue(nodeDisplayOptions.markdown ? "`" + code + "`" : code);
 
         if (nodeDisplayOptions.showLocation) {
             // s += chalk.dim(` ${this.id}`);
@@ -54,5 +58,15 @@ export class Node {
         }
 
         return color ? s : stripAnsi(s);
+    }
+
+    trimBefore(location: Location) {
+        this.code = this.code.slice(location.offset - this.span.range.start.offset).trim();
+        this.span.range.start = location;
+    }
+
+    trimAfter(location: Location) {
+        this.code = this.code.slice(0, location.offset - this.span.range.start.offset).trim();
+        this.span.range.end = location;
     }
 }

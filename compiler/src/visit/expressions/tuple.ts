@@ -3,6 +3,7 @@ import { Fact, Node } from "../../db";
 import { TupleExpression } from "../../syntax";
 import { visitExpression } from ".";
 import * as codegen from "../../codegen";
+import { TypeConstraint, types } from "../../typecheck";
 
 export class IsTupleExpression extends Fact<null> {}
 export class ElementInTupleExpression extends Fact<Node> {}
@@ -15,4 +16,6 @@ export const visitTupleExpression: Visit<TupleExpression> = (visitor, expression
     visitor.db.add(node, new IsTupleExpression(null));
 
     node.setCodegen(codegen.tupleExpression(elements));
+
+    visitor.addConstraints(new TypeConstraint(node, types.tuple(elements)));
 };

@@ -74,11 +74,23 @@ export class Db {
             .next().value;
     }
 
-    display<T>(node: Node, fact: typeof Fact<T>): string[] {
+    findBy<T>(fact: typeof Fact<T>, f: (value: T) => boolean): [Node, T] | undefined {
+        return this.list(fact)
+            .filter(([_node, value]) => f(value))
+            .next().value;
+    }
+
+    deleteAll<T>(node: Node, fact: typeof Fact<T>) {
+        this.facts.get(fact)?.delete(node);
+    }
+
+    display<T>(node: Node, fact: typeof Fact<T>): Set<string> {
         const values = this.facts.get(fact)?.get(node)?.values() ?? [];
 
-        return Array.from(values).map((value) =>
-            stripVTControlCharacters(new (fact as any)(value).display(value)),
+        return new Set(
+            values.map((value) =>
+                stripVTControlCharacters(new (fact as any)(value).display(value)),
+            ),
         );
     }
 
@@ -114,7 +126,7 @@ export class Db {
             facts.sort((a, b) => a.constructor.name.localeCompare(b.constructor.name));
 
             for (const fact of facts) {
-                console.log("  ".repeat(indent + 1) + fact.toString());
+                console.log("  ".repeat(indent + 1) + fact.toString(this));
             }
         }
     }

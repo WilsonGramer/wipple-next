@@ -1,3 +1,5 @@
+import { Db } from ".";
+
 export abstract class Fact<T> {
     value: (T & {}) | null;
 
@@ -7,14 +9,14 @@ export abstract class Fact<T> {
 
     clone?(value: T & {}): T & {};
 
-    display?(value: (T & {}) | null): string | undefined;
+    display?(value: (T & {}) | null, db: Db): string | undefined;
 
-    toString() {
+    toString(db: Db) {
         if (this.value === null) {
             return this.constructor.name;
         } else {
             const displayed =
-                this.display != null ? (this.display(this.value) ?? "...") : this.value;
+                this.display != null ? this.display(this.value, db) ?? "..." : this.value;
 
             return `${this.constructor.name}(${displayed})`;
         }

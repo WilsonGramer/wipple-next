@@ -1,6 +1,6 @@
 import { Db, Node } from "../db";
-import { HasDefinitionConstraints, Instance } from "../visit/visitor";
-import { BoundConstraint, Constraint, Constraints, Score } from "./constraints";
+import { Instance } from "../visit/visitor";
+import { Constraint, Constraints, Score } from "./constraints";
 import {
     traverseType,
     Type,
@@ -8,17 +8,17 @@ import {
     ConstructedType,
     typesAreEqual,
     TypeParameter,
-    displayType,
 } from "./constraints/type";
 
 export class Solver {
     db: Db;
     private groups = new Map<Set<Node>, ConstructedType[]>();
     constraints = new Constraints();
-    implyInstances = true;
+    defaultConstraints = new Constraints();
     impliedInstances: Instance[] = [];
     applyQueue: Map<TypeParameter, Type>[] = [];
     error = false;
+    appliedDefaults = false;
 
     constructor(db: Db) {
         this.db = db;
@@ -26,11 +26,11 @@ export class Solver {
 
     static from(other: Solver) {
         const solver = new Solver(other.db);
-        solver.replaceWith(other);
+        solver.inherit(other);
         return solver;
     }
 
-    replaceWith(other: Solver) {
+    inherit(other: Solver) {
         this.groups = new Map(
             other.groups.entries().map(([nodes, types]) => [new Set(nodes), [...types]]),
         );
@@ -38,7 +38,16 @@ export class Solver {
     }
 
     add(...constraints: Constraint[]) {
-        this.constraints.add(...constraints);
+        for (const constraint of constraints) {
+            if ("isDefault" in constraint && constraint.isDefault) {
+                this.defaultConstraints.add(constraint);
+            } else {
+                this.constraints.add(constraint);
+            }
+        }
+
+        this.defaultConstraints.sort();
+        this.constraints.sort();
     }
 
     setGroup(group: Group) {
@@ -46,14 +55,15 @@ export class Solver {
     }
 
     run({ until }: { until?: Score } = {}) {
+        this.appliedDefaults = false;
+        this.constraints.run(this, { until });
+        this.defaultConstraints.run(this, { until });
+        this.appliedDefaults = true;
         this.constraints.run(this, { until });
     }
 
     imply(instance: Instance) {
-        if (
-            this.implyInstances &&
-            this.impliedInstances.every((existing) => existing.node !== instance.node)
-        ) {
+        if (this.impliedInstances.every((existing) => existing.node !== instance.node)) {
             this.impliedInstances.push(instance);
         }
     }
@@ -186,15 +196,15 @@ export class Solver {
 
         return this.groups
             .entries()
-            .map(([nodes, types]): Group => {
-                return {
+            .map(
+                ([nodes, types]): Group => ({
                     nodes,
                     types: deduplicate(
                         types.map((type) => this.apply(type) as ConstructedType),
                         typesAreEqual,
                     ),
-                };
-            })
+                }),
+            )
             .toArray();
     }
 }

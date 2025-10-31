@@ -28,23 +28,18 @@ export const visitConstructorPattern: Visit<ConstructorPattern> = (visitor, patt
     if (definition != null) {
         // TODO: Ensure `elements` has the right length
 
-        const constructorNode = visitor.node(pattern);
-        constructorNode.isHidden = true;
-
-        visitor.addConstraints(
-            new InstantiateConstraint({
-                source: constructorNode,
-                definition: definition.node,
-                substitutions: new Map(),
-                replacements: new Map([[definition.node, constructorNode]]),
-            }),
-        );
-
         switch (definition.type) {
             case "markerConstructor": {
                 // No need to add a condition; markers only have one value
 
-                visitor.addConstraints(new TypeConstraint(constructorNode, node));
+                visitor.addConstraints(
+                    new InstantiateConstraint({
+                        source: node,
+                        definition: definition.node,
+                        substitutions: new Map(),
+                        replacements: new Map([[definition.node, node]]),
+                    }),
+                );
 
                 break;
             }
@@ -71,9 +66,32 @@ export const visitConstructorPattern: Visit<ConstructorPattern> = (visitor, patt
                     return element;
                 });
 
-                visitor.addConstraints(
-                    new TypeConstraint(constructorNode, types.function(elements, node)),
-                );
+                if (elements.length === 0) {
+                    visitor.addConstraints(
+                        new InstantiateConstraint({
+                            source: node,
+                            definition: definition.node,
+                            substitutions: new Map(),
+                            replacements: new Map([[definition.node, node]]),
+                        }),
+                    );
+                } else {
+                    const constructorNode = visitor.node(pattern);
+                    constructorNode.isHidden = true;
+
+                    visitor.addConstraints(
+                        new InstantiateConstraint({
+                            source: node,
+                            definition: definition.node,
+                            substitutions: new Map(),
+                            replacements: new Map([[definition.node, constructorNode]]),
+                        }),
+                    );
+
+                    visitor.addConstraints(
+                        new TypeConstraint(constructorNode, types.function(elements, node)),
+                    );
+                }
 
                 break;
             }

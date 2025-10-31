@@ -14,6 +14,16 @@ export class IsTopLevelExecutableStatement extends Fact<null> {}
 export const visitStatement: Visit<Statement> = (visitor, statement, node) => {
     visitor.db.add(node, new IsStatement(null));
 
+    if ("comments" in statement) {
+        const end = statement.comments.at(-1)?.location.end;
+        if (end != null) node.trimBefore(end);
+    }
+
+    if ("attributes" in statement) {
+        const end = statement.attributes.at(-1)?.location.end;
+        if (end != null) node.trimBefore(end);
+    }
+
     switch (statement.type) {
         case "constantDefinition": {
             visitConstantDefinition(visitor, statement, node);

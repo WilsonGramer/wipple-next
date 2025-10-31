@@ -389,7 +389,7 @@ instance (Extend (left ; right) (left-element ; right-element)) where (Extend le
 }
 
 -- Split a sequence that produces two values at a time into two separate collections.
-unzip :: collection -> (left ; right) where (As-Sequence collection (left-element ; right-element)) (Extend left left-element) (Extend right right-element) (Initial left) (Initial right)
+unzip :: collection -> (left ; right) where (Initial left) (Initial right) (As-Sequence collection (left-element ; right-element)) (Extend left left-element) (Extend right right-element)
 unzip : collection -> (Initial ; Initial) . extend (As-Sequence collection)
 
 Container : collection (infer element) => trait (element -> collection -> Boolean)

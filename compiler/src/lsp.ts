@@ -41,6 +41,7 @@ export default () => {
     documents.listen(connection);
 
     documents.onDidChangeContent((e) => {
+        const filter = nodeFilter([{ path: e.document.uri }]);
         const code = e.document.getText();
 
         try {
@@ -69,7 +70,7 @@ export default () => {
                 }
             }
 
-            addFeedback(db, diagnostics);
+            addFeedback(db, filter, diagnostics);
 
             connection.sendDiagnostics({
                 uri: e.document.uri,
@@ -123,9 +124,9 @@ const convertRange = (location: LocationRange): lsp.Range => ({
     },
 });
 
-const addFeedback = (db: Db, diagnostics: lsp.Diagnostic[]) => {
+const addFeedback = (db: Db, filter: (node: Node) => boolean, diagnostics: lsp.Diagnostic[]) => {
     const seenFeedback = new Map<Node, Set<string>>();
-    for (const feedback of collectFeedback(db)) {
+    for (const feedback of collectFeedback(db, filter)) {
         if (!seenFeedback.get(feedback.on)) {
             seenFeedback.set(feedback.on, new Set());
         }
@@ -152,13 +153,13 @@ const addSemanticTokens = (uri: string, db: Db) => {
 
     const tokens: [Node, (typeof tokenTypes)[number]][] = [];
 
-    for (const { node } of queries.highlightType(db)) {
+    for (const { node } of queries.highlightType(db, filter)) {
         if (!filter(node)) continue;
 
         tokens.push([node, "type"]);
     }
 
-    for (const { node } of queries.highlightFunction(db)) {
+    for (const { node } of queries.highlightFunction(db, filter)) {
         if (!filter(node)) continue;
 
         tokens.push([node, "function"]);
@@ -184,6 +185,8 @@ const addSemanticTokens = (uri: string, db: Db) => {
 };
 
 const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | undefined => {
+    const filter = nodeFilter([{ path: uri }]);
+
     const nodeAtPosition = getNodeAtPosition(uri, position, db);
     if (nodeAtPosition == null) {
         return undefined;
@@ -191,7 +194,7 @@ const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | unde
 
     const contents: lsp.Hover["contents"] = [];
 
-    for (const { node, type } of queries.type(db)) {
+    for (const { node, type } of queries.type(db, filter)) {
         if (node !== nodeAtPosition) continue;
 
         contents.push({
@@ -200,7 +203,7 @@ const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | unde
         });
     }
 
-    for (const { node, comments, links } of queries.comments(db)) {
+    for (const { node, comments, links } of queries.comments(db, filter)) {
         if (node !== nodeAtPosition) continue;
 
         const documentation = renderComments(comments, links).toString();
@@ -214,13 +217,15 @@ const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | unde
 };
 
 const getRelated = (uri: string, position: lsp.Position, db: Db): lsp.DocumentHighlight[] => {
+    const filter = nodeFilter([{ path: uri }]);
+
     const nodeAtPosition = getNodeAtPosition(uri, position, db);
     if (nodeAtPosition == null) {
         return [];
     }
 
     const locations: lsp.Location[] = [{ uri, range: convertRange(nodeAtPosition.span.range) }];
-    for (const { node, related } of queries.related(db)) {
+    for (const { node, related } of queries.related(db, filter)) {
         if (node !== nodeAtPosition) continue;
 
         locations.push({ uri, range: convertRange(related.span.range) });

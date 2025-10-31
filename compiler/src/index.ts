@@ -34,9 +34,13 @@ const compileCommand = (options: { run: boolean }) =>
                 type: cmd.optional(cmd.string),
             }),
             filterLines: cmd.multioption({
-                long: "filter-lines",
+                long: "filter-line",
                 short: "l",
                 type: cmd.array(cmd.number),
+            }),
+            filterFeedback: cmd.multioption({
+                long: "filter-feedback",
+                type: cmd.array(cmd.string),
             }),
             debugCodegen: cmd.flag({
                 long: "debug-codegen",
@@ -101,7 +105,15 @@ const compileCommand = (options: { run: boolean }) =>
 
             const seenFeedback = new Map<Node, Set<string>>();
             let feedbackCount = 0;
-            for (const feedback of collectFeedback(db)) {
+            for (const feedback of collectFeedback(db, filter)) {
+                if (args.filterFeedback.length > 0 && !args.filterFeedback.includes(feedback.id)) {
+                    continue;
+                }
+
+                if (!filter(feedback.on)) {
+                    continue;
+                }
+
                 if (!seenFeedback.get(feedback.on)) {
                     seenFeedback.set(feedback.on, new Set());
                 }
@@ -147,7 +159,9 @@ const compileCommand = (options: { run: boolean }) =>
                 if (args.debugCodegen) {
                     console.error(e);
                 } else {
-                    console.error(chalk.bold(`Compilation failed with ${feedbackCount} feedback item(s)`));
+                    console.error(
+                        chalk.bold(`Compilation failed with ${feedbackCount} feedback item(s)`),
+                    );
                 }
             }
 

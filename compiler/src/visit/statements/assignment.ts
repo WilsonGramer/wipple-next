@@ -23,7 +23,7 @@ export const visitAssignmentStatement: Visit<AssignmentStatement> = (visitor, st
         const definition = visitor.peekName(statement.pattern.variable.value, (definition) => {
             switch (definition.type) {
                 case "constant":
-                    return definition;
+                    return definition.value.assigned ? undefined : definition;
                 default:
                     return undefined;
             }

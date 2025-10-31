@@ -1,4 +1,4 @@
--- Produce a piece of `String` describing the value.
+-- Produce a `String` describing the value.
 Describe : value => trait (value -> String)
 
 -- Can't describe [`value`].
@@ -20,7 +20,7 @@ instance (Describe (Maybe value)) where (Describe value) : m -> when m {
   None -> "None"
 }
 
--- Convert from a piece of `String` to a value.
+-- Convert from a `String` to a value.
 Read : value => trait (String -> Maybe value)
 
 -- Can't read [`value`] from input.
