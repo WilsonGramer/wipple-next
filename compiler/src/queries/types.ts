@@ -55,7 +55,10 @@ export const unknownType = query(function* (db) {
     for (const [node, _] of db.list(IsTyped)) {
         const types = db.list(node, HasType).toArray();
         if (types.length === 0) {
-            yield { node };
+            const group = db.get(node, InTypeGroup);
+            if (group?.nodes.values().next().value === node) {
+                yield { node };
+            }
         }
     }
 });

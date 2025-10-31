@@ -19,17 +19,18 @@ export const visitBoundConstraint: Visit<SyntaxBoundConstraint> = (visitor, stat
     });
 
     if (trait == null) {
+        node.span.range = statement.trait.location;
         visitor.db.add(node, new IsUnresolvedBoundConstraint(null));
         return;
     }
 
     const parameters = statement.parameters.map((type) =>
-        visitor.visit(type, ParameterInBoundConstraint, visitType),
+        visitor.visit(type, ParameterInBoundConstraint, visitType)
     );
 
     // TODO: Ensure `parameters` has the right length
     const substitutions = new Map(
-        trait.parameters.map((parameter, index) => [parameter, parameters[index]]),
+        trait.parameters.map((parameter, index) => [parameter, parameters[index]])
     );
 
     visitor.addConstraints(
@@ -38,6 +39,6 @@ export const visitBoundConstraint: Visit<SyntaxBoundConstraint> = (visitor, stat
             fromConstraint: true,
             trait: trait.node,
             substitutions,
-        }),
+        })
     );
 };

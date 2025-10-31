@@ -100,6 +100,7 @@ const compileCommand = (options: { run: boolean }) =>
             }
 
             const seenFeedback = new Map<Node, Set<string>>();
+            let feedbackCount = 0;
             for (const feedback of collectFeedback(db)) {
                 if (!seenFeedback.get(feedback.on)) {
                     seenFeedback.set(feedback.on, new Set());
@@ -112,6 +113,7 @@ const compileCommand = (options: { run: boolean }) =>
                 }
 
                 seenFeedbackForNode.add(feedback.id);
+                feedbackCount += 1;
 
                 const indent = "  ";
 
@@ -145,7 +147,7 @@ const compileCommand = (options: { run: boolean }) =>
                 if (args.debugCodegen) {
                     console.error(e);
                 } else {
-                    console.error(chalk.bold("Compilation failed"));
+                    console.error(chalk.bold(`Compilation failed with ${feedbackCount} feedback item(s)`));
                 }
             }
 

@@ -1,3 +1,3 @@
 import "./bounds";
+import "./names";
 import "./types";
-import "./variables";
