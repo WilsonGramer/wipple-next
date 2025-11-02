@@ -4,6 +4,7 @@ import { ExpressionStatement } from "../../syntax";
 import { visitExpression } from "../expressions";
 import * as codegen from "../../codegen";
 import { trySetTopLevelExecutableStatement } from ".";
+import { TypeConstraint } from "../../typecheck";
 
 export class ExpressionInExpressionStatement extends Fact<Node> {}
 
@@ -13,6 +14,8 @@ export const visitExpressionStatement: Visit<ExpressionStatement> = (visitor, st
         ExpressionInExpressionStatement,
         visitExpression,
     );
+
+    visitor.addConstraints(new TypeConstraint(node, expression));
 
     node.setCodegen(codegen.expressionStatement(expression));
 
