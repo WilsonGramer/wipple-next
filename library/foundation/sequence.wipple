@@ -276,7 +276,7 @@ count : collection -> do {
 
 -- Collect two sequences into a single value.
 join :: a b -> c where (As-Sequence a element) (As-Sequence b element) (From-Sequence element c) (c :: a)
-join : a b -> collect (flatten (((,)) . append (As-Sequence a) . append (As-Sequence b)))
+join : a b -> collect (flatten ((,) . append (As-Sequence a) . append (As-Sequence b)))
 
 -- Take up to a fixed number of values from a sequence.
 take :: Number -> collection -> Sequence element where (As-Sequence collection element)

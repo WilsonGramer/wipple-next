@@ -173,6 +173,12 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                                             : codegen.variantExpression(index, []),
                                     );
 
+                                    // Inherit constraints from the type definition
+                                    visitor.addConstraints(
+                                        ...(visitor.definitionConstraints.get(definitionNode) ??
+                                            []),
+                                    );
+
                                     visitor.addConstraints(
                                         new TypeConstraint(
                                             variantNode,

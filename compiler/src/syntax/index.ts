@@ -23,9 +23,11 @@ type DeepPartial<T> = T extends Record<string, any> ? { [P in keyof T]?: DeepPar
 export const testParse = <T>(
     rule: (parser: Parser) => T,
     source: string,
-    expected: DeepPartial<T>,
+    expected?: DeepPartial<T>,
 ) => {
-    const parsed = rule(new Parser("test", source));
+    const parser = new Parser("test", source);
+    const parsed = rule(parser);
+    parser.finish();
 
     const removeLocation = (x: any) => {
         if (x !== null && typeof x === "object") {
@@ -39,7 +41,11 @@ export const testParse = <T>(
 
     removeLocation(parsed);
 
-    expect(parsed).to.containSubset(expected);
+    if (expected != null) {
+        expect(parsed).to.containSubset(expected);
+    }
+
+    return parsed;
 };
 
 const parseSourceFile = (path: string, code: string): SourceFile => {

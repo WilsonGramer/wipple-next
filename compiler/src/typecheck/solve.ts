@@ -130,7 +130,7 @@ export class Solver {
         if (type instanceof Node) {
             for (const [nodes, types] of this.groups) {
                 if (nodes.has(type)) {
-                    return types[0] ?? type;
+                    return types.at(-1) ?? type;
                 }
             }
         }
@@ -222,7 +222,7 @@ export const cloneGroup = (group: Group): Group => ({
 const deduplicate = <T>(array: T[], equal: (a: T, b: T) => boolean): T[] => {
     const result: T[] = [];
     for (const item of array) {
-        if (!result.some((existing) => equal(existing, item))) {
+        if (result.every((existing) => !equal(existing, item))) {
             result.push(item);
         }
     }

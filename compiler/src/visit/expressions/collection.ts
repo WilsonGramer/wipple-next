@@ -51,7 +51,6 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
         const initialCollectionNode = visitor.node(expression);
 
         const substitutions = new Map<TypeParameter, Type>();
-        const replacements = new Map([[definition.node, initialCollectionNode]]);
 
         initialCollectionNode.setCodegen(codegen.traitExpression(definition.node, substitutions));
 
@@ -60,7 +59,7 @@ export const visitCollectionExpression: Visit<CollectionExpression> = (
                 source: initialCollectionNode,
                 definition: definition.node,
                 substitutions,
-                replacements,
+                replacements: new Map([[definition.node, initialCollectionNode]]),
             }),
         );
 

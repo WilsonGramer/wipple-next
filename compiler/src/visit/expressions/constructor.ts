@@ -14,13 +14,12 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
     node,
 ) => {
     const constraint = visitor.resolveName<Constraint>(
-        expression.trait.value,
+        expression.constructor.value,
         node,
         (definition) => {
             switch (definition.type) {
                 case "trait": {
                     const substitutions = new Map<TypeParameter, Type>();
-                    const replacements = new Map([[definition.node, node]]);
 
                     node.setCodegen(codegen.traitExpression(definition.node, substitutions));
 
@@ -29,7 +28,7 @@ export const visitConstructorExpression: Visit<ConstructorExpression> = (
                             source: node,
                             definition: definition.node,
                             substitutions,
-                            replacements,
+                            replacements: new Map([[definition.node, node]]),
                         }),
                         ResolvedConstructor,
                     ];

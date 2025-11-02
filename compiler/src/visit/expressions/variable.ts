@@ -16,8 +16,6 @@ export const visitVariableExpression: Visit<VariableExpression> = (visitor, expr
         (definition) => {
             switch (definition.type) {
                 case "variable": {
-                    node.isHidden = true;
-
                     node.setCodegen(codegen.variableExpression(definition.node));
 
                     return [new TypeConstraint(node, definition.node), ResolvedVariable];

@@ -103,7 +103,7 @@ export const cloneType = <T extends Type>(type: T): T =>
 
 export const displayType = (type: Type, root = true): string => {
     if (type instanceof Node) {
-        return type.toString() || "_";
+        return "_";
     } else {
         const children = type.children.map(
             (child) =>

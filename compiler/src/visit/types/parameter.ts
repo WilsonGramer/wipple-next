@@ -20,7 +20,6 @@ export const visitParameterType: Visit<ParameterType> = (visitor, type, node) =>
     const existing = visitor.resolveName(type.name.value, node, (definition) => {
         switch (definition.type) {
             case "typeParameter":
-                node.isHidden = true;
                 return [definition.node, ResolvedParameterType];
             default:
                 return undefined;

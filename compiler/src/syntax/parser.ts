@@ -161,13 +161,12 @@ export class Parser {
         f: (parser: Parser) => T,
         operator = false,
     ): [T, S[number] | undefined][] {
-        const empty = (parser: Parser) =>
-            parser.delimited("leftParenthesis", "rightParenthesis", () => {
-                parser.try("lineBreak");
-                parser.next(...separators);
-                parser.try("lineBreak");
-                return [];
-            });
+        const empty = (parser: Parser) => {
+            parser.try("lineBreak");
+            parser.next(...separators);
+            parser.try("lineBreak");
+            return [];
+        };
 
         const nonEmpty = (parser: Parser) => {
             const initialIndex = parser.index;

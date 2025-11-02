@@ -2,7 +2,13 @@ import { Parser, LocationRange, SyntaxError, Token } from "./parser";
 import { Pattern, parsePattern, parsePatternElement, parseAtomicPattern } from "./patterns";
 import { Type, parseTypeElement } from "./types";
 import { Statement, parseStatements } from "./statements";
-import { parseNumber, parseString, parseTypeName, parseVariableName } from "./tokens";
+import {
+    parseConstructorName,
+    parseNumber,
+    parseString,
+    parseTypeName,
+    parseVariableName,
+} from "./tokens";
 
 export type Expression =
     | FunctionExpression
@@ -109,13 +115,13 @@ export const parseVariableExpression = (parser: Parser): VariableExpression =>
 export interface ConstructorExpression {
     type: "constructor";
     location: LocationRange;
-    trait: Token;
+    constructor: Token;
 }
 
 export const parseConstructorExpression = (parser: Parser): ConstructorExpression =>
     parser.withLocation(() => ({
         type: "constructor",
-        trait: parseTypeName(parser),
+        constructor: parseConstructorName(parser),
     }));
 
 export interface NumberExpression {
