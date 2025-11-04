@@ -55,6 +55,7 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
         });
 
         const definitionType = types.named(definitionNode, parameters.map(types.parameter));
+        visitor.addConstraints(new TypeConstraint(definitionNode, definitionType));
 
         // Types don't have additional constraints
 
@@ -64,23 +65,13 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
                     case "marker": {
                         visitor.popScope();
 
-                        const markerNode = visitor.node(statement.name);
+                        const constructorDefinition: MarkerConstructorDefinition = {
+                            type: "markerConstructor",
+                            node: definition.node,
+                            comments: statement.comments,
+                        };
 
-                        visitor.withDefinition(markerNode, () => {
-                            markerNode.setCodegen(codegen.markerExpression());
-
-                            visitor.addConstraints(new TypeConstraint(markerNode, definitionType));
-
-                            const constructorDefinition: MarkerConstructorDefinition = {
-                                type: "markerConstructor",
-                                node: markerNode,
-                                comments: statement.comments,
-                            };
-
-                            visitor.defineName(statement.name.value, constructorDefinition);
-
-                            return constructorDefinition;
-                        });
+                        visitor.defineName(statement.name.value, constructorDefinition);
 
                         break;
                     }
@@ -100,25 +91,14 @@ export const visitTypeDefinition: Visit<TypeDefinitionStatement> = (
 
                         visitor.popScope();
 
-                        const structureNode = visitor.node(statement.name);
+                        const constructorDefinition: StructureConstructorDefinition = {
+                            type: "structureConstructor",
+                            node: definition.node,
+                            comments: statement.comments,
+                            fields,
+                        };
 
-                        visitor.withDefinition(structureNode, () => {
-                            visitor.addConstraints(
-                                new TypeConstraint(structureNode, definitionType),
-                                new TypeConstraint(definition.node, definitionType),
-                            );
-
-                            const constructorDefinition: StructureConstructorDefinition = {
-                                type: "structureConstructor",
-                                node: definition.node,
-                                comments: statement.comments,
-                                fields,
-                            };
-
-                            visitor.defineName(statement.name.value, constructorDefinition);
-
-                            return constructorDefinition;
-                        });
+                        visitor.defineName(statement.name.value, constructorDefinition);
 
                         break;
                     }
