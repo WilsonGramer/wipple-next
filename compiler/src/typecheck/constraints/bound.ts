@@ -222,7 +222,11 @@ export class BoundConstraint extends Constraint {
                 substitutions: new Map([...boundSubstitutions, ...boundInferred]),
             };
 
-            if (candidates.length === 1) {
+            // Allow multiple candidates (picking the first) if considering
+            // implied instances
+            const hasCandidate = instantiate ? candidates.length === 1 : candidates.length > 0;
+
+            if (hasCandidate) {
                 const [[instanceNode, copy]] = candidates;
 
                 solver.inherit(copy);

@@ -55,7 +55,7 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         };
     }
 
-    const _info = visit(parsedFiles, db);
+    const info = visit(parsedFiles, db);
 
     const definitionSolver = new Solver(db);
     for (const [_node, group] of db.list(InTypeGroup)) {
@@ -63,10 +63,19 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
     }
 
     // Solve constraints from each definition, implying all bounds
-    for (const [definition, constraints] of db.list(HasDefinitionConstraints)) {
+    for (const [definitionNode, constraints] of db.list(HasDefinitionConstraints)) {
+        const definition = info.definitions.get(definitionNode)!;
+        if (definition.type !== "constant" && definition.type !== "instance") {
+            continue;
+        }
+
         const solver = Solver.from(definitionSolver);
 
-        const instance = db.findBy(HasInstance, (instance) => instance.node === definition)?.[1];
+        const instance = db.findBy(
+            HasInstance,
+            (instance) => instance.node === definitionNode,
+        )?.[1];
+
         if (instance != null) {
             solver.imply(instance);
         }
