@@ -26,12 +26,12 @@ export class Visitor {
     constructor(db: Db) {
         this.db = db;
 
-        const existingScopes = this.db
+        this.scopes = this.db
             .list(HasTopLevelScope)
             .map(([, scope]) => scope)
             .toArray();
 
-        this.scopes = existingScopes.length > 0 ? existingScopes : [new Scope()];
+        this.pushScope();
     }
 
     node(value: { location: LocationRange }) {
@@ -178,18 +178,26 @@ export class Visitor {
 
     enqueue(key: QueueKey, f: () => void) {
         this.queue[key].push({
-            scopes: [...this.scopes],
-            currentNode: this.currentNode,
-            currentMatch: this.currentMatch,
-            currentDefinition: this.currentDefinition,
+            ...this.captureForQueue(),
             f,
         });
     }
 
+    private captureForQueue(): Partial<Visitor> {
+        return {
+            scopes: [...this.scopes],
+            currentNode: this.currentNode,
+            currentMatch: this.currentMatch,
+            currentDefinition: this.currentDefinition,
+        };
+    }
+
     runQueue() {
         for (const { f, ...props } of this.queue) {
+            const prev = this.captureForQueue();
             Object.assign(this, props);
             f();
+            Object.assign(this, prev);
         }
     }
 
@@ -206,7 +214,11 @@ export class Visitor {
             this.db.add(node, new Definition(definition));
         }
 
-        this.db.add(this.currentNode, new HasTopLevelScope(this.scopes.pop()!));
+        for (const variable of this.peekScope().getDefinitions().variables ?? []) {
+            this.db.add(variable, new IsTopLevelVariableDefinition(null));
+        }
+
+        this.db.add(this.currentNode, new HasTopLevelScope(this.popScope()));
 
         return {
             definitions: this.definitions,
@@ -275,6 +287,8 @@ interface QueuedVisit extends Partial<Visitor> {
 }
 
 type QueueKey = { [K in keyof Queue]: Queue[K] extends QueuedVisit[] ? K : never }[keyof Queue];
+
+export class IsTopLevelVariableDefinition extends Fact<null> {}
 
 export class HasTopLevelScope extends Fact<Scope> {}
 

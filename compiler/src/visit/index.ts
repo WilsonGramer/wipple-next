@@ -1,11 +1,10 @@
 import { Fact, Node, Db } from "../db";
 import { SourceFile } from "../syntax";
 import { visitStatement } from "./statements";
-import { Scope, Visitor } from "./visitor";
+import { Visitor } from "./visitor";
 
 export class StatementInSourceFile extends Fact<Node> {}
 export class IsTyped extends Fact<null> {}
-export class IsTopLevelVariableDefinition extends Fact<null> {}
 
 export const visit = (files: SourceFile[], db: Db) => {
     const visitor = new Visitor(db);
@@ -21,10 +20,6 @@ export const visit = (files: SourceFile[], db: Db) => {
     }
 
     visitor.runQueue();
-
-    for (const variable of visitor.peekScope().getDefinitions().variables ?? []) {
-        db.add(variable, new IsTopLevelVariableDefinition(null));
-    }
 
     return visitor.finish();
 };

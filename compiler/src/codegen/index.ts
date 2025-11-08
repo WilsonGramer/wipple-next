@@ -1,7 +1,6 @@
 import { Db, Node } from "../db";
-import { IsTopLevelVariableDefinition } from "../visit";
 import { IsTopLevelExecutableStatement } from "../visit/statements";
-import { Definition, HasInstance } from "../visit/visitor";
+import { Definition, HasInstance, IsTopLevelVariableDefinition } from "../visit/visitor";
 
 export interface CodegenOptions {
     format: { type: "module" } | { type: "iife"; arg: string };

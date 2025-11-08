@@ -64,8 +64,11 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
 
     // Solve constraints from each definition, implying all bounds
     for (const [definitionNode, constraints] of db.list(HasDefinitionConstraints)) {
-        const definition = info.definitions.get(definitionNode)!;
-        if (definition.type !== "constant" && definition.type !== "instance") {
+        const definition = info.definitions.get(definitionNode);
+        if (
+            definition == null ||
+            (definition.type !== "constant" && definition.type !== "instance")
+        ) {
             continue;
         }
 
