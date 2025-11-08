@@ -35,5 +35,5 @@ export abstract class Constraint {
      * Add the type information in this constraint to the solver. Returning
      * `this` will re-queue it.
      */
-    abstract run(solver: Solver): this | void;
+    abstract run(solver: Solver): void;
 }

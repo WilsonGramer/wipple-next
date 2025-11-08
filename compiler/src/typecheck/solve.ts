@@ -18,7 +18,6 @@ export class Solver {
     impliedInstances: Instance[] = [];
     applyQueue: Map<TypeParameter, Type>[] = [];
     error = false;
-    appliedDefaults = false;
 
     constructor(db: Db) {
         this.db = db;
@@ -39,15 +38,8 @@ export class Solver {
 
     add(...constraints: Constraint[]) {
         for (const constraint of constraints) {
-            if ("isDefault" in constraint && constraint.isDefault) {
-                this.defaultConstraints.add(constraint);
-            } else {
-                this.constraints.add(constraint);
-            }
+            this.constraints.add(constraint);
         }
-
-        this.defaultConstraints.sort();
-        this.constraints.sort();
     }
 
     setGroup(group: Group) {
@@ -55,10 +47,6 @@ export class Solver {
     }
 
     run({ until }: { until?: Score } = {}) {
-        this.appliedDefaults = false;
-        this.constraints.run(this, { until });
-        this.defaultConstraints.run(this, { until });
-        this.appliedDefaults = true;
         this.constraints.run(this, { until });
     }
 

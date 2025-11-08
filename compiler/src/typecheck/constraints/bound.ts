@@ -120,7 +120,7 @@ export class BoundConstraint extends Constraint {
         };
     }
 
-    run(solver: Solver): this | void {
+    run(solver: Solver): void {
         const { source, trait, substitutions, fromConstraint, instantiated } = this.bound;
 
         if (source === trait && !instantiated) {
@@ -245,11 +245,6 @@ export class BoundConstraint extends Constraint {
             }
 
             if (isLastInstanceSet) {
-                // Retry bound after applying defaults
-                if (!solver.appliedDefaults) {
-                    return this;
-                }
-
                 solver.db.add(source, new HasUnresolvedBound(applyBound(resolvedBound, solver)));
             }
         }

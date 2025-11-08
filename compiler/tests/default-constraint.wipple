@@ -7,7 +7,8 @@ Collect : element collection => trait (element -> collection)
 instance (Collect element (List element))
 instance (Collect element (Set element))
 
-collect :: element -> output where (Collect element output) (output :: List _)
+-- Default and bound constraints are resolved in source code order
+collect :: element -> output where (output :: List _) (Collect element output)
 
 _ : collect "hi"
 _ : (collect "hi" :: Set _)

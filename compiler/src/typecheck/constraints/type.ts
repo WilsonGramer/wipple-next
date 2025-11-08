@@ -27,17 +27,13 @@ export class TypeParameter {
 export class TypeConstraint extends Constraint {
     node: Node;
     type: Type;
-    onlyIfInstantiated: boolean;
-    isDefault: boolean;
+    active: boolean;
 
-    private instantiated = false;
-
-    constructor(node: Node, type: Type, { isDefault = false, onlyIfInstantiated = false } = {}) {
+    constructor(node: Node, type: Type, { active = true } = {}) {
         super();
         this.node = node;
         this.type = type;
-        this.onlyIfInstantiated = onlyIfInstantiated;
-        this.isDefault = isDefault;
+        this.active = active;
     }
 
     score(): Score {
@@ -53,22 +49,11 @@ export class TypeConstraint extends Constraint {
         const node = getOrInstantiate(this.node, source, replacements);
         const type = instantiateType(this.type, source, replacements, substitutions);
 
-        const constraint = new TypeConstraint(node, type, {
-            onlyIfInstantiated: this.onlyIfInstantiated,
-            isDefault: this.isDefault,
-        }) as this;
-
-        constraint.instantiated = true;
-
-        return constraint;
+        return new TypeConstraint(node, type, { active: true }) as this;
     }
 
-    run(solver: Solver): this | void {
-        if (this.onlyIfInstantiated && !this.instantiated) {
-            return;
-        }
-
-        if (this.isDefault && !(solver.apply(this.node) instanceof Node)) {
+    run(solver: Solver): void {
+        if (!this.active) {
             return;
         }
 
@@ -103,7 +88,7 @@ export const cloneType = <T extends Type>(type: T): T =>
 
 export const displayType = (type: Type, root = true): string => {
     if (type instanceof Node) {
-        return "_";
+        return type.toString() || "_";
     } else {
         const children = type.children.map(
             (child) =>

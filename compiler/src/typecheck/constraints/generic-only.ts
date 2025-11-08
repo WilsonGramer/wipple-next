@@ -24,8 +24,7 @@ export class GenericOnlyConstraint extends Constraint {
         return undefined;
     }
 
-    run(solver: Solver): this | void {
-        const requeued = this.constraint.run(solver);
-        return requeued && (new GenericOnlyConstraint(requeued) as this);
+    run(solver: Solver): void {
+        this.constraint.run(solver);
     }
 }

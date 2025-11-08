@@ -7,6 +7,7 @@ Build-Collection : (infer element) collection => trait (element collection -> co
 [default] [error] instance (Build-Collection element collection) where (collection :: List element)
 
 Initial-Collection : (infer element) collection => trait collection
+instance (Initial-Collection element collection) where (Initial collection) (Build-Collection element collection) (collection :: List element) : Initial
 
 instance (Build-Collection element (List element)) : element l -> l . append element
 

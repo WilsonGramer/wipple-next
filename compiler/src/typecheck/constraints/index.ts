@@ -5,53 +5,56 @@ import { GenericOnlyConstraint } from "./generic-only";
 import { Node } from "../../db";
 import { Constraint } from "./constraint";
 import { Solver } from "../solve";
+import { DefaultConstraint } from "./default";
 
-/**
- * Instantiate constraints run first because they get type information from the
- * `HasConstraints` fact rather than the solver. Then form groups, add concrete
- * types, and finally resolve bounds.
- */
-export const scores = ["group", "type", "instantiate", "bound"] as const;
+export const scores = ["group", "type", "instantiate", "bound", "default"] as const;
 export type Score = (typeof scores)[number];
 
 export class Constraints {
-    constraints: Constraint[];
+    private constraints: Record<Score, Constraint[]>;
 
-    constructor(constraints: Constraint[] = []) {
-        this.constraints = constraints;
+    constructor() {
+        this.constraints = Object.fromEntries(scores.map((score) => [score, []])) as any;
     }
 
-    add(constraint: Constraint) {
-        this.constraints.push(constraint);
-    }
-
-    sort() {
-        this.constraints.sort((a, b) => scores.indexOf(a.score()) - scores.indexOf(b.score()));
+    add(...constraints: Constraint[]) {
+        for (const constraint of constraints) {
+            this.constraints[constraint.score()].push(constraint);
+        }
     }
 
     run(solver: Solver, { until }: { until?: Score } = {}) {
-        const requeue: Constraint[] = [];
-
-        // Needed instead of a `for` loop because constraints can be added while
-        // running.
-        while (
-            this.constraints.length > 0 &&
-            (until == null || this.constraints[0].score() !== until)
-        ) {
-            const constraint = this.constraints.shift()!;
-
-            const requeued = constraint.run(solver);
-            if (requeued != null) {
-                requeue.push(requeued);
+        while (true) {
+            const constraint = this.peek();
+            if (constraint == null || constraint.score() === until) {
+                break;
             }
-        }
 
-        for (const constraint of requeue) this.add(constraint);
-        this.sort();
+            this.shift();
+
+            constraint.run(solver);
+        }
     }
 
-    [Symbol.iterator]() {
-        return this.constraints[Symbol.iterator]();
+    private shift() {
+        for (const key of scores) {
+            const next = this.constraints[key].shift();
+            if (next != null) {
+                return next;
+            }
+        }
+    }
+
+    private peek() {
+        return this[Symbol.iterator]().next().value;
+    }
+
+    *[Symbol.iterator]() {
+        for (const key of scores) {
+            for (const constraint of this.constraints[key]) {
+                yield constraint;
+            }
+        }
     }
 }
 
@@ -72,6 +75,7 @@ export const getOrInstantiate = (node: Node, source: Node, replacements: Map<Nod
 export {
     Constraint,
     BoundConstraint,
+    DefaultConstraint,
     InstantiateConstraint,
     TypeConstraint,
     GenericOnlyConstraint,

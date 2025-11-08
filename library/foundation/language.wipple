@@ -15,16 +15,16 @@ As : input output => trait (input -> output)
 
 instance (As value value) : value -> value
 
-error :: String -> value where (value :: ())
+error :: String -> value
 error : message -> intrinsic "crash" message
 
-todo :: value where (value :: ())
+todo :: value
 todo : error "not yet implemented"
 
 assert :: String -> Boolean -> ()
 assert : message -> condition -> if condition {()} {error message}
 
-unreachable :: value where (value :: ())
+unreachable :: value
 unreachable : error "unreachable"
 
 -- Represents the default or initial value of a type.

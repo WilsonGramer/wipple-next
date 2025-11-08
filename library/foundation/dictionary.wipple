@@ -106,7 +106,7 @@ set-entry : key value -> (Dictionary {
   entries : (((entries . remove-at index) or unreachable) . insert-at index new-entry)
     or unreachable
 
-  {
+  Dictionary {
     size : size
     entries : entries
   }
@@ -144,7 +144,7 @@ insert : element -> (Set {dictionary : dictionary}) -> Set {dictionary : diction
 remove :: element -> (Set element) -> Set element where (Equal element) (Hash element)
 remove : element -> (Set {dictionary : dictionary}) -> (Set {dictionary : dictionary . remove-entry element})
 
-instance (From-Sequence element (Set element)) where (Equal element) (Hash element) : sequence -> Dictionary {dictionary : sequence . transform (key -> (key ; ())) . collect}
+instance (From-Sequence element (Set element)) where (Equal element) (Hash element) : sequence -> Set {dictionary : sequence . transform (key -> (key ; ())) . collect}
 
 instance (As-Sequence (Set element) element) : (Set {dictionary : dictionary}) -> dictionary . transform ((key ; ()) -> key)
 
