@@ -63,7 +63,7 @@ instance (As-Sequence (Maybe element) element) : maybe -> sequence {
   }
 }
 
-transform :: (element -> result) -> container -> Sequence result where (As-Sequence container element)
+transform :: (input -> output) -> container -> Sequence output where (As-Sequence container input)
 transform : f -> container -> do {
   base : As-Sequence container
 
