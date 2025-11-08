@@ -6,7 +6,7 @@ import { collectFeedback } from "./feedback";
 import chalk from "chalk";
 import wrapAnsi from "wrap-ansi";
 import { inspect } from "node:util";
-import { nodeFilter } from "./db/filter";
+import { Filter, nodeFilter } from "./db/filter";
 import lsp from "./lsp";
 import { Codegen } from "./codegen";
 import runtime from "inline:../../runtime/runtime.js";
@@ -36,7 +36,7 @@ const compileCommand = (options: { run: boolean }) =>
             filterLines: cmd.multioption({
                 long: "filter-line",
                 short: "l",
-                type: cmd.array(cmd.number),
+                type: cmd.array(cmd.string),
             }),
             filterFeedback: cmd.multioption({
                 long: "filter-feedback",
@@ -71,10 +71,15 @@ const compileCommand = (options: { run: boolean }) =>
 
             const layers = [...libs, files];
 
-            const filters =
-                args.filterLines.length > 0
-                    ? [{ path: args.paths.at(-1)!, lines: args.filterLines }]
-                    : [];
+            const filters = args.filterLines.map((filterLine): Filter => {
+                if (!filterLine.includes(":")) {
+                    return { path: args.paths.at(-1)!, line: parseFloat(filterLine) };
+                }
+
+                const [path, lineString] = filterLine.split(":");
+                const line = parseFloat(lineString);
+                return { path, line };
+            });
 
             const filter = nodeFilter(filters);
 

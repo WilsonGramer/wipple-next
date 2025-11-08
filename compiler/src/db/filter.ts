@@ -3,7 +3,7 @@ import { Node } from "./node";
 export type Filter =
     | { path: string }
     | { path: string; start: number; end: number }
-    | { path: string; lines: number[] };
+    | { path: string; line: number };
 
 export const nodeFilter =
     (filters: Filter[] = []) =>
@@ -23,8 +23,8 @@ export const nodeFilter =
                 return false;
             }
 
-            if ("lines" in filter) {
-                return filter.lines.includes(start.line);
+            if ("line" in filter) {
+                return filter.line === start.line;
             }
 
             if ("start" in filter && "end" in filter) {
