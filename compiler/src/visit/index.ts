@@ -151,6 +151,7 @@ export class Visitor {
             definitions: this.definitions,
             instances: this.instances,
             constraints: this.constraints,
+            scope: this.popScope(),
         };
     }
 }

@@ -1,11 +1,11 @@
 import * as lsp from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { compile } from "./compile";
+import { compile, makeRoot } from "./compile";
 import { collectFeedback } from "./feedback";
 import * as queries from "./queries";
 import { render } from "./feedback/render";
 import type { Node } from "./node";
-import { Db, nodeFilter } from "./node";
+import { type Db, nodeFilter } from "./node";
 import type { Span } from "./span";
 import { displayType } from "./typecheck";
 
@@ -41,9 +41,10 @@ export default () => {
         const code = e.document.getText();
 
         try {
-            const db = new Db();
+            const root = makeRoot();
+            const { db } = root;
 
-            const result = compile(db, {
+            const result = compile(root, {
                 files: [{ path: e.document.uri, code }], // TODO: support multiple files
             });
 

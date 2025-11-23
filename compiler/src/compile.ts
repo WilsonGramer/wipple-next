@@ -1,9 +1,9 @@
-import type { Db } from "./node";
-import { fact } from "./node";
+import { Db } from "./node";
+import { fact, Node } from "./node";
 import type { FileNode } from "./nodes";
 import type { Span } from "./span";
 import { parseFile } from "./syntax";
-import { SyntaxError } from "./syntax/parser";
+import { nullSpan, SyntaxError } from "./syntax/parser";
 import { Solver } from "./typecheck/solve";
 import type { Scope } from "./visit";
 import { DefinitionConstraints, Instances, Visitor } from "./visit";
@@ -19,9 +19,21 @@ export type CompileResult =
     | { success: true }
     | { success: false; type: "parse"; span: Span; message: string };
 
-const TopLevelScope = fact<Scope>(() => "top-level scope");
+// Marker for e.g. top-level scopes
+export class RootNode extends Node {
+    visit(_visitor: Visitor): void {}
+}
 
-export const compile = (db: Db, options: CompileOptions): CompileResult => {
+const TopLevelScopes = fact<Scope[]>(() => "has top-level scopes");
+
+export const makeRoot = () => {
+    const db = new Db();
+    const root = new RootNode(nullSpan("<root>"));
+    db.register(root);
+    return root;
+};
+
+export const compile = (root: RootNode, options: CompileOptions): CompileResult => {
     let parsedFiles: FileNode[];
     try {
         parsedFiles = options.files.map(({ path, code }) => parseFile(path, code));
@@ -38,10 +50,11 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         };
     }
 
+    const { db } = root;
+
     const topLevelScopes = db
-        .list(TopLevelScope)
-        .map(([, scope]) => scope)
-        .filter((scope) => scope != null)
+        .list(TopLevelScopes)
+        .flatMap(([, scope]) => scope)
         .toArray();
 
     const visitor = new Visitor(db, topLevelScopes);
@@ -51,6 +64,8 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
     }
 
     const info = visitor.finish();
+
+    root.facts.getOr(TopLevelScopes, []).push(info.scope);
 
     const definitionSolver = new Solver(db);
 
@@ -62,6 +77,12 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
 
     // Solve constraints from each definition, implying all bounds
     for (const [definitionNode, constraints] of db.list(DefinitionConstraints)) {
+        const existingGroup = definitionNode.facts.get(Typed);
+        if (existingGroup != null && !existingGroup.isEmpty()) {
+            // No need to check definitions multiple times
+            continue;
+        }
+
         const solver = Solver.from(definitionSolver);
 
         const instance = Iterator.from(db)

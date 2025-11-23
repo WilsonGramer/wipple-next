@@ -352,7 +352,7 @@ export class Parser {
     }
 }
 
-const nullSpan = (path: string) => ({
+export const nullSpan = (path: string) => ({
     path,
     source: "",
     start: { line: 1, column: 1, offset: 0 },

@@ -1,6 +1,6 @@
 import * as cmd from "cmd-ts";
 import { readdirSync, readFileSync } from "node:fs";
-import { compile } from "./compile";
+import { compile, makeRoot } from "./compile";
 import type { Node, Filter } from "./node";
 import { Db, nodeFilter } from "./node";
 import { collectFeedback } from "./feedback";
@@ -69,9 +69,11 @@ const compileCommand = cmd.command({
 
         const filter = nodeFilter(filters);
 
-        const db = new Db();
+        const root = makeRoot();
+        const { db } = root;
+
         for (const files of layers) {
-            const result = compile(db, { files });
+            const result = compile(root, { files });
 
             if (!result.success) {
                 switch (result.type) {

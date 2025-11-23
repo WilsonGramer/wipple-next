@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import { compile } from "../src/compile";
+import { compile, makeRoot } from "../src/compile";
 import { collectFeedback } from "../src/feedback";
 import type { Node } from "../src/node";
 import { Db, nodeFilter } from "../src/node";
@@ -14,8 +14,10 @@ import { Typed } from "../src/nodes/types";
 export const compileTest = (path: string) => {
     const code = readFileSync(resolve(__dirname, path), "utf8");
 
-    const db = new Db();
-    const result = compile(db, { files: [{ path, code }] });
+    const root = makeRoot();
+    const { db } = root;
+
+    const result = compile(root, { files: [{ path, code }] });
 
     expect(result).toMatchObject({ success: true });
 
