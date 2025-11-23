@@ -78,4 +78,4 @@ export const unknownType = query(function* (node, filter) {
 });
 
 const isFirstNodeInGroup = (node: Node, group: Group, filter: (node: Node) => boolean) =>
-    group.nodes.values().filter(filter).next().value === node;
+    group.nodes.filter(filter)[0] === node;
