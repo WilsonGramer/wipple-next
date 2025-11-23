@@ -152,6 +152,7 @@ const addSemanticTokens = (uri: string, db: Db) => {
 
     for (const node of db) {
         if (!filter(node)) continue;
+
         for (const {} of queries.highlightType(node, filter)) {
             tokens.push([node, "type"]);
         }

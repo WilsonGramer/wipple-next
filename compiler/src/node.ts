@@ -25,14 +25,15 @@ export abstract class Node {
     }
 
     toString() {
-        return `${this.constructor.name}(${this.render()})`;
+        return `${this.constructor.name}(${this.render()} @ ${this.span.path}:${
+            this.span.start.line
+        }:${this.span.start.column})`;
     }
 
     render() {
         // Collapse multiple lines
         const source = this.span.source.trim().replace(/\n.*$/s, "⋯");
-
-        return `\`${source}\` @ ${this.span.path}:${this.span.start.line}:${this.span.start.column}`;
+        return "`" + source + "`";
     }
 
     // eslint-disable-next-line
