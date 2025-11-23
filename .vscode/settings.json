@@ -1,5 +1,4 @@
 {
-    "mochaExplorer.cwd": "compiler",
-    "mochaExplorer.require": ["source-map-support/register"],
-    "mochaExplorer.files": ["dist/**/*.test.js"]
+    "typescript.preferences.preferTypeOnlyAutoImports": true,
+    "jest.runMode": "on-demand"
 }

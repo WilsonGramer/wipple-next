@@ -1,21 +1,17 @@
 import * as lsp from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { Db, Node } from "./db";
 import { compile } from "./compile";
 import { collectFeedback } from "./feedback";
-import { nodeFilter } from "./db/filter";
-import { nodeDisplayOptions } from "./db/node";
 import * as queries from "./queries";
-import { displayType } from "./typecheck/constraints/type";
-import { renderComments } from "./feedback/render";
-import { LocationRange } from "./syntax";
+import { render } from "./feedback/render";
+import type { Node } from "./node";
+import { Db, nodeFilter } from "./node";
+import type { Span } from "./span";
+import { displayType } from "./typecheck";
 
 const tokenTypes = ["type", "function", "typeParameter"] as const;
 
 export default () => {
-    nodeDisplayOptions.showLocation = false;
-    nodeDisplayOptions.markdown = true;
-
     const connection = lsp.createConnection(lsp.ProposedFeatures.all);
     const documents = new lsp.TextDocuments(TextDocument);
     const dbs = new Map<string, Db>();
@@ -40,7 +36,7 @@ export default () => {
 
     documents.listen(connection);
 
-    documents.onDidChangeContent((e) => {
+    documents.onDidChangeContent(async (e) => {
         const filter = nodeFilter([{ path: e.document.uri }]);
         const code = e.document.getText();
 
@@ -52,12 +48,14 @@ export default () => {
             });
 
             const diagnostics: lsp.Diagnostic[] = [];
-            if (!result.success) {
+            if (result.success) {
+                addFeedback(db, filter, diagnostics);
+            } else {
                 switch (result.type) {
                     case "parse": {
                         diagnostics.push({
                             severity: lsp.DiagnosticSeverity.Error,
-                            range: convertRange(result.location),
+                            range: convertSpan(result.span),
                             message: result.message,
                             source: "wipple",
                         });
@@ -70,9 +68,7 @@ export default () => {
                 }
             }
 
-            addFeedback(db, filter, diagnostics);
-
-            connection.sendDiagnostics({
+            await connection.sendDiagnostics({
                 uri: e.document.uri,
                 diagnostics,
             });
@@ -85,7 +81,7 @@ export default () => {
 
     connection.languages.semanticTokens.on((params) => {
         const db = dbs.get(params.textDocument.uri);
-        if (!db) {
+        if (db == null) {
             return { data: [] };
         }
 
@@ -94,7 +90,7 @@ export default () => {
 
     connection.onHover((params) => {
         const db = dbs.get(params.textDocument.uri);
-        if (!db) {
+        if (db == null) {
             return null;
         }
 
@@ -103,7 +99,7 @@ export default () => {
 
     connection.onDocumentHighlight((params) => {
         const db = dbs.get(params.textDocument.uri);
-        if (!db) {
+        if (db == null) {
             return [];
         }
 
@@ -113,14 +109,14 @@ export default () => {
     connection.listen();
 };
 
-const convertRange = (location: LocationRange): lsp.Range => ({
+const convertSpan = (span: Span): lsp.Range => ({
     start: {
-        line: location.start.line - 1,
-        character: location.start.column - 1,
+        line: span.start.line - 1,
+        character: span.start.column - 1,
     },
     end: {
-        line: location.end.line - 1,
-        character: location.end.column - 1,
+        line: span.end.line - 1,
+        character: span.end.column - 1,
     },
 });
 
@@ -141,8 +137,8 @@ const addFeedback = (db: Db, filter: (node: Node) => boolean, diagnostics: lsp.D
 
         diagnostics.push({
             severity: lsp.DiagnosticSeverity.Information,
-            range: convertRange(feedback.on.span.range),
-            message: feedback.rendered.toString(),
+            range: convertSpan(feedback.on.span),
+            message: feedback.rendered.render(),
             source: "wipple",
         });
     }
@@ -153,24 +149,23 @@ const addSemanticTokens = (uri: string, db: Db) => {
 
     const tokens: [Node, (typeof tokenTypes)[number]][] = [];
 
-    for (const { node } of queries.highlightType(db, filter)) {
+    for (const node of db) {
         if (!filter(node)) continue;
+        for (const {} of queries.highlightType(node, filter)) {
+            tokens.push([node, "type"]);
+        }
 
-        tokens.push([node, "type"]);
+        for (const {} of queries.highlightFunction(node, filter)) {
+            tokens.push([node, "function"]);
+        }
     }
 
-    for (const { node } of queries.highlightFunction(db, filter)) {
-        if (!filter(node)) continue;
-
-        tokens.push([node, "function"]);
-    }
-
-    tokens.sort(([a], [b]) => a.span.range.start.offset - b.span.range.start.offset);
+    tokens.sort(([a], [b]) => a.span.start.offset - b.span.start.offset);
 
     const builder = new lsp.SemanticTokensBuilder();
 
     for (const [node, type] of tokens) {
-        const { start, end } = convertRange(node.span.range);
+        const { start, end } = convertSpan(node.span);
 
         builder.push(
             start.line,
@@ -194,24 +189,22 @@ const getHover = (uri: string, position: lsp.Position, db: Db): lsp.Hover | unde
 
     const contents: lsp.Hover["contents"] = [];
 
-    for (const { node, type } of queries.type(db, filter)) {
-        if (node !== nodeAtPosition) continue;
-
+    for (const { type } of queries.type(nodeAtPosition, filter)) {
         contents.push({
             language: "wipple",
             value: displayType(type),
         });
     }
 
-    for (const { node, comments, links } of queries.comments(db, filter)) {
+    for (const { node, comments, links } of queries.comments(nodeAtPosition, filter)) {
         if (node !== nodeAtPosition) continue;
 
-        const documentation = renderComments(comments, links).toString();
+        const documentation = render.comments(comments, links).render();
         contents.push(documentation);
     }
 
     return {
-        range: convertRange(nodeAtPosition.span.range),
+        range: convertSpan(nodeAtPosition.span),
         contents,
     };
 };
@@ -224,11 +217,9 @@ const getRelated = (uri: string, position: lsp.Position, db: Db): lsp.DocumentHi
         return [];
     }
 
-    const locations: lsp.Location[] = [{ uri, range: convertRange(nodeAtPosition.span.range) }];
-    for (const { node, related } of queries.related(db, filter)) {
-        if (node !== nodeAtPosition) continue;
-
-        locations.push({ uri, range: convertRange(related.span.range) });
+    const locations: lsp.Location[] = [{ uri, range: convertSpan(nodeAtPosition.span) }];
+    for (const { related } of queries.related(nodeAtPosition, filter)) {
+        locations.push({ uri, range: convertSpan(related.span) });
     }
 
     return locations;
@@ -238,8 +229,10 @@ const getNodeAtPosition = (uri: string, position: lsp.Position, db: Db): Node | 
     const filter = nodeFilter([{ path: uri }]);
 
     const matches: { length: number; node: Node }[] = [];
-    for (const node of db.nodes().filter(filter)) {
-        const range = convertRange(node.span.range);
+    for (const node of db) {
+        if (!filter(node)) continue;
+
+        const range = convertSpan(node.span);
 
         if (
             range.start.line === position.line &&

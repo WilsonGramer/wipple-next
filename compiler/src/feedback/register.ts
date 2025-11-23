@@ -1,17 +1,17 @@
-import { RenderedFeedback } from "./render";
-import { Db, Node } from "../db";
-import { Query } from "../queries";
+import type { RenderedFeedback } from "./render";
+import type { Node } from "../node";
+import type { Query } from "../queries";
 
-interface Feedback<T> {
+interface Feedback<T extends Record<string, unknown>> {
     id: string;
     query: Query<T>;
-    on: (props: T) => Node;
-    render: (props: T, db: Db) => RenderedFeedback;
+    on: (node: Node, props: T) => Node;
+    render: (node: Node, props: T) => RenderedFeedback;
 }
 
-const feedback: Feedback<any>[] = [];
-export const registerFeedback = <T>(item: Feedback<T>) => {
-    feedback.push(item);
+const feedback: Feedback<Record<string, any>>[] = [];
+export const registerFeedback = <T extends Record<string, unknown>>(item: Feedback<T>) => {
+    feedback.push(item as Feedback<Record<string, any>>);
 };
 
 export default () => feedback;

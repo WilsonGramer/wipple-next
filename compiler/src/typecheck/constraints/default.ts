@@ -1,8 +1,9 @@
-import { Node } from "../../db";
-import { Solver } from "../solve";
-import { getOrInstantiate, Score } from ".";
+import type { Solver } from "../solve";
 import { Constraint } from "./constraint";
-import { instantiateType, Type, TypeParameter } from "./type";
+import { Node } from "../../node";
+import type { TypeParameterNode } from "../../nodes/types/parameter";
+import type { Type } from "..";
+import { getOrInstantiate, instantiateType } from "..";
 
 export class DefaultConstraint extends Constraint {
     node: Node;
@@ -14,20 +15,16 @@ export class DefaultConstraint extends Constraint {
         this.type = type;
     }
 
-    score(): Score {
-        return "bound"; // default and bound constraints are resolved in source code order
-    }
-
     instantiate(
         _solver: Solver,
         source: Node,
         replacements: Map<Node, Node>,
-        substitutions: Map<TypeParameter, Type>,
-    ): this | void {
+        substitutions: Map<TypeParameterNode, Type>,
+    ): Constraint {
         const node = getOrInstantiate(this.node, source, replacements);
         const type = instantiateType(this.type, source, replacements, substitutions);
 
-        return new DefaultConstraint(node, type) as this;
+        return new DefaultConstraint(node, type);
     }
 
     run(solver: Solver): void {

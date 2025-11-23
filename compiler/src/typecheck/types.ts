@@ -1,19 +1,18 @@
-import { Node } from "../db";
-import { ConstructedType, Type, TypeParameter } from "./constraints/type";
-import * as codegen from "../codegen";
+import type { ConstructedType, Type } from ".";
+import type { TypeDefinitionNode } from "../nodes/statements/type-definition";
+import type { TypeParameterNode } from "../nodes/types/parameter";
 
-export const named = (name: Node, parameters: Type[]): ConstructedType => ({
-    tag: name,
+export const named = (definition: TypeDefinitionNode, parameters: Type[]): ConstructedType => ({
+    tag: definition,
     children: parameters,
     display: (parameters, root) => {
         if (parameters.length === 0) {
-            return name.code;
+            return definition.name;
         } else {
-            const display = `${name.code} ${parameters.map((p) => p()).join(" ")}`;
+            const display = `${definition.name} ${parameters.map((p) => p()).join(" ")}`;
             return root ? display : `(${display})`;
         }
     },
-    codegen: codegen.namedType(name, parameters),
 });
 
 const func = (inputs: Type[], output: Type): ConstructedType => ({
@@ -23,7 +22,6 @@ const func = (inputs: Type[], output: Type): ConstructedType => ({
         const display = `${inputs.map((i) => i()).join(" ")} -> ${output(true)}`;
         return root ? display : `(${display})`;
     },
-    codegen: codegen.functionType(inputs, output),
 });
 
 export { func as function };
@@ -40,7 +38,6 @@ export const tuple = (elements: Type[]): ConstructedType => ({
             return `(${elements.map((e) => e(true)).join(" ; ")})`;
         }
     },
-    codegen: codegen.tupleType(elements),
 });
 
 export const unit = () => tuple([]);
@@ -49,12 +46,11 @@ export const block = (output: Type): ConstructedType => ({
     tag: block,
     children: [output],
     display: ([output]) => `{${output(true)}}`,
-    codegen: codegen.blockType(output),
 });
 
-export const parameter = (parameter: TypeParameter): ConstructedType => ({
+export const parameter = (node: TypeParameterNode): ConstructedType => ({
     tag: parameter,
     children: [],
-    display: () => parameter.toString(),
-    codegen: codegen.parameterType(parameter),
+    instantiate: node,
+    display: () => node.name,
 });

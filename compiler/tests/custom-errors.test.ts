@@ -1,23 +1,26 @@
-import { test } from "mocha";
-import { compileTest } from ".";
-import assert from "node:assert";
-import { HasType } from "../src/compile";
-import { AssignedTo } from "../src/visit/statements/assignment";
-import { FunctionInCallExpression } from "../src/visit/expressions/call";
+import { compileTest, testTypes } from ".";
+import { nodeFilter } from "../src/node";
+import type { CallExpressionNode } from "../src/nodes/expressions/call";
+import { ConstructorExpressionNode } from "../src/nodes/expressions/constructor";
+import { AssignmentNode } from "../src/nodes/statements/assignment";
 
 test("custom errors", () => {
     const { db, placeholders, feedback } = compileTest("custom-errors.wipple");
 
-    assert.deepStrictEqual(db.display(placeholders[2], HasType), new Set(["Number"]));
-    assert.deepStrictEqual(db.display(placeholders[3], HasType), new Set(["String"]));
-    assert.deepStrictEqual(db.display(placeholders[4], HasType), new Set([]));
-    assert.deepStrictEqual(db.display(placeholders[5], HasType), new Set([]));
+    testTypes(placeholders[2], ["Number"]);
+    testTypes(placeholders[3], ["String"]);
+    testTypes(placeholders[4], []);
+    testTypes(placeholders[5], []);
 
-    const valueOfPlaceholder4 = db.get(placeholders[4], AssignedTo)!;
-    const functionOfPlaceholder4 = db.find(FunctionInCallExpression, valueOfPlaceholder4)!;
-    assert.partialDeepStrictEqual(feedback.get(functionOfPlaceholder4), ["error-instance"]);
+    const addConstructor1 = Iterator.from(db)
+        .filter(nodeFilter([{ line: placeholders[4].span.start.line }]))
+        .find((node) => node instanceof ConstructorExpressionNode)!;
 
-    const valueOfPlaceholder5 = db.get(placeholders[5], AssignedTo)!;
-    const functionOfPlaceholder5 = db.find(FunctionInCallExpression, valueOfPlaceholder5)!;
-    assert.partialDeepStrictEqual(feedback.get(functionOfPlaceholder5), ["error-instance"]);
+    expect(feedback.get(addConstructor1)).toContain("error-instance");
+
+    const addConstructor2 = Iterator.from(db)
+        .filter(nodeFilter([{ line: placeholders[5].span.start.line }]))
+        .find((node) => node instanceof ConstructorExpressionNode)!;
+
+    expect(feedback.get(addConstructor2)).toContain("error-instance");
 });

@@ -1,0 +1,398 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`parsing add expression 1`] = `
+OperatorExpressionNode {
+  "isHidden": false,
+  "left": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "a",
+  },
+  "operator": "+",
+  "right": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "b",
+  },
+}
+`;
+
+exports[`parsing annotate expression 1`] = `
+AnnotateExpressionNode {
+  "isHidden": false,
+  "left": NumberExpressionNode {
+    "isHidden": false,
+    "value": "3.14",
+  },
+  "right": NamedTypeNode {
+    "isHidden": false,
+    "name": "Number",
+    "parameters": [],
+  },
+}
+`;
+
+exports[`parsing as expression 1`] = `
+AsExpressionNode {
+  "isHidden": false,
+  "left": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "x",
+  },
+  "right": NamedTypeNode {
+    "isHidden": false,
+    "name": "T",
+    "parameters": [],
+  },
+}
+`;
+
+exports[`parsing block expression 1`] = `
+BlockExpressionNode {
+  "isHidden": false,
+  "statements": [
+    ExpressionStatementNode {
+      "comments": [],
+      "expression": VariableExpressionNode {
+        "isHidden": false,
+        "variable": "foo",
+      },
+      "isHidden": true,
+    },
+    EmptyStatementNode {
+      "comments": [],
+      "isHidden": false,
+    },
+  ],
+}
+`;
+
+exports[`parsing call expression 1`] = `
+CallExpressionNode {
+  "function": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "f",
+  },
+  "inputs": [
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "x",
+    },
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "y",
+    },
+  ],
+  "isHidden": false,
+}
+`;
+
+exports[`parsing complex apply expression 1`] = `
+OperatorExpressionNode {
+  "isHidden": false,
+  "left": CallExpressionNode {
+    "function": VariableExpressionNode {
+      "isHidden": false,
+      "variable": "a",
+    },
+    "inputs": [
+      VariableExpressionNode {
+        "isHidden": false,
+        "variable": "b",
+      },
+    ],
+    "isHidden": false,
+  },
+  "operator": ".",
+  "right": CallExpressionNode {
+    "function": VariableExpressionNode {
+      "isHidden": false,
+      "variable": "c",
+    },
+    "inputs": [
+      VariableExpressionNode {
+        "isHidden": false,
+        "variable": "d",
+      },
+    ],
+    "isHidden": false,
+  },
+}
+`;
+
+exports[`parsing complex input function expression 1`] = `
+FunctionExpressionNode {
+  "inputs": [
+    ConstructorPatternNode {
+      "constructorName": "X",
+      "elements": [
+        VariablePatternNode {
+          "isHidden": false,
+          "variable": "y",
+        },
+      ],
+      "isHidden": false,
+    },
+  ],
+  "isHidden": false,
+  "output": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "z",
+  },
+}
+`;
+
+exports[`parsing complex intrinsic expression 1`] = `
+IntrinsicExpressionNode {
+  "inputs": [
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "x",
+    },
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "y",
+    },
+  ],
+  "isHidden": false,
+  "name": "message",
+}
+`;
+
+exports[`parsing complex is expression 1`] = `
+IsExpressionNode {
+  "isHidden": false,
+  "left": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "x",
+  },
+  "right": ConstructorPatternNode {
+    "constructorName": "Some",
+    "elements": [
+      NumberPatternNode {
+        "isHidden": false,
+        "value": "3.14",
+      },
+    ],
+    "isHidden": false,
+  },
+}
+`;
+
+exports[`parsing do expression 1`] = `
+DoExpressionNode {
+  "input": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "foo",
+  },
+  "isHidden": false,
+}
+`;
+
+exports[`parsing empty collection expression 1`] = `
+CollectionExpressionNode {
+  "elements": [],
+  "isHidden": false,
+}
+`;
+
+exports[`parsing format expression 1`] = `
+FormatExpressionNode {
+  "inputs": [
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "name",
+    },
+  ],
+  "isHidden": false,
+  "string": "Hello, _!",
+}
+`;
+
+exports[`parsing multi input function expression 1`] = `
+FunctionExpressionNode {
+  "inputs": [
+    VariablePatternNode {
+      "isHidden": false,
+      "variable": "x",
+    },
+    VariablePatternNode {
+      "isHidden": false,
+      "variable": "y",
+    },
+  ],
+  "isHidden": false,
+  "output": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "z",
+  },
+}
+`;
+
+exports[`parsing multiline collection expression 1`] = `
+CollectionExpressionNode {
+  "elements": [
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "a",
+    },
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "b",
+    },
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "c",
+    },
+  ],
+  "isHidden": false,
+}
+`;
+
+exports[`parsing number expression 1`] = `
+NumberExpressionNode {
+  "isHidden": false,
+  "value": "3.14",
+}
+`;
+
+exports[`parsing simple apply expression 1`] = `
+OperatorExpressionNode {
+  "isHidden": false,
+  "left": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "x",
+  },
+  "operator": ".",
+  "right": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "f",
+  },
+}
+`;
+
+exports[`parsing simple intrinsic expression 1`] = `
+IntrinsicExpressionNode {
+  "inputs": [],
+  "isHidden": false,
+  "name": "message",
+}
+`;
+
+exports[`parsing simple is expression 1`] = `
+IsExpressionNode {
+  "isHidden": false,
+  "left": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "x",
+  },
+  "right": ConstructorPatternNode {
+    "constructorName": "None",
+    "elements": [],
+    "isHidden": false,
+  },
+}
+`;
+
+exports[`parsing single input function expression 1`] = `
+FunctionExpressionNode {
+  "inputs": [
+    VariablePatternNode {
+      "isHidden": false,
+      "variable": "x",
+    },
+  ],
+  "isHidden": false,
+  "output": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "y",
+  },
+}
+`;
+
+exports[`parsing single line collection expression 1`] = `
+CollectionExpressionNode {
+  "elements": [
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "a",
+    },
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "b",
+    },
+    VariableExpressionNode {
+      "isHidden": false,
+      "variable": "c",
+    },
+  ],
+  "isHidden": false,
+}
+`;
+
+exports[`parsing string expression 1`] = `
+StringExpressionNode {
+  "isHidden": false,
+  "value": "abc",
+}
+`;
+
+exports[`parsing structure expression 1`] = `
+StructureExpressionNode {
+  "fields": [
+    StructureExpressionField {
+      "name": "a",
+      "value": VariableExpressionNode {
+        "isHidden": false,
+        "variable": "b",
+      },
+    },
+    StructureExpressionField {
+      "name": "c",
+      "value": VariableExpressionNode {
+        "isHidden": false,
+        "variable": "d",
+      },
+    },
+  ],
+  "isHidden": false,
+  "name": "Foo",
+}
+`;
+
+exports[`parsing variable expression 1`] = `
+VariableExpressionNode {
+  "isHidden": false,
+  "variable": "foo",
+}
+`;
+
+exports[`parsing when expression 1`] = `
+WhenExpressionNode {
+  "arms": [
+    Arm {
+      "pattern": VariablePatternNode {
+        "isHidden": false,
+        "variable": "a",
+      },
+      "value": VariableExpressionNode {
+        "isHidden": false,
+        "variable": "b",
+      },
+    },
+    Arm {
+      "pattern": VariablePatternNode {
+        "isHidden": false,
+        "variable": "c",
+      },
+      "value": VariableExpressionNode {
+        "isHidden": false,
+        "variable": "d",
+      },
+    },
+  ],
+  "input": VariableExpressionNode {
+    "isHidden": false,
+    "variable": "x",
+  },
+  "isHidden": false,
+}
+`;

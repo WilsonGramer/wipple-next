@@ -1,164 +1,100 @@
-import { Parser, LocationRange, Token } from "./parser";
-import { parseTypeName, parseTypeParameterName } from "./tokens";
+import type { Parser } from "./parser";
+import { parseTypeName, parseTypeParameterName } from "./atoms";
+import { BlockTypeNode } from "../nodes/types/block";
+import { FunctionTypeNode } from "../nodes/types/function";
+import { NamedTypeNode } from "../nodes/types/named";
+import { TypeParameterNode } from "../nodes/types/parameter";
+import { PlaceholderTypeNode } from "../nodes/types/placeholder";
+import { TupleTypeNode } from "../nodes/types/tuple";
+import { UnitTypeNode } from "../nodes/types/unit";
+import type { TypeNode } from "../nodes/types";
 
-export type Type =
-    | PlaceholderType
-    | UnitType
-    | NamedType
-    | BlockType
-    | FunctionType
-    | ParameterType
-    | TupleType;
+export const parseType = (parser: Parser): TypeNode =>
+    parser.alternatives<TypeNode>("type", parseType, [
+        parseTupleType,
+        parseFunctionType,
+        parseAnnotatedParameterType,
+        parseTypeElement,
+    ]);
 
-let types: ((parser: Parser) => Type)[];
-export const parseType = (parser: Parser): Type => {
-    if (types === undefined) {
-        types = [parseTupleType, parseFunctionType, parseAnnotatedParameterType, parseTypeElement];
-    }
+export const parseTypeElement = (parser: Parser): TypeNode =>
+    parser.alternatives<TypeNode>("type", parseTypeElement, [
+        parseParameterizedType,
+        parseAtomicType,
+    ]);
 
-    return parser.alternatives<Type>("type", types);
-};
+export const parseAtomicType = (parser: Parser): TypeNode =>
+    parser.alternatives<TypeNode>("type", parseAtomicType, [
+        parsePlaceholderType,
+        parseParameterType,
+        parseNamedType,
+        parseBlockType,
+        parseUnitType,
+        parseParenthesizedType,
+    ]);
 
-let typeElements: ((parser: Parser) => Type)[];
-export const parseTypeElement = (parser: Parser): Type => {
-    if (typeElements === undefined) {
-        typeElements = [parseParameterizedType, parseAtomicType];
-    }
+export const parseParenthesizedType = (parser: Parser) =>
+    parser.delimited("leftParenthesis", "rightParenthesis", () => parseType(parser));
 
-    return parser.alternatives<Type>("type", typeElements);
-};
-
-let atomicTypes: ((parser: Parser) => Type)[];
-export const parseAtomicType = (parser: Parser): Type => {
-    if (atomicTypes === undefined) {
-        atomicTypes = [
-            parsePlaceholderType,
-            parseParameterType,
-            parseNamedType,
-            parseBlockType,
-            parseUnitType,
-            parseParenthesizedType,
-        ];
-    }
-
-    return parser.alternatives<Type>("type", atomicTypes);
-};
-
-export const parseParenthesizedType = (parser: Parser): Type =>
-    parser.withLocation(() =>
-        parser.delimited("leftParenthesis", "rightParenthesis", () => parseType(parser)),
-    );
-
-export interface PlaceholderType {
-    type: "placeholder";
-    location: LocationRange;
-}
-
-export const parsePlaceholderType = (parser: Parser): PlaceholderType =>
-    parser.withLocation(() => {
+export const parsePlaceholderType = (parser: Parser) =>
+    parser.spanned((span) => {
         parser.next("underscoreKeyword");
-        return { type: "placeholder" };
+        return new PlaceholderTypeNode(span());
     });
 
-export interface ParameterType {
-    type: "parameter";
-    location: LocationRange;
-    name: Token;
-    value?: Type;
-}
+export const parseParameterType = (parser: Parser) =>
+    parser.spanned(
+        (span) => new TypeParameterNode(parseTypeParameterName(parser), false, undefined, span()),
+    );
 
-export const parseParameterType = (parser: Parser): ParameterType =>
-    parser.withLocation(() => ({
-        type: "parameter",
-        name: parseTypeParameterName(parser),
-    }));
-
-export const parseAnnotatedParameterType = (parser: Parser): ParameterType =>
-    parser.withLocation(() => {
+export const parseAnnotatedParameterType = (parser: Parser) =>
+    parser.spanned((span) => {
         const name = parseTypeParameterName(parser);
         parser.next("annotateOperator");
         const value = parseType(parser);
-        return { type: "parameter", name, value };
+        return new TypeParameterNode(name, false, value, span());
     });
 
-export interface NamedType {
-    type: "named";
-    location: LocationRange;
-    name: Token;
-    parameters: Type[];
-}
+export const parseNamedType = (parser: Parser) =>
+    parser.spanned((span) => new NamedTypeNode(parseTypeName(parser), [], span()));
 
-export const parseNamedType = (parser: Parser): NamedType =>
-    parser.withLocation(() => ({
-        type: "named",
-        name: parseTypeName(parser),
-        parameters: [],
-    }));
-
-export interface FunctionType {
-    type: "function";
-    location: LocationRange;
-    inputs: Type[];
-    output: Type;
-}
-
-export const parseFunctionType = (parser: Parser): FunctionType =>
-    parser.withLocation(() => {
+export const parseFunctionType = (parser: Parser) =>
+    parser.spanned((span) => {
         const inputs = parseFunctionTypeInputs(parser);
         const output = parseType(parser);
-        return { type: "function", inputs, output };
+        return new FunctionTypeNode(inputs, output, span());
     });
 
-export const parseFunctionTypeInputs = (parser: Parser): Type[] => {
+export const parseFunctionTypeInputs = (parser: Parser) => {
     const inputs = parser.many("type", parseAtomicType);
     parser.next("functionOperator");
     parser.commit();
     return inputs;
 };
 
-export interface BlockType {
-    type: "block";
-    location: LocationRange;
-    output: Type;
-}
+export const parseBlockType = (parser: Parser) =>
+    parser.spanned((span) => {
+        const output = parser.delimited("leftBrace", "rightBrace", () => parseTypeElement(parser));
+        return new BlockTypeNode(output, span());
+    });
 
-export const parseBlockType = (parser: Parser): BlockType =>
-    parser.withLocation(() =>
-        parser.delimited("leftBrace", "rightBrace", () => ({
-            type: "block",
-            output: parseTypeElement(parser),
-        })),
-    );
+export const parseUnitType = (parser: Parser) =>
+    parser.spanned((span) => {
+        parser.delimited("leftParenthesis", "rightParenthesis", () => undefined);
+        return new UnitTypeNode(span());
+    });
 
-export interface UnitType {
-    type: "unit";
-    location: LocationRange;
-}
-
-export const parseUnitType = (parser: Parser): UnitType =>
-    parser.withLocation(() =>
-        parser.delimited("leftParenthesis", "rightParenthesis", () => ({
-            type: "unit",
-        })),
-    );
-
-export interface TupleType {
-    type: "tuple";
-    location: LocationRange;
-    elements: Type[];
-}
-
-export const parseTupleType = (parser: Parser): TupleType =>
-    parser.withLocation(() => ({
-        type: "tuple",
-        elements: parser
+export const parseTupleType = (parser: Parser) =>
+    parser.spanned((span) => {
+        const elements = parser
             .collection("tuple type", ["tupleOperator"], parseTypeElement)
-            .map(([element]) => element),
-    }));
+            .map(([element]) => element);
+        return new TupleTypeNode(elements, span());
+    });
 
-export const parseParameterizedType = (parser: Parser): NamedType =>
-    parser.withLocation(() => ({
-        type: "named",
-        name: parseTypeName(parser),
-        parameters: parser.many("type", parseAtomicType),
-    }));
+export const parseParameterizedType = (parser: Parser) =>
+    parser.spanned((span) => {
+        const name = parseTypeName(parser);
+        const parameters = parser.many("type", parseAtomicType);
+        return new NamedTypeNode(name, parameters, span());
+    });

@@ -1,67 +1,54 @@
 import { query } from "./query";
-import { InTypeGroup } from "../compile";
-import { Db, Node } from "../db";
-import { HasResolvedBound } from "../typecheck/constraints/bound";
-import { IsTyped } from "../visit";
-import { IsErrorInstance, ResolvedInstance } from "../visit/statements/instance-definition";
-import { HasTypeParameter } from "../visit/types/parameter";
-import { ResolvedConstant, ResolvedVariable } from "../visit/expressions/variable";
-import { ResolvedConstructor } from "../visit/expressions/constructor";
-import { ResolvedNamedType } from "../visit/types/named";
-import { Definition } from "../visit/visitor";
-import { render, Renderable } from "../feedback/render";
+import type { Links } from "../feedback/render";
+import { render } from "../feedback/render";
+import { ResolvedBound } from "../typecheck/constraints/bound";
+import type { Node } from "../node";
+import { InstantiatedNode } from "../node";
+import { Resolved, TypeParameters } from "../visit";
+import { Typed } from "../nodes/types";
+import { Definition } from "../visit/definitions";
 
-export const errorInstance = query(function* (db) {
-    for (const [node, [bound, instanceNode]] of db.list(HasResolvedBound)) {
-        const comments = db.get(instanceNode, IsErrorInstance);
-        if (comments != null) {
-            const links = getLinks(db, instanceNode, bound.source);
-            yield { node, bound, comments, links };
+export const errorInstance = query(function* (node) {
+    for (const { bound, instance } of node.facts.get(ResolvedBound) ?? []) {
+        if (instance != null && instance.attributes.error) {
+            const links = getLinks(instance, node);
+            yield { bound, comments: instance.comments, links };
         }
     }
 });
 
-export const comments = query(function* (db) {
-    for (const [node, definitionNode] of [
-        ...db.list(ResolvedVariable),
-        ...db.list(ResolvedNamedType),
-        ...db.list(ResolvedConstructor),
-        ...db.list(ResolvedConstant),
-        ...db.list(ResolvedInstance),
-    ]) {
-        const definition = db.get(definitionNode, Definition);
-        if (definition != null && "comments" in definition) {
-            const links = getLinks(db, definitionNode, node);
-            yield { node, comments: definition.comments, links };
-        }
+export const comments = query(function* (node) {
+    const definition = node.facts.get(Resolved);
+    if (definition instanceof Definition) {
+        const links = getLinks(definition.node, node);
+        yield { node, comments: definition.comments, links };
     }
 });
 
-export type Links = ReturnType<typeof getLinks>;
+const getLinks = (node: Node, source: Node | undefined) => {
+    const links: Links = {};
 
-const getLinks = (db: Db, node: Node, source: Node | undefined) => {
-    const links: Record<string, Node | { or: Renderable[] } | { and: Renderable[] }> = {};
-    for (const typeParameter of db.list(node, HasTypeParameter)) {
-        const instantiated = db
-            .nodes()
-            .find(
-                (candidate) =>
-                    candidate.instantiatedFrom === typeParameter.node &&
-                    candidate.instantiatedBy === source,
-            );
+    for (const typeParameter of node.facts.get(TypeParameters) ?? []) {
+        const instantiated = Iterator.from(node.db).find(
+            (candidate): candidate is InstantiatedNode =>
+                candidate instanceof InstantiatedNode &&
+                candidate.from === typeParameter &&
+                candidate.source === source,
+        );
 
         if (instantiated == null) {
             continue;
         }
 
-        const group = db.get(instantiated, InTypeGroup);
+        const group = instantiated.facts.get(Typed);
         if (group == null) {
             continue;
         }
 
         const uses = group.nodes
             .values()
-            .filter((node) => node !== instantiated && db.has(node, IsTyped))
+            .filter((node) => node !== instantiated && node.facts.get(Typed) != null)
+            .map(render.node)
             .toArray();
 
         if (uses.length === 0) {

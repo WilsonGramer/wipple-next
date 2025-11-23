@@ -22,11 +22,11 @@ not :: value -> value where (Not value) (value :: Boolean)
 not : Not
 
 -- Returns `True` if both sides are `True`.
-And : left right (infer output) => trait (left {right} -> output)
+And : left (infer right) (infer output) => trait (left {right} -> output)
 instance (And Boolean Boolean Boolean) : a b -> if a b {False}
 
 -- Returns `True` if either side is `True`.
-Or : left right (infer output) => trait (left {right} -> output)
+Or : left (infer right) (infer output) => trait (left {right} -> output)
 instance (Or Boolean Boolean Boolean) : a b -> if a {True} b
 instance (Or (Maybe value) value value) : maybe other -> when maybe {
   Some value -> value

@@ -112,11 +112,6 @@ Angle : type {degrees :: Number}
 [unit] degrees :: Number -> Angle
 degrees : degrees -> Angle {degrees : degrees}
 
--- Missing `degrees` after `_`.
---
--- Try rewriting this code as `([`n`] degrees)`, or double-check your parentheses.
-[error] instance (Mismatch (n :: Number) Angle)
-
 -- Calculate the sine of an angle.
 sin :: Angle -> Number
 sin : (Angle {degrees : degrees}) -> intrinsic "sin" degrees

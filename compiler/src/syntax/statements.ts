@@ -1,32 +1,42 @@
-import { Parser, LocationRange, Token } from "./parser";
-import { Attribute, parseAttributes } from "./attributes";
+import type { Parser } from "./parser";
+import { parseComment, parseConstructorName, parseTypeName, parseVariableName } from "./atoms";
+import { parseTypeParameters, parseConstraints, parseBoundConstraint } from "./constraints";
+import { parseAttributes } from "./attributes";
+import { parseType, parseAtomicType } from "./types";
+import { parsePattern } from "./patterns";
+import { parseExpression } from "./expressions";
+import type { StatementNode } from "../nodes/statements";
 import {
-    Constraint,
-    BoundConstraint,
-    parseConstraints,
-    parseBoundConstraint,
-    parseTypeParameters,
-    TypeParameter,
-} from "./constraints";
-import { Expression, parseExpression } from "./expressions";
-import { Pattern, parsePattern } from "./patterns";
-import { Type, parseType, parseAtomicType } from "./types";
-import { parseComment, parseConstructorName, parseTypeName, parseVariableName } from "./tokens";
+    TypeDefinitionNode,
+    StructureTypeRepresentation,
+    FieldDefinition,
+    EnumerationTypeRepresentation,
+    VariantDefinition,
+    MarkerTypeRepresentation,
+} from "../nodes/statements/type-definition";
+import { TraitDefinitionNode } from "../nodes/statements/trait-definition";
+import { ConstantDefinitionNode } from "../nodes/statements/constant-definition";
+import { InstanceDefinitionNode } from "../nodes/statements/instance-definition";
+import { AssignmentNode } from "../nodes/statements/assignment";
+import { ExpressionStatementNode } from "../nodes/statements/expression";
+import { EmptyStatementNode } from "../nodes/statements/empty";
 
-export type Statement =
-    | ConstantDefinitionStatement
-    | TypeDefinitionStatement
-    | TraitDefinitionStatement
-    | InstanceDefinitionStatement
-    | AssignmentStatement
-    | ExpressionStatement
-    | EmptyStatement;
+export const parseStatements = (parser: Parser) => {
+    const statements = parser.optional(
+        () => parser.many("statement", parseStatement, ["lineBreak"]),
+        [],
+    );
 
-export const parseStatements = (parser: Parser): Statement[] =>
-    parser.optional(() => parser.many("statement", parseStatement, ["lineBreak"]), []);
+    const trailing = parser.optional(parseEmptyStatement, undefined);
+    if (trailing != null) {
+        statements.push(trailing);
+    }
 
-export const parseStatement = (parser: Parser): Statement =>
-    parser.alternatives<Statement>("statement", [
+    return statements;
+};
+
+export const parseStatement = (parser: Parser) =>
+    parser.alternatives<StatementNode>("statement", parseStatement, [
         parseTypeDefinitionStatement,
         parseTraitDefinitionStatement,
         parseConstantDefinitionStatement,
@@ -35,260 +45,163 @@ export const parseStatement = (parser: Parser): Statement =>
         parseExpressionStatement,
     ]);
 
-export interface TypeDefinitionStatement {
-    type: "typeDefinition";
-    location: LocationRange;
-    comments: Token[];
-    attributes: Attribute[];
-    name: Token;
-    parameters: TypeParameter[];
-    representation: TypeRepresentation;
-}
-
-export const parseTypeDefinitionStatement = (parser: Parser): TypeDefinitionStatement =>
-    parser.withLocation(() => {
+export const parseTypeDefinitionStatement = (parser: Parser) =>
+    parser.spanned((span) => {
         const comments = parseComments(parser);
         const attributes = parseAttributes(parser);
         const name = parseTypeName(parser);
         parser.next("assignOperator");
         const parameters = parser.optional(parseTypeParameters, []);
         const representation = parseTypeRepresentation(parser);
-        return { type: "typeDefinition", comments, attributes, name, parameters, representation };
+        return new TypeDefinitionNode(
+            comments,
+            attributes,
+            name,
+            parameters,
+            representation,
+            span(),
+        );
     });
 
-export type TypeRepresentation =
-    | StructureTypeRepresentation
-    | EnumerationTypeRepresentation
-    | MarkerTypeRepresentation;
-
-export const parseTypeRepresentation = (parser: Parser): TypeRepresentation =>
-    parser.alternatives<TypeRepresentation>("typeRepresentation", [
+export const parseTypeRepresentation = (
+    parser: Parser,
+): StructureTypeRepresentation | EnumerationTypeRepresentation | MarkerTypeRepresentation =>
+    parser.alternatives("typeRepresentation", parseTypeRepresentation, [
         parseStructureTypeRepresentation,
         parseEnumerationTypeRepresentation,
         parseMarkerTypeRepresentation,
     ]);
 
-export interface MarkerTypeRepresentation {
-    type: "marker";
-    location: LocationRange;
-}
-
-export const parseMarkerTypeRepresentation = (parser: Parser): MarkerTypeRepresentation =>
-    parser.withLocation(() => {
+export const parseMarkerTypeRepresentation = (parser: Parser) =>
+    parser.spanned((span) => {
         parser.next("typeKeyword");
-        return { type: "marker" };
+        return new MarkerTypeRepresentation(span());
     });
 
-export interface StructureTypeRepresentation {
-    type: "structure";
-    location: LocationRange;
-    fields: FieldDefinition[];
-}
-
-export const parseStructureTypeRepresentation = (parser: Parser): StructureTypeRepresentation =>
-    parser.withLocation(() => {
+export const parseStructureTypeRepresentation = (parser: Parser) =>
+    parser.spanned((span) => {
         parser.next("typeKeyword");
-        return {
-            type: "structure",
-            fields: parser.delimited("leftBrace", "rightBrace", () =>
-                parser.many("field definition", parseFieldDefinition, ["lineBreak"]),
-            ),
-        };
+        const fields = parser.delimited("leftBrace", "rightBrace", () =>
+            parser.many("field definition", parseFieldDefinition, ["lineBreak"]),
+        );
+        return new StructureTypeRepresentation(fields, span());
     });
 
-export interface FieldDefinition {
-    location: LocationRange;
-    name: Token;
-    type: Type;
-}
-
-export const parseFieldDefinition = (parser: Parser): FieldDefinition =>
-    parser.withLocation(() => {
+export const parseFieldDefinition = (parser: Parser) =>
+    parser.spanned((span) => {
         const name = parseVariableName(parser);
         parser.next("annotateOperator");
         parser.commit();
         const type = parseType(parser);
-        return { name, type };
+        return new FieldDefinition(name, type, span());
     });
 
-export interface EnumerationTypeRepresentation {
-    type: "enumeration";
-    location: LocationRange;
-    variants: VariantDefinition[];
-}
-
-export const parseEnumerationTypeRepresentation = (parser: Parser): EnumerationTypeRepresentation =>
-    parser.withLocation(() => {
+export const parseEnumerationTypeRepresentation = (parser: Parser) =>
+    parser.spanned((span) => {
         parser.next("typeKeyword");
-        return {
-            type: "enumeration",
-            variants: parser.delimited("leftBrace", "rightBrace", () =>
-                parser.many("variant definition", parseVariantDefinition, ["lineBreak"]),
-            ),
-        };
+        const variants = parser.delimited("leftBrace", "rightBrace", () =>
+            parser.many("variant definition", parseVariantDefinition, ["lineBreak"]),
+        );
+        return new EnumerationTypeRepresentation(variants, span());
     });
 
-export interface VariantDefinition {
-    location: LocationRange;
-    name: Token;
-    elements: Type[];
-}
-
-export const parseVariantDefinition = (parser: Parser): VariantDefinition =>
-    parser.withLocation(() => {
+export const parseVariantDefinition = (parser: Parser) =>
+    parser.spanned((span) => {
         const name = parseConstructorName(parser);
         parser.commit();
-        return {
-            name,
-            elements: parser.optional(() => parser.many("type", parseAtomicType), []),
-        };
+        const elements = parser.optional(() => parser.many("type", parseAtomicType), []);
+        return new VariantDefinition(name, elements, span());
     });
 
-export interface TraitDefinitionStatement {
-    type: "traitDefinition";
-    location: LocationRange;
-    comments: Token[];
-    attributes: Attribute[];
-    name: Token;
-    parameters: TypeParameter[];
-    constraints: TraitConstraints;
-}
-
-export const parseTraitDefinitionStatement = (parser: Parser): TraitDefinitionStatement =>
-    parser.withLocation(() => {
+export const parseTraitDefinitionStatement = (parser: Parser) =>
+    parser.spanned((span) => {
         const comments = parseComments(parser);
         const attributes = parseAttributes(parser);
         const name = parseTypeName(parser);
         parser.next("assignOperator");
         const parameters = parser.optional(parseTypeParameters, []);
-        const constraints = parseTraitConstraints(parser);
-        return { type: "traitDefinition", comments, attributes, name, parameters, constraints };
+        const { type, constraints } = parseTraitConstraints(parser);
+        return new TraitDefinitionNode(
+            comments,
+            attributes,
+            name,
+            parameters,
+            type,
+            constraints,
+            span(),
+        );
     });
 
-export interface TraitConstraints {
-    location: LocationRange;
-    type: Type;
-    constraints: Constraint[];
-}
-
-export const parseTraitConstraints = (parser: Parser): TraitConstraints =>
-    parser.withLocation(() => {
+export const parseTraitConstraints = (parser: Parser) =>
+    parser.spanned(() => {
         parser.next("traitKeyword");
         parser.commit();
-        return {
-            type: parseAtomicType(parser),
-            constraints: parser.optional(parseConstraints, []),
-        };
+        const type = parseAtomicType(parser);
+        const constraints = parser.optional(parseConstraints, []);
+        return { type, constraints };
     });
 
-export interface ConstantDefinitionStatement {
-    type: "constantDefinition";
-    location: LocationRange;
-    comments: Token[];
-    attributes: Attribute[];
-    name: Token;
-    constraints: ConstantConstraints;
-}
-
-export const parseConstantDefinitionStatement = (parser: Parser): ConstantDefinitionStatement =>
-    parser.withLocation(() => {
+export const parseConstantDefinitionStatement = (parser: Parser) =>
+    parser.spanned((span) => {
         const comments = parseComments(parser);
         const attributes = parseAttributes(parser);
         const name = parseVariableName(parser);
-        const constraints = parseConstantConstraints(parser);
-        return { type: "constantDefinition", comments, attributes, name, constraints };
+        const { type, constraints } = parseConstantConstraints(parser);
+        return new ConstantDefinitionNode(comments, attributes, name, type, constraints, span());
     });
 
-export interface ConstantConstraints {
-    location: LocationRange;
-    type: Type;
-    constraints: Constraint[];
-}
-
-export const parseConstantConstraints = (parser: Parser): ConstantConstraints =>
-    parser.withLocation(() => {
+export const parseConstantConstraints = (parser: Parser) =>
+    parser.spanned(() => {
         parser.next("annotateOperator");
         parser.commit();
-        return {
-            type: parseType(parser),
-            constraints: parser.optional(parseConstraints, []),
-        };
+        const type = parseType(parser);
+        const constraints = parser.optional(parseConstraints, []);
+        return { type, constraints };
     });
 
-export interface InstanceDefinitionStatement {
-    type: "instanceDefinition";
-    location: LocationRange;
-    comments: Token[];
-    attributes: Attribute[];
-    constraints: InstanceConstraints;
-    value?: Expression;
-}
-
-export const parseInstanceDefinitionStatement = (parser: Parser): InstanceDefinitionStatement =>
-    parser.withLocation(() => ({
-        type: "instanceDefinition",
-        comments: parseComments(parser),
-        attributes: parseAttributes(parser),
-        constraints: parseInstanceConstraints(parser),
-        value: parser.optional(() => {
+export const parseInstanceDefinitionStatement = (parser: Parser) =>
+    parser.spanned((span) => {
+        const comments = parseComments(parser);
+        const attributes = parseAttributes(parser);
+        const { bound, constraints } = parseInstanceConstraints(parser);
+        const value = parser.optional(() => {
             parser.next("assignOperator");
             parser.commit();
             return parseExpression(parser);
-        }, undefined),
-    }));
-
-export interface InstanceConstraints {
-    location: LocationRange;
-    bound: BoundConstraint;
-    constraints: Constraint[];
-}
-
-export const parseInstanceConstraints = (parser: Parser): InstanceConstraints =>
-    parser.withLocation(() => {
-        parser.next("instanceKeyword");
-        return {
-            bound: parseBoundConstraint(parser),
-            constraints: parser.optional(parseConstraints, []),
-        };
+        }, undefined);
+        return new InstanceDefinitionNode(comments, attributes, bound, constraints, value, span());
     });
 
-export interface AssignmentStatement {
-    type: "assignment";
-    location: LocationRange;
-    comments: Token[];
-    pattern: Pattern;
-    value: Expression;
-}
+export const parseInstanceConstraints = (parser: Parser) =>
+    parser.spanned(() => {
+        parser.next("instanceKeyword");
+        const bound = parseBoundConstraint(parser);
+        const constraints = parser.optional(parseConstraints, []);
+        return { bound, constraints };
+    });
 
-export const parseAssignmentStatement = (parser: Parser): AssignmentStatement =>
-    parser.withLocation(() => {
+export const parseAssignmentStatement = (parser: Parser) =>
+    parser.spanned((span) => {
         const comments = parseComments(parser);
         const pattern = parsePattern(parser);
         parser.next("assignOperator");
         parser.commit();
         const value = parseExpression(parser);
-        return { type: "assignment", comments, pattern, value };
+        return new AssignmentNode(comments, [], pattern, value, span());
     });
 
-export interface ExpressionStatement {
-    type: "expression";
-    location: LocationRange;
-    comments: Token[];
-    expression: Expression;
-}
+export const parseExpressionStatement = (parser: Parser) =>
+    parser.spanned((span) => {
+        const comments = parseComments(parser);
+        const expression = parseExpression(parser);
+        return new ExpressionStatementNode(comments, [], expression, span());
+    });
 
-export const parseExpressionStatement = (parser: Parser): ExpressionStatement =>
-    parser.withLocation(() => ({
-        type: "expression",
-        comments: parseComments(parser),
-        expression: parseExpression(parser),
-    }));
+export const parseEmptyStatement = (parser: Parser) =>
+    parser.spanned((span) => {
+        const comments = parseComments(parser);
+        return new EmptyStatementNode(comments, span());
+    });
 
-export interface EmptyStatement {
-    type: "empty";
-    location: LocationRange;
-    comments: Token[];
-}
-
-export const parseComments = (parser: Parser): Token[] =>
+export const parseComments = (parser: Parser) =>
     parser.optional(() => parser.many("comment", parseComment, ["lineBreak"]), []);

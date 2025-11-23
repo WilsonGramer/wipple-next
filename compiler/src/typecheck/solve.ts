@@ -1,14 +1,12 @@
-import { Db, Node } from "../db";
-import { Instance } from "../visit/visitor";
-import { Constraint, Constraints, Score } from "./constraints";
-import {
-    traverseType,
-    Type,
-    cloneType,
-    ConstructedType,
-    typesAreEqual,
-    TypeParameter,
-} from "./constraints/type";
+import type { ConstructedType, Type } from ".";
+import { traverseType, typeReferencesNode, typesAreEqual } from ".";
+import type { Db } from "../node";
+import { Node } from "../node";
+import { ExpressionNode } from "../nodes/expressions";
+import { PatternNode } from "../nodes/patterns";
+import { Constraints } from "./constraints";
+import type { Instance } from "./constraints/bound";
+import type { Constraint } from "./constraints/constraint";
 
 export class Solver {
     db: Db;
@@ -16,7 +14,7 @@ export class Solver {
     constraints = new Constraints();
     defaultConstraints = new Constraints();
     impliedInstances: Instance[] = [];
-    applyQueue: Map<TypeParameter, Type>[] = [];
+    boundCache = new Map<Node, Map<Node, Node>>();
     error = false;
 
     constructor(db: Db) {
@@ -33,7 +31,7 @@ export class Solver {
         this.groups = new Map(
             other.groups.entries().map(([nodes, types]) => [new Set(nodes), [...types]]),
         );
-        this.applyQueue = [...other.applyQueue];
+        this.boundCache = other.boundCache;
     }
 
     add(...constraints: Constraint[]) {
@@ -46,7 +44,7 @@ export class Solver {
         this.groups.set(new Set(group.nodes), group.types);
     }
 
-    run({ until }: { until?: Score } = {}) {
+    run<T extends abstract new (...args: any[]) => Constraint>({ until }: { until?: T } = {}) {
         this.constraints.run(this, { until });
     }
 
@@ -62,6 +60,7 @@ export class Solver {
         }
 
         const leftNode = left instanceof Node ? left : undefined;
+
         const rightNode = right instanceof Node ? right : undefined;
 
         if (leftNode != null && rightNode != null) {
@@ -82,6 +81,15 @@ export class Solver {
                 for (let i = 0; i < Math.min(left.children.length, right.children.length); i++) {
                     const leftChild = left.children[i];
                     const rightChild = right.children[i];
+
+                    if (
+                        typeReferencesNode(leftChild, leftNode, rightNode) ||
+                        typeReferencesNode(rightChild, leftNode, rightNode)
+                    ) {
+                        // Recursive types
+                        continue;
+                    }
+
                     this.unify(leftChild, rightChild);
                 }
             }
@@ -104,16 +112,6 @@ export class Solver {
         return traverseType(type, (type) => this.applyShallow(type));
     }
 
-    groupOf(node: Node): Group | undefined {
-        for (const [nodes, types] of this.groups) {
-            if (nodes.has(node)) {
-                return { nodes, types };
-            }
-        }
-
-        return undefined;
-    }
-
     private applyShallow(type: Type): Type {
         if (type instanceof Node) {
             for (const [nodes, types] of this.groups) {
@@ -124,6 +122,16 @@ export class Solver {
         }
 
         return type;
+    }
+
+    groupOf(node: Node): Group | undefined {
+        for (const [nodes, types] of this.groups) {
+            if (nodes.has(node)) {
+                return new Group(nodes, types);
+            }
+        }
+
+        return undefined;
     }
 
     private insert(node: Node, ...newTypes: Type[]) {
@@ -155,14 +163,14 @@ export class Solver {
     }
 
     private merge(left: Node, right: Node) {
-        let leftGroup: Group = { nodes: new Set([left]), types: [] };
-        let rightGroup: Group = { nodes: new Set([right]), types: [] };
+        let leftGroup = Group.empty(left);
+        let rightGroup = Group.empty(right);
         for (const [nodes, types] of this.groups) {
             if (nodes.has(left)) {
-                leftGroup = { nodes, types };
+                leftGroup = new Group(nodes, types);
                 this.groups.delete(nodes);
             } else if (nodes.has(right)) {
-                rightGroup = { nodes, types };
+                rightGroup = new Group(nodes, types);
                 this.groups.delete(nodes);
             }
         }
@@ -175,37 +183,52 @@ export class Solver {
     }
 
     finish(): Group[] {
-        // Forward applied types to any substitution maps created elsewhere
-        for (const substitutions of this.applyQueue) {
-            for (const [node, type] of substitutions) {
-                substitutions.set(node, this.apply(type));
-            }
-        }
-
         return this.groups
             .entries()
-            .map(
-                ([nodes, types]): Group => ({
-                    nodes,
-                    types: deduplicate(
-                        types.map((type) => this.apply(type) as ConstructedType),
-                        typesAreEqual,
-                    ),
-                }),
-            )
+            .map(([nodes, types]): Group => {
+                types = types.map((type) => this.apply(type) as ConstructedType);
+                return new Group(nodes, types).normalize();
+            })
             .toArray();
     }
 }
 
-export interface Group {
-    nodes: Set<Node>;
+export class Group {
+    nodes: Node[];
     types: ConstructedType[];
-}
 
-export const cloneGroup = (group: Group): Group => ({
-    nodes: new Set(group.nodes),
-    types: group.types.map(cloneType),
-});
+    constructor(nodes: Iterable<Node>, types: Iterable<ConstructedType>) {
+        this.nodes = Array.from(nodes);
+        this.types = Array.from(types);
+    }
+
+    static empty(node: Node): Group {
+        return new Group([node], []);
+    }
+
+    static from(other: Group): Group {
+        return new Group(other.nodes, other.types);
+    }
+
+    normalize() {
+        // Prefer showing patterns first, then expressions, etc.
+        const nodeOrder = [PatternNode, ExpressionNode];
+        const compareKey = (node: Node) => {
+            const index = nodeOrder.findIndex((type) => node instanceof type);
+            return index === -1 ? nodeOrder.length : index;
+        };
+
+        this.nodes.sort((a, b) => compareKey(a) - compareKey(b));
+
+        this.types = deduplicate(this.types, typesAreEqual);
+
+        return this;
+    }
+
+    isEmpty(): boolean {
+        return this.nodes.length <= 1 && this.types.length === 0;
+    }
+}
 
 const deduplicate = <T>(array: T[], equal: (a: T, b: T) => boolean): T[] => {
     const result: T[] = [];

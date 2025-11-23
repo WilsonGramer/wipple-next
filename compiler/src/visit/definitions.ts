@@ -1,84 +1,128 @@
-import { Node } from "../db";
-import { Token } from "../syntax/parser";
-import { TypeParameter } from "../typecheck/constraints/type";
-import {
+import type { Node } from "../node";
+import { fact } from "../node";
+import type {
     ConstantAttributes,
     InstanceAttributes,
     TraitAttributes,
     TypeAttributes,
 } from "./attributes";
+import type { ConstantDefinitionNode } from "../nodes/statements/constant-definition";
+import type { TypeDefinitionNode } from "../nodes/statements/type-definition";
+import type { TraitDefinitionNode } from "../nodes/statements/trait-definition";
+import type { InstanceDefinitionNode } from "../nodes/statements/instance-definition";
+import type { TypeParameterNode } from "../nodes/types/parameter";
 
-export type AnyDefinition =
-    | VariableDefinition
-    | ConstantDefinition
-    | TypeDefinition
-    | TraitDefinition
-    | InstanceDefinition
-    | TypeParameterDefinition
-    | MarkerConstructorDefinition
-    | StructureConstructorDefinition
-    | VariantConstructorDefinition;
+export const Defined = fact<Definition>(() => "is a definition");
 
-export interface VariableDefinition {
-    type: "variable";
-    node: Node;
+export abstract class Definition<N extends Node = Node> {
+    node: N;
+    comments: string[];
+
+    constructor(node: N, comments: string[]) {
+        this.node = node;
+        this.comments = comments;
+    }
 }
 
-export interface ConstantDefinition {
-    type: "constant";
-    node: Node;
-    comments: Token[];
+export class VariableDefinition extends Definition {
+    value: Node;
+
+    constructor(node: Node, value: Node) {
+        super(node, []);
+        this.value = value;
+    }
+}
+
+export class ConstantDefinition extends Definition<ConstantDefinitionNode> {
     attributes: ConstantAttributes;
-    value: { assigned: true; node: Node } | { assigned: false; type: () => Node };
+    value: { assigned: true; node: Node } | { assigned: false; type: Node };
+
+    constructor(
+        node: ConstantDefinitionNode,
+        comments: string[],
+        attributes: ConstantAttributes,
+        type: Node,
+    ) {
+        super(node, comments);
+        this.attributes = attributes;
+        this.value = { assigned: false, type };
+    }
 }
 
-export interface TypeDefinition {
-    type: "type";
-    node: Node;
-    comments: Token[];
+export class TypeDefinition extends Definition<TypeDefinitionNode> {
     attributes: TypeAttributes;
-    parameters: TypeParameter[];
+    parameters: TypeParameterNode[];
+
+    constructor(
+        node: TypeDefinitionNode,
+        comments: string[],
+        attributes: TypeAttributes,
+        parameters: TypeParameterNode[],
+    ) {
+        super(node, comments);
+        this.attributes = attributes;
+        this.parameters = parameters;
+    }
 }
 
-export interface TraitDefinition {
-    type: "trait";
-    node: Node;
-    comments: Token[];
+export class TraitDefinition extends Definition<TraitDefinitionNode> {
     attributes: TraitAttributes;
-    parameters: TypeParameter[];
+    parameters: TypeParameterNode[];
+
+    constructor(
+        node: TraitDefinitionNode,
+        comments: string[],
+        attributes: TraitAttributes,
+        parameters: TypeParameterNode[],
+    ) {
+        super(node, comments);
+        this.attributes = attributes;
+        this.parameters = parameters;
+    }
 }
 
-export interface InstanceDefinition {
-    type: "instance";
-    node: Node;
-    comments: Token[];
+export class InstanceDefinition extends Definition<InstanceDefinitionNode> {
     attributes: InstanceAttributes;
-    value: () => Node | undefined;
-    // substitutions and other trait information is added via the `HasInstance` fact
+    value: Node | undefined;
+
+    constructor(
+        node: InstanceDefinitionNode,
+        comments: string[],
+        attributes: InstanceAttributes,
+        value: Node | undefined,
+    ) {
+        super(node, comments);
+        this.attributes = attributes;
+        this.value = value;
+    }
 }
 
-export interface TypeParameterDefinition {
-    type: "typeParameter";
-    node: Node;
-    name: string;
+export class TypeParameterDefinition extends Definition<TypeParameterNode> {
+    constructor(node: TypeParameterNode) {
+        super(node, []);
+    }
 }
 
-export interface MarkerConstructorDefinition {
-    type: "markerConstructor";
-    node: Node;
-    comments: Token[];
+export class MarkerConstructorDefinition extends Definition<Node> {
+    constructor(node: Node, comments: string[]) {
+        super(node, comments);
+    }
 }
 
-export interface StructureConstructorDefinition {
-    type: "structureConstructor";
-    node: Node;
-    comments: Token[];
-    fields: Map<string, Node>;
+export class StructureConstructorDefinition extends Definition<Node> {
+    fields: Record<string, Node>;
+
+    constructor(node: Node, comments: string[], fields: Record<string, Node>) {
+        super(node, comments);
+        this.fields = fields;
+    }
 }
 
-export interface VariantConstructorDefinition {
-    type: "variantConstructor";
-    node: Node;
-    comments: Token[];
+export class VariantConstructorDefinition extends Definition<Node> {
     index: number;
+
+    constructor(node: Node, index: number) {
+        super(node, []);
+        this.index = index;
+    }
 }

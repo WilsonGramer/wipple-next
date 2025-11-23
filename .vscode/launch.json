@@ -2,7 +2,7 @@
     "configurations": [
         {
             "name": "Compiler",
-            "program": "${workspaceFolder}/compiler/dist/src/index.js",
+            "program": "${workspaceFolder}/compiler/dist/index.js",
             "request": "launch",
             "skipFiles": ["<node_internals>/**"],
             "type": "node",

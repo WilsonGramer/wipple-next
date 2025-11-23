@@ -1,64 +1,57 @@
-import { Fact } from "../db";
-import { Attribute, AttributeValue } from "../syntax";
-import { Visitor } from "./visitor";
+import { fact } from "../node";
+import type { AttributeNode } from "../nodes/attributes";
+import type { AttributeValue } from "../nodes/attributes/value";
+import { StringAttributeValue } from "../nodes/attributes/value";
 
-export class IsAttribute extends Fact<null> {}
-export class IsExtraAttributeValue extends Fact<null> {}
-export class IsDuplicateAttribute extends Fact<null> {}
-export class IsMismatchedAttributeValue extends Fact<null> {}
-export class IsMissingAttributeValue extends Fact<null> {}
+export const ExtraAttributeValue = fact(() => "extra attribute value");
+export const UnsupportedAttribute = fact(() => "unsupported attribute");
+export const DuplicateAttribute = fact(() => "duplicate attribute");
+export const MismatchedAttributeValue = fact(() => "mismatched attribute value");
+export const MissingAttributeValue = fact(() => "missing attribute value");
+
+export interface VariableAttributes {}
+
+export const parseVariableAttributes = (attributes: AttributeNode[]): VariableAttributes => ({});
 
 export interface ConstantAttributes {
     unit?: boolean;
 }
 
-export const parseConstantAttributes = (
-    visitor: Visitor,
-    attributes: Attribute[],
-): ConstantAttributes => ({
-    unit: parseNameAttribute(visitor, "unit", attributes),
+export const parseConstantAttributes = (attributes: AttributeNode[]): ConstantAttributes => ({
+    unit: parseNameAttribute("unit", attributes),
 });
 
 export interface TypeAttributes {
     intrinsic?: boolean;
 }
 
-export const parseTypeAttributes = (visitor: Visitor, attributes: Attribute[]): TypeAttributes => ({
-    intrinsic: parseNameAttribute(visitor, "intrinsic", attributes),
+export const parseTypeAttributes = (attributes: AttributeNode[]): TypeAttributes => ({
+    intrinsic: parseNameAttribute("intrinsic", attributes),
 });
 
 export interface TraitAttributes {}
 
-export const parseTraitAttributes = (
-    visitor: Visitor,
-    attributes: Attribute[],
-): TraitAttributes => ({});
+export const parseTraitAttributes = (attributes: AttributeNode[]): TraitAttributes => ({});
 
 export interface InstanceAttributes {
     default?: boolean;
     error?: boolean;
 }
 
-export const parseInstanceAttributes = (
-    visitor: Visitor,
-    attributes: Attribute[],
-): InstanceAttributes => ({
-    default: parseNameAttribute(visitor, "default", attributes),
-    error: parseNameAttribute(visitor, "error", attributes),
+export const parseInstanceAttributes = (attributes: AttributeNode[]): InstanceAttributes => ({
+    default: parseNameAttribute("default", attributes),
+    error: parseNameAttribute("error", attributes),
 });
 
-const parseNameAttribute = (visitor: Visitor, name: string, attributes: Attribute[]) => {
+const parseNameAttribute = (name: string, attributes: AttributeNode[]) => {
     let found = false;
     for (const attribute of attributes) {
-        if (attribute.name.value === name) {
-            const node = visitor.node(attribute);
-
+        if (attribute.name === name) {
             if (attribute.value != null) {
-                visitor.db.add(node, new IsExtraAttributeValue(null));
+                attribute.facts.set(ExtraAttributeValue, null);
             } else if (found) {
-                visitor.db.add(node, new IsDuplicateAttribute(null));
+                attribute.facts.set(DuplicateAttribute, null);
             } else {
-                visitor.db.add(node, new IsAttribute(null));
                 found = true;
             }
         }
@@ -67,40 +60,32 @@ const parseNameAttribute = (visitor: Visitor, name: string, attributes: Attribut
     return found;
 };
 
-const parseStringValueAttribute = (visitor: Visitor, name: string, attributes: Attribute[]) =>
-    parseAssignmentAttribute(visitor, name, attributes, (value) => {
-        switch (value.type) {
-            case "string":
-                return value.value;
-            default:
-                return undefined;
-        }
-    });
+const parseStringValueAttribute = (name: string, attributes: AttributeNode[]) =>
+    parseAssignmentAttribute(name, attributes, (value) =>
+        value instanceof StringAttributeValue ? value.value : undefined,
+    );
 
 const parseAssignmentAttribute = <T>(
-    visitor: Visitor,
     name: string,
-    attributes: Attribute[],
+    attributes: AttributeNode[],
     f: (value: AttributeValue) => T | undefined,
 ) => {
     let result: T | undefined = undefined;
     for (const attribute of attributes) {
-        if (attribute.name.value === name) {
-            const node = visitor.node(attribute);
-
+        if (attribute.name === name) {
             if (attribute.value != null) {
                 if (result != null) {
-                    visitor.db.add(node, new IsDuplicateAttribute(null));
+                    attribute.facts.set(DuplicateAttribute, null);
                     continue;
                 }
 
                 result = f(attribute.value);
 
                 if (result == null) {
-                    visitor.db.add(node, new IsMismatchedAttributeValue(null));
+                    attribute.facts.set(MismatchedAttributeValue, null);
                 }
             } else {
-                visitor.db.add(node, new IsMissingAttributeValue(null));
+                attribute.facts.set(MissingAttributeValue, null);
             }
         }
     }

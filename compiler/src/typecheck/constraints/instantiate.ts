@@ -1,15 +1,16 @@
-import { Solver } from "../solve";
-import { Node } from "../../db/node";
-import { HasDefinitionConstraints } from "../../visit/visitor";
-import { getOrInstantiate, Score } from ".";
-import { instantiateType, Type, TypeParameter } from "./type";
+import type { Solver } from "../solve";
+import type { Node } from "../../node";
 import { Constraint } from "./constraint";
+import { DefinitionConstraints } from "../../visit";
+import type { TypeParameterNode } from "../../nodes/types/parameter";
+import type { Type } from "..";
+import { getOrInstantiate, instantiateType } from "..";
 
 export interface Instantiation {
     source: Node;
     definition: Node;
     replacements: Map<Node, Node>;
-    substitutions: Map<TypeParameter, Type>;
+    substitutions: Map<TypeParameterNode, Type>;
 }
 
 export class InstantiateConstraint extends Constraint {
@@ -20,16 +21,12 @@ export class InstantiateConstraint extends Constraint {
         this.instantiation = instantiation;
     }
 
-    score(): Score {
-        return "instantiate";
-    }
-
     instantiate(
         _solver: Solver,
         source: Node,
         replacements: Map<Node, Node>,
-        substitutions: Map<TypeParameter, Type>,
-    ): this | void {
+        substitutions: Map<TypeParameterNode, Type>,
+    ): Constraint {
         const instantiation: Instantiation = {
             source,
             definition: this.instantiation.definition,
@@ -51,7 +48,7 @@ export class InstantiateConstraint extends Constraint {
             ),
         };
 
-        return new InstantiateConstraint(instantiation) as this;
+        return new InstantiateConstraint(instantiation);
     }
 
     run(solver: Solver): void {
@@ -60,23 +57,15 @@ export class InstantiateConstraint extends Constraint {
         // NOTE: Types are *not* applied before instantiating; we have access to
         // all related nodes/constraints here, which together will form better
         // groups
-        const instantiatedConstraints: Constraint[] = [];
-        for (const constraints of solver.db.list(definition, HasDefinitionConstraints)) {
-            instantiatedConstraints.push(
-                ...constraints.flatMap((constraint) => {
-                    const instantiated = constraint.instantiate(
-                        solver,
-                        source,
-                        replacements,
-                        substitutions,
-                    );
+        const instantiatedConstraints =
+            definition.facts.get(DefinitionConstraints)?.flatMap((constraint) => {
+                if (!constraint.shouldInstantiate) {
+                    return [];
+                }
 
-                    return instantiated != null ? [instantiated] : [];
-                }),
-            );
-        }
+                return constraint.instantiate(solver, source, replacements, substitutions);
+            }) ?? [];
 
         solver.add(...instantiatedConstraints);
-        solver.applyQueue.push(substitutions);
     }
 }

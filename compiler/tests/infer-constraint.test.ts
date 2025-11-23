@@ -1,12 +1,9 @@
-import { test } from "mocha";
-import { compileTest } from ".";
-import assert from "node:assert";
-import { HasType } from "../src/compile";
+import { compileTest, testTypes } from ".";
 
 test("infer constraint", () => {
-    const { db, placeholders, feedback } = compileTest("infer-constraint.wipple");
+    const { placeholders, feedback } = compileTest("infer-constraint.wipple");
 
-    assert.deepStrictEqual(db.display(placeholders[2], HasType), new Set(["String"]));
-    assert.deepStrictEqual(db.display(placeholders[5], HasType), new Set(["String", "Number"]));
-    assert.partialDeepStrictEqual(feedback.get(placeholders[5]), ["conflicting-types"]);
+    testTypes(placeholders[2], ["String"]);
+    testTypes(placeholders[5], ["String", "Number"]);
+    expect(feedback.get(placeholders[5])).toContain("conflicting-types");
 });

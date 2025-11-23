@@ -1,30 +1,6 @@
-import { test } from "mocha";
-import { parseConstraint, testParse } from ".";
+import { testParse } from ".";
+import { parseConstraint } from "./constraints";
 
-test("parsing bound constraint", () => {
-    testParse(parseConstraint, `(Foo value)`, {
-        type: "bound",
-        trait: { value: "Foo" },
-        parameters: [
-            {
-                type: "parameter",
-                name: { value: "value" },
-            },
-        ],
-    });
-});
+testParse("parsing bound constraint", parseConstraint, `(Foo value)`);
 
-test("parsing default constraint", () => {
-    testParse(parseConstraint, `(value :: Number)`, {
-        type: "default",
-        parameter: {
-            type: "parameter",
-            name: { value: "value" },
-        },
-        value: {
-            type: "named",
-            name: { value: "Number" },
-            parameters: [],
-        },
-    });
-});
+testParse("parsing default constraint", parseConstraint, `(value :: Number)`);

@@ -1,18 +1,15 @@
-import { Fact, Db } from "./db";
-import parse, { SourceFile, SyntaxError, LocationRange } from "./syntax";
-import { visit } from "./visit";
-import { BoundConstraint, Group, Solver } from "./typecheck";
-import { cloneType, displayType, Type } from "./typecheck/constraints/type";
-import chalk from "chalk";
-import {
-    HasTopLevelConstraints,
-    HasDefinitionConstraints,
-    HasInstance,
-    Definition,
-} from "./visit/visitor";
-import { cloneGroup } from "./typecheck/solve";
-import { applyBound, displayBound } from "./typecheck/constraints/bound";
-import { GenericOnlyConstraint } from "./typecheck/constraints";
+import type { Db } from "./node";
+import { fact } from "./node";
+import type { FileNode } from "./nodes";
+import type { Span } from "./span";
+import { parseFile } from "./syntax";
+import { SyntaxError } from "./syntax/parser";
+import { Solver } from "./typecheck/solve";
+import type { Scope } from "./visit";
+import { DefinitionConstraints, Instances, Visitor } from "./visit";
+import { BoundConstraint } from "./typecheck/constraints/bound";
+import { Typed } from "./nodes/types";
+import { BoundConstraintNode } from "./nodes/constraints/bound";
 
 export interface CompileOptions {
     files: { path: string; code: string }[];
@@ -20,28 +17,14 @@ export interface CompileOptions {
 
 export type CompileResult =
     | { success: true }
-    | { success: false; type: "parse"; location: LocationRange; message: string };
+    | { success: false; type: "parse"; span: Span; message: string };
 
-export class HasType extends Fact<Type> {
-    clone = cloneType;
-    display = (type: Type) => chalk.blue(displayType(type));
-}
-
-export class InTypeGroup extends Fact<Group> {
-    clone = cloneGroup;
-
-    display = (group: Group) =>
-        group.nodes
-            .values()
-            .map((node) => chalk.blue(node))
-            .toArray()
-            .join(", ");
-}
+const TopLevelScope = fact<Scope>(() => "top-level scope");
 
 export const compile = (db: Db, options: CompileOptions): CompileResult => {
-    let parsedFiles: SourceFile[];
+    let parsedFiles: FileNode[];
     try {
-        parsedFiles = options.files.map(({ path, code }) => parse(path, code));
+        parsedFiles = options.files.map(({ path, code }) => parseFile(path, code));
     } catch (e) {
         if (!(e instanceof SyntaxError)) {
             throw e;
@@ -50,41 +33,52 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         return {
             success: false,
             type: "parse",
-            location: e.location,
+            span: e.span,
             message: e.message,
         };
     }
 
-    const info = visit(parsedFiles, db);
+    const topLevelScopes = db
+        .list(TopLevelScope)
+        .map(([, scope]) => scope)
+        .filter((scope) => scope != null)
+        .toArray();
+
+    const visitor = new Visitor(db, topLevelScopes);
+
+    for (const file of parsedFiles) {
+        visitor.visit(file);
+    }
+
+    const info = visitor.finish();
 
     const definitionSolver = new Solver(db);
-    for (const [_node, group] of db.list(InTypeGroup)) {
-        definitionSolver.setGroup(group);
+
+    for (const [, group] of db.list(Typed)) {
+        if (!group.isEmpty()) {
+            definitionSolver.setGroup(group);
+        }
     }
 
     // Solve constraints from each definition, implying all bounds
-    for (const [definitionNode, constraints] of db.list(HasDefinitionConstraints)) {
-        const definition = info.definitions.get(definitionNode);
-        if (
-            definition == null ||
-            (definition.type !== "constant" && definition.type !== "instance")
-        ) {
-            continue;
-        }
-
+    for (const [definitionNode, constraints] of db.list(DefinitionConstraints)) {
         const solver = Solver.from(definitionSolver);
 
-        const instance = db.findBy(
-            HasInstance,
-            (instance) => instance.node === definitionNode,
-        )?.[1];
+        const instance = Iterator.from(db)
+            .flatMap((node) => node.facts.get(Instances) ?? [])
+            .find((instance) => instance.node === definitionNode);
 
         if (instance != null) {
             solver.imply(instance);
         }
 
         for (const constraint of constraints) {
-            if (constraint instanceof BoundConstraint) {
+            if (
+                constraint instanceof BoundConstraint &&
+                // Only imply bounds from constraints, not from inside the
+                // definition's value!
+                constraint.node instanceof BoundConstraintNode
+            ) {
                 solver.imply(constraint.asInstance());
             }
         }
@@ -92,38 +86,30 @@ export const compile = (db: Db, options: CompileOptions): CompileResult => {
         solver.add(...constraints);
         solver.run();
 
-        addGroupsFrom(db, solver);
+        addGroupsFrom(solver);
+        definitionNode.facts.delete(Typed);
     }
 
     // Solve constraints from top-level expressions
-
-    const solver = new Solver(db); // definition constraints will be retrieved from `db` as needed
-
-    const constraints = db
-        .list(HasTopLevelConstraints)
-        .flatMap(([_node, constraints]) => constraints);
-
-    solver.add(...constraints);
+    const solver = new Solver(db);
+    solver.add(...info.constraints);
     solver.run();
 
-    addGroupsFrom(db, solver);
+    addGroupsFrom(solver);
 
     return { success: true };
 };
 
-const addGroupsFrom = (db: Db, solver: Solver) => {
+const addGroupsFrom = (solver: Solver) => {
     const groups = solver.finish();
 
     for (const group of groups) {
+        if (group.isEmpty()) {
+            continue;
+        }
+
         for (const node of group.nodes) {
-            db.deleteAll(node, InTypeGroup);
-            db.deleteAll(node, HasType);
-
-            db.add(node, new InTypeGroup(group));
-
-            for (const type of group.types) {
-                db.add(node, new HasType(type));
-            }
+            node.facts.set(Typed, group);
         }
     }
 };

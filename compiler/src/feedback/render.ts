@@ -1,118 +1,182 @@
-import chalk from "chalk";
-import { Db, Node } from "../db";
 import dedent from "dedent";
-import { displayType, Type } from "../typecheck/constraints/type";
-import { Bound, displayBound } from "../typecheck/constraints/bound";
-import { nodeDisplayOptions } from "../db/node";
-import { Links } from "../queries";
-import { Token } from "../syntax/parser";
+import type { ResolvedBound } from "../typecheck/constraints/bound";
+import { applyBound, displayBound } from "../typecheck/constraints/bound";
+import type { Type } from "../typecheck";
+import { displayType } from "../typecheck";
+import type { Node } from "../node";
 
 export interface RenderedFeedback {
     strings: readonly string[];
     values: Renderable[];
-    toString: () => string;
+    render: () => string;
 }
 
 export const render = (strings: readonly string[], ...values: Renderable[]): RenderedFeedback => ({
     strings,
     values,
-    toString: () =>
+    render: () =>
         dedent(
-            values.map((value, index) => strings[index] + value.toString()).join("") +
+            values.map((value, index) => strings[index] + value.render()).join("") +
                 strings[strings.length - 1],
-        ).trim(),
+        ),
 });
 
-export const renderComments = (comments: Token[], links: Links, suffix = "") => {
-    const string = comments.map((comment) => comment.value).join("\n");
+export abstract class Renderable {
+    abstract render(): string;
+}
 
-    const items = string.split(/\[`([^`]+)`\]/);
+export class RenderableNode extends Renderable {
+    node: Node;
 
-    const segments: string[] = [];
-    const values: Renderable[] = [];
-    for (let i = 0; i < items.length - 1; i += 2) {
-        segments.push(items[i]);
-
-        const link = links[items[i + 1]];
-        if (link == null) {
-            values.push(render.code("_"));
-            continue;
-        }
-
-        if ("and" in link) {
-            values.push(render.list(link.and, "and"));
-        } else if ("or" in link) {
-            values.push(render.list(link.or, "or"));
-        } else if (link instanceof Node) {
-            values.push(link);
-        } else {
-            link satisfies never;
-        }
+    constructor(node: Node) {
+        super();
+        this.node = node;
     }
 
-    segments.push(items[items.length - 1] + suffix);
+    render() {
+        return this.node.render();
+    }
+}
 
-    return render(segments, ...values);
-};
+render.node = (node: Node) => new RenderableNode(node);
 
-export type Renderable = string | Node | RenderableType | RenderableBound | RenderableCode;
-
-export class RenderableCode {
+export class RenderableCode extends Renderable {
     code: string;
 
     constructor(code: string) {
+        super();
         this.code = code;
     }
 
-    toString() {
-        return chalk.blue(nodeDisplayOptions.markdown ? "`" + this.code + "`" : this.code);
+    render() {
+        return "`" + this.code + "`";
     }
 }
 
 render.code = (code: string) => new RenderableCode(code);
 
-export class RenderableType {
+export class RenderableType extends Renderable {
     type: Type;
 
     constructor(type: Type) {
+        super();
         this.type = type;
     }
 
-    toString() {
-        const type = displayType(this.type);
-        return chalk.blue(nodeDisplayOptions.markdown ? "`" + type + "`" : type);
+    render() {
+        return "`" + displayType(this.type) + "`";
     }
 }
 
 render.type = (type: Type) => new RenderableType(type);
 
-export class RenderableBound {
-    bound: Bound;
-    db: Db;
+export class RenderableBound extends Renderable {
+    bound: ResolvedBound;
 
-    constructor(bound: Bound, db: Db) {
+    constructor(bound: ResolvedBound) {
+        super();
         this.bound = bound;
-        this.db = db;
     }
 
-    toString() {
-        const bound = displayBound(this.db, this.bound);
-        return chalk.blue(nodeDisplayOptions.markdown ? "`" + bound + "`" : bound);
+    render() {
+        return "`" + displayBound(this.bound) + "`";
     }
 }
 
-render.bound = (bound: Bound, db: Db) => new RenderableBound(bound, db);
+render.bound = (bound: ResolvedBound) => new RenderableBound(bound);
 
-render.list = (values: Renderable[], separator: string) => {
-    if (values.length > 2) {
-        return (
-            values.slice(0, values.length - 1).join(`, `) +
-            `, ${separator} ` +
-            values[values.length - 1]
-        );
-    } else if (values.length === 2) {
-        return values.join(` ${separator} `);
-    } else {
-        return values[0].toString();
+export class RenderableList extends Renderable {
+    values: Renderable[];
+    separator: string;
+
+    constructor(values: Renderable[], separator: string) {
+        super();
+        this.values = values;
+        this.separator = separator;
     }
-};
+
+    render() {
+        const values = this.values.map((value) => value.render());
+
+        if (values.length > 2) {
+            return (
+                values.slice(0, values.length - 1).join(`, `) +
+                `, ${this.separator} ` +
+                values[values.length - 1].toString()
+            );
+        } else if (values.length === 2) {
+            return values.join(` ${this.separator} `);
+        } else {
+            return values[0].toString();
+        }
+    }
+}
+
+render.list = (values: Renderable[], separator: string) => new RenderableList(values, separator);
+
+export type Links = Record<string, Renderable | { or: Renderable[] } | { and: Renderable[] }>;
+
+class RenderableComments extends Renderable {
+    comments: string[];
+    links: Links;
+    suffix?: RenderedFeedback;
+
+    constructor(comments: string[], links: Links, suffix?: RenderedFeedback) {
+        super();
+        this.comments = comments;
+        this.links = links;
+        this.suffix = suffix;
+    }
+
+    render(): string {
+        const { comments, links, suffix } = this;
+
+        const string = comments.join("\n");
+
+        const items = string.split(/\[`([^`]+)`\]/);
+
+        const segments: string[] = [];
+        const values: Renderable[] = [];
+        for (let i = 0; i < items.length - 1; i += 2) {
+            segments.push(items[i]);
+
+            const link = links[items[i + 1]];
+            if (link == null) {
+                values.push(render.code("_"));
+                continue;
+            }
+
+            if ("and" in link) {
+                values.push(render.list(link.and, "and"));
+            } else if ("or" in link) {
+                values.push(render.list(link.or, "or"));
+            } else if (link instanceof Renderable) {
+                values.push(link);
+            } else {
+                link satisfies never;
+            }
+        }
+
+        segments.push(items[items.length - 1] + (suffix?.render() ?? ""));
+
+        return render(segments, ...values).render();
+    }
+}
+
+render.comments = (comments: string[], links: Links, suffix?: RenderedFeedback) =>
+    new RenderableComments(comments, links, suffix);
+
+class RenderableOptional extends Renderable {
+    value: RenderedFeedback | undefined;
+
+    constructor(value: RenderedFeedback | undefined) {
+        super();
+        this.value = value;
+    }
+
+    render(): string {
+        return this.value?.render() ?? "";
+    }
+}
+
+render.optional = (value: RenderedFeedback | undefined) => new RenderableOptional(value);

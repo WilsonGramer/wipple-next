@@ -1,32 +1,19 @@
 import * as moo from "moo";
-
-export interface Location {
-    line: number;
-    column: number;
-    offset: number;
-}
-
-export interface LocationRange {
-    path: string;
-    source: any;
-    start: Location;
-    end: Location;
-}
+import type { Span } from "../span";
+import type { Db, Node } from "../node";
 
 export interface Token {
+    span: Span;
     type: string;
-    location: LocationRange;
     value: string;
 }
 
 export class SyntaxError extends Error {
-    location: LocationRange;
+    span: Span;
 
-    constructor(message: string, location: LocationRange) {
-        super(
-            `${location.path}:${location.start.line}:${location.start.column}: syntax error: ${message}`,
-        );
-        this.location = location;
+    constructor(message: string, span: Span) {
+        super(`${span.path}:${span.start.line}:${span.start.column}: syntax error: ${message}`);
+        this.span = span;
     }
 }
 
@@ -94,7 +81,7 @@ export class Parser {
     private tokens: Token[];
     private index = 0;
     private stack: { committed: boolean }[] = [];
-    private cache: Map<number, Map<any, [any, number]>> = new Map();
+    private cache: Map<number, Map<Function, [any, number]>> = new Map();
 
     constructor(path: string, source: string) {
         this.path = path;
@@ -103,47 +90,45 @@ export class Parser {
 
         this.tokens = Iterator.from<moo.Token>(lexer)
             .filter((token) => token.type !== "space")
-            .map(
-                (token): Token => ({
-                    type: token.type!,
-                    location: {
-                        path,
-                        start: {
-                            offset: token.offset,
-                            line: token.line,
-                            column: token.col,
-                        },
-                        end: {
-                            offset: token.offset + token.text.length,
-                            line: token.line, // TODO: handle line breaks?
-                            column: token.col + token.text.length,
-                        },
-                        source: token.text,
+            .map((token) => ({
+                type: token.type!,
+                span: {
+                    path,
+                    start: {
+                        offset: token.offset,
+                        line: token.line,
+                        column: token.col,
                     },
-                    value: token.value,
-                }),
-            )
+                    end: {
+                        offset: token.offset + token.text.length,
+                        line: token.line, // TODO: handle line breaks?
+                        column: token.col + token.text.length,
+                    },
+                    source: token.text,
+                },
+                value: token.value,
+            }))
             .toArray();
     }
 
-    withLocation<T>(f: () => Omit<T, "location">): T & { location: LocationRange } {
+    spanned<T>(f: (span: () => Span) => T): T {
         const startIndex = this.index;
-        const result = f();
-        const endIndex = this.index;
+        return f(() => {
+            const endIndex = this.index;
 
-        const start = this.tokens[startIndex]?.location.start ?? nullLocationRange(this.path).start;
-        const end = this.tokens[endIndex - 1]?.location.end ?? nullLocationRange(this.path).end;
-        const source = this.slice(start.offset, end.offset);
+            const start = this.tokens[startIndex]?.span.start ?? nullSpan(this.path).start;
 
-        return {
-            ...(result as any),
-            location: {
+            const end = this.tokens[endIndex - 1]?.span.end ?? nullSpan(this.path).end;
+
+            const source = this.slice(start.offset, end.offset);
+
+            return {
                 path: this.path,
                 source,
                 start,
                 end,
-            } satisfies LocationRange,
-        };
+            };
+        });
     }
 
     delimited<T>(left: string, right: string, f: () => T): T {
@@ -155,69 +140,60 @@ export class Parser {
         return result;
     }
 
-    collection<T, S extends string[]>(
+    collection<T>(
         expected: string,
-        separators: [...S],
+        separators: string[],
         f: (parser: Parser) => T,
         operator = false,
-    ): [T, S[number] | undefined][] {
-        const empty = (parser: Parser) => {
-            parser.try("lineBreak");
-            parser.next(...separators);
-            parser.try("lineBreak");
+    ): [T, Token | undefined][] {
+        const initialIndex = this.index;
+
+        this.try("lineBreak");
+
+        if (this.try(...separators) != null) {
+            // Empty collection
             return [];
-        };
+        }
 
-        const nonEmpty = (parser: Parser) => {
-            const initialIndex = parser.index;
+        const elements: [T, Token | undefined][] = [[f(this), undefined]];
+        let hasTrailingSeparator = false;
+        while (true) {
+            this.try("lineBreak");
 
-            parser.try("lineBreak");
-
-            const elements: [T, S[number] | undefined][] = [[f(parser), undefined]];
-            let hasTrailingSeparator = false;
-            while (true) {
-                parser.try("lineBreak");
-
-                const separator = parser.try(...separators);
-                if (separator == null) {
-                    break;
-                } else {
-                    hasTrailingSeparator = true;
-                }
-
-                parser.try("lineBreak");
-
-                const initialIndex = parser.index;
-                try {
-                    const element = f(parser);
-                    elements.push([element, separator]);
-                    hasTrailingSeparator = false;
-                } catch {
-                    parser.index = initialIndex;
-                    break;
-                }
+            const separator = this.try(...separators);
+            if (separator == null) {
+                break;
+            } else {
+                hasTrailingSeparator = true;
             }
 
-            if (operator) {
-                return elements;
+            this.try("lineBreak");
+
+            const initialIndex = this.index;
+            try {
+                const element = f(this);
+                elements.push([element, separator]);
+                hasTrailingSeparator = false;
+            } catch {
+                this.index = initialIndex;
+                break;
             }
+        }
 
-            const minElements = hasTrailingSeparator ? 1 : 2;
-
-            if (elements.length < minElements) {
-                const token = parser.tokens[parser.index - 1];
-                parser.index = initialIndex;
-
-                throw new SyntaxError(
-                    `expected ${expected} here`,
-                    token?.location ?? nullLocationRange(this.path),
-                );
-            }
-
+        if (operator) {
             return elements;
-        };
+        }
 
-        return operator ? nonEmpty(this) : this.alternatives(expected, [empty, nonEmpty]);
+        const minElements = hasTrailingSeparator ? 1 : 2;
+
+        if (elements.length < minElements) {
+            const token = this.tokens[this.index - 1];
+            this.index = initialIndex;
+
+            throw new SyntaxError(`expected ${expected} here`, token?.span ?? nullSpan(this.path));
+        }
+
+        return elements;
     }
 
     many<T>(expected: string, f: (parser: Parser) => T, separators: string[] = []): T[] {
@@ -248,16 +224,17 @@ export class Parser {
             const token = this.tokens[this.index - 1];
             this.index = initialIndex;
 
-            throw new SyntaxError(
-                `expected ${expected} here`,
-                token?.location ?? nullLocationRange(this.path),
-            );
+            throw new SyntaxError(`expected ${expected} here`, token?.span ?? nullSpan(this.path));
         }
 
         return results;
     }
 
-    alternatives<T>(expected: string, alternatives: ((parser: Parser) => T)[]): T {
+    alternatives<T>(
+        expected: string,
+        key: Function | undefined,
+        alternatives: ((parser: Parser) => T)[],
+    ): T {
         const initialIndex = this.index;
 
         if (!this.cache.has(initialIndex)) {
@@ -265,10 +242,10 @@ export class Parser {
         }
 
         const cached = this.cache.get(initialIndex)!;
-        if (cached.has(alternatives)) {
-            const [result, index] = cached.get(alternatives)!;
+        if (key != null && cached.has(key)) {
+            const [result, index] = cached.get(key)!;
             this.index = index;
-            return result;
+            return result as T;
         }
 
         const entry = { committed: false };
@@ -280,7 +257,11 @@ export class Parser {
             try {
                 const result = f(this);
                 this.stack.pop();
-                cached.set(alternatives, [result, this.index]);
+
+                if (key != null) {
+                    cached.set(key, [result, this.index]);
+                }
+
                 return result;
             } catch (e) {
                 if (!(e instanceof SyntaxError) || entry.committed) {
@@ -297,10 +278,7 @@ export class Parser {
         const token = this.tokens[this.index - 1];
         this.index = initialIndex;
 
-        throw new SyntaxError(
-            `expected ${expected} here`,
-            token?.location ?? nullLocationRange(this.path),
-        );
+        throw new SyntaxError(`expected ${expected} here`, token?.span ?? nullSpan(this.path));
     }
 
     optional<T>(f: (parser: Parser) => T, defaultValue: T): T {
@@ -321,7 +299,7 @@ export class Parser {
         this.stack.at(-1)!.committed = true;
     }
 
-    try<S extends string[]>(...types: [...S]): S[number] | undefined {
+    try<S extends string[]>(...types: [...S]): Token | undefined {
         const token = this.tokens[this.index];
         if (token == null || !types.includes(token.type)) {
             return undefined;
@@ -329,47 +307,52 @@ export class Parser {
 
         this.index++;
 
-        return token.type;
+        return token;
     }
 
-    next(...types: string[]): Token {
+    next(...types: string[]): string {
         const token = this.tokens[this.index];
         if (token == null) {
             throw new SyntaxError(
                 `expected ${types.join(" or ")} here`,
-                this.tokens[this.tokens.length - 1]?.location ?? nullLocationRange(this.path),
+                this.tokens[this.tokens.length - 1]?.span ?? nullSpan(this.path),
             );
         }
 
         if (!types.includes(token.type)) {
             throw new SyntaxError(
                 `expected ${types.join(" or ")} but found ${token.type}`,
-                token.location,
+                token.span,
             );
         }
 
         this.index++;
 
-        return {
-            type: token.type,
-            location: token.location,
-            value: token.value,
-        };
+        return token.value;
     }
 
     slice(start: number, end: number): string {
         return this.source.slice(start, end);
     }
 
+    join(left: Span, right: Span): Span {
+        return {
+            path: left.path,
+            source: this.source.slice(left.start.offset, right.end.offset),
+            start: left.start,
+            end: right.end,
+        };
+    }
+
     finish() {
         const token = this.tokens[this.index];
         if (token != null) {
-            throw new SyntaxError(`unexpected ${token.type}`, token.location);
+            throw new SyntaxError(`unexpected ${token.type}`, token.span);
         }
     }
 }
 
-const nullLocationRange = (path: string): LocationRange => ({
+const nullSpan = (path: string) => ({
     path,
     source: "",
     start: { line: 1, column: 1, offset: 0 },

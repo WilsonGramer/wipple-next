@@ -1,11 +1,8 @@
-import { test } from "mocha";
-import { compileTest } from ".";
-import assert from "node:assert";
-import { HasType } from "../src/compile";
+import { compileTest, testTypes } from ".";
 
 test("default constraint", () => {
-    const { db, placeholders } = compileTest("default-constraint.wipple");
+    const { placeholders } = compileTest("default-constraint.wipple");
 
-    assert.deepStrictEqual(db.display(placeholders[1], HasType), new Set(["List String"]));
-    assert.deepStrictEqual(db.display(placeholders[2], HasType), new Set(["Set String"]));
+    testTypes(placeholders[1], ["List String"]);
+    testTypes(placeholders[2], ["Set String"]);
 });

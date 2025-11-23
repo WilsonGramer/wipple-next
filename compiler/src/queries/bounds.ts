@@ -1,8 +1,10 @@
+import { ResolvedBound } from "../typecheck/constraints/bound";
 import { query } from "./query";
-import { HasUnresolvedBound } from "../typecheck/constraints/bound";
 
-export const unresolvedBound = query(function* (db) {
-    for (const [node, bound] of db.list(HasUnresolvedBound)) {
-        yield { node, bound };
+export const unresolvedBound = query(function* (node) {
+    for (const { bound, instance } of node.facts.get(ResolvedBound) ?? []) {
+        if (instance == null) {
+            yield { bound };
+        }
     }
 });

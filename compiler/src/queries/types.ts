@@ -1,66 +1,79 @@
+import { InstantiatedNode, Node } from "../node";
+import { ExpressionNode } from "../nodes/expressions";
+import { PatternNode } from "../nodes/patterns";
+import { Typed } from "../nodes/types";
+import { typeReferencesNode } from "../typecheck";
+import type { Group } from "../typecheck/solve";
 import { query } from "./query";
-import { HasType, InTypeGroup } from "../compile";
-import { Db, Node } from "../db";
-import { typeReferencesNode } from "../typecheck/constraints/type";
-import { IsTyped } from "../visit";
-import { Group } from "../typecheck";
 
-export const type = query(function* (db) {
-    for (const [node, type] of db.list(HasType)) {
-        yield { node, type };
+export const type = query(function* (node) {
+    const group = node.facts.get(Typed);
+    if (group == null) {
+        return;
     }
+
+    yield { type: group.types[0] };
 });
 
-export const related = query(function* (db) {
-    for (const [node, group] of db.list(InTypeGroup)) {
-        for (const related of group.nodes.values()) {
-            if (related !== node) {
-                yield { node, related };
-            }
+export const related = query(function* (node) {
+    const group = node.facts.get(Typed);
+    if (group == null) {
+        return;
+    }
+
+    for (const related of group.nodes.values()) {
+        if (related !== node) {
+            yield { related };
         }
     }
 });
 
-export const conflictingTypes = query(function* (db, filter) {
-    for (const [node, group] of db.list(InTypeGroup)) {
-        const { instantiatedFrom, instantiatedBy: source } = node;
+export const conflictingTypes = query(function* (node, filter) {
+    const instantiatedNode = node instanceof InstantiatedNode ? node : undefined;
 
-        if (group.types.length > 1) {
-            yield {
-                source,
-                node: instantiatedFrom ?? node,
-                types: group.types,
-                nodes: group.nodes.values().filter(filter).toArray(),
-            };
-        }
+    const group = node.facts.get(Typed);
+    if (group == null) {
+        return;
+    }
+
+    if (group.types.length > 1 && isFirstNodeInGroup(node, group, filter)) {
+        yield {
+            source: instantiatedNode?.source,
+            from: instantiatedNode?.from,
+            nodes: Iterator.from(group.nodes)
+                .filter(filter)
+                .filter((n) => n !== node)
+                .toArray(),
+            types: group.types,
+        };
     }
 });
 
-export const incompleteType = query(function* (db, filter) {
-    for (const [node, _] of db.list(IsTyped)) {
-        const types = db.list(node, HasType).toArray();
-        if (types.length === 1) {
-            const [type] = types;
+export const incompleteType = query(function* (node, filter) {
+    const group = node.facts.get(Typed);
+    if (group == null) {
+        return;
+    }
 
-            if (!(type instanceof Node) && typeReferencesNode(type)) {
-                const group = db.get(node, InTypeGroup);
-                if (group != null && isFirstNodeInGroup(node, group, filter)) {
-                    yield { node, type };
-                }
-            }
-        }
+    if (group.types.length !== 1 || !isFirstNodeInGroup(node, group, filter)) {
+        return;
+    }
+
+    const [type] = group.types;
+
+    if (!(type instanceof Node) && typeReferencesNode(type)) {
+        yield { type };
     }
 });
 
-export const unknownType = query(function* (db, filter) {
-    for (const [node, _] of db.list(IsTyped)) {
-        const types = db.list(node, HasType).toArray();
-        if (types.length === 0) {
-            const group = db.get(node, InTypeGroup);
-            if (group != null && isFirstNodeInGroup(node, group, filter)) {
-                yield { node };
-            }
-        }
+export const unknownType = query(function* (node, filter) {
+    const group = node.facts.get(Typed);
+    if (group == null) {
+        return;
+    }
+
+    if (group.types.length === 0 && isFirstNodeInGroup(node, group, filter)) {
+        yield { group };
     }
 });
 

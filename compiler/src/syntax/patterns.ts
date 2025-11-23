@@ -1,225 +1,126 @@
-import { Parser, LocationRange, Token } from "./parser";
+import type { Parser } from "./parser";
 import {
     parseConstructorName,
     parseNumber,
     parseString,
     parseTypeName,
     parseVariableName,
-} from "./tokens";
-import { parseTypeElement, Type } from "./types";
+} from "./atoms";
+import { parseTypeElement } from "./types";
+import { AnnotatePatternNode } from "../nodes/patterns/annotate";
+import { ConstructorPatternNode } from "../nodes/patterns/constructor";
+import { NumberPatternNode } from "../nodes/patterns/number";
+import { OrPatternNode } from "../nodes/patterns/or";
+import { SetPatternNode } from "../nodes/patterns/set";
+import { StringPatternNode } from "../nodes/patterns/string";
+import { StructurePatternField, StructurePatternNode } from "../nodes/patterns/structure";
+import { TuplePatternNode } from "../nodes/patterns/tuple";
+import { UnitPatternNode } from "../nodes/patterns/unit";
+import { VariablePatternNode } from "../nodes/patterns/variable";
+import { WildcardPatternNode } from "../nodes/patterns/wildcard";
+import type { PatternNode } from "../nodes/patterns";
 
-export type Pattern =
-    | UnitPattern
-    | WildcardPattern
-    | VariablePattern
-    | NumberPattern
-    | StringPattern
-    | StructurePattern
-    | SetPattern
-    | ConstructorPattern
-    | OrPattern
-    | TuplePattern
-    | AnnotatePattern;
+export const parsePattern = (parser: Parser): PatternNode =>
+    parser.alternatives<PatternNode>("pattern", parsePattern, [
+        parseTuplePattern,
+        parseOrPattern,
+        parseAnnotatePattern,
+        parsePatternElement,
+    ]);
 
-let patterns: ((parser: Parser) => Pattern)[];
-export const parsePattern = (parser: Parser): Pattern => {
-    if (patterns === undefined) {
-        patterns = [parseTuplePattern, parseOrPattern, parseAnnotatePattern, parsePatternElement];
-    }
+export const parsePatternElement = (parser: Parser): PatternNode =>
+    parser.alternatives<PatternNode>("pattern", parsePatternElement, [
+        parseStructurePattern,
+        parseConstructorPattern,
+        parseSetPattern,
+        parseAtomicPattern,
+    ]);
 
-    return parser.alternatives<Pattern>("pattern", patterns);
-};
+export const parseAtomicPattern = (parser: Parser): PatternNode =>
+    parser.alternatives<PatternNode>("pattern", parseAtomicPattern, [
+        parseWildcardPattern,
+        parseVariablePattern,
+        parseNumberPattern,
+        parseStringPattern,
+        parseUnitPattern,
+        parseParenthesizedPattern,
+    ]);
 
-let patternElements: ((parser: Parser) => Pattern)[];
-export const parsePatternElement = (parser: Parser): Pattern => {
-    if (patternElements === undefined) {
-        patternElements = [
-            parseStructurePattern,
-            parseConstructorPattern,
-            parseSetPattern,
-            parseAtomicPattern,
-        ];
-    }
+export const parseParenthesizedPattern = (parser: Parser) =>
+    parser.delimited("leftParenthesis", "rightParenthesis", () => parsePattern(parser));
 
-    return parser.alternatives<Pattern>("pattern", patternElements);
-};
-
-let atomicPatterns: ((parser: Parser) => Pattern)[];
-export const parseAtomicPattern = (parser: Parser): Pattern => {
-    if (atomicPatterns === undefined) {
-        atomicPatterns = [
-            parseWildcardPattern,
-            parseVariablePattern,
-            parseNumberPattern,
-            parseStringPattern,
-            parseUnitPattern,
-            parseParenthesizedPattern,
-        ];
-    }
-
-    return parser.alternatives<Pattern>("pattern", atomicPatterns);
-};
-
-export const parseParenthesizedPattern = (parser: Parser): Pattern =>
-    parser.withLocation(() =>
-        parser.delimited("leftParenthesis", "rightParenthesis", () => parsePattern(parser)),
-    );
-
-export interface WildcardPattern {
-    type: "wildcard";
-    location: LocationRange;
-}
-
-export const parseWildcardPattern = (parser: Parser): WildcardPattern =>
-    parser.withLocation(() => {
+export const parseWildcardPattern = (parser: Parser) =>
+    parser.spanned((span) => {
         parser.next("underscoreKeyword");
-        return { type: "wildcard" };
+        return new WildcardPatternNode(span());
     });
 
-export interface VariablePattern {
-    type: "variable";
-    location: LocationRange;
-    variable: Token;
-}
+export const parseVariablePattern = (parser: Parser) =>
+    parser.spanned((span) => new VariablePatternNode(parseVariableName(parser), span()));
 
-export const parseVariablePattern = (parser: Parser): VariablePattern =>
-    parser.withLocation(() => ({
-        type: "variable",
-        variable: parseVariableName(parser),
-    }));
+export const parseNumberPattern = (parser: Parser) =>
+    parser.spanned((span) => new NumberPatternNode(parseNumber(parser), span()));
 
-export interface NumberPattern {
-    type: "number";
-    location: LocationRange;
-    value: Token;
-}
+export const parseStringPattern = (parser: Parser) =>
+    parser.spanned((span) => new StringPatternNode(parseString(parser), span()));
 
-export const parseNumberPattern = (parser: Parser): NumberPattern =>
-    parser.withLocation(() => ({
-        type: "number",
-        value: parseNumber(parser),
-    }));
-
-export interface StringPattern {
-    type: "string";
-    location: LocationRange;
-    value: Token;
-}
-
-export const parseStringPattern = (parser: Parser): StringPattern =>
-    parser.withLocation(() => ({
-        type: "string",
-        value: parseString(parser),
-    }));
-
-export interface StructurePattern {
-    type: "structure";
-    location: LocationRange;
-    name: Token;
-    fields: StructurePatternField[];
-}
-
-export const parseStructurePattern = (parser: Parser): StructurePattern =>
-    parser.withLocation(() => ({
-        type: "structure",
-        name: parseTypeName(parser),
-        fields: parser.delimited("leftBrace", "rightBrace", () =>
+export const parseStructurePattern = (parser: Parser) =>
+    parser.spanned((span) => {
+        const name = parseTypeName(parser);
+        const fields = parser.delimited("leftBrace", "rightBrace", () =>
             parser.many("field", parseStructurePatternField, ["lineBreak"]),
-        ),
-    }));
+        );
+        return new StructurePatternNode(name, fields, span());
+    });
 
-export interface StructurePatternField {
-    location: LocationRange;
-    name: Token;
-    value: Pattern;
-}
-
-export const parseStructurePatternField = (parser: Parser): StructurePatternField =>
-    parser.withLocation(() => {
+export const parseStructurePatternField = (parser: Parser) =>
+    parser.spanned((span) => {
         const name = parseVariableName(parser);
         parser.next("assignOperator");
         parser.commit();
         const value = parsePattern(parser);
-        return { name, value };
+        return new StructurePatternField(name, value, span());
     });
 
-export interface UnitPattern {
-    type: "unit";
-    location: LocationRange;
-}
+export const parseUnitPattern = (parser: Parser) =>
+    parser.spanned((span) => {
+        parser.delimited("leftParenthesis", "rightParenthesis", () => undefined);
+        return new UnitPatternNode(span());
+    });
 
-export const parseUnitPattern = (parser: Parser): UnitPattern =>
-    parser.withLocation(() =>
-        parser.delimited("leftParenthesis", "rightParenthesis", () => ({
-            type: "unit",
-        })),
-    );
-
-export interface TuplePattern {
-    type: "tuple";
-    location: LocationRange;
-    elements: Pattern[];
-}
-
-export const parseTuplePattern = (parser: Parser): TuplePattern =>
-    parser.withLocation(() => ({
-        type: "tuple",
-        elements: parser
+export const parseTuplePattern = (parser: Parser) =>
+    parser.spanned((span) => {
+        const elements = parser
             .collection("tuple pattern", ["tupleOperator"], parsePatternElement)
-            .map(([element]) => element),
-    }));
-
-export interface OrPattern {
-    type: "or";
-    location: LocationRange;
-    patterns: Pattern[];
-}
-
-export const parseOrPattern = (parser: Parser): OrPattern =>
-    parser.withLocation(() => ({
-        type: "or",
-        patterns: parser
-            .collection("or pattern", ["orOperator"], parsePatternElement)
-            .map(([element]) => element),
-    }));
-
-export interface SetPattern {
-    type: "set";
-    location: LocationRange;
-    variable: Token;
-}
-
-export const parseSetPattern = (parser: Parser): SetPattern =>
-    parser.withLocation(() => {
-        parser.next("setKeyword");
-        return { type: "set", variable: parseVariableName(parser) };
+            .map(([element]) => element);
+        return new TuplePatternNode(elements, span());
     });
 
-export interface ConstructorPattern {
-    type: "constructor";
-    location: LocationRange;
-    constructor: Token;
-    elements: Pattern[];
-}
+export const parseOrPattern = (parser: Parser) =>
+    parser.spanned((span) => {
+        const patterns = parser
+            .collection("or pattern", ["orOperator"], parsePatternElement)
+            .map(([element]) => element);
+        return new OrPatternNode(patterns, span());
+    });
 
-export const parseConstructorPattern = (parser: Parser): ConstructorPattern =>
-    parser.withLocation(() => ({
-        type: "constructor",
-        constructor: parseConstructorName(parser),
-        elements: parser.optional(() => parser.many("pattern", parseAtomicPattern), []),
-    }));
+export const parseSetPattern = (parser: Parser) =>
+    parser.spanned((span) => {
+        parser.next("setKeyword");
+        return new SetPatternNode(parseVariableName(parser), span());
+    });
 
-export interface AnnotatePattern {
-    type: "annotate";
-    location: LocationRange;
-    left: Pattern;
-    right: Type;
-}
+export const parseConstructorPattern = (parser: Parser) =>
+    parser.spanned((span) => {
+        const constructor = parseConstructorName(parser);
+        const elements = parser.optional(() => parser.many("pattern", parseAtomicPattern), []);
+        return new ConstructorPatternNode(constructor, elements, span());
+    });
 
-export const parseAnnotatePattern = (parser: Parser): AnnotatePattern =>
-    parser.withLocation(() => {
+export const parseAnnotatePattern = (parser: Parser) =>
+    parser.spanned((span) => {
         const left = parsePatternElement(parser);
         parser.next("annotateOperator");
         const right = parseTypeElement(parser);
-        return { type: "annotate", left, right };
+        return new AnnotatePatternNode(left, right, span());
     });

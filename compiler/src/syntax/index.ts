@@ -1,65 +1,45 @@
-import { expect } from "chai";
-import { parseStatements, Statement } from "./statements";
-import { Parser, LocationRange } from "./parser";
+import { Node } from "../node";
+import { FileNode } from "../nodes";
+import { Parser } from "./parser";
+import { parseStatements } from "./statements";
 
-export { SyntaxError, Location, LocationRange } from "./parser";
-export * from "./attributes";
-export * from "./constraints";
-export * from "./expressions";
-export * from "./patterns";
-export * from "./statements";
-export * from "./tokens";
-export * from "./types";
-
-export interface SourceFile {
-    path: string;
-    code: string;
-    location: LocationRange;
-    statements: Statement[];
-}
-
-type DeepPartial<T> = T extends Record<string, any> ? { [P in keyof T]?: DeepPartial<T[P]> } : T;
-
-export const testParse = <T>(
-    rule: (parser: Parser) => T,
-    source: string,
-    expected?: DeepPartial<T>,
-) => {
-    const parser = new Parser("test", source);
-    const parsed = rule(parser);
-    parser.finish();
-
-    const removeLocation = (x: any) => {
-        if (x !== null && typeof x === "object") {
-            delete x.location;
-
-            for (const key in x) {
-                removeLocation(x[key]);
-            }
-        }
-    };
-
-    removeLocation(parsed);
-
-    if (expected != null) {
-        expect(parsed).to.containSubset(expected);
-    }
-
-    return parsed;
-};
-
-const parseSourceFile = (path: string, code: string): SourceFile => {
+export const parseFile = (path: string, code: string) => {
     const parser = new Parser(path, code);
 
-    const sourceFile = parser.withLocation<SourceFile>(() => ({
-        path,
-        code,
-        statements: parseStatements(parser),
-    }));
+    const file = parser.spanned((span) => {
+        const statements = parseStatements(parser);
+        return new FileNode(statements, span());
+    });
 
     parser.finish();
 
-    return sourceFile;
+    return file;
 };
 
-export default parseSourceFile;
+export const testParse = <T>(name: string, rule: (parser: Parser) => T, source: string) => {
+    test(name, () => {
+        const parser = new Parser("test", source);
+        const parsed = rule(parser);
+        parser.finish();
+
+        const filter = (value: any) => {
+            if (Array.isArray(value)) {
+                value.forEach(filter);
+            } else if (typeof value === "object" && value !== null) {
+                if (value instanceof Node) {
+                    // @ts-expect-error
+                    delete value.facts;
+                }
+
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                delete value.span;
+
+                Object.values(value).forEach(filter);
+            }
+        };
+
+        filter(parsed);
+
+        expect(parsed).toMatchSnapshot();
+    });
+};

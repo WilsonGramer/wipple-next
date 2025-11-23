@@ -1,13 +1,15 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { compile } from "../src/compile";
-import { Db, Node } from "../src/db";
-import { AssertionError } from "assert";
-import { IsPlaceholderExpression } from "../src/visit/expressions/placeholder";
-import { IsPlaceholderType } from "../src/visit/types/placeholder";
 import { collectFeedback } from "../src/feedback";
-import { IsWildcardPattern } from "../src/visit/patterns/wildcard";
-import { nodeFilter } from "../src/db/filter";
+import type { Node } from "../src/node";
+import { Db, nodeFilter } from "../src/node";
+import { WildcardPatternNode } from "../src/nodes/patterns/wildcard";
+import { PlaceholderExpressionNode } from "../src/nodes/expressions/placeholder";
+import { PlaceholderTypeNode } from "../src/nodes/types/placeholder";
+import { compareSpans } from "../src/span";
+import { displayType } from "../src/typecheck";
+import { Typed } from "../src/nodes/types";
 
 export const compileTest = (path: string) => {
     const code = readFileSync(resolve(__dirname, path), "utf8");
@@ -15,24 +17,18 @@ export const compileTest = (path: string) => {
     const db = new Db();
     const result = compile(db, { files: [{ path, code }] });
 
-    if (!result.success) {
-        throw new AssertionError({ message: result.message });
-    }
+    expect(result).toMatchObject({ success: true });
 
-    const placeholders = [
-        ...db.list(IsWildcardPattern).map(([node]) => node),
-        ...db.list(IsPlaceholderExpression).map(([node]) => node),
-        ...db.list(IsPlaceholderType).map(([node]) => node),
-    ];
+    const placeholders = Iterator.from(db)
+        .filter(
+            (node) =>
+                node instanceof WildcardPatternNode ||
+                node instanceof PlaceholderExpressionNode ||
+                node instanceof PlaceholderTypeNode,
+        )
+        .toArray();
 
-    // Sort by source code location
-    placeholders.sort((a, b) => {
-        if (a.span.range.start.offset !== b.span.range.start.offset) {
-            return a.span.range.start.offset - b.span.range.start.offset;
-        } else {
-            return a.span.range.end.offset - b.span.range.end.offset;
-        }
-    });
+    placeholders.sort((a, b) => compareSpans(a.span, b.span));
 
     const feedback = new Map<Node, string[]>();
     for (const feedbackItem of collectFeedback(db, nodeFilter())) {
@@ -48,4 +44,9 @@ export const compileTest = (path: string) => {
         placeholders,
         feedback,
     };
+};
+
+export const testTypes = (node: Node, expected: string[]) => {
+    const types = node.facts.get(Typed)?.types.map((type) => displayType(type)) ?? [];
+    expect(new Set(types)).toEqual(new Set(expected));
 };

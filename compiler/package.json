@@ -1,12 +1,13 @@
 {
     "name": "wipple-compiler",
     "private": true,
-    "main": "./dist/src/index.js",
+    "main": "./dist/index.js",
     "scripts": {
         "build": "node build.mjs",
-        "test": "npm run build && mocha",
+        "test": "npm run build && jest",
+        "lint": "eslint src tests",
         "format": "prettier --write .",
-        "exe": "npm run build && (EXE=/usr/local/bin/wipple; echo '#!/usr/bin/env node' > $EXE && cat ./dist/src/index.js >> $EXE && chmod +x $EXE)"
+        "exe": "npm run build && (EXE=/usr/local/bin/wipple; echo '#!/usr/bin/env node' > $EXE && cat ./dist/index.js >> $EXE && chmod +x $EXE)"
     },
     "dependencies": {
         "chalk": "^5.6.2",
@@ -16,21 +17,22 @@
         "moo": "^0.5.2",
         "nanoid": "^5.1.6",
         "nearley": "^2.20.1",
-        "typescript": "^5.9.2",
         "vscode-languageserver": "^9.0.1",
         "vscode-languageserver-textdocument": "^1.0.12",
         "wrap-ansi": "^9.0.2"
     },
     "devDependencies": {
-        "@types/chai": "^5.2.2",
-        "@types/mocha": "^10.0.10",
+        "@eslint/js": "^9.39.1",
+        "@types/jest": "^30.0.0",
         "@types/moo": "^0.5.10",
         "@types/node": "^24.5.2",
-        "chai": "^6.2.0",
-        "esbuild": "^0.25.10",
+        "esbuild": "^0.27.0",
         "esbuild-plugin-inline-import": "^1.1.0",
-        "esbuild-runner": "^2.2.2",
-        "mocha": "^11.7.4",
-        "source-map-support": "^0.5.21"
+        "eslint": "^9.39.1",
+        "jest": "^30.2.0",
+        "source-map-support": "^0.5.21",
+        "ts-jest": "^29.4.5",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.47.0"
     }
 }

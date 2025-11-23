@@ -1,11 +1,8 @@
-import { test } from "mocha";
-import { compileTest } from ".";
-import assert from "node:assert";
-import { HasType } from "../src/compile";
+import { compileTest, testTypes } from ".";
 
 test("sequence", () => {
-    const { db, placeholders, feedback } = compileTest("sequence.wipple");
+    const { placeholders, feedback } = compileTest("sequence.wipple");
 
-    assert.deepStrictEqual(db.display(placeholders[2], HasType), new Set(["Number", "String"]));
-    assert.partialDeepStrictEqual(feedback.get(placeholders[2]), ["conflicting-types"]);
+    testTypes(placeholders[2], ["Number", "String"]);
+    expect(feedback.get(placeholders[2])).toContain("conflicting-types");
 });

@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`parsing bound constraint 1`] = `
+BoundConstraintNode {
+  "isHidden": false,
+  "parameters": [
+    TypeParameterNode {
+      "infer": false,
+      "isHidden": false,
+      "name": "value",
+      "value": undefined,
+    },
+  ],
+  "trait": "Foo",
+}
+`;
+
+exports[`parsing default constraint 1`] = `
+DefaultConstraintNode {
+  "isHidden": false,
+  "parameter": TypeParameterNode {
+    "infer": false,
+    "isHidden": false,
+    "name": "value",
+    "value": undefined,
+  },
+  "value": NamedTypeNode {
+    "isHidden": false,
+    "name": "Number",
+    "parameters": [],
+  },
+}
+`;

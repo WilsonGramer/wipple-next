@@ -1,19 +1,6 @@
-import { test } from "mocha";
-import { parseAttribute, testParse } from ".";
+import { testParse } from ".";
+import { parseAttribute } from "./attributes";
 
-test("parsing named attribute", () => {
-    testParse(parseAttribute, "[foo]", {
-        name: { value: "foo" },
-        value: undefined,
-    });
-});
+testParse("parsing named attribute", parseAttribute, "[foo]");
 
-test("parsing valued attribute", () => {
-    testParse(parseAttribute, `[a : "b"]`, {
-        name: { value: "a" },
-        value: {
-            type: "string",
-            value: { value: "b" },
-        },
-    });
-});
+testParse("parsing valued attribute", parseAttribute, `[a : "b"]`);

@@ -2,12 +2,11 @@ import esbuild from "esbuild";
 import inlineImport from "esbuild-plugin-inline-import";
 
 esbuild.build({
-    entryPoints: ["src/index.ts", "src/**/*.test.ts", "tests/**/*.test.ts", "tests/**/*.wipple"],
+    entryPoints: ["src/index.ts"],
     loader: { ".wipple": "copy" },
-    outdir: "dist",
+    outfile: "dist/index.js",
     platform: "node",
     bundle: true,
     sourcemap: true,
-    external: ["mocha"],
     plugins: [inlineImport()],
 });

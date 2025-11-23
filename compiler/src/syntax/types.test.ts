@@ -1,111 +1,18 @@
-import { test } from "mocha";
-import { parseType, testParse } from ".";
+import { testParse } from ".";
+import { parseType } from "./types";
 
-test("parsing placeholder type", () => {
-    testParse(parseType, "_", {
-        type: "placeholder",
-    });
-});
+testParse("parsing placeholder type", parseType, "_");
 
-test("parsing unit type", () => {
-    testParse(parseType, "()", {
-        type: "unit",
-    });
-});
+testParse("parsing unit type", parseType, "()");
 
-test("parsing simple named type", () => {
-    testParse(parseType, "Number", {
-        type: "named",
-        name: { value: "Number" },
-        parameters: [],
-    });
-});
+testParse("parsing simple named type", parseType, "Number");
 
-test("parsing complex named type", () => {
-    testParse(parseType, "Maybe Number", {
-        type: "named",
-        name: { value: "Maybe" },
-        parameters: [
-            {
-                type: "named",
-                name: { value: "Number" },
-                parameters: [],
-            },
-        ],
-    });
-});
+testParse("parsing complex named type", parseType, "Maybe Number");
 
-test("parsing block type", () => {
-    testParse(parseType, "{Number}", {
-        type: "block",
-        output: {
-            type: "named",
-            name: { value: "Number" },
-            parameters: [],
-        },
-    });
-});
+testParse("parsing block type", parseType, "{Number}");
 
-test("parsing single input function type", () => {
-    testParse(parseType, "Number -> ()", {
-        type: "function",
-        inputs: [
-            {
-                type: "named",
-                name: { value: "Number" },
-                parameters: [],
-            },
-        ],
-        output: {
-            type: "unit",
-        },
-    });
-});
+testParse("parsing single input function type", parseType, "Number -> ()");
 
-test("parsing multi input function type", () => {
-    testParse(parseType, "Number Number -> ()", {
-        type: "function",
-        inputs: [
-            {
-                type: "named",
-                name: { value: "Number" },
-                parameters: [],
-            },
-            {
-                type: "named",
-                name: { value: "Number" },
-                parameters: [],
-            },
-        ],
-        output: {
-            type: "unit",
-        },
-    });
-});
+testParse("parsing multi input function type", parseType, "Number Number -> ()");
 
-test("parsing complex input function type", () => {
-    testParse(parseType, "(Maybe Number) Number -> ()", {
-        type: "function",
-        inputs: [
-            {
-                type: "named",
-                name: { value: "Maybe" },
-                parameters: [
-                    {
-                        type: "named",
-                        name: { value: "Number" },
-                        parameters: [],
-                    },
-                ],
-            },
-            {
-                type: "named",
-                name: { value: "Number" },
-                parameters: [],
-            },
-        ],
-        output: {
-            type: "unit",
-        },
-    });
-});
+testParse("parsing complex input function type", parseType, "(Maybe Number) Number -> ()");
