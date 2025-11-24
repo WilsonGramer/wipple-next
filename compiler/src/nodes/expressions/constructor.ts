@@ -8,12 +8,15 @@ import {
 } from "../../visit/definitions";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
-import { Node } from "../../node";
 import type { Type } from "../../typecheck";
 import type { TypeParameterNode } from "../types/parameter";
+import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class ConstructorExpressionNode extends ExpressionNode {
     constructorName: string;
+
+    matchingConstructor?: Node;
 
     constructor(constructorName: string, span: Span) {
         super(span);
@@ -52,6 +55,20 @@ export class ConstructorExpressionNode extends ExpressionNode {
                     substitutions,
                 }),
             );
+        }
+
+        this.matchingConstructor = constructorDefinition.node;
+    }
+
+    codegen(codegen: Codegen): void {
+        if (this.matchingConstructor == null) {
+            codegen.fail();
+        }
+
+        if (this.matchingConstructor instanceof MarkerConstructorDefinition) {
+            codegen.write("null");
+        } else {
+            codegen.write(this.matchingConstructor);
         }
     }
 }

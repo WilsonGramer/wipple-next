@@ -3,6 +3,8 @@ import type { Span } from "../../span";
 import { ExpressionNode } from "./index";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
+import type { Codegen } from "../../codegen";
+import { TupleExpressionNode } from "./tuple";
 
 export class UnitExpressionNode extends ExpressionNode {
     constructor(span: Span) {
@@ -12,6 +14,10 @@ export class UnitExpressionNode extends ExpressionNode {
     visit(visitor: Visitor): void {
         super.visit(visitor);
 
-        visitor.constraint(new TypeConstraint(this, types.unit()));
+        visitor.constraint(new TypeConstraint(this, types.tuple([])));
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write(new TupleExpressionNode([], this.span));
     }
 }

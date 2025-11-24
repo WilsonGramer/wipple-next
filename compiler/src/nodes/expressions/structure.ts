@@ -4,6 +4,7 @@ import { ExpressionNode } from "./index";
 import { StructureConstructorDefinition } from "../../visit/definitions";
 import type { Node } from "../../node";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import type { Codegen } from "../../codegen";
 
 export class StructureExpressionNode extends ExpressionNode {
     name: string;
@@ -59,6 +60,18 @@ export class StructureExpressionNode extends ExpressionNode {
                 replacements,
             }),
         );
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write("{");
+
+        for (const field of this.fields) {
+            codegen.write(`${JSON.stringify(field.name)}: `);
+            codegen.write(field.value);
+            codegen.write(", ");
+        }
+
+        codegen.write("}");
     }
 }
 

@@ -8,6 +8,7 @@ import { parseConstantAttributes } from "../../visit/attributes";
 import type { Visitor } from "../../visit";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { ConstantDefinition } from "../../visit/definitions";
+import type { Codegen } from "../../codegen";
 
 export class ConstantDefinitionNode extends StatementNode {
     attributes: ConstantAttributes;
@@ -66,5 +67,9 @@ export class ConstantDefinitionNode extends StatementNode {
 
             return definition;
         });
+    }
+
+    codegen(_codegen: Codegen): void {
+        // Handled specially in `Codegen`
     }
 }

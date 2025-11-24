@@ -1,5 +1,4 @@
-import { Db } from "./node";
-import { fact, Node } from "./node";
+import { Db, Fact, Node } from "./node";
 import type { FileNode } from "./nodes";
 import type { Span } from "./span";
 import { parseFile } from "./syntax";
@@ -21,15 +20,24 @@ export type CompileResult =
 
 // Marker for e.g. top-level scopes
 export class RootNode extends Node {
+    files: FileNode[] = [];
+
     visit(_visitor: Visitor): void {}
 }
 
-const TopLevelScopes = fact<Scope[]>(() => "has top-level scopes");
+export class TopLevelScopes extends Fact<Scope[]> {
+    display = "has top-level scopes";
+}
 
 export const makeRoot = () => {
     const db = new Db();
+
+    // This needs to be done separately to prevent circular imports
+    db.solver = new Solver(db);
+
     const root = new RootNode(nullSpan("<root>"));
     db.register(root);
+
     return root;
 };
 
@@ -50,7 +58,10 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
         };
     }
 
+    root.files.push(...parsedFiles);
+
     const { db } = root;
+    const { solver } = db;
 
     const topLevelScopes = db
         .list(TopLevelScopes)
@@ -63,11 +74,11 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
         visitor.visit(file);
     }
 
-    const info = visitor.finish();
+    const topLevel = visitor.finish();
 
-    root.facts.getOr(TopLevelScopes, []).push(info.scope);
+    root.facts.getOr(TopLevelScopes, []).push(topLevel.scope);
 
-    const definitionSolver = new Solver(db);
+    const definitionSolver = Solver.from(solver);
 
     for (const [, group] of db.list(Typed)) {
         if (!group.isEmpty()) {
@@ -112,8 +123,7 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
     }
 
     // Solve constraints from top-level expressions
-    const solver = new Solver(db);
-    solver.add(...info.constraints);
+    solver.add(...topLevel.constraints);
     solver.run();
 
     addGroupsFrom(solver);

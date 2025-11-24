@@ -13,6 +13,11 @@ export const named = (definition: TypeDefinitionNode, parameters: Type[]): Const
             return root ? display : `(${display})`;
         }
     },
+    codegen: (parameters) => ({
+        type: "named",
+        name: definition.name,
+        parameters,
+    }),
 });
 
 const func = (inputs: Type[], output: Type): ConstructedType => ({
@@ -22,6 +27,11 @@ const func = (inputs: Type[], output: Type): ConstructedType => ({
         const display = `${inputs.map((i) => i()).join(" ")} -> ${output(true)}`;
         return root ? display : `(${display})`;
     },
+    codegen: ([output, ...inputs]) => ({
+        type: "function",
+        inputs,
+        output,
+    }),
 });
 
 export { func as function };
@@ -38,14 +48,20 @@ export const tuple = (elements: Type[]): ConstructedType => ({
             return `(${elements.map((e) => e(true)).join(" ; ")})`;
         }
     },
+    codegen: (elements) => ({
+        type: "tuple",
+        elements,
+    }),
 });
-
-export const unit = () => tuple([]);
 
 export const block = (output: Type): ConstructedType => ({
     tag: block,
     children: [output],
     display: ([output]) => `{${output(true)}}`,
+    codegen: ([output]) => ({
+        type: "block",
+        output,
+    }),
 });
 
 export const parameter = (node: TypeParameterNode): ConstructedType => ({
@@ -53,4 +69,8 @@ export const parameter = (node: TypeParameterNode): ConstructedType => ({
     children: [],
     instantiate: node,
     display: () => node.name,
+    codegen: ([], codegen) => ({
+        type: "parameter",
+        node: codegen.node(node),
+    }),
 });

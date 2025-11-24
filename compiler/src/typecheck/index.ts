@@ -1,13 +1,13 @@
+import type { Codegen } from "../codegen";
 import { Node } from "../node";
 import type { TypeParameterNode } from "../nodes/types/parameter";
-import type { Solver } from "./solve";
 
 export interface ConstructedType {
     tag: unknown;
     children: Type[];
     instantiate?: TypeParameterNode;
     display: (children: ((root?: boolean) => string)[], root: boolean) => string;
-    solver?: Solver;
+    codegen: (children: any[], codegen: Codegen) => any;
 }
 
 export type Type = Node | ConstructedType;

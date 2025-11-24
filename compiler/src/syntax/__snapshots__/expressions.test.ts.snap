@@ -17,12 +17,12 @@ OperatorExpressionNode {
 
 exports[`parsing annotate expression 1`] = `
 AnnotateExpressionNode {
-  "isHidden": false,
-  "left": NumberExpressionNode {
+  "expression": NumberExpressionNode {
     "isHidden": false,
     "value": "3.14",
   },
-  "right": NamedTypeNode {
+  "isHidden": false,
+  "type": NamedTypeNode {
     "isHidden": false,
     "name": "Number",
     "parameters": [],

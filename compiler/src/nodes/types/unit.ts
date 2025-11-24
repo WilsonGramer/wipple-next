@@ -7,6 +7,6 @@ export class UnitTypeNode extends TypeNode {
     visit(visitor: Visitor): void {
         super.visit(visitor);
 
-        visitor.constraint(new TypeConstraint(this, types.unit()));
+        visitor.constraint(new TypeConstraint(this, types.tuple([])));
     }
 }

@@ -1,15 +1,20 @@
-import type { Visitor } from "../../visit";
+import { type Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { MarkerConstructorDefinition, VariantConstructorDefinition } from "../../visit/definitions";
-import { InternalNode } from "../../node";
+import { InternalNode, type Node } from "../../node";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
+import type { Codegen } from "../../codegen";
 
 export class ConstructorPatternNode extends PatternNode {
     constructorName: string;
     elements: PatternNode[];
+
+    private matchingConstructor?:
+        | { type: "marker" }
+        | { type: "variant"; index: number; elements: Node[] };
 
     constructor(constructorName: string, elements: PatternNode[], span: Span) {
         super(span);
@@ -48,14 +53,20 @@ export class ConstructorPatternNode extends PatternNode {
                 }),
             );
         } else if (definition instanceof VariantConstructorDefinition) {
-            for (const pattern of this.elements) {
-                const elementNode = new InternalNode(pattern.span);
-                visitor.db.register(elementNode);
+            this.matchingConstructor = {
+                type: "variant",
+                index: definition.index,
+                elements: this.elements.map((pattern) => {
+                    const elementNode = new InternalNode(pattern.span);
+                    visitor.db.register(elementNode);
 
-                visitor.matching(elementNode, () => {
-                    visitor.visit(pattern);
-                });
-            }
+                    visitor.matching(elementNode, () => {
+                        visitor.visit(pattern);
+                    });
+
+                    return elementNode;
+                }),
+            };
 
             if (this.elements.length === 0) {
                 visitor.constraint(
@@ -87,6 +98,44 @@ export class ConstructorPatternNode extends PatternNode {
             }
         } else {
             definition satisfies never;
+        }
+    }
+
+    codegen(codegen: Codegen): void {
+        if (this.matchingConstructor == null) {
+            codegen.fail();
+        }
+
+        switch (this.matchingConstructor.type) {
+            case "marker": {
+                // No code needed
+                break;
+            }
+            case "variant": {
+                const { index, elements } = this.matchingConstructor;
+
+                codegen.write(
+                    ` && (`,
+                    codegen.node(this.matching),
+                    `[runtime.variant] === ${index})`,
+                );
+
+                elements.forEach((element, index) => {
+                    codegen.write(
+                        ` && ((`,
+                        codegen.node(this),
+                        ` = `,
+                        codegen.node(this.matching),
+                        `[${index}]) || true)`,
+                        element,
+                    );
+                });
+
+                break;
+            }
+            default: {
+                this.matchingConstructor satisfies never;
+            }
         }
     }
 }

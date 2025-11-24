@@ -4,6 +4,7 @@ import { TypeDefinition } from "../../visit/definitions";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import { PatternNode } from "./index";
+import type { Codegen } from "../../codegen";
 
 export class NumberPatternNode extends PatternNode {
     value: string;
@@ -22,5 +23,9 @@ export class NumberPatternNode extends PatternNode {
                 new TypeConstraint(this, types.named(numberTypeDefinition.node, [])),
             );
         }
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write(` && (`, codegen.node(this.matching), `=== ${this.value})`);
     }
 }

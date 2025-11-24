@@ -1,6 +1,6 @@
 import { Solver } from "../solve";
 import type { Node } from "../../node";
-import { fact } from "../../node";
+import { Fact } from "../../node";
 import { Instances } from "../../visit";
 import { Constraint } from "./constraint";
 import type { TraitDefinitionNode } from "../../nodes/statements/trait-definition";
@@ -56,13 +56,13 @@ interface BoundLike {
     substitutions: Map<TypeParameterNode, Type>;
 }
 
-export const ResolvedBound = fact<
-    {
-        bound: ResolvedBound;
-        instance: InstanceDefinitionNode | undefined;
-    }[]
->(
-    (bounds) =>
+type BoundValues = {
+    bound: ResolvedBound;
+    instance: InstanceDefinitionNode | undefined;
+}[];
+
+export class Bounds extends Fact<BoundValues> {
+    display = (bounds: BoundValues) =>
         `has bound(s) ${bounds
             .map(
                 ({ bound, instance }) =>
@@ -70,8 +70,8 @@ export const ResolvedBound = fact<
                         instance != null ? instance.toString() : "unresolved"
                     })`,
             )
-            .join(", ")}`,
-);
+            .join(", ")}`;
+}
 
 export class BoundConstraint extends Constraint {
     node: Node;
@@ -221,7 +221,7 @@ export class BoundConstraint extends Constraint {
                 );
 
                 if (!isImpliedInstance && instanceNode instanceof InstanceDefinitionNode) {
-                    source.facts.getOr(ResolvedBound, []).push({
+                    source.facts.getOr(Bounds, []).push({
                         bound: applyBound(resolvedBound, solver),
                         instance: instanceNode,
                     });
@@ -237,7 +237,7 @@ export class BoundConstraint extends Constraint {
             }
 
             if (isLastInstanceSet) {
-                source.facts.getOr(ResolvedBound, []).push({
+                source.facts.getOr(Bounds, []).push({
                     bound: applyBound(resolvedBound, solver),
                     instance: undefined,
                 });

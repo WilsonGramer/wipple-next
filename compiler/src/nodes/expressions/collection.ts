@@ -6,11 +6,16 @@ import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { types } from "../../typecheck";
 import { ExpressionNode } from "./index";
 import { TraitDefinition } from "../../visit/definitions";
-import { InternalNode } from "../../node";
+import { InternalNode, type Node } from "../../node";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
+import type { Codegen } from "../../codegen";
+import { CallExpressionNode } from "./call";
 
 export class CollectionExpressionNode extends ExpressionNode {
     elements: ExpressionNode[];
+
+    private initialCollectionNode?: Node;
+    private buildCollectionNode?: Node;
 
     constructor(elements: ExpressionNode[], span: Span) {
         super(span);
@@ -110,6 +115,25 @@ export class CollectionExpressionNode extends ExpressionNode {
 
             return next;
         }, initialCollectionNode);
+
         visitor.constraint(new GroupConstraint(this, resultNode));
+    }
+
+    codegen(codegen: Codegen): void {
+        if (this.initialCollectionNode == null || this.buildCollectionNode == null) {
+            codegen.fail();
+        }
+
+        codegen.write(
+            this.elements.reduce(
+                (collection, element) =>
+                    new CallExpressionNode(
+                        this.buildCollectionNode!,
+                        [element, collection],
+                        this.span,
+                    ),
+                this.initialCollectionNode,
+            ),
+        );
     }
 }

@@ -1,7 +1,7 @@
 import { query } from "./query";
 import type { Links } from "../feedback/render";
 import { render } from "../feedback/render";
-import { ResolvedBound } from "../typecheck/constraints/bound";
+import { Bounds } from "../typecheck/constraints/bound";
 import type { Node } from "../node";
 import { InstantiatedNode } from "../node";
 import { Resolved, TypeParameters } from "../visit";
@@ -9,7 +9,7 @@ import { Typed } from "../nodes/types";
 import { Definition } from "../visit/definitions";
 
 export const errorInstance = query(function* (node) {
-    for (const { bound, instance } of node.facts.get(ResolvedBound) ?? []) {
+    for (const { bound, instance } of node.facts.get(Bounds) ?? []) {
         if (instance != null && instance.attributes.error) {
             const links = getLinks(instance, node);
             yield { bound, comments: instance.comments, links };

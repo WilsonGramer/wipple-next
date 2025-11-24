@@ -1,6 +1,7 @@
 import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { ExpressionNode } from "./index";
+import type { Codegen } from "../../codegen";
 
 export class IntrinsicExpressionNode extends ExpressionNode {
     name: string;
@@ -22,5 +23,16 @@ export class IntrinsicExpressionNode extends ExpressionNode {
         for (const input of this.inputs) {
             visitor.visit(input);
         }
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write(`await runtime[${JSON.stringify(this.name)}](`);
+
+        for (const input of this.inputs) {
+            codegen.write(input);
+            codegen.write(", ");
+        }
+
+        codegen.write(")");
     }
 }

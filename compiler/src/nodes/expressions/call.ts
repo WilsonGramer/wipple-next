@@ -5,6 +5,7 @@ import { VariableExpressionNode } from "./variable";
 import { ConstantDefinition } from "../../visit/definitions";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
+import type { Codegen } from "../../codegen";
 
 export class CallExpressionNode extends ExpressionNode {
     function: ExpressionNode;
@@ -49,5 +50,18 @@ export class CallExpressionNode extends ExpressionNode {
         }
 
         visitor.constraint(new TypeConstraint(this.function, types.function(this.inputs, this)));
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write("await (");
+        codegen.write(this.function);
+        codegen.write(")(");
+
+        for (const input of this.inputs) {
+            codegen.write(input);
+            codegen.write(", ");
+        }
+
+        codegen.write(")");
     }
 }

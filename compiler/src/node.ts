@@ -1,5 +1,7 @@
+import type { Codegen } from "./codegen";
 import type { Span } from "./span";
 import { compareSpans } from "./span";
+import type { Solver } from "./typecheck/solve";
 import type { Visitor } from "./visit";
 
 export abstract class Node {
@@ -12,12 +14,20 @@ export abstract class Node {
         this.span = span;
     }
 
-    *children(): Iterable<Node> {}
+    *children(): Generator<Node> {}
+
+    *traverse(): Generator<Node> {
+        yield this;
+        for (const child of this.children()) {
+            yield* child.traverse();
+        }
+    }
 
     abstract visit(visitor: Visitor): void;
 
-    codegen(): void {
-        throw new Error("codegen not supported");
+    codegen(codegen: Codegen): void {
+        console.error("cannot codegen", this);
+        codegen.fail();
     }
 
     instantiate(source: Node | undefined): Node {
@@ -65,7 +75,7 @@ export class InstantiatedNode extends Node {
 }
 
 export class InternalNode extends Node {
-    constructor(span: Span, codegen?: () => void) {
+    constructor(span: Span, codegen?: (codegen: Codegen) => void) {
         super(span);
 
         if (codegen != null) {
@@ -76,24 +86,20 @@ export class InternalNode extends Node {
     visit(_visitor: Visitor): void {}
 }
 
-class Fact<T> {
-    display: (value: T) => string;
+export abstract class Fact<T> {
+    private declare _value: T;
 
-    constructor(display: (value: T) => string) {
-        this.display = display;
-    }
+    abstract display: string | ((value: T) => string);
 }
 
-export const fact = <T = null>(display: (value: T) => string): Fact<T> => new Fact(display);
-
 export class Facts {
-    private values = new Map<Fact<any>, any>();
+    private values = new Map<typeof Fact<any>, any>();
 
-    get<T>(key: Fact<T>): T | undefined {
+    get<T>(key: typeof Fact<T>): T | undefined {
         return this.values.get(key) as T | undefined;
     }
 
-    getOr<T>(key: Fact<T>, defaultValue: NoInfer<T>): T {
+    getOr<T>(key: typeof Fact<T>, defaultValue: NoInfer<T>): T {
         if (!this.values.has(key)) {
             this.values.set(key, defaultValue);
         }
@@ -101,11 +107,11 @@ export class Facts {
         return this.values.get(key) as T;
     }
 
-    set<T>(key: Fact<T>, value: NoInfer<T>) {
+    set<T>(key: typeof Fact<T>, value: NoInfer<T>) {
         this.values.set(key, value);
     }
 
-    delete<T>(key: Fact<T>) {
+    delete<T>(key: typeof Fact<T>) {
         this.values.delete(key);
     }
 
@@ -118,13 +124,14 @@ export class Facts {
 
 export class Db {
     private nodes = new Set<Node>();
+    solver!: Solver;
 
     register(node: Node) {
         node.db = this;
         this.nodes.add(node);
     }
 
-    *list<T>(key: Fact<T>) {
+    *list<T>(key: new () => Fact<T>) {
         for (const node of this.nodes) {
             const value = node.facts.get(key);
             if (value !== undefined) {
@@ -145,7 +152,8 @@ export class Db {
 
             if (facts.length > 0) {
                 for (const [fact, value] of facts) {
-                    console.log("  " + fact.display(value));
+                    const { display } = fact.prototype;
+                    console.log("  " + (typeof display === "string" ? display : display(value)));
                 }
             } else {
                 console.log("  (no facts)");

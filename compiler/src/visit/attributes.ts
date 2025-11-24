@@ -1,13 +1,27 @@
-import { fact } from "../node";
+import { Fact } from "../node";
 import type { AttributeNode } from "../nodes/attributes";
 import type { AttributeValue } from "../nodes/attributes/value";
 import { StringAttributeValue } from "../nodes/attributes/value";
 
-export const ExtraAttributeValue = fact(() => "extra attribute value");
-export const UnsupportedAttribute = fact(() => "unsupported attribute");
-export const DuplicateAttribute = fact(() => "duplicate attribute");
-export const MismatchedAttributeValue = fact(() => "mismatched attribute value");
-export const MissingAttributeValue = fact(() => "missing attribute value");
+export class ExtraAttributeValue extends Fact<null> {
+    display = "extra attribute value";
+}
+
+export class UnsupportedAttribute extends Fact<null> {
+    display = "unsupported attribute";
+}
+
+export class DuplicateAttribute extends Fact<null> {
+    display = "duplicate attribute";
+}
+
+export class MismatchedAttributeValue extends Fact<null> {
+    display = "mismatched attribute value";
+}
+
+export class MissingAttributeValue extends Fact<null> {
+    display = "missing attribute value";
+}
 
 export interface VariableAttributes {}
 

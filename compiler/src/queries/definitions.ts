@@ -8,17 +8,3 @@ export const unresolved = query(function* (node) {
         yield { name: definition };
     }
 });
-
-export const unused = query(function* (node) {
-    if (
-        node.facts.get(Defined) != null &&
-        node.db
-            .list(Resolved)
-            .filter(
-                ([, definition]) => definition instanceof Definition && definition.node === node,
-            )
-            .next().value == null
-    ) {
-        yield {};
-    }
-});

@@ -5,6 +5,7 @@ import type { AttributeNode } from "../attributes";
 import type { ExpressionNode } from "../expressions";
 import { StatementNode } from "./index";
 import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Codegen } from "../../codegen";
 
 export class ExpressionStatementNode extends StatementNode {
     expression: ExpressionNode;
@@ -36,5 +37,9 @@ export class ExpressionStatementNode extends StatementNode {
             visitor.visit(this.expression);
             visitor.constraint(new GroupConstraint(this, this.expression));
         });
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write(this.expression, ";\n");
     }
 }

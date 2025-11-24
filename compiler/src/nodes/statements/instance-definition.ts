@@ -14,6 +14,7 @@ import { InstanceDefinition, TraitDefinition } from "../../visit/definitions";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { TraitDefinitionNode } from "./trait-definition";
+import type { Codegen } from "../../codegen";
 
 export class InstanceDefinitionNode extends StatementNode {
     attributes: InstanceAttributes;
@@ -124,5 +125,9 @@ export class InstanceDefinitionNode extends StatementNode {
 
             return definition;
         });
+    }
+
+    codegen(_codegen: Codegen): void {
+        // Handled specially in `Codegen`
     }
 }

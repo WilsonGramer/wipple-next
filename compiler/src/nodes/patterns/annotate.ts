@@ -3,20 +3,21 @@ import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import type { TypeNode } from "../types";
 import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Codegen } from "../../codegen";
 
 export class AnnotatePatternNode extends PatternNode {
-    left: PatternNode;
-    right: TypeNode;
+    pattern: PatternNode;
+    type: TypeNode;
 
-    constructor(left: PatternNode, right: TypeNode, span: Span) {
+    constructor(pattern: PatternNode, type: TypeNode, span: Span) {
         super(span);
-        this.left = left;
-        this.right = right;
+        this.pattern = pattern;
+        this.type = type;
     }
 
     *children() {
-        yield this.left;
-        yield this.right;
+        yield this.pattern;
+        yield this.type;
     }
 
     visit(visitor: Visitor): void {
@@ -24,9 +25,13 @@ export class AnnotatePatternNode extends PatternNode {
 
         this.isHidden = true;
 
-        visitor.visit(this.left);
-        visitor.visit(this.right);
-        visitor.constraint(new GroupConstraint(this.left, this.right));
-        visitor.constraint(new GroupConstraint(this, this.left));
+        visitor.visit(this.pattern);
+        visitor.visit(this.type);
+        visitor.constraint(new GroupConstraint(this.pattern, this.type));
+        visitor.constraint(new GroupConstraint(this, this.pattern));
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write(this.pattern);
     }
 }

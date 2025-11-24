@@ -3,29 +3,34 @@ import type { Span } from "../../span";
 import { ExpressionNode } from "./index";
 import type { TypeNode } from "../types";
 import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Codegen } from "../../codegen";
 
 export class AnnotateExpressionNode extends ExpressionNode {
-    left: ExpressionNode;
-    right: TypeNode;
+    expression: ExpressionNode;
+    type: TypeNode;
 
-    constructor(left: ExpressionNode, right: TypeNode, span: Span) {
+    constructor(expression: ExpressionNode, type: TypeNode, span: Span) {
         super(span);
-        this.left = left;
-        this.right = right;
+        this.expression = expression;
+        this.type = type;
     }
 
     *children() {
-        yield this.left;
-        yield this.right;
+        yield this.expression;
+        yield this.type;
     }
 
     visit(visitor: Visitor): void {
         super.visit(visitor);
 
         this.isHidden = true;
-        visitor.visit(this.left);
-        visitor.visit(this.right);
-        visitor.constraint(new GroupConstraint(this.left, this.right));
-        visitor.constraint(new GroupConstraint(this, this.left));
+        visitor.visit(this.expression);
+        visitor.visit(this.type);
+        visitor.constraint(new GroupConstraint(this.expression, this.type));
+        visitor.constraint(new GroupConstraint(this, this.expression));
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write(this.expression);
     }
 }

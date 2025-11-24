@@ -4,6 +4,7 @@ import { TypeDefinition } from "../../visit/definitions";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import { PatternNode } from "./index";
+import type { Codegen } from "../../codegen";
 
 export class StringPatternNode extends PatternNode {
     value: string;
@@ -22,5 +23,9 @@ export class StringPatternNode extends PatternNode {
                 new TypeConstraint(this, types.named(stringTypeDefinition.node, [])),
             );
         }
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write(` && (`, codegen.node(this.matching), `=== ${JSON.stringify(this.value)})`);
     }
 }

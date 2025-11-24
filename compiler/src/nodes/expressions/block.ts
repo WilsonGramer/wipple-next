@@ -5,6 +5,7 @@ import { ExpressionNode } from "./index";
 import { types } from "../../typecheck";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { EmptyStatementNode } from "../statements/empty";
+import type { Codegen } from "../../codegen";
 
 export class BlockExpressionNode extends ExpressionNode {
     statements: StatementNode[];
@@ -34,7 +35,9 @@ export class BlockExpressionNode extends ExpressionNode {
         visitor.popScope();
 
         visitor.constraint(
-            new TypeConstraint(this, types.block(statements.at(-1) ?? types.unit())),
+            new TypeConstraint(this, types.block(statements.at(-1) ?? types.tuple([]))),
         );
     }
+
+    codegen(codegen: Codegen): void {}
 }

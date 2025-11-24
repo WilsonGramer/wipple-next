@@ -2,6 +2,7 @@ import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Codegen } from "../../codegen";
 
 export class OrPatternNode extends PatternNode {
     patterns: PatternNode[];
@@ -25,5 +26,15 @@ export class OrPatternNode extends PatternNode {
         for (const pattern of this.patterns) {
             visitor.constraint(new GroupConstraint(this, pattern));
         }
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write("(false");
+
+        for (const pattern of this.patterns) {
+            codegen.write(" || (true", pattern, ")");
+        }
+
+        codegen.write(")");
     }
 }

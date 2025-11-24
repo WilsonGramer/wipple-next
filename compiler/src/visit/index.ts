@@ -1,17 +1,26 @@
 import type { Db, Node } from "../node";
-import { fact } from "../node";
-import type { Definition, InstanceDefinition } from "./definitions";
+import { Fact } from "../node";
+import { Defined, type Definition, type InstanceDefinition } from "./definitions";
 import type { Instance } from "../typecheck/constraints/bound";
 import type { TypeParameterNode } from "../nodes/types/parameter";
 import type { Constraint } from "../typecheck/constraints/constraint";
 
-export const Resolved = fact<Definition | string>((definition) =>
-    typeof definition === "string" ? "unresolved" : `resolved to ${definition.node}`,
-);
+export class Resolved extends Fact<Definition | string> {
+    display = (definition: Definition | string) =>
+        typeof definition === "string" ? "unresolved" : `resolved to ${definition.node}`;
+}
 
-export const DefinitionConstraints = fact<Constraint[]>(() => "has definition constraints");
-export const TypeParameters = fact<TypeParameterNode[]>(() => "has type parameters");
-export const Instances = fact<Instance[]>(() => "has instances");
+export class DefinitionConstraints extends Fact<Constraint[]> {
+    display = () => "has definition constraints";
+}
+
+export class TypeParameters extends Fact<TypeParameterNode[]> {
+    display = () => "has type parameters";
+}
+
+export class Instances extends Fact<Instance[]> {
+    display = () => "has instances";
+}
 
 export class Visitor {
     db: Db;
@@ -108,6 +117,7 @@ export class Visitor {
 
         if (resultDefinition != null) {
             this.definitions.set(node, resultDefinition);
+            node.facts.set(Defined, resultDefinition);
         }
 
         return resultDefinition;
@@ -148,8 +158,6 @@ export class Visitor {
         this.runQueue();
 
         return {
-            definitions: this.definitions,
-            instances: this.instances,
             constraints: this.constraints,
             scope: this.popScope(),
         };

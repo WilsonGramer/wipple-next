@@ -16,6 +16,9 @@ import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Node } from "../../node";
 import { InternalNode } from "../../node";
+import type { Codegen } from "../../codegen";
+import { FunctionExpressionNode } from "../expressions/function";
+import { InternalPatternNode, PatternNode } from "../patterns";
 
 export class TypeDefinitionNode extends StatementNode {
     attributes: TypeAttributes;
@@ -66,7 +69,6 @@ export class TypeDefinitionNode extends StatementNode {
 
             const definitionType = types.named(this, this.parameters);
             visitor.constraint(new TypeConstraint(this, definitionType));
-
             // Types don't have additional constraints
 
             if (!this.attributes.intrinsic) {
@@ -101,7 +103,33 @@ export class TypeDefinitionNode extends StatementNode {
 
                         const variantDefinitions = this.representation.variants.map(
                             (variant, index) => {
-                                const variantNode = new InternalNode(variant.span);
+                                const variantNode = new InternalNode(variant.span, (codegen) => {
+                                    const result = new InternalNode(variant.span, (codegen) => {
+                                        codegen.write(`runtime.variant(${index}, [`);
+
+                                        for (const element of variant.elements) {
+                                            codegen.write(element);
+                                            codegen.write(", ");
+                                        }
+
+                                        codegen.write("])");
+                                    });
+
+                                    if (variant.elements.length === 0) {
+                                        return result;
+                                    } else {
+                                        const elementPatterns = variant.elements.map(
+                                            () => new InternalPatternNode(variant.span),
+                                        );
+
+                                        return new FunctionExpressionNode(
+                                            elementPatterns,
+                                            result,
+                                            variant.span,
+                                        );
+                                    }
+                                });
+
                                 visitor.db.register(variantNode);
 
                                 const constructorDefinition = visitor.defining(variantNode, () => {
@@ -162,6 +190,10 @@ export class TypeDefinitionNode extends StatementNode {
 
             return definition;
         });
+    }
+
+    codegen(_codegen: Codegen): void {
+        // Not an executable statement
     }
 }
 

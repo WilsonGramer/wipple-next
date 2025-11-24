@@ -12,6 +12,7 @@ import { types } from "../../typecheck";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
 import type { Node } from "../../node";
+import type { Codegen } from "../../codegen";
 
 export class TraitDefinitionNode extends StatementNode {
     attributes: TraitAttributes;
@@ -80,5 +81,9 @@ export class TraitDefinitionNode extends StatementNode {
 
             return definition;
         });
+    }
+
+    codegen(_codegen: Codegen): void {
+        // Handled specially in `Codegen`
     }
 }

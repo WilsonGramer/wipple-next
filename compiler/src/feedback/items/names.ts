@@ -12,14 +12,3 @@ registerFeedback({
         Double-check your spelling.
     `,
 });
-
-registerFeedback({
-    id: "unused",
-    query: queries.unused,
-    on: (node) => node,
-    render: (node) => render`
-        ${render.node(node)} is never used.
-
-        If you don't need this definition, you can remove it.
-    `,
-});

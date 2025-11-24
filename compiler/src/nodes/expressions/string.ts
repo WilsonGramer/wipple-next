@@ -4,6 +4,7 @@ import { TypeDefinition } from "../../visit/definitions";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import { ExpressionNode } from "./index";
+import type { Codegen } from "../../codegen";
 
 export class StringExpressionNode extends ExpressionNode {
     value: string;
@@ -22,5 +23,9 @@ export class StringExpressionNode extends ExpressionNode {
                 new TypeConstraint(this, types.named(stringTypeDefinition.node, [])),
             );
         }
+    }
+
+    codegen(codegen: Codegen): void {
+        codegen.write(JSON.stringify(this.value));
     }
 }

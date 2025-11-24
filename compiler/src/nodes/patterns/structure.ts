@@ -4,10 +4,13 @@ import { PatternNode } from "./index";
 import { StructureConstructorDefinition } from "../../visit/definitions";
 import { InternalNode, type Node } from "../../node";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import type { Codegen } from "../../codegen";
 
 export class StructurePatternNode extends PatternNode {
     name: string;
     fields: StructurePatternField[];
+
+    private matchingFields?: Map<string, Node>;
 
     constructor(name: string, fields: StructurePatternField[], span: Span) {
         super(span);
@@ -41,6 +44,8 @@ export class StructurePatternNode extends PatternNode {
             return;
         }
 
+        this.matchingFields = fields;
+
         const replacements = new Map<Node, Node>([[definition.node, this]]);
         for (const [name, type] of Object.entries(definition.fields)) {
             const value = fields.get(name);
@@ -57,6 +62,22 @@ export class StructurePatternNode extends PatternNode {
                 replacements,
             }),
         );
+    }
+
+    codegen(codegen: Codegen): void {
+        if (this.matchingFields == null) {
+            codegen.fail();
+        }
+
+        for (const [name, field] of this.matchingFields) {
+            codegen.write(
+                ` && ((`,
+                codegen.node(field),
+                ` = `,
+                codegen.node(this.matching),
+                `[${JSON.stringify(name)}]) || true)`,
+            );
+        }
     }
 }
 

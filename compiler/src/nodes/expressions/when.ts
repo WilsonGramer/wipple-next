@@ -1,12 +1,16 @@
 import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
-import type { PatternNode } from "../patterns";
+import { InternalPatternNode, type PatternNode } from "../patterns";
 import { ExpressionNode } from "./index";
 import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Codegen } from "../../codegen";
+import { VariablePatternNode } from "../patterns/variable";
 
 export class WhenExpressionNode extends ExpressionNode {
     input: ExpressionNode;
     arms: Arm[];
+
+    private inputTemporary?: PatternNode;
 
     constructor(input: ExpressionNode, arms: Arm[], span: Span) {
         super(span);
@@ -26,7 +30,11 @@ export class WhenExpressionNode extends ExpressionNode {
         super.visit(visitor);
 
         visitor.visit(this.input);
-        visitor.matching(this.input, () => {
+
+        this.inputTemporary = new InternalPatternNode(this.input.span);
+        visitor.constraint(new GroupConstraint(this.inputTemporary, this.input));
+
+        visitor.matching(this.inputTemporary, () => {
             for (const arm of this.arms) {
                 visitor.pushScope();
                 visitor.visit(arm.pattern);
@@ -36,6 +44,28 @@ export class WhenExpressionNode extends ExpressionNode {
                 visitor.constraint(new GroupConstraint(arm.value, this));
             }
         });
+    }
+
+    codegen(codegen: Codegen): void {
+        if (this.inputTemporary == null) {
+            codegen.fail();
+        }
+
+        codegen.write("((", codegen.node(this.inputTemporary), "}) => {\n");
+
+        const variables = Iterator.from(this.arms)
+            .flatMap((arm) => arm.pattern.traverse())
+            .filter((node) => node instanceof VariablePatternNode);
+
+        for (const variable of variables) {
+            codegen.write(`let ${codegen.node(variable)};\n`);
+        }
+
+        for (const arm of this.arms) {
+            codegen.write("if (true", arm.pattern, ") {\n", "return ", arm.value, ";\n}\n");
+        }
+
+        codegen.write("})(", this.input, ")");
     }
 }
 
