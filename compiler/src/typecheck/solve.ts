@@ -11,6 +11,7 @@ import type { Constraint } from "./constraints/constraint";
 export class Solver {
     db: Db;
     private groups = new Map<Set<Node>, ConstructedType[]>();
+    private cache = new Map<Node, Set<Node>>();
     constraints = new Constraints();
     impliedInstances: Instance[] = [];
     progress = false;
@@ -30,6 +31,12 @@ export class Solver {
         this.groups = new Map(
             other.groups.entries().map(([nodes, types]) => [new Set(nodes), [...types]]),
         );
+
+        for (const set of this.groups.keys()) {
+            for (const node of set) {
+                this.cache.set(node, set);
+            }
+        }
     }
 
     add(...constraints: Constraint[]) {
@@ -37,7 +44,11 @@ export class Solver {
     }
 
     setGroup(group: Group) {
-        this.groups.set(new Set(group.nodes), group.types);
+        const set = new Set(group.nodes);
+        this.groups.set(set, group.types);
+        for (const node of group.nodes) {
+            this.cache.set(node, set);
+        }
     }
 
     run() {
@@ -125,68 +136,92 @@ export class Solver {
 
     private applyShallow(type: Type): Type {
         if (type instanceof Node) {
-            for (const [nodes, types] of this.groups) {
-                if (nodes.has(type)) {
-                    return types.at(-1) ?? type;
-                }
+            const set = this.cache.get(type);
+            if (set == null) {
+                return type;
             }
+
+            const types = this.groups.get(set)!;
+            return types.at(-1) ?? type;
         }
 
         return type;
     }
 
     groupOf(node: Node): Group | undefined {
-        for (const [nodes, types] of this.groups) {
-            if (nodes.has(node)) {
-                return new Group(nodes, types);
-            }
+        const set = this.cache.get(node);
+        if (set == null) {
+            return undefined;
         }
 
-        return undefined;
+        const types = this.groups.get(set)!;
+        return new Group(set, types);
     }
 
     private insert(node: Node, ...newTypes: Type[]) {
-        for (const [nodes, types] of this.groups) {
-            if (nodes.has(node)) {
-                for (const type of newTypes) {
-                    if (type instanceof Node) {
-                        nodes.add(type);
-                    } else {
-                        types.push(type);
-                    }
-                }
+        const set = this.cache.get(node);
+        if (set != null) {
+            const types = this.groups.get(set)!;
 
-                return;
+            for (const type of newTypes) {
+                if (type instanceof Node) {
+                    set.add(type);
+                } else {
+                    types.push(type);
+                }
             }
+
+            return;
         }
 
-        const groupNodes = new Set<Node>([node]);
+        const groupSet = new Set<Node>([node]);
         const groupTypes: ConstructedType[] = [];
         for (const type of newTypes) {
             if (type instanceof Node) {
-                groupNodes.add(type);
+                groupSet.add(type);
             } else {
                 groupTypes.push(type);
             }
         }
 
-        this.groups.set(groupNodes, groupTypes);
+        this.groups.set(groupSet, groupTypes);
+        for (const node of groupSet) {
+            this.cache.set(node, groupSet);
+        }
     }
 
     private merge(left: Node, right: Node) {
-        let leftGroup = Group.empty(left);
-        let rightGroup = Group.empty(right);
-        for (const [nodes, types] of this.groups) {
-            if (nodes.has(left)) {
-                leftGroup = new Group(nodes, types);
-                this.groups.delete(nodes);
-            } else if (nodes.has(right)) {
-                rightGroup = new Group(nodes, types);
-                this.groups.delete(nodes);
+        const leftSet = this.cache.get(left);
+
+        const leftGroup =
+            leftSet != null ? new Group(leftSet, this.groups.get(leftSet)!) : Group.empty(left);
+
+        if (leftSet != null) {
+            this.groups.delete(leftSet);
+
+            for (const node of leftGroup.nodes) {
+                this.cache.delete(node);
             }
         }
 
-        this.groups.set(new Set([...leftGroup.nodes, ...rightGroup.nodes]), leftGroup.types);
+        const rightSet = this.cache.get(right);
+
+        const rightGroup =
+            rightSet != null ? new Group(rightSet, this.groups.get(rightSet)!) : Group.empty(right);
+
+        if (rightSet != null) {
+            this.groups.delete(rightSet);
+
+            for (const node of rightGroup.nodes) {
+                this.cache.delete(node);
+            }
+        }
+
+        const newSet = new Set([...leftGroup.nodes, ...rightGroup.nodes]);
+        this.groups.set(newSet, leftGroup.types);
+        for (const node of newSet) {
+            this.cache.set(node, newSet);
+        }
 
         for (const type of rightGroup.types) {
             this.unify(left, type);
@@ -222,12 +257,9 @@ export class Group {
     }
 
     normalize() {
-        // Prefer showing patterns first, then expressions, etc.
-        const nodeOrder = [PatternNode, ExpressionNode];
-        const compareKey = (node: Node) => {
-            const index = nodeOrder.findIndex((type) => node instanceof type);
-            return index === -1 ? nodeOrder.length : index;
-        };
+        // Prefer showing patterns first, then expressions
+        const compareKey = (node: Node) =>
+            node instanceof PatternNode ? 0 : node instanceof ExpressionNode ? 1 : 2;
 
         this.nodes.sort((a, b) => compareKey(a) - compareKey(b));
 

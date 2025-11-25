@@ -208,9 +208,10 @@ export class Codegen {
         const prelude = this.options.prelude + typeCache;
         const script = prelude + this.output;
 
+        const lineColumnIndex = lineColumn(script);
         const sourceMap = new SourceMapGenerator({ file: this.file });
         for (const [span, index] of this.mappings) {
-            const { line, col } = lineColumn(script).fromIndex(prelude.length + index)!;
+            const { line, col } = lineColumnIndex.fromIndex(prelude.length + index)!;
 
             sourceMap.addMapping({
                 source: span.path,
