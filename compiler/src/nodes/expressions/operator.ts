@@ -14,6 +14,7 @@ import type { Codegen } from "../../codegen";
 import { CallExpressionNode } from "./call";
 import { BlockExpressionNode } from "./block";
 import { ExpressionStatementNode } from "../statements/expression";
+import { ConstructorExpressionNode } from "./constructor";
 
 export class OperatorExpressionNode extends ExpressionNode {
     operator: string;
@@ -47,38 +48,13 @@ export class OperatorExpressionNode extends ExpressionNode {
             codegen.fail();
         }
 
-        codegen.write(this.operatorNode);
+        codegen.write(this.span, this.operatorNode);
     }
 }
 
 const resolveOperatorTrait = (visitor: Visitor, node: Node, name: string) => {
-    const operatorNode = new InternalNode(node.span);
-    visitor.db.register(operatorNode);
-
-    const operatorDefinition = visitor.resolve(name, [TraitDefinition], operatorNode);
-    if (operatorDefinition == null) {
-        return;
-    }
-
-    const substitutions = new Map<TypeParameterNode, Type>();
-
-    visitor.constraint(
-        new InstantiateConstraint({
-            source: operatorNode,
-            definition: operatorDefinition.node,
-            substitutions,
-            replacements: new Map([[operatorDefinition.node, operatorNode]]),
-        }),
-    );
-
-    visitor.constraint(
-        new BoundConstraint(operatorNode, {
-            source: operatorNode,
-            trait: operatorDefinition.node,
-            substitutions,
-        }),
-    );
-
+    const operatorNode = new ConstructorExpressionNode(name, node.span);
+    visitor.visit(operatorNode);
     return operatorNode;
 };
 

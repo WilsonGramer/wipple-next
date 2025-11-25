@@ -26,13 +26,13 @@ export class IntrinsicExpressionNode extends ExpressionNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(`await runtime[${JSON.stringify(this.name)}](`);
+        codegen.write(this.span, `await runtime[${JSON.stringify(this.name)}](`);
 
         for (const input of this.inputs) {
-            codegen.write(input);
-            codegen.write(", ");
+            codegen.write(this.span, input);
+            codegen.write(this.span, ", ");
         }
 
-        codegen.write(")");
+        codegen.write(this.span, ")");
     }
 }

@@ -13,7 +13,7 @@ show : value -> intrinsic "display" (Describe value)
 
 
 instance (Describe String) : string -> string
-instance (Describe Number) : n -> intrinsic "number-to-text" n
+instance (Describe Number) : n -> intrinsic "number-to-string" n
 instance (Describe Boolean) : b -> if b {"True"} {"False"}
 instance (Describe (Maybe value)) where (Describe value) : m -> when m {
   Some value -> "Some _" value
@@ -30,7 +30,7 @@ Read : value => trait (String -> Maybe value)
 [default] [error] instance (Read value)
 
 instance (Read String) : Some
-instance (Read Number) : string -> intrinsic "text-to-number" string
+instance (Read Number) : string -> intrinsic "string-to-number" string
 
 -- Ask the user to enter a value.
 prompt :: String -> value where (Read value)

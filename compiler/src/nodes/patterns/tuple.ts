@@ -35,6 +35,7 @@ export class TuplePatternNode extends PatternNode {
 
         this.elementTemporaries.forEach((element, index) => {
             codegen.write(
+                this.span,
                 ` && ((`,
                 codegen.node(element),
                 ` = `,
@@ -43,5 +44,17 @@ export class TuplePatternNode extends PatternNode {
                 this.elements[index],
             );
         });
+    }
+
+    *temporaries() {
+        if (this.elementTemporaries != null) {
+            for (const element of this.elementTemporaries) {
+                yield element;
+            }
+        }
+
+        for (const element of this.elements) {
+            yield* element.temporaries();
+        }
     }
 }

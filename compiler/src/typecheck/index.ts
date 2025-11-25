@@ -7,7 +7,7 @@ export interface ConstructedType {
     children: Type[];
     instantiate?: TypeParameterNode;
     display: (children: ((root?: boolean) => string)[], root: boolean) => string;
-    codegen: (children: any[], codegen: Codegen) => any;
+    codegen: (children: unknown[], codegen: Codegen) => unknown;
 }
 
 export type Type = Node | ConstructedType;

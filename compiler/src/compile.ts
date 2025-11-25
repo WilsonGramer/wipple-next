@@ -1,4 +1,4 @@
-import { Db, Fact, Node } from "./node";
+import { Db, fact, Node } from "./node";
 import type { FileNode } from "./nodes";
 import type { Span } from "./span";
 import { parseFile } from "./syntax";
@@ -25,9 +25,7 @@ export class RootNode extends Node {
     visit(_visitor: Visitor): void {}
 }
 
-export class TopLevelScopes extends Fact<Scope[]> {
-    display = "has top-level scopes";
-}
+export const TopLevelScopes = fact<Scope[]>("has top-level scopes");
 
 export const makeRoot = () => {
     const db = new Db();
@@ -119,8 +117,7 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
 
     // Solve constraints from top-level expressions
 
-    const solver = Solver.from(definitionSolver); // definition constraints will be retrieved from `db` as needed
-
+    const solver = new Solver(db); // definition constraints will be retrieved from `db` as needed
     solver.add(...topLevel.constraints);
     solver.run();
 

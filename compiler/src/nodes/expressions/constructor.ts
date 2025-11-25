@@ -56,6 +56,8 @@ export class ConstructorExpressionNode extends ExpressionNode {
                     substitutions,
                 }),
             );
+
+            this.matchingSubstitutions = substitutions;
         }
 
         this.matchingConstructorDefinition = constructorDefinition;
@@ -67,27 +69,28 @@ export class ConstructorExpressionNode extends ExpressionNode {
         }
 
         if (this.matchingConstructorDefinition instanceof MarkerConstructorDefinition) {
-            codegen.write("null");
+            codegen.write(this.span, "null");
         } else if (this.matchingConstructorDefinition instanceof TraitDefinition) {
             if (this.matchingSubstitutions == null) {
                 codegen.fail();
             }
 
             codegen.write(
+                this.span,
                 `await runtime.trait(${codegen.node(
                     this.matchingConstructorDefinition.node,
                 )}, types, {`,
             );
 
             this.matchingSubstitutions.forEach((type, parameter) => {
-                codegen.write(`${codegen.node(parameter)}: `);
-                codegen.writeType(type);
-                codegen.write(", ");
+                codegen.write(this.span, `${codegen.node(parameter)}: `);
+                codegen.writeType(this.span, type);
+                codegen.write(this.span, ", ");
             });
 
-            codegen.write("})");
+            codegen.write(this.span, "})");
         } else {
-            codegen.write(this.matchingConstructorDefinition.node);
+            codegen.write(this.span, this.matchingConstructorDefinition.node);
         }
     }
 }

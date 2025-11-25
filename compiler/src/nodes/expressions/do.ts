@@ -26,6 +26,6 @@ export class DoExpressionNode extends ExpressionNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(new CallExpressionNode(this.input, [], this.span));
+        codegen.write(this.span, new CallExpressionNode(this.input, [], this.span));
     }
 }

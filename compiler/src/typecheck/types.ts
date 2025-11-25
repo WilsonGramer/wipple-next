@@ -13,9 +13,9 @@ export const named = (definition: TypeDefinitionNode, parameters: Type[]): Const
             return root ? display : `(${display})`;
         }
     },
-    codegen: (parameters) => ({
+    codegen: (parameters, codegen) => ({
         type: "named",
-        name: definition.name,
+        name: codegen.node(definition),
         parameters,
     }),
 });
@@ -71,6 +71,6 @@ export const parameter = (node: TypeParameterNode): ConstructedType => ({
     display: () => node.name,
     codegen: ([], codegen) => ({
         type: "parameter",
-        node: codegen.node(node),
+        name: codegen.node(node),
     }),
 });

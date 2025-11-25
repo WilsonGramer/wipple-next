@@ -1,12 +1,28 @@
 {
     "configurations": [
         {
-            "name": "Compiler",
+            "name": "Debug Compiler",
             "program": "${workspaceFolder}/compiler/dist/index.js",
             "request": "launch",
             "skipFiles": ["<node_internals>/**"],
             "type": "node",
             "args": ["compile", "test.wipple"]
+        },
+        {
+            "name": "Debug Compiler + Stdlib",
+            "program": "${workspaceFolder}/compiler/dist/index.js",
+            "request": "launch",
+            "skipFiles": ["<node_internals>/**"],
+            "type": "node",
+            "args": ["compile", "test.wipple", "--lib", "library/foundation"]
+        },
+        {
+            "name": "Debug Current File",
+            "program": "${file}",
+            "request": "launch",
+            "skipFiles": ["<node_internals>/**"],
+            "type": "node",
+            "sourceMaps": true
         }
     ]
 }

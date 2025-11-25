@@ -7,6 +7,7 @@ import { PatternNode } from "./index";
 import type { Codegen } from "../../codegen";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import { NamedTypeNode } from "../types/named";
 
 export class NumberPatternNode extends PatternNode {
     value: string;
@@ -19,20 +20,15 @@ export class NumberPatternNode extends PatternNode {
     visit(visitor: Visitor): void {
         super.visit(visitor);
 
-        const numberTypeDefinition = visitor.resolve("Number", [TypeDefinition], this);
-        if (numberTypeDefinition != null) {
-            visitor.constraint(
-                new InstantiateConstraint({
-                    source: this,
-                    definition: numberTypeDefinition.node,
-                    substitutions: new Map(),
-                    replacements: new Map([[numberTypeDefinition.node, this]]),
-                }),
-            );
-        }
+        const numberType = new NamedTypeNode("Number", [], this.span);
+        visitor.visit(numberType);
+
+        visitor.constraint(new GroupConstraint(this, numberType));
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(` && (`, codegen.node(this.matching), `=== ${this.value})`);
+        codegen.write(this.span, ` && (`, codegen.node(this.matching), `=== ${this.value})`);
     }
+
+    *temporaries() {}
 }

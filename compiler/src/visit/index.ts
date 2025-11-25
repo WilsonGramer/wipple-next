@@ -1,27 +1,20 @@
 import type { Db, Node } from "../node";
-import { Fact, InternalNode } from "../node";
+import { fact, InternalNode } from "../node";
 import { Defined, type Definition, type InstanceDefinition } from "./definitions";
 import type { Instance } from "../typecheck/constraints/bound";
 import type { TypeParameterNode } from "../nodes/types/parameter";
 import type { Constraint } from "../typecheck/constraints/constraint";
 import { type PatternNode } from "../nodes/patterns";
 
-export class Resolved extends Fact<Definition | string> {
-    display = (definition: Definition | string) =>
-        typeof definition === "string" ? "unresolved" : `resolved to ${definition.node}`;
-}
+export const Resolved = fact<Definition | string>((definition) =>
+    typeof definition === "string" ? "unresolved" : `resolved to ${definition.node}`,
+);
 
-export class DefinitionConstraints extends Fact<Constraint[]> {
-    display = () => "has definition constraints";
-}
+export const DefinitionConstraints = fact<Constraint[]>("has definition constraints");
 
-export class TypeParameters extends Fact<TypeParameterNode[]> {
-    display = () => "has type parameters";
-}
+export const TypeParameters = fact<TypeParameterNode[]>("has type parameters");
 
-export class Instances extends Fact<Instance[]> {
-    display = () => "has instances";
-}
+export const Instances = fact<Instance[]>("has instances");
 
 export class Visitor {
     db: Db;
@@ -132,7 +125,7 @@ export class Visitor {
         return result;
     }
 
-    subpattern(pattern: PatternNode): Node {
+    subpattern(pattern: PatternNode): InternalNode {
         const temporary = new InternalNode(pattern.span);
         this.db.register(temporary);
 

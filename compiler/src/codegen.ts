@@ -1,8 +1,8 @@
-import { type Db, Node } from "./node";
+import { type Db, InternalNode, Node } from "./node";
 import type { FileNode } from "./nodes";
 import type { TraitDefinitionNode } from "./nodes/statements/trait-definition";
 import { Typed } from "./nodes/types";
-import type { Type } from "./typecheck";
+import { displayType, typeReferencesNode, type Type } from "./typecheck";
 import { Instances } from "./visit";
 import {
     ConstantDefinition,
@@ -10,60 +10,93 @@ import {
     InstanceDefinition,
     TraitDefinition,
 } from "./visit/definitions";
+import { SourceMapGenerator } from "source-map";
+// @ts-ignore
+import inlineSourceMapComment from "inline-source-map-comment";
+import lineColumn from "line-column";
+import type { Span } from "./span";
 
 export interface CodegenOptions {
+    prelude: string;
     format: { type: "module" } | { type: "iife"; arg: string };
 }
 
 class CodegenError extends Error {}
 
 export class Codegen {
+    file: string;
     db: Db;
     options: CodegenOptions;
     output: string;
-    nodes = new Map<Node, number>();
 
-    constructor(db: Db, options: CodegenOptions) {
+    private mappings: [Span, number][] = [];
+    private nodes: Node[] = [];
+    private writtenTypes = new Map<string, [number, string]>();
+
+    constructor(file: string, db: Db, options: CodegenOptions) {
+        this.file = file;
         this.db = db;
         this.options = options;
         this.output = "";
     }
 
-    static from(other: Codegen): Codegen {
-        const codegen = new Codegen(other.db, other.options);
-        codegen.nodes = new Map(other.nodes);
-        return codegen;
-    }
-
     node(node: Node): string {
-        if (!this.nodes.has(node)) {
-            this.nodes.set(node, this.nodes.size);
+        if (!this.nodes.includes(node)) {
+            this.nodes.push(node);
         }
 
-        return `_${this.nodes.get(node)!}`;
+        return `_${this.nodes.indexOf(node)}`;
     }
 
-    write(...items: (string | Node)[]) {
+    write(span: Span | undefined, ...items: (string | Node)[]) {
         for (const item of items) {
+            if (span != null) {
+                this.mappings.push([span, this.output.length]);
+            }
+
             if (typeof item === "string") {
                 this.output += item;
             } else if (item instanceof Node) {
+                this.write(span, `/**! ${item.toString()} */`);
                 item.codegen(this);
             }
         }
     }
 
-    writeType(type: Type) {
-        if (type instanceof Node) {
-            const applied = type.facts.get(Typed)?.types[0];
-            if (applied == null) {
-                throw new Error(`unresolved type: ${type.toString()}`);
-            }
+    writeType(span: Span | undefined, type: Type) {
+        let [typeCode, typeString] = this.type(type);
 
-            type = applied;
+        if (!this.writtenTypes.has(typeCode)) {
+            this.writtenTypes.set(typeCode, [this.writtenTypes.size, typeString]);
         }
 
-        this.output += JSON.stringify(type.codegen(type.children, this));
+        let index: number;
+        [index, typeString] = this.writtenTypes.get(typeCode)!;
+
+        this.write(span, `/**! ${typeString} */ typeCache[${index}]`);
+    }
+
+    private type(type: Type): [string, string];
+    private type(type: Type, root: false): unknown;
+    private type(type: Type, root = true): any {
+        if (type instanceof Node) {
+            type = type.facts.get(Typed)?.types[0] ?? type;
+        }
+
+        if (type instanceof Node || typeReferencesNode(type)) {
+            this.fail(`unresolved type: ${displayType(type)}`);
+        }
+
+        const typeCode = type.codegen(
+            type.children.map((child) => this.type(child, false)),
+            this,
+        );
+
+        if (root) {
+            return [JSON.stringify(typeCode), displayType(type)];
+        } else {
+            return typeCode;
+        }
     }
 
     fail(message = "explicit call to `fail()`"): never {
@@ -91,39 +124,48 @@ export class Codegen {
                 continue;
             }
 
-            this.write(`/**! ${node.toString()} */ `);
-            this.write(`async function ${this.node(node)}(types) {\nreturn `, body, `;\n}\n`);
+            this.write(undefined, `/**! ${node.toString()} */ `);
+            this.write(
+                undefined,
+                `async function ${this.node(node)}(types) {\nreturn `,
+                body,
+                `;\n}\n`,
+            );
         }
     }
 
     private writeInstances(trait: TraitDefinitionNode) {
         const instances = trait.facts.get(Instances) ?? [];
 
-        this.write(`const ${this.node(trait)} = [\n`);
+        this.write(undefined, `const ${this.node(trait)} = [\n`);
 
         for (const instance of instances) {
-            this.write(`[${this.node(instance.node)}, {`);
-
-            for (const [parameter, substitution] of instance.substitutions) {
-                this.write(`${this.node(parameter)}: `);
-                this.writeType(substitution);
-                this.write(`, `);
+            if (instance.error) {
+                continue; // skip error instances that have no value
             }
 
-            this.write(`}],\n`);
+            this.write(undefined, `[${this.node(instance.node)}, {`);
+
+            for (const [parameter, substitution] of instance.substitutions) {
+                this.write(undefined, `${this.node(parameter)}: `);
+                this.writeType(undefined, substitution);
+                this.write(undefined, `, `);
+            }
+
+            this.write(undefined, `}],\n`);
         }
 
-        this.write(`];\n`);
+        this.write(undefined, `];\n`);
     }
 
     run(files: FileNode[]): string | undefined {
         switch (this.options.format.type) {
             case "module": {
-                this.write(`export default async function(runtime) {\n`);
+                this.write(undefined, `export default async function(runtime) {\n`);
                 break;
             }
             case "iife": {
-                this.write(`(async (runtime) => {\n`);
+                this.write(undefined, `(async (runtime) => {\n`);
                 break;
             }
             default: {
@@ -133,9 +175,9 @@ export class Codegen {
 
         try {
             this.writeDefinitions();
-            this.write("const types = {};\n");
+            this.write(undefined, "const types = {};\n");
             for (const file of files) {
-                this.write(file);
+                this.write(file.span, file);
             }
         } catch (e) {
             if (!(e instanceof CodegenError)) {
@@ -147,11 +189,11 @@ export class Codegen {
 
         switch (this.options.format.type) {
             case "module": {
-                this.write(`};\n`);
+                this.write(undefined, `};\n`);
                 break;
             }
             case "iife": {
-                this.write(`})(${this.options.format.arg});\n`);
+                this.write(undefined, `})(${this.options.format.arg});\n`);
                 break;
             }
             default: {
@@ -159,6 +201,26 @@ export class Codegen {
             }
         }
 
-        return this.output;
+        const typeCache = `const typeCache = [\n${Array.from(this.writtenTypes.keys()).join(
+            ",\n",
+        )},\n];\n`;
+
+        const prelude = this.options.prelude + typeCache;
+        const script = prelude + this.output;
+
+        const sourceMap = new SourceMapGenerator({ file: this.file });
+        for (const [span, index] of this.mappings) {
+            const { line, col } = lineColumn(script).fromIndex(prelude.length + index)!;
+
+            sourceMap.addMapping({
+                source: span.path,
+                // Lines are 1-based and columns are 0-based
+                original: { line: span.start.line, column: span.start.column - 1 },
+                generated: { line: line + 1, column: col },
+            });
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        return script + inlineSourceMapComment(sourceMap.toString());
     }
 }

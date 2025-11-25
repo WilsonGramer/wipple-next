@@ -12,9 +12,8 @@ export class Solver {
     db: Db;
     private groups = new Map<Set<Node>, ConstructedType[]>();
     constraints = new Constraints();
-    defaultConstraints = new Constraints();
     impliedInstances: Instance[] = [];
-    boundCache = new Map<Node, Map<Node, Node>>();
+    progress = false;
     error = false;
 
     constructor(db: Db) {
@@ -31,21 +30,28 @@ export class Solver {
         this.groups = new Map(
             other.groups.entries().map(([nodes, types]) => [new Set(nodes), [...types]]),
         );
-        this.boundCache = other.boundCache;
     }
 
     add(...constraints: Constraint[]) {
-        for (const constraint of constraints) {
-            this.constraints.add(constraint);
-        }
+        this.constraints.add(...constraints);
     }
 
     setGroup(group: Group) {
         this.groups.set(new Set(group.nodes), group.types);
     }
 
-    run<T extends abstract new (...args: any[]) => Constraint>({ until }: { until?: T } = {}) {
-        this.constraints.run(this, { until });
+    run() {
+        while (true) {
+            this.progress = false;
+            this.runPassUntil(undefined);
+            if (!this.progress) {
+                break;
+            }
+        }
+    }
+
+    runPassUntil<T extends abstract new (...args: any[]) => Constraint>(until: T | undefined) {
+        this.constraints.runUntil(this, until);
     }
 
     imply(instance: Instance) {
@@ -65,6 +71,7 @@ export class Solver {
 
         if (leftNode != null && rightNode != null) {
             this.merge(leftNode, rightNode);
+            this.progress = true;
         }
 
         left = this.applyShallow(left);
@@ -74,8 +81,10 @@ export class Solver {
             // already merged groups above
         } else if (left instanceof Node) {
             this.insert(left, right);
+            this.progress = true;
         } else if (right instanceof Node) {
             this.insert(right, left);
+            this.progress = true;
         } else {
             if (left.tag === right.tag) {
                 for (let i = 0; i < Math.min(left.children.length, right.children.length); i++) {

@@ -411,7 +411,7 @@ instance (Container (List element) element) where (Equal element) : target -> li
 
 instance (Add String String String) : a b -> "__" a b
 
-instance (As-Sequence String String) : text ->
-  As-Sequence (intrinsic "text-characters" text :: List String)
+instance (As-Sequence String String) : string ->
+  As-Sequence (intrinsic "string-characters" string :: List String)
 
 instance (From-Sequence String String) : reduce "" (right -> left -> left + right)

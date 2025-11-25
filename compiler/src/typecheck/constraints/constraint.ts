@@ -14,7 +14,7 @@ export abstract class Constraint {
         substitutions: Map<TypeParameterNode, Type>,
     ): Constraint;
 
-    abstract run(solver: Solver): void;
+    abstract run(solver: Solver): boolean;
 
     waitUntilInstantiated() {
         this.isActive = false;

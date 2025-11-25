@@ -9,6 +9,7 @@ import type { Codegen } from "../../codegen";
 import { Arm, WhenExpressionNode } from "./when";
 import { InternalNode, type Node } from "../../node";
 import { GroupConstraint } from "../../typecheck/constraints/group";
+import { WildcardPatternNode } from "../patterns/wildcard";
 
 export class IsExpressionNode extends ExpressionNode {
     left: ExpressionNode;
@@ -63,13 +64,13 @@ export class IsExpressionNode extends ExpressionNode {
             this.left,
             [
                 new Arm(this.right, this.trueVariant, this.span),
-                new Arm(this.right, this.falseVariant, this.span),
+                new Arm(new WildcardPatternNode(this.span), this.falseVariant, this.span),
             ],
             this.span,
         );
 
         whenExpression.inputTemporary = this.inputTemporary;
 
-        codegen.write(whenExpression);
+        codegen.write(this.span, whenExpression);
     }
 }

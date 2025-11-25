@@ -18,6 +18,6 @@ export class UnitExpressionNode extends ExpressionNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(new TupleExpressionNode([], this.span));
+        codegen.write(this.span, new TupleExpressionNode([], this.span));
     }
 }

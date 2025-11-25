@@ -32,6 +32,10 @@ export class AnnotatePatternNode extends PatternNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(this.pattern);
+        codegen.write(this.span, this.pattern);
+    }
+
+    *temporaries() {
+        yield* this.pattern.temporaries();
     }
 }

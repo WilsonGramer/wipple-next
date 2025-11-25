@@ -81,19 +81,26 @@ export class AssignmentNode extends StatementNode {
 
     codegen(codegen: Codegen): void {
         if (this.temporary == null) {
-            codegen.fail();
+            return; // assigned to constant
         }
 
-        codegen.write("let ", codegen.node(this.temporary), " = ", this.value, ";\n");
+        codegen.write(this.span, `var ${codegen.node(this.temporary)};\n`);
 
-        const variables = this.pattern
-            .traverse()
-            .filter((node) => node instanceof VariablePatternNode);
+        for (const temporary of new Set(this.pattern.temporaries())) {
+            if (temporary === this.temporary) {
+                continue;
+            }
 
-        for (const variable of variables) {
-            codegen.write(`let ${codegen.node(variable)};\n`);
+            codegen.write(this.span, `var ${codegen.node(temporary)};\n`);
         }
 
-        codegen.write("if (true", this.pattern, ") {}\n");
+        codegen.write(this.span, codegen.node(this.temporary), " = ", this.value, ";\n");
+
+        codegen.write(
+            this.span,
+            "if (true",
+            this.pattern,
+            `) {} else { throw new Error("unreachable"); }\n`,
+        );
     }
 }

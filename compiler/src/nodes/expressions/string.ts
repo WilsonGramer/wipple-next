@@ -1,12 +1,9 @@
 import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
-import { TypeDefinition } from "../../visit/definitions";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
 import { ExpressionNode } from "./index";
 import type { Codegen } from "../../codegen";
 import { GroupConstraint } from "../../typecheck/constraints/group";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import { NamedTypeNode } from "../types/named";
 
 export class StringExpressionNode extends ExpressionNode {
     value: string;
@@ -19,20 +16,13 @@ export class StringExpressionNode extends ExpressionNode {
     visit(visitor: Visitor): void {
         super.visit(visitor);
 
-        const stringTypeDefinition = visitor.resolve("String", [TypeDefinition], this);
-        if (stringTypeDefinition != null) {
-            visitor.constraint(
-                new InstantiateConstraint({
-                    source: this,
-                    definition: stringTypeDefinition.node,
-                    substitutions: new Map(),
-                    replacements: new Map([[stringTypeDefinition.node, this]]),
-                }),
-            );
-        }
+        const stringType = new NamedTypeNode("String", [], this.span);
+        visitor.visit(stringType);
+
+        visitor.constraint(new GroupConstraint(this, stringType));
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(JSON.stringify(this.value));
+        codegen.write(this.span, JSON.stringify(this.value));
     }
 }

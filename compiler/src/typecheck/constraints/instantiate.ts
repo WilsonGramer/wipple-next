@@ -51,7 +51,7 @@ export class InstantiateConstraint extends Constraint {
         return new InstantiateConstraint(instantiation);
     }
 
-    run(solver: Solver): void {
+    run(solver: Solver): boolean {
         const { source, definition, substitutions, replacements } = this.instantiation;
 
         // NOTE: Types are *not* applied before instantiating; we have access to
@@ -67,5 +67,7 @@ export class InstantiateConstraint extends Constraint {
             }) ?? [];
 
         solver.add(...instantiatedConstraints);
+
+        return true;
     }
 }

@@ -22,9 +22,11 @@ export class NamedTypeNode extends TypeNode {
         super.visit(visitor);
 
         const typeDefinition = visitor.resolve(this.name, [TypeDefinition], this);
+
         for (const parameter of this.parameters) {
             visitor.visit(parameter);
         }
+
         if (typeDefinition != null) {
             // TODO: Ensure `parameters` has the right length
 

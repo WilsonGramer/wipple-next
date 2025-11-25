@@ -15,4 +15,6 @@ export class WildcardPatternNode extends PatternNode {
     codegen(_codegen: Codegen): void {
         // No code needed
     }
+
+    *temporaries() {}
 }

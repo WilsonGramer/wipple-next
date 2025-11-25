@@ -1,16 +1,14 @@
 import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { ExpressionNode } from "./index";
-import { TraitDefinition, TypeDefinition } from "../../visit/definitions";
-import { InternalNode, type Node } from "../../node";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { BoundConstraint } from "../../typecheck/constraints/bound";
-import { GroupConstraint } from "../../typecheck/constraints/group";
+import { type Node } from "../../node";
 import type { Codegen } from "../../codegen";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import { CallExpressionNode } from "./call";
 import { ConstructorExpressionNode } from "./constructor";
+import { NamedTypeNode } from "../types/named";
+import { GroupConstraint } from "../../typecheck/constraints/group";
 
 export class FormatExpressionNode extends ExpressionNode {
     string: string;
@@ -35,69 +33,24 @@ export class FormatExpressionNode extends ExpressionNode {
         const segments = this.string.split("_");
         const trailing = segments.pop() ?? "";
 
-        const describeTrait = visitor.resolve("Describe", [TraitDefinition], this);
-        if (describeTrait == null) {
-            return;
-        }
+        const stringType = new NamedTypeNode("String", [], this.span);
+        visitor.visit(stringType);
 
-        const stringTypeDefinition = visitor.resolve("String", [TypeDefinition], this);
-        if (stringTypeDefinition == null) {
-            return;
-        }
+        visitor.constraint(new GroupConstraint(this, stringType));
 
         this.segments = [];
         this.trailing = trailing;
         this.inputs.forEach((input, index) => {
-            visitor.visit(input); // TODO: Wrap in `Describe`
+            visitor.visit(input);
 
-            const substitutions = new Map([[describeTrait.parameters[0], input]]);
-
-            const describeFunction = new InternalNode(this.span, (codegen) => {
-                const constructor = new ConstructorExpressionNode("Describe", this.span);
-
-                constructor.matchingConstructorDefinition = describeTrait;
-                constructor.matchingSubstitutions = substitutions;
-
-                codegen.write(constructor);
-            });
-
-            visitor.db.register(describeFunction);
-
-            this.segments!.push([segments[index], describeFunction, input]);
-
+            const describeTrait = new ConstructorExpressionNode("Describe", this.span);
+            visitor.visit(describeTrait);
             visitor.constraint(
-                new InstantiateConstraint({
-                    source: describeFunction,
-                    definition: describeTrait.node,
-                    substitutions,
-                    replacements: new Map<Node, Node>([[describeTrait.node, describeFunction]]),
-                }),
+                new TypeConstraint(describeTrait, types.function([input], stringType)),
             );
 
-            visitor.constraint(
-                new BoundConstraint(describeFunction, {
-                    source: describeFunction,
-                    trait: describeTrait.node,
-                    substitutions,
-                }),
-            );
-
-            visitor.constraint(
-                new TypeConstraint(
-                    describeFunction,
-                    types.function([input], stringTypeDefinition.node),
-                ),
-            );
+            this.segments!.push([segments[index], describeTrait, input]);
         });
-
-        visitor.constraint(
-            new InstantiateConstraint({
-                source: this,
-                definition: stringTypeDefinition.node,
-                substitutions: new Map(),
-                replacements: new Map([[stringTypeDefinition.node, this]]),
-            }),
-        );
     }
 
     codegen(codegen: Codegen): void {
@@ -105,15 +58,16 @@ export class FormatExpressionNode extends ExpressionNode {
             codegen.fail();
         }
 
-        codegen.write('(""');
+        codegen.write(this.span, '(""');
 
         for (const [segment, describeFunction, input] of this.segments) {
             codegen.write(
+                this.span,
                 ` + ${JSON.stringify(segment)} + `,
                 new CallExpressionNode(describeFunction, [input], this.span),
             );
         }
 
-        codegen.write(` + ${JSON.stringify(this.trailing)})`);
+        codegen.write(this.span, ` + ${JSON.stringify(this.trailing)})`);
     }
 }

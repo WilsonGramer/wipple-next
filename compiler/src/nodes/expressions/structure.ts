@@ -63,15 +63,15 @@ export class StructureExpressionNode extends ExpressionNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write("{");
+        codegen.write(this.span, "{");
 
         for (const field of this.fields) {
-            codegen.write(`${JSON.stringify(field.name)}: `);
-            codegen.write(field.value);
-            codegen.write(", ");
+            codegen.write(this.span, `${JSON.stringify(field.name)}: `);
+            codegen.write(this.span, field.value);
+            codegen.write(this.span, ", ");
         }
 
-        codegen.write("}");
+        codegen.write(this.span, "}");
     }
 }
 

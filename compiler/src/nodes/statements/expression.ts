@@ -40,6 +40,6 @@ export class ExpressionStatementNode extends StatementNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(this.expression, ";\n");
+        codegen.write(this.span, this.expression, ";\n");
     }
 }

@@ -156,22 +156,21 @@ const compileCommand = (options: { run: boolean }) =>
                 process.exit(1);
             }
 
-            const codegen = new Codegen(db, {
+            const codegen = new Codegen(args.output ?? "index.mjs", db, {
                 format: { type: "iife", arg: "buildRuntime(env)" },
+                prelude: nodePrelude + runtime,
             });
 
-            let script = codegen.run(root.files);
+            const script = codegen.run(root.files);
 
             if (script != null) {
-                script = nodePrelude + runtime + script;
-
                 if (args.output != null) {
                     writeFileSync(args.output, script);
                 }
 
                 if (options.run) {
                     const tempDir = mkdtempSync(join(tmpdir(), "wipple-"));
-                    const scriptPath = `${tempDir}/script.js`;
+                    const scriptPath = `${tempDir}/index.mjs`;
                     writeFileSync(scriptPath, script);
                     execSync(`node ${scriptPath}`, { stdio: "inherit" });
                     rmSync(tempDir, { recursive: true, force: true });

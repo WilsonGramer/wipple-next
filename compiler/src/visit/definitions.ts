@@ -1,5 +1,5 @@
 import type { Node } from "../node";
-import { Fact } from "../node";
+import { fact } from "../node";
 import type {
     ConstantAttributes,
     InstanceAttributes,
@@ -11,10 +11,9 @@ import type { TypeDefinitionNode } from "../nodes/statements/type-definition";
 import type { TraitDefinitionNode } from "../nodes/statements/trait-definition";
 import type { InstanceDefinitionNode } from "../nodes/statements/instance-definition";
 import type { TypeParameterNode } from "../nodes/types/parameter";
+import type { VariablePatternNode } from "../nodes/patterns/variable";
 
-export class Defined extends Fact<Definition> {
-    display = () => "is a definition";
-}
+export const Defined = fact<Definition>("is a definition");
 
 export abstract class Definition<N extends Node = Node> {
     node: N;
@@ -26,10 +25,10 @@ export abstract class Definition<N extends Node = Node> {
     }
 }
 
-export class VariableDefinition extends Definition {
+export class VariableDefinition extends Definition<VariablePatternNode> {
     value: Node;
 
-    constructor(node: Node, value: Node) {
+    constructor(node: VariablePatternNode, value: Node) {
         super(node, []);
         this.value = value;
     }

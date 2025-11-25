@@ -5,7 +5,6 @@ import type { Constraint } from "./constraint";
 import type { Solver } from "../solve";
 import { DefaultConstraint } from "./default";
 import { GroupConstraint } from "./group";
-import { displayType } from "..";
 
 const constraintOrder: Function[][] = [
     [GroupConstraint],
@@ -24,14 +23,17 @@ export class Constraints {
                 this.constraints.set(key, []);
             }
 
-            this.constraints.get(key)!.push(constraint);
+            const groupConstraints = this.constraints.get(key)!;
+
+            groupConstraints.push(constraint);
         }
     }
 
-    run<T extends abstract new (...args: any[]) => Constraint>(
+    runUntil<T extends abstract new (...args: any[]) => Constraint>(
         solver: Solver,
-        { until }: { until?: T } = {},
+        until: T | undefined,
     ) {
+        const requeuedConstraints: Constraint[] = [];
         while (true) {
             const constraint = this.peek();
             if (constraint == null || constraint.constructor === until) {
@@ -41,16 +43,21 @@ export class Constraints {
             this.shift();
 
             if (constraint.isActive) {
-                constraint.run(solver);
+                const success = constraint.run(solver);
+
+                if (!success) {
+                    requeuedConstraints.push(constraint);
+                }
             }
         }
+
+        this.add(...requeuedConstraints);
     }
 
     private shift() {
         for (const key of constraintOrder) {
-            const next = this.constraints.get(key)?.shift();
-            if (next != null) {
-                return next;
+            if (this.constraints.get(key)?.shift() != null) {
+                return;
             }
         }
     }

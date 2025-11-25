@@ -29,7 +29,7 @@ export class FileNode extends Node {
     codegen(codegen: Codegen): void {
         for (const statement of this.statements) {
             if (!(statement instanceof EmptyStatementNode)) {
-                codegen.write(statement);
+                codegen.write(this.span, statement);
             }
         }
     }

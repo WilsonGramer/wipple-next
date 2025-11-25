@@ -6,7 +6,7 @@ Range : index => type {
 }
 
 To : index => trait (index index -> Range index)
-instance (To index) where (index :: Number) : min max -> Range {
+instance (To Number) : min max -> Range {
   min : min
   max : max
 }
@@ -19,7 +19,7 @@ Stride : index => type {
 }
 
 By : index => trait ((Range index) index -> Stride index)
-instance (By index) where (index :: Number) : (Range {
+instance (By Number) : (Range {
   min : min
   max : max
 }) step -> Stride {

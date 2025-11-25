@@ -1,6 +1,6 @@
 import { Solver } from "../solve";
 import type { Node } from "../../node";
-import { Fact } from "../../node";
+import { fact } from "../../node";
 import { Instances } from "../../visit";
 import { Constraint } from "./constraint";
 import type { TraitDefinitionNode } from "../../nodes/statements/trait-definition";
@@ -46,9 +46,7 @@ export const displayBound = (bound: ResolvedBound) => {
 
 export const applyBound = <T extends BoundLike>(bound: T, solver: Solver): T => ({
     ...bound,
-    substitutions: new Map(
-        bound.substitutions.entries().map(([parameter, type]) => [parameter, solver.apply(type)]),
-    ),
+    substitutions: applySubstitutions(bound.substitutions, solver),
 });
 
 interface BoundLike {
@@ -61,8 +59,8 @@ type BoundValues = {
     instance: InstanceDefinitionNode | undefined;
 }[];
 
-export class Bounds extends Fact<BoundValues> {
-    display = (bounds: BoundValues) =>
+export const Bounds = fact<BoundValues>(
+    (bounds) =>
         `has bound(s) ${bounds
             .map(
                 ({ bound, instance }) =>
@@ -70,8 +68,8 @@ export class Bounds extends Fact<BoundValues> {
                         instance != null ? instance.toString() : "unresolved"
                     })`,
             )
-            .join(", ")}`;
-}
+            .join(", ")}`,
+);
 
 export class BoundConstraint extends Constraint {
     node: Node;
@@ -113,7 +111,7 @@ export class BoundConstraint extends Constraint {
         };
     }
 
-    run(solver: Solver): void {
+    run(solver: Solver): boolean {
         const { source, trait, substitutions } = this.bound;
 
         // These are for the *trait's* parameters
@@ -172,7 +170,7 @@ export class BoundConstraint extends Constraint {
                 }
 
                 // Run the solver (excluding bounds) to populate `replacements`
-                copy.run({ until: BoundConstraint });
+                copy.runPassUntil(BoundConstraint);
 
                 // These are for the *trait's* parameters
                 const instanceSubstitutions = new Map<TypeParameterNode, Type>();
@@ -212,7 +210,7 @@ export class BoundConstraint extends Constraint {
                 const [[instanceNode, copy]] = candidates;
 
                 solver.inherit(copy);
-                solver.add(...copy.constraints); // add the remaining bound constraints
+                solver.add(...copy.constraints);
 
                 // Don't indicate a resolved instance if this instance is
                 // implied (suppresses custom `[error]` messages)
@@ -225,15 +223,11 @@ export class BoundConstraint extends Constraint {
                         bound: applyBound(resolvedBound, solver),
                         instance: instanceNode,
                     });
-
-                    if (!solver.boundCache.has(source)) {
-                        solver.boundCache.set(source, new Map());
-                    }
-
-                    solver.boundCache.get(source)!.set(this.node, instanceNode);
                 }
 
                 break;
+            } else if (candidates.length > 1) {
+                return false; // ambiguous; try again
             }
 
             if (isLastInstanceSet) {
@@ -243,6 +237,8 @@ export class BoundConstraint extends Constraint {
                 });
             }
         }
+
+        return true;
     }
 }
 
@@ -258,3 +254,6 @@ const unifySubstitutions = (
         }
     }
 };
+
+const applySubstitutions = (substitutions: Map<TypeParameterNode, Type>, solver: Solver) =>
+    new Map(substitutions.entries().map(([parameter, type]) => [parameter, solver.apply(type)]));

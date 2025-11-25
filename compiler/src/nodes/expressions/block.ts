@@ -39,5 +39,21 @@ export class BlockExpressionNode extends ExpressionNode {
         );
     }
 
-    codegen(codegen: Codegen): void {}
+    codegen(codegen: Codegen): void {
+        codegen.write(this.span, "(async () => {\n");
+
+        const statements = this.statements.filter(
+            (statement) => !(statement instanceof EmptyStatementNode),
+        );
+
+        statements.forEach((statement, index) => {
+            if (index + 1 === statements.length) {
+                codegen.write(this.span, "return ");
+            }
+
+            codegen.write(this.span, statement, ";\n");
+        });
+
+        codegen.write(this.span, "})");
+    }
 }

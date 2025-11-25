@@ -105,31 +105,33 @@ export class TypeDefinitionNode extends StatementNode {
                         const variantDefinitions = this.representation.variants.map(
                             (variant, index) => {
                                 const variantNode = new InternalNode(variant.span, (codegen) => {
-                                    const result = new InternalNode(variant.span, (codegen) => {
-                                        codegen.write(`runtime.variant(${index}, [`);
+                                    const elementTemporaries = variant.elements.map(() => {
+                                        return new InternalPatternNode(variant.span);
+                                    });
 
-                                        for (const element of variant.elements) {
-                                            codegen.write(element);
-                                            codegen.write(", ");
+                                    const result = new InternalNode(variant.span, (codegen) => {
+                                        codegen.write(this.span, `runtime.variant(${index}, [`);
+
+                                        for (const temporary of elementTemporaries) {
+                                            codegen.write(this.span, codegen.node(temporary));
+                                            codegen.write(this.span, ", ");
                                         }
 
-                                        codegen.write("])");
+                                        codegen.write(this.span, "])");
                                     });
 
                                     if (variant.elements.length === 0) {
-                                        codegen.write(result);
+                                        codegen.write(this.span, result);
                                     } else {
-                                        const elementPatterns = variant.elements.map(
-                                            () => new InternalPatternNode(variant.span),
+                                        const variantFunction = new FunctionExpressionNode(
+                                            elementTemporaries,
+                                            result,
+                                            variant.span,
                                         );
 
-                                        codegen.write(
-                                            new FunctionExpressionNode(
-                                                elementPatterns,
-                                                result,
-                                                variant.span,
-                                            ),
-                                        );
+                                        variantFunction.inputTemporaries = elementTemporaries;
+
+                                        codegen.write(this.span, variantFunction);
                                     }
                                 });
 

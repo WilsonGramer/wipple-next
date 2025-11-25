@@ -44,24 +44,25 @@ export class CallExpressionNode extends ExpressionNode {
             }
         }
 
-        visitor.visit(this.function);
         for (const input of this.inputs) {
             visitor.visit(input);
         }
+
+        visitor.visit(this.function);
 
         visitor.constraint(new TypeConstraint(this.function, types.function(this.inputs, this)));
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write("await (");
-        codegen.write(this.function);
-        codegen.write(")(");
+        codegen.write(this.span, "await (");
+        codegen.write(this.span, this.function);
+        codegen.write(this.span, ")(");
 
         for (const input of this.inputs) {
-            codegen.write(input);
-            codegen.write(", ");
+            codegen.write(this.span, input);
+            codegen.write(this.span, ", ");
         }
 
-        codegen.write(")");
+        codegen.write(this.span, ")");
     }
 }

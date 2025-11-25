@@ -20,11 +20,16 @@ export class VariablePatternNode extends PatternNode {
 
     codegen(codegen: Codegen): void {
         codegen.write(
+            this.span,
             ` && ((`,
             codegen.node(this),
             ` = `,
             codegen.node(this.matching),
             `) || true)`,
         );
+    }
+
+    *temporaries() {
+        yield this;
     }
 }

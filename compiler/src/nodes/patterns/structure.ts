@@ -2,7 +2,7 @@ import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { StructureConstructorDefinition } from "../../visit/definitions";
-import { type Node } from "../../node";
+import { type InternalNode, type Node } from "../../node";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import type { Codegen } from "../../codegen";
 
@@ -10,7 +10,7 @@ export class StructurePatternNode extends PatternNode {
     name: string;
     fields: StructurePatternField[];
 
-    private fieldTemporaries?: Map<string, readonly [Node, PatternNode]>;
+    private fieldTemporaries?: Map<string, readonly [InternalNode, PatternNode]>;
 
     constructor(name: string, fields: StructurePatternField[], span: Span) {
         super(span);
@@ -66,6 +66,7 @@ export class StructurePatternNode extends PatternNode {
 
         for (const [name, [temporary, pattern]] of this.fieldTemporaries) {
             codegen.write(
+                this.span,
                 ` && ((`,
                 codegen.node(temporary),
                 ` = `,
@@ -73,6 +74,15 @@ export class StructurePatternNode extends PatternNode {
                 `[${JSON.stringify(name)}]) || true)`,
                 pattern,
             );
+        }
+    }
+
+    *temporaries() {
+        if (this.fieldTemporaries != null) {
+            for (const [temporary, pattern] of this.fieldTemporaries.values()) {
+                yield temporary;
+                yield* pattern.temporaries();
+            }
         }
     }
 }

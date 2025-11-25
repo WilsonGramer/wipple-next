@@ -4,6 +4,8 @@ import { TypeDefinition } from "../../visit/definitions";
 import { PatternNode } from "./index";
 import type { Codegen } from "../../codegen";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import { NamedTypeNode } from "../types/named";
+import { GroupConstraint } from "../../typecheck/constraints/group";
 
 export class StringPatternNode extends PatternNode {
     value: string;
@@ -16,20 +18,20 @@ export class StringPatternNode extends PatternNode {
     visit(visitor: Visitor): void {
         super.visit(visitor);
 
-        const stringTypeDefinition = visitor.resolve("String", [TypeDefinition], this);
-        if (stringTypeDefinition != null) {
-            visitor.constraint(
-                new InstantiateConstraint({
-                    source: this,
-                    definition: stringTypeDefinition.node,
-                    substitutions: new Map(),
-                    replacements: new Map([[stringTypeDefinition.node, this]]),
-                }),
-            );
-        }
+        const stringType = new NamedTypeNode("String", [], this.span);
+        visitor.visit(stringType);
+
+        visitor.constraint(new GroupConstraint(this, stringType));
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(` && (`, codegen.node(this.matching), `=== ${JSON.stringify(this.value)})`);
+        codegen.write(
+            this.span,
+            ` && (`,
+            codegen.node(this.matching),
+            `=== ${JSON.stringify(this.value)})`,
+        );
     }
+
+    *temporaries() {}
 }

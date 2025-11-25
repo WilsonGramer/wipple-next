@@ -2,7 +2,7 @@
 -- `Set` to organize their elements.
 Hash : value => trait (value -> Number)
 instance (Hash Number) : number -> number
-instance (Hash String) : text -> intrinsic "hash-text" text
+instance (Hash String) : string -> intrinsic "hash-string" string
 instance (Hash ()) : () -> Hash 0
 
 -- A collection of unique keys associated with values.
@@ -103,12 +103,12 @@ set-entry : key value -> (Dictionary {
     None -> None
   }
 
-  entries : (((entries . remove-at index) or unreachable) . insert-at index new-entry)
+  entries2 : (((entries . remove-at index) or unreachable) . insert-at index new-entry)
     or unreachable
 
   Dictionary {
     size : size
-    entries : entries
+    entries : entries2
   }
 }
 

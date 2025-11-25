@@ -1,7 +1,6 @@
 import type { Codegen } from "./codegen";
 import type { Span } from "./span";
 import { compareSpans } from "./span";
-import type { Solver } from "./typecheck/solve";
 import type { Visitor } from "./visit";
 
 export abstract class Node {
@@ -85,20 +84,26 @@ export class InternalNode extends Node {
     visit(_visitor: Visitor): void {}
 }
 
-export abstract class Fact<T> {
+class Fact<T> {
     private declare _value: T;
 
-    abstract display: string | ((value: T) => string);
+    display: (value: T) => string;
+
+    constructor(display: string | ((value: T) => string)) {
+        this.display = typeof display === "string" ? () => display : display;
+    }
 }
 
-export class Facts {
-    private values = new Map<typeof Fact<any>, any>();
+export const fact = <T>(display: string | ((value: T) => string)) => new Fact(display);
 
-    get<T>(key: typeof Fact<T>): T | undefined {
+export class Facts {
+    private values = new Map<Fact<any>, any>();
+
+    get<T>(key: Fact<T>): T | undefined {
         return this.values.get(key) as T | undefined;
     }
 
-    getOr<T>(key: typeof Fact<T>, defaultValue: NoInfer<T>): T {
+    getOr<T>(key: Fact<T>, defaultValue: NoInfer<T>): T {
         if (!this.values.has(key)) {
             this.values.set(key, defaultValue);
         }
@@ -106,11 +111,11 @@ export class Facts {
         return this.values.get(key) as T;
     }
 
-    set<T>(key: typeof Fact<T>, value: NoInfer<T>) {
+    set<T>(key: Fact<T>, value: NoInfer<T>) {
         this.values.set(key, value);
     }
 
-    delete<T>(key: typeof Fact<T>) {
+    delete<T>(key: Fact<T>) {
         this.values.delete(key);
     }
 
@@ -129,7 +134,7 @@ export class Db {
         this.nodes.add(node);
     }
 
-    *list<T>(key: new () => Fact<T>) {
+    *list<T>(key: Fact<T>) {
         for (const node of this.nodes) {
             const value = node.facts.get(key);
             if (value !== undefined) {
@@ -150,8 +155,7 @@ export class Db {
 
             if (facts.length > 0) {
                 for (const [fact, value] of facts) {
-                    const { display } = fact.prototype;
-                    console.log("  " + (typeof display === "string" ? display : display(value)));
+                    console.log("  " + fact.display(value));
                 }
             } else {
                 console.log("  (no facts)");

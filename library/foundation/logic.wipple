@@ -66,7 +66,7 @@ instance (Greater-Than-Or-Equal value) where (Order value) : a b -> (Order a b) 
 
 -- Returns `True` if two values are equal.
 Equal : value => trait (value value -> Boolean)
-instance (Equal String) : a b -> intrinsic "text-equality" a b
+instance (Equal String) : a b -> intrinsic "string-equality" a b
 instance (Equal Number) : a b -> intrinsic "number-equality" a b
 instance (Equal ()) : () () -> True
 instance (Equal Boolean) : a b -> if a {b} {not b}

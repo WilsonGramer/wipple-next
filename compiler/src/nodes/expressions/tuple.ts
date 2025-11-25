@@ -27,13 +27,13 @@ export class TupleExpressionNode extends ExpressionNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write("[");
+        codegen.write(this.span, "[");
 
         for (const element of this.elements) {
-            codegen.write(element);
-            codegen.write(", ");
+            codegen.write(this.span, element);
+            codegen.write(this.span, ", ");
         }
 
-        codegen.write("]");
+        codegen.write(this.span, "]");
     }
 }

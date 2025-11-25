@@ -75,21 +75,22 @@ export class VariableExpressionNode extends ExpressionNode {
 
         switch (this.resolved.type) {
             case "variable": {
-                codegen.write(codegen.node(this.resolved.node));
+                codegen.write(this.span, codegen.node(this.resolved.node));
                 break;
             }
             case "constant": {
                 codegen.write(
+                    this.span,
                     `await runtime.constant(${codegen.node(this.resolved.node)}, types, {`,
                 );
 
                 for (const [parameter, type] of this.resolved.substitutions) {
-                    codegen.write(`${codegen.node(parameter)}: `);
-                    codegen.writeType(type);
-                    codegen.write(", ");
+                    codegen.write(this.span, `${codegen.node(parameter)}: `);
+                    codegen.writeType(this.span, type);
+                    codegen.write(this.span, ", ");
                 }
 
-                codegen.write("})");
+                codegen.write(this.span, "})");
 
                 break;
             }

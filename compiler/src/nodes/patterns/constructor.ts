@@ -108,6 +108,7 @@ export class ConstructorPatternNode extends PatternNode {
                 const { index, elements } = this.matchingConstructor;
 
                 codegen.write(
+                    this.span,
                     ` && (`,
                     codegen.node(this.matching),
                     `[runtime.variant] === ${index})`,
@@ -115,6 +116,7 @@ export class ConstructorPatternNode extends PatternNode {
 
                 elements.forEach(([temporary, pattern], index) => {
                     codegen.write(
+                        this.span,
                         ` && ((`,
                         codegen.node(temporary),
                         ` = `,
@@ -128,6 +130,15 @@ export class ConstructorPatternNode extends PatternNode {
             }
             default: {
                 this.matchingConstructor satisfies never;
+            }
+        }
+    }
+
+    *temporaries() {
+        if (this.matchingConstructor?.type === "variant") {
+            for (const [temporary, element] of this.matchingConstructor.elements) {
+                yield temporary;
+                yield* element.temporaries();
             }
         }
     }

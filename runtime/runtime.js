@@ -8,8 +8,15 @@ const buildRuntime = (env, proxy = (f) => f) => {
 
     variant.toString = () => "<variant>";
 
-    const constant = async (func, types, substitutions) =>
-        await func(substitute(types, substitutions));
+    const constant = async (func, types, substitutions) => {
+        const result = await func(substitute(types, substitutions));
+
+        if (result === undefined) {
+            throw new Error();
+        }
+
+        return result;
+    };
 
     const trait = async (instances, types, substitutions) => {
         types = substitute(types, substitutions);
@@ -73,64 +80,46 @@ const buildRuntime = (env, proxy = (f) => f) => {
     };
 
     const substituteType = (ty, substitutions) => {
-        if ("parameter" in ty) {
-            return substitutions[ty.parameter] ?? ty;
-        }
+        switch (ty.type) {
+            case "parameter": {
+                return substitutions[ty.name] ?? ty;
+            }
+            case "named": {
+                return {
+                    type: "named",
+                    name: ty.name,
+                    parameters: ty.parameters.map((param) => substituteType(param, substitutions)),
+                };
+            }
 
-        if ("named" in ty) {
-            return {
-                named: [ty.named[0], ty.named[1].map((ty) => substituteType(ty, substitutions))],
-            };
-        }
+            case "function": {
+                return {
+                    type: "function",
+                    inputs: ty.inputs.map((input) => substituteType(input, substitutions)),
+                    output: substituteType(ty.output, substitutions),
+                };
+            }
 
-        if ("function" in ty) {
-            return {
-                function: [
-                    ty.function[0].map((ty) => substituteType(ty, substitutions)),
-                    substituteType(ty.function[1], substitutions),
-                ],
-            };
-        }
+            case "tuple": {
+                return {
+                    type: "tuple",
+                    elements: ty.elements.map((element) => substituteType(element, substitutions)),
+                };
+            }
 
-        if ("tuple" in ty) {
-            return {
-                tuple: ty.tuple.map((ty) => substituteType(ty, substitutions)),
-            };
+            case "block": {
+                return {
+                    type: "block",
+                    output: substituteType(ty.output, substitutions),
+                };
+            }
+            default: {
+                return ty;
+            }
         }
-
-        if ("block" in ty) {
-            return {
-                block: substituteType(ty.block, substitutions),
-            };
-        }
-
-        if ("equal" in ty) {
-            return {
-                equal: [
-                    substituteType(ty.equal[0], substitutions),
-                    substituteType(ty.equal[1], substitutions),
-                ],
-            };
-        }
-
-        return ty;
     };
 
     const unify = (left, right, substitutions) => {
-        if (left.type === "equal") {
-            return (
-                unify(left.equal[0], right, substitutions) &&
-                unify(left.equal[1], left.equal[0], substitutions)
-            );
-        }
-
-        if ("equal" in right) {
-            return (
-                unify(left, right.equal[0], substitutions) &&
-                unify(right.equal[1], right.equal[0], substitutions)
-            );
-        }
-
         if (left.type === "parameter") {
             // This occurs when bounds are being resolved that involve type
             // parameters not mentioned in the item's type descriptor; no value's

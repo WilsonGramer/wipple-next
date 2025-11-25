@@ -31,6 +31,6 @@ export class AnnotateExpressionNode extends ExpressionNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(this.expression);
+        codegen.write(this.span, this.expression);
     }
 }

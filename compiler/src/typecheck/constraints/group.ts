@@ -27,7 +27,8 @@ export class GroupConstraint extends Constraint {
         return new GroupConstraint(left, right);
     }
 
-    run(solver: Solver): void {
+    run(solver: Solver): boolean {
         solver.unify(this.left, this.right);
+        return true;
     }
 }

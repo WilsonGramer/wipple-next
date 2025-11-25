@@ -30,7 +30,8 @@ export class TypeConstraint extends Constraint {
             : new TypeConstraint(node, type);
     }
 
-    run(solver: Solver): void {
+    run(solver: Solver): boolean {
         solver.unify(this.node, this.type);
+        return true;
     }
 }

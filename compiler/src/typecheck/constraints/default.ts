@@ -27,9 +27,11 @@ export class DefaultConstraint extends Constraint {
         return new DefaultConstraint(node, type);
     }
 
-    run(solver: Solver): void {
+    run(solver: Solver): boolean {
         if (solver.apply(this.node) instanceof Node) {
             solver.unify(this.node, this.type);
         }
+
+        return true;
     }
 }

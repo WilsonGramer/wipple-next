@@ -52,21 +52,33 @@ export class WhenExpressionNode extends ExpressionNode {
             codegen.fail();
         }
 
-        codegen.write("(async (", codegen.node(this.inputTemporary), ") => {\n");
+        codegen.write(this.span, "await (async (", codegen.node(this.inputTemporary), ") => {\n");
 
-        const variables = Iterator.from(this.arms)
-            .flatMap((arm) => arm.pattern.traverse())
-            .filter((node) => node instanceof VariablePatternNode);
+        for (const temporary of new Set(
+            Iterator.from(this.arms).flatMap((arm) => arm.pattern.temporaries()),
+        )) {
+            if (temporary === this.inputTemporary) {
+                continue;
+            }
 
-        for (const variable of variables) {
-            codegen.write(`let ${codegen.node(variable)};\n`);
+            codegen.write(this.span, `var ${codegen.node(temporary)};\n`);
         }
 
         for (const arm of this.arms) {
-            codegen.write("if (true", arm.pattern, ") {\n", "return ", arm.value, ";\n}\n");
+            codegen.write(
+                this.span,
+                "if (true",
+                arm.pattern,
+                ") {\n",
+                "return ",
+                arm.value,
+                ";\n}\n",
+            );
         }
 
-        codegen.write("})(", this.input, ")");
+        codegen.write(this.span, `throw new Error("unreachable");\n`);
+
+        codegen.write(this.span, "})(", this.input, ")");
     }
 }
 

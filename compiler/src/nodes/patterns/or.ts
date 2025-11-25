@@ -29,12 +29,18 @@ export class OrPatternNode extends PatternNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write("(false");
+        codegen.write(this.span, " && (false");
 
         for (const pattern of this.patterns) {
-            codegen.write(" || (true", pattern, ")");
+            codegen.write(this.span, " || (true", pattern, ")");
         }
 
-        codegen.write(")");
+        codegen.write(this.span, ")");
+    }
+
+    *temporaries() {
+        for (const pattern of this.patterns) {
+            yield* pattern.temporaries();
+        }
     }
 }

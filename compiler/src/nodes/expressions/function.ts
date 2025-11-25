@@ -44,26 +44,33 @@ export class FunctionExpressionNode extends ExpressionNode {
             codegen.fail();
         }
 
-        codegen.write("(async (");
+        codegen.write(this.span, "(async (");
 
         for (const temporary of this.inputTemporaries) {
-            codegen.write(codegen.node(temporary), ", ");
+            codegen.write(this.span, codegen.node(temporary), ", ");
         }
 
-        codegen.write(") => {\n");
+        codegen.write(this.span, ") => {\n");
 
-        const variables = Iterator.from(this.inputs)
-            .flatMap((input) => input.traverse())
-            .filter((node) => node instanceof VariablePatternNode);
+        for (const temporary of new Set(
+            Iterator.from(this.inputs).flatMap((pattern) => pattern.temporaries()),
+        )) {
+            if (this.inputTemporaries.includes(temporary)) {
+                continue;
+            }
 
-        for (const variable of variables) {
-            codegen.write(`let ${codegen.node(variable)};\n`);
+            codegen.write(this.span, `var ${codegen.node(temporary)};\n`);
         }
 
         for (const pattern of this.inputs) {
-            codegen.write("if (true", pattern, ") {}\n");
+            codegen.write(
+                this.span,
+                "if (true",
+                pattern,
+                `) {} else { throw new Error("unreachable"); }\n`,
+            );
         }
 
-        codegen.write("return ", this.output, ";\n})");
+        codegen.write(this.span, "return ", this.output, ";\n})");
     }
 }
