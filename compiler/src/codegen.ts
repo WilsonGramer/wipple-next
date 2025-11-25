@@ -1,6 +1,7 @@
 import { type Db, Node } from "./node";
 import type { FileNode } from "./nodes";
 import type { TraitDefinitionNode } from "./nodes/statements/trait-definition";
+import { Typed } from "./nodes/types";
 import type { Type } from "./typecheck";
 import { Instances } from "./visit";
 import {
@@ -53,16 +54,20 @@ export class Codegen {
     }
 
     writeType(type: Type) {
-        type = this.db.solver.apply(type);
-
         if (type instanceof Node) {
-            throw new Error("unresolved type");
+            const applied = type.facts.get(Typed)?.types[0];
+            if (applied == null) {
+                throw new Error(`unresolved type: ${type.toString()}`);
+            }
+
+            type = applied;
         }
 
-        this.output += type.codegen(type.children, this);
+        this.output += JSON.stringify(type.codegen(type.children, this));
     }
 
-    fail(): never {
+    fail(message = "explicit call to `fail()`"): never {
+        console.error(new Error(message).stack);
         throw new CodegenError();
     }
 

@@ -18,7 +18,8 @@ import type { Node } from "../../node";
 import { InternalNode } from "../../node";
 import type { Codegen } from "../../codegen";
 import { FunctionExpressionNode } from "../expressions/function";
-import { InternalPatternNode, PatternNode } from "../patterns";
+import { InternalPatternNode } from "../patterns";
+import { GroupConstraint } from "../../typecheck/constraints/group";
 
 export class TypeDefinitionNode extends StatementNode {
     attributes: TypeAttributes;
@@ -67,8 +68,8 @@ export class TypeDefinitionNode extends StatementNode {
                 }
             });
 
-            const definitionType = types.named(this, this.parameters);
-            visitor.constraint(new TypeConstraint(this, definitionType));
+            visitor.constraint(new TypeConstraint(this, types.named(this, this.parameters)));
+
             // Types don't have additional constraints
 
             if (!this.attributes.intrinsic) {
@@ -116,16 +117,18 @@ export class TypeDefinitionNode extends StatementNode {
                                     });
 
                                     if (variant.elements.length === 0) {
-                                        return result;
+                                        codegen.write(result);
                                     } else {
                                         const elementPatterns = variant.elements.map(
                                             () => new InternalPatternNode(variant.span),
                                         );
 
-                                        return new FunctionExpressionNode(
-                                            elementPatterns,
-                                            result,
-                                            variant.span,
+                                        codegen.write(
+                                            new FunctionExpressionNode(
+                                                elementPatterns,
+                                                result,
+                                                variant.span,
+                                            ),
                                         );
                                     }
                                 });
@@ -142,14 +145,16 @@ export class TypeDefinitionNode extends StatementNode {
                                         visitor.constraint(constraint);
                                     }
 
-                                    const variantType =
-                                        variant.elements.length > 0
-                                            ? types.function(variant.elements, definitionType)
-                                            : definitionType;
-
-                                    visitor.constraint(
-                                        new TypeConstraint(variantNode, variantType),
-                                    );
+                                    if (variant.elements.length === 0) {
+                                        visitor.constraint(new GroupConstraint(variantNode, this));
+                                    } else {
+                                        visitor.constraint(
+                                            new TypeConstraint(
+                                                variantNode,
+                                                types.function(variant.elements, this),
+                                            ),
+                                        );
+                                    }
 
                                     const constructorDefinition = new VariantConstructorDefinition(
                                         variantNode,

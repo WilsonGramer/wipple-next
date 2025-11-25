@@ -3,13 +3,13 @@ import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
-import { InternalNode, type Node } from "../../node";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class TuplePatternNode extends PatternNode {
     elements: PatternNode[];
 
-    private matchingElements?: Node[];
+    private elementTemporaries?: Node[];
 
     constructor(elements: PatternNode[], span: Span) {
         super(span);
@@ -23,33 +23,24 @@ export class TuplePatternNode extends PatternNode {
     visit(visitor: Visitor): void {
         super.visit(visitor);
 
-        this.matchingElements = this.elements.map((pattern) => {
-            const elementNode = new InternalNode(pattern.span);
-            visitor.db.register(elementNode);
-
-            visitor.matching(elementNode, () => {
-                visitor.visit(pattern);
-            });
-
-            return elementNode;
-        });
+        this.elementTemporaries = this.elements.map((pattern) => visitor.subpattern(pattern));
 
         visitor.constraint(new TypeConstraint(this, types.tuple(this.elements)));
     }
 
     codegen(codegen: Codegen): void {
-        if (this.matchingElements == null) {
+        if (this.elementTemporaries == null) {
             codegen.fail();
         }
 
-        this.matchingElements.forEach((element, index) => {
+        this.elementTemporaries.forEach((element, index) => {
             codegen.write(
                 ` && ((`,
-                codegen.node(this),
+                codegen.node(element),
                 ` = `,
                 codegen.node(this.matching),
                 `[${index}]) || true)`,
-                element,
+                this.elements[index],
             );
         });
     }

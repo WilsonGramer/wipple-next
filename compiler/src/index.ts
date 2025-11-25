@@ -12,6 +12,7 @@ import { extname, join } from "node:path";
 import { Codegen } from "./codegen";
 import runtime from "inline:../../runtime/runtime.js";
 import nodePrelude from "inline:../../runtime/node-prelude.js";
+import { tmpdir } from "node:os";
 
 const compileCommand = (options: { run: boolean }) =>
     cmd.command({
@@ -155,16 +156,11 @@ const compileCommand = (options: { run: boolean }) =>
                 process.exit(1);
             }
 
-            let script: string | undefined;
-            try {
-                const codegen = new Codegen(db, {
-                    format: { type: "iife", arg: "buildRuntime(env)" },
-                });
+            const codegen = new Codegen(db, {
+                format: { type: "iife", arg: "buildRuntime(env)" },
+            });
 
-                script = codegen.run(root.files);
-            } catch (e) {
-                console.error(chalk.bold("Compilation failed during codegen"));
-            }
+            let script = codegen.run(root.files);
 
             if (script != null) {
                 script = nodePrelude + runtime + script;
@@ -174,12 +170,14 @@ const compileCommand = (options: { run: boolean }) =>
                 }
 
                 if (options.run) {
-                    const tempDir = mkdtempSync("wipple-");
+                    const tempDir = mkdtempSync(join(tmpdir(), "wipple-"));
                     const scriptPath = `${tempDir}/script.js`;
                     writeFileSync(scriptPath, script);
                     execSync(`node ${scriptPath}`, { stdio: "inherit" });
                     rmSync(tempDir, { recursive: true, force: true });
                 }
+            } else {
+                console.error(chalk.bold("Compilation failed during codegen"));
             }
         },
     });

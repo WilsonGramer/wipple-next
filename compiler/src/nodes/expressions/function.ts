@@ -1,18 +1,18 @@
 import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
-import { InternalPatternNode, type PatternNode } from "../patterns";
+import { type PatternNode } from "../patterns";
 import { ExpressionNode } from "./index";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
-import { GroupConstraint } from "../../typecheck/constraints/group";
 import { VariablePatternNode } from "../patterns/variable";
+import type { Node } from "../../node";
 
 export class FunctionExpressionNode extends ExpressionNode {
     inputs: PatternNode[];
     output: ExpressionNode;
 
-    inputTemporaries?: PatternNode[];
+    inputTemporaries?: Node[];
 
     constructor(inputs: PatternNode[], output: ExpressionNode, span: Span) {
         super(span);
@@ -30,16 +30,7 @@ export class FunctionExpressionNode extends ExpressionNode {
 
         visitor.pushScope();
 
-        this.inputTemporaries = this.inputs.map((pattern) => {
-            const inputTemporary = new InternalPatternNode(pattern.span);
-            visitor.db.register(inputTemporary);
-
-            visitor.matching(inputTemporary, () => {
-                visitor.visit(pattern);
-            });
-
-            return inputTemporary;
-        });
+        this.inputTemporaries = this.inputs.map((pattern) => visitor.subpattern(pattern));
 
         visitor.visit(this.output);
 
@@ -53,13 +44,13 @@ export class FunctionExpressionNode extends ExpressionNode {
             codegen.fail();
         }
 
-        codegen.write("((");
+        codegen.write("(async (");
 
         for (const temporary of this.inputTemporaries) {
             codegen.write(codegen.node(temporary), ", ");
         }
 
-        codegen.write("}) => {\n");
+        codegen.write(") => {\n");
 
         const variables = Iterator.from(this.inputs)
             .flatMap((input) => input.traverse())

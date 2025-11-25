@@ -35,7 +35,7 @@ export class SetPatternNode extends PatternNode {
         }
 
         codegen.write(
-            `((`,
+            ` && ((`,
             codegen.node(this.matchingVariable),
             ` = `,
             codegen.node(this.matching),

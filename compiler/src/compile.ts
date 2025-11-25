@@ -32,9 +32,6 @@ export class TopLevelScopes extends Fact<Scope[]> {
 export const makeRoot = () => {
     const db = new Db();
 
-    // This needs to be done separately to prevent circular imports
-    db.solver = new Solver(db);
-
     const root = new RootNode(nullSpan("<root>"));
     db.register(root);
 
@@ -61,7 +58,6 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
     root.files.push(...parsedFiles);
 
     const { db } = root;
-    const { solver } = db;
 
     const topLevelScopes = db
         .list(TopLevelScopes)
@@ -78,8 +74,7 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
 
     root.facts.getOr(TopLevelScopes, []).push(topLevel.scope);
 
-    const definitionSolver = Solver.from(solver);
-
+    const definitionSolver = new Solver(db);
     for (const [, group] of db.list(Typed)) {
         if (!group.isEmpty()) {
             definitionSolver.setGroup(group);
@@ -123,6 +118,9 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
     }
 
     // Solve constraints from top-level expressions
+
+    const solver = Solver.from(definitionSolver); // definition constraints will be retrieved from `db` as needed
+
     solver.add(...topLevel.constraints);
     solver.run();
 

@@ -8,8 +8,8 @@ registerFeedback({
     on: (node) => node,
     render: (node, { bound }) => render`
         ${render.node(node)} requires the instance ${render.bound(
-            bound,
-        )}, but this instance isn't defined.
+        bound,
+    )}, but this instance isn't defined.
 
         Double-check that these types are correct.
     `,
@@ -23,6 +23,6 @@ registerFeedback({
         render`${render.comments(
             comments,
             { source: render.node(node), ...links },
-            render`\n\n(This feedback comes from the instance ${render.bound(bound)}.)`,
+            render`\n\(This feedback comes from the instance ${render.bound(bound)}.)`,
         )}`,
 });

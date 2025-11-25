@@ -2,19 +2,20 @@ import type { Span } from "../../span";
 import type { AttributeNode } from "../attributes";
 import type { ExpressionNode } from "../expressions";
 import { StatementNode } from "./index";
-import { InternalPatternNode, type PatternNode } from "../patterns";
+import { type PatternNode } from "../patterns";
 import { UnsupportedAttribute } from "../../visit/attributes";
 import type { Visitor } from "../../visit";
 import { VariablePatternNode } from "../patterns/variable";
 import { ConstantDefinition } from "../../visit/definitions";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
+import { InternalNode, type Node } from "../../node";
 
 export class AssignmentNode extends StatementNode {
     pattern: PatternNode;
     value: ExpressionNode;
 
-    private temporary?: PatternNode;
+    private temporary?: Node;
 
     constructor(
         comments: string[],
@@ -69,7 +70,7 @@ export class AssignmentNode extends StatementNode {
 
             visitor.visit(this.value);
 
-            this.temporary = new InternalPatternNode(this.value.span);
+            this.temporary = new InternalNode(this.value.span);
             visitor.matching(this.temporary, () => {
                 visitor.visit(this.pattern);
             });

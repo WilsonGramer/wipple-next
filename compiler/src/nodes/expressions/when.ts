@@ -1,16 +1,17 @@
 import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
-import { InternalPatternNode, type PatternNode } from "../patterns";
+import { type PatternNode } from "../patterns";
 import { ExpressionNode } from "./index";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
 import { VariablePatternNode } from "../patterns/variable";
+import { InternalNode, type Node } from "../../node";
 
 export class WhenExpressionNode extends ExpressionNode {
     input: ExpressionNode;
     arms: Arm[];
 
-    private inputTemporary?: PatternNode;
+    inputTemporary?: Node;
 
     constructor(input: ExpressionNode, arms: Arm[], span: Span) {
         super(span);
@@ -31,7 +32,7 @@ export class WhenExpressionNode extends ExpressionNode {
 
         visitor.visit(this.input);
 
-        this.inputTemporary = new InternalPatternNode(this.input.span);
+        this.inputTemporary = new InternalNode(this.input.span);
         visitor.constraint(new GroupConstraint(this.inputTemporary, this.input));
 
         visitor.matching(this.inputTemporary, () => {
@@ -51,7 +52,7 @@ export class WhenExpressionNode extends ExpressionNode {
             codegen.fail();
         }
 
-        codegen.write("((", codegen.node(this.inputTemporary), "}) => {\n");
+        codegen.write("(async (", codegen.node(this.inputTemporary), ") => {\n");
 
         const variables = Iterator.from(this.arms)
             .flatMap((arm) => arm.pattern.traverse())

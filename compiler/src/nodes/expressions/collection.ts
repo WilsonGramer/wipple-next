@@ -3,13 +3,15 @@ import type { Span } from "../../span";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { types } from "../../typecheck";
+import { types, type Type } from "../../typecheck";
 import { ExpressionNode } from "./index";
 import { TraitDefinition } from "../../visit/definitions";
 import { InternalNode, type Node } from "../../node";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
 import type { Codegen } from "../../codegen";
 import { CallExpressionNode } from "./call";
+import { ConstructorExpressionNode } from "./constructor";
+import type { TypeParameterNode } from "../types/parameter";
 
 export class CollectionExpressionNode extends ExpressionNode {
     elements: ExpressionNode[];
@@ -49,46 +51,69 @@ export class CollectionExpressionNode extends ExpressionNode {
             return;
         }
 
-        const initialCollectionNode = new InternalNode(this.span);
-        visitor.db.register(initialCollectionNode);
+        const initialSubstitutions = new Map<TypeParameterNode, Type>();
 
-        const initialSubstitutions = new Map();
+        this.initialCollectionNode = new InternalNode(this.span, (codegen) => {
+            const constructor = new ConstructorExpressionNode(
+                "Initial-Collection",
+                initialCollectionDefinition.node.span,
+            );
+
+            constructor.matchingConstructorDefinition = initialCollectionDefinition;
+            constructor.matchingSubstitutions = initialSubstitutions;
+
+            codegen.write(constructor);
+        });
+        visitor.db.register(this.initialCollectionNode);
 
         visitor.constraint(
             new InstantiateConstraint({
-                source: initialCollectionNode,
+                source: this.initialCollectionNode,
                 definition: initialCollectionDefinition.node,
                 substitutions: initialSubstitutions,
-                replacements: new Map([[initialCollectionDefinition.node, initialCollectionNode]]),
+                replacements: new Map([
+                    [initialCollectionDefinition.node, this.initialCollectionNode],
+                ]),
             }),
         );
 
         visitor.constraint(
-            new BoundConstraint(initialCollectionNode, {
-                source: initialCollectionNode,
+            new BoundConstraint(this.initialCollectionNode, {
+                source: this.initialCollectionNode,
                 trait: initialCollectionDefinition.node,
                 substitutions: initialSubstitutions,
             }),
         );
 
-        const buildCollectionNode =
-            buildCollectionDefinition != null ? new InternalNode(this.span) : undefined;
+        if (buildCollectionDefinition != null) {
+            const buildSubstitutions = new Map<TypeParameterNode, Type>();
 
-        if (buildCollectionDefinition != null && buildCollectionNode != null) {
-            const buildSubstitutions = new Map();
+            this.buildCollectionNode = new InternalNode(this.span, (codegen) => {
+                const constructor = new ConstructorExpressionNode(
+                    "Build-Collection",
+                    buildCollectionDefinition.node.span,
+                );
+
+                constructor.matchingConstructorDefinition = buildCollectionDefinition;
+                constructor.matchingSubstitutions = buildSubstitutions;
+
+                codegen.write(constructor);
+            });
 
             visitor.constraint(
                 new InstantiateConstraint({
-                    source: buildCollectionNode,
+                    source: this.buildCollectionNode,
                     definition: buildCollectionDefinition.node,
                     substitutions: buildSubstitutions,
-                    replacements: new Map([[buildCollectionDefinition.node, buildCollectionNode]]),
+                    replacements: new Map([
+                        [buildCollectionDefinition.node, this.buildCollectionNode],
+                    ]),
                 }),
             );
 
             visitor.constraint(
-                new BoundConstraint(buildCollectionNode, {
-                    source: buildCollectionNode,
+                new BoundConstraint(this.buildCollectionNode, {
+                    source: this.buildCollectionNode,
                     trait: buildCollectionDefinition.node,
                     substitutions: buildSubstitutions,
                 }),
@@ -96,8 +121,8 @@ export class CollectionExpressionNode extends ExpressionNode {
         }
 
         if (
-            initialCollectionNode == null ||
-            (this.elements.length > 0 && buildCollectionNode == null)
+            this.initialCollectionNode == null ||
+            (this.elements.length > 0 && this.buildCollectionNode == null)
         ) {
             return;
         }
@@ -108,32 +133,40 @@ export class CollectionExpressionNode extends ExpressionNode {
 
             visitor.constraint(
                 new TypeConstraint(
-                    buildCollectionNode!,
+                    this.buildCollectionNode!,
                     types.function([element, collection], next),
                 ),
             );
 
             return next;
-        }, initialCollectionNode);
+        }, this.initialCollectionNode);
 
         visitor.constraint(new GroupConstraint(this, resultNode));
     }
 
     codegen(codegen: Codegen): void {
-        if (this.initialCollectionNode == null || this.buildCollectionNode == null) {
+        if (this.initialCollectionNode == null) {
             codegen.fail();
         }
 
-        codegen.write(
-            this.elements.reduce(
-                (collection, element) =>
-                    new CallExpressionNode(
-                        this.buildCollectionNode!,
-                        [element, collection],
-                        this.span,
-                    ),
-                this.initialCollectionNode,
-            ),
-        );
+        if (this.elements.length > 0) {
+            if (this.buildCollectionNode == null) {
+                codegen.fail();
+            }
+
+            codegen.write(
+                this.elements.reduce(
+                    (collection, element) =>
+                        new CallExpressionNode(
+                            this.buildCollectionNode!,
+                            [element, collection],
+                            this.span,
+                        ),
+                    this.initialCollectionNode,
+                ),
+            );
+        } else {
+            codegen.write(this.initialCollectionNode);
+        }
     }
 }

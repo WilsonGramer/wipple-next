@@ -5,6 +5,8 @@ import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import { PatternNode } from "./index";
 import type { Codegen } from "../../codegen";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 
 export class NumberPatternNode extends PatternNode {
     value: string;
@@ -20,7 +22,12 @@ export class NumberPatternNode extends PatternNode {
         const numberTypeDefinition = visitor.resolve("Number", [TypeDefinition], this);
         if (numberTypeDefinition != null) {
             visitor.constraint(
-                new TypeConstraint(this, types.named(numberTypeDefinition.node, [])),
+                new InstantiateConstraint({
+                    source: this,
+                    definition: numberTypeDefinition.node,
+                    substitutions: new Map(),
+                    replacements: new Map([[numberTypeDefinition.node, this]]),
+                }),
             );
         }
     }

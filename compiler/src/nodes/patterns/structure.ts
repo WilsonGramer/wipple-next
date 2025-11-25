@@ -2,7 +2,7 @@ import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { StructureConstructorDefinition } from "../../visit/definitions";
-import { InternalNode, type Node } from "../../node";
+import { type Node } from "../../node";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import type { Codegen } from "../../codegen";
 
@@ -10,7 +10,7 @@ export class StructurePatternNode extends PatternNode {
     name: string;
     fields: StructurePatternField[];
 
-    private matchingFields?: Map<string, Node>;
+    private fieldTemporaries?: Map<string, readonly [Node, PatternNode]>;
 
     constructor(name: string, fields: StructurePatternField[], span: Span) {
         super(span);
@@ -28,29 +28,24 @@ export class StructurePatternNode extends PatternNode {
         super.visit(visitor);
 
         const definition = visitor.resolve(this.name, [StructureConstructorDefinition], this);
-        const fields = new Map<string, Node>();
-        for (const field of this.fields) {
-            const fieldNode = new InternalNode(field.span);
-            visitor.db.register(fieldNode);
-
-            visitor.matching(fieldNode, () => {
-                visitor.visit(field.value);
-            });
-
-            fields.set(field.name, fieldNode);
-        }
+        const fields = new Map(
+            this.fields.map((field) => [
+                field.name,
+                [visitor.subpattern(field.value), field.value] as const,
+            ]),
+        );
 
         if (definition == null) {
             return;
         }
 
-        this.matchingFields = fields;
+        this.fieldTemporaries = fields;
 
         const replacements = new Map<Node, Node>([[definition.node, this]]);
         for (const [name, type] of Object.entries(definition.fields)) {
             const value = fields.get(name);
             if (value != null) {
-                replacements.set(type, value);
+                replacements.set(type, value[0]);
             }
         }
 
@@ -65,17 +60,18 @@ export class StructurePatternNode extends PatternNode {
     }
 
     codegen(codegen: Codegen): void {
-        if (this.matchingFields == null) {
+        if (this.fieldTemporaries == null) {
             codegen.fail();
         }
 
-        for (const [name, field] of this.matchingFields) {
+        for (const [name, [temporary, pattern]] of this.fieldTemporaries) {
             codegen.write(
                 ` && ((`,
-                codegen.node(field),
+                codegen.node(temporary),
                 ` = `,
                 codegen.node(this.matching),
                 `[${JSON.stringify(name)}]) || true)`,
+                pattern,
             );
         }
     }

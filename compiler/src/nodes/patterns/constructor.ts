@@ -14,7 +14,7 @@ export class ConstructorPatternNode extends PatternNode {
 
     private matchingConstructor?:
         | { type: "marker" }
-        | { type: "variant"; index: number; elements: Node[] };
+        | { type: "variant"; index: number; elements: (readonly [Node, PatternNode])[] };
 
     constructor(constructorName: string, elements: PatternNode[], span: Span) {
         super(span);
@@ -56,16 +56,9 @@ export class ConstructorPatternNode extends PatternNode {
             this.matchingConstructor = {
                 type: "variant",
                 index: definition.index,
-                elements: this.elements.map((pattern) => {
-                    const elementNode = new InternalNode(pattern.span);
-                    visitor.db.register(elementNode);
-
-                    visitor.matching(elementNode, () => {
-                        visitor.visit(pattern);
-                    });
-
-                    return elementNode;
-                }),
+                elements: this.elements.map(
+                    (element) => [visitor.subpattern(element), element] as const,
+                ),
             };
 
             if (this.elements.length === 0) {
@@ -120,14 +113,14 @@ export class ConstructorPatternNode extends PatternNode {
                     `[runtime.variant] === ${index})`,
                 );
 
-                elements.forEach((element, index) => {
+                elements.forEach(([temporary, pattern], index) => {
                     codegen.write(
                         ` && ((`,
-                        codegen.node(this),
+                        codegen.node(temporary),
                         ` = `,
                         codegen.node(this.matching),
                         `[${index}]) || true)`,
-                        element,
+                        pattern,
                     );
                 });
 

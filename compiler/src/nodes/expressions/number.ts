@@ -5,6 +5,8 @@ import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import { ExpressionNode } from "./index";
 import type { Codegen } from "../../codegen";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 
 export class NumberExpressionNode extends ExpressionNode {
     value: string;
@@ -21,7 +23,12 @@ export class NumberExpressionNode extends ExpressionNode {
 
         if (numberTypeDefinition != null) {
             visitor.constraint(
-                new TypeConstraint(this, types.named(numberTypeDefinition.node, [])),
+                new InstantiateConstraint({
+                    source: this,
+                    definition: numberTypeDefinition.node,
+                    substitutions: new Map(),
+                    replacements: new Map([[numberTypeDefinition.node, this]]),
+                }),
             );
         }
     }

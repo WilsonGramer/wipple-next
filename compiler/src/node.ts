@@ -26,8 +26,7 @@ export abstract class Node {
     abstract visit(visitor: Visitor): void;
 
     codegen(codegen: Codegen): void {
-        console.error("cannot codegen", this);
-        codegen.fail();
+        codegen.fail(`cannot codegen ${this}`);
     }
 
     instantiate(source: Node | undefined): Node {
@@ -124,7 +123,6 @@ export class Facts {
 
 export class Db {
     private nodes = new Set<Node>();
-    solver!: Solver;
 
     register(node: Node) {
         node.db = this;

@@ -19,6 +19,12 @@ export class VariablePatternNode extends PatternNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(`((`, codegen.node(this), ` = `, codegen.node(this.matching), `) || true)`);
+        codegen.write(
+            ` && ((`,
+            codegen.node(this),
+            ` = `,
+            codegen.node(this.matching),
+            `) || true)`,
+        );
     }
 }

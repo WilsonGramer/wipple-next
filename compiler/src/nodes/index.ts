@@ -27,11 +27,10 @@ export class FileNode extends Node {
     }
 
     codegen(codegen: Codegen): void {
-        // for (const [variable, _] of this.db.list(IsTopLevelVariableDefinition)) {
-        //     this.write(`let ${this.node(variable)};\n`);
-        // }
-        // for (const [statement, _] of this.db.list(IsTopLevelExecutableStatement)) {
-        //     this.write(statement);
-        // }
+        for (const statement of this.statements) {
+            if (!(statement instanceof EmptyStatementNode)) {
+                codegen.write(statement);
+            }
+        }
     }
 }

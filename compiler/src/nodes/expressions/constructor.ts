@@ -5,18 +5,19 @@ import {
     MarkerConstructorDefinition,
     TraitDefinition,
     VariantConstructorDefinition,
+    type Definition,
 } from "../../visit/definitions";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
 import type { Type } from "../../typecheck";
 import type { TypeParameterNode } from "../types/parameter";
 import type { Codegen } from "../../codegen";
-import type { Node } from "../../node";
 
 export class ConstructorExpressionNode extends ExpressionNode {
     constructorName: string;
 
-    matchingConstructor?: Node;
+    matchingConstructorDefinition?: Definition;
+    matchingSubstitutions?: Map<TypeParameterNode, Type>;
 
     constructor(constructorName: string, span: Span) {
         super(span);
@@ -57,18 +58,36 @@ export class ConstructorExpressionNode extends ExpressionNode {
             );
         }
 
-        this.matchingConstructor = constructorDefinition.node;
+        this.matchingConstructorDefinition = constructorDefinition;
     }
 
     codegen(codegen: Codegen): void {
-        if (this.matchingConstructor == null) {
+        if (this.matchingConstructorDefinition == null) {
             codegen.fail();
         }
 
-        if (this.matchingConstructor instanceof MarkerConstructorDefinition) {
+        if (this.matchingConstructorDefinition instanceof MarkerConstructorDefinition) {
             codegen.write("null");
+        } else if (this.matchingConstructorDefinition instanceof TraitDefinition) {
+            if (this.matchingSubstitutions == null) {
+                codegen.fail();
+            }
+
+            codegen.write(
+                `await runtime.trait(${codegen.node(
+                    this.matchingConstructorDefinition.node,
+                )}, types, {`,
+            );
+
+            this.matchingSubstitutions.forEach((type, parameter) => {
+                codegen.write(`${codegen.node(parameter)}: `);
+                codegen.writeType(type);
+                codegen.write(", ");
+            });
+
+            codegen.write("})");
         } else {
-            codegen.write(this.matchingConstructor);
+            codegen.write(this.matchingConstructorDefinition.node);
         }
     }
 }

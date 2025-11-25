@@ -1,9 +1,10 @@
 import type { Db, Node } from "../node";
-import { Fact } from "../node";
+import { Fact, InternalNode } from "../node";
 import { Defined, type Definition, type InstanceDefinition } from "./definitions";
 import type { Instance } from "../typecheck/constraints/bound";
 import type { TypeParameterNode } from "../nodes/types/parameter";
 import type { Constraint } from "../typecheck/constraints/constraint";
+import { type PatternNode } from "../nodes/patterns";
 
 export class Resolved extends Fact<Definition | string> {
     display = (definition: Definition | string) =>
@@ -123,12 +124,24 @@ export class Visitor {
         return resultDefinition;
     }
 
-    matching<T>(node: Node, f: () => T): T {
+    matching<T>(temporary: InternalNode, f: () => T): T {
         const existingMatching = this.currentMatch;
-        this.currentMatch = node;
+        this.currentMatch = temporary;
         const result = f();
         this.currentMatch = existingMatching;
         return result;
+    }
+
+    subpattern(pattern: PatternNode): Node {
+        const temporary = new InternalNode(pattern.span);
+        this.db.register(temporary);
+
+        const previousMatch = this.currentMatch;
+        this.currentMatch = temporary;
+        this.visit(pattern);
+        this.currentMatch = previousMatch;
+
+        return temporary;
     }
 
     enqueue(key: QueueKey, f: () => void) {

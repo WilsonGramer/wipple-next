@@ -7,12 +7,14 @@ import type { PatternNode } from "../patterns";
 import { ExpressionNode } from "./index";
 import type { Codegen } from "../../codegen";
 import { Arm, WhenExpressionNode } from "./when";
-import type { Node } from "../../node";
+import { InternalNode, type Node } from "../../node";
+import { GroupConstraint } from "../../typecheck/constraints/group";
 
 export class IsExpressionNode extends ExpressionNode {
     left: ExpressionNode;
     right: PatternNode;
 
+    private inputTemporary?: Node;
     private trueVariant?: Node;
     private falseVariant?: Node;
 
@@ -32,9 +34,12 @@ export class IsExpressionNode extends ExpressionNode {
 
         visitor.visit(this.left);
 
-        visitor.matching(this.left, () => {
+        this.inputTemporary = new InternalNode(this.left.span);
+        visitor.matching(this.inputTemporary, () => {
             visitor.visit(this.right);
         });
+
+        visitor.constraint(new GroupConstraint(this.inputTemporary, this.left));
 
         const booleanTypeDefinition = visitor.resolve("Boolean", [TypeDefinition], this);
         const trueVariant = visitor.resolve("True", [VariantConstructorDefinition], this);
@@ -46,23 +51,25 @@ export class IsExpressionNode extends ExpressionNode {
         this.trueVariant = trueVariant.node;
         this.falseVariant = falseVariant.node;
 
-        visitor.constraint(new TypeConstraint(this, types.named(booleanTypeDefinition.node, [])));
+        visitor.constraint(new GroupConstraint(this, booleanTypeDefinition.node));
     }
 
     codegen(codegen: Codegen): void {
-        if (this.trueVariant == null || this.falseVariant == null) {
+        if (this.inputTemporary == null || this.trueVariant == null || this.falseVariant == null) {
             codegen.fail();
         }
 
-        codegen.write(
-            new WhenExpressionNode(
-                this.left,
-                [
-                    new Arm(this.right, this.trueVariant, this.span),
-                    new Arm(this.right, this.falseVariant, this.span),
-                ],
-                this.span,
-            ),
+        const whenExpression = new WhenExpressionNode(
+            this.left,
+            [
+                new Arm(this.right, this.trueVariant, this.span),
+                new Arm(this.right, this.falseVariant, this.span),
+            ],
+            this.span,
         );
+
+        whenExpression.inputTemporary = this.inputTemporary;
+
+        codegen.write(whenExpression);
     }
 }
