@@ -48,6 +48,8 @@ export class Solver {
                 break;
             }
         }
+
+        this.runPassUntil(undefined);
     }
 
     runPassUntil<T extends abstract new (...args: any[]) => Constraint>(until: T | undefined) {
