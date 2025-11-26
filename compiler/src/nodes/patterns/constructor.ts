@@ -2,11 +2,15 @@ import { type Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { MarkerConstructorDefinition, VariantConstructorDefinition } from "../../visit/definitions";
-import { InternalNode, type Node } from "../../node";
+import { fact, InternalNode, type Node } from "../../node";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
+
+export const MissingElement = fact("is missing element");
+export const ExtraElement = fact("is extra element");
+export const DuplicateElement = fact("is duplicate element");
 
 export class ConstructorPatternNode extends PatternNode {
     constructorName: string;
@@ -39,10 +43,13 @@ export class ConstructorPatternNode extends PatternNode {
             return;
         }
 
-        // TODO: Ensure `elements` has the right length
-
         if (definition instanceof MarkerConstructorDefinition) {
             // No need to add a condition; markers only have one value
+
+            for (const element of this.elements) {
+                visitor.subpattern(element);
+                element.facts.set(ExtraElement, null);
+            }
 
             visitor.constraint(
                 new InstantiateConstraint({

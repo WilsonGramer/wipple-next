@@ -84,7 +84,7 @@ export class InternalNode extends Node {
     visit(_visitor: Visitor): void {}
 }
 
-class Fact<T> {
+export class Fact<T> {
     private declare _value: T;
 
     display: (value: T) => string;
@@ -94,7 +94,7 @@ class Fact<T> {
     }
 }
 
-export const fact = <T>(display: string | ((value: T) => string)) => new Fact(display);
+export const fact = <T = null>(display: string | ((value: T) => string)) => new Fact(display);
 
 export class Facts {
     private values = new Map<Fact<any>, any>();

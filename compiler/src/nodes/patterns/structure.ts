@@ -42,7 +42,7 @@ export class StructurePatternNode extends PatternNode {
         this.fieldTemporaries = fields;
 
         const replacements = new Map<Node, Node>([[definition.node, this]]);
-        for (const [name, type] of Object.entries(definition.fields)) {
+        for (const [name, type] of definition.fields) {
             const value = fields.get(name);
             if (value != null) {
                 replacements.set(type, value[0]);

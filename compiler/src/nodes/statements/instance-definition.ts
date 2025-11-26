@@ -8,13 +8,19 @@ import type { ConstraintNode } from "../constraints";
 import type { BoundConstraintNode } from "../constraints/bound";
 import type { ExpressionNode } from "../expressions";
 import { StatementNode } from "./index";
-import type { TypeParameterNode } from "../types/parameter";
+import { type TypeParameterNode } from "../types/parameter";
 import type { Type } from "../../typecheck";
 import { InstanceDefinition, TraitDefinition } from "../../visit/definitions";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { TraitDefinitionNode } from "./trait-definition";
 import type { Codegen } from "../../codegen";
+import { zipNodes } from "../../util";
+import { fact } from "../../node";
+import { ExtraType, MissingType } from "../types";
+
+export const MissingInstanceValue = fact("is missing instance value");
+export const ExtraInstanceValue = fact("is extra instance value");
 
 export class InstanceDefinitionNode extends StatementNode {
     attributes: InstanceAttributes;
@@ -66,12 +72,11 @@ export class InstanceDefinitionNode extends StatementNode {
                         visitor.visit(parameter);
                     }
 
-                    // TODO: Ensure `parameters` has the right length
                     substitutions = new Map(
-                        traitDefinition.parameters.map((parameter, index) => [
-                            parameter,
-                            this.bound.parameters[index],
-                        ]),
+                        zipNodes(traitDefinition.parameters, this.bound.parameters, {
+                            missing: MissingType,
+                            extra: ExtraType,
+                        }),
                     );
 
                     for (const constraint of this.constraints) {
@@ -99,8 +104,12 @@ export class InstanceDefinitionNode extends StatementNode {
 
                     visitor.visit(this.value);
                     visitor.constraint(new GroupConstraint(this.value, this));
-                } else if (this.attributes.error == null) {
-                    // TODO: Missing instance value
+
+                    if (this.attributes.error) {
+                        this.facts.set(ExtraInstanceValue, null);
+                    }
+                } else if (!this.attributes.error) {
+                    this.facts.set(MissingInstanceValue, null);
                 }
 
                 trait.facts.getOr(Instances, []).push({

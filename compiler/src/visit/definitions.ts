@@ -111,9 +111,9 @@ export class MarkerConstructorDefinition extends Definition<Node> {
 }
 
 export class StructureConstructorDefinition extends Definition<Node> {
-    fields: Record<string, Node>;
+    fields: Map<string, Node>;
 
-    constructor(node: Node, comments: string[], fields: Record<string, Node>) {
+    constructor(node: Node, comments: string[], fields: Map<string, Node>) {
         super(node, comments);
         this.fields = fields;
     }

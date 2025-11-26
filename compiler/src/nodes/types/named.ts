@@ -3,6 +3,8 @@ import type { Span } from "../../span";
 import { TypeNode } from "./index";
 import { TypeDefinition } from "../../visit/definitions";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import { zipNodes } from "../../util";
+import { ExtraType, MissingType } from ".";
 
 export class NamedTypeNode extends TypeNode {
     name: string;
@@ -28,18 +30,18 @@ export class NamedTypeNode extends TypeNode {
         }
 
         if (typeDefinition != null) {
-            // TODO: Ensure `parameters` has the right length
+            const substitutions = new Map(
+                zipNodes(typeDefinition.parameters, this.parameters, {
+                    missing: MissingType,
+                    extra: ExtraType,
+                }),
+            );
 
             visitor.constraint(
                 new InstantiateConstraint({
                     source: this,
                     definition: typeDefinition.node,
-                    substitutions: new Map(
-                        this.parameters.map((parameter, index) => [
-                            typeDefinition.parameters[index],
-                            parameter,
-                        ]),
-                    ),
+                    substitutions,
                     replacements: new Map([[typeDefinition.node, this]]),
                 }),
             );

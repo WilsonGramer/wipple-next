@@ -2,9 +2,14 @@ import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { ExpressionNode } from "./index";
 import { StructureConstructorDefinition } from "../../visit/definitions";
-import type { Node } from "../../node";
+import { fact, type Node } from "../../node";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import type { Codegen } from "../../codegen";
+import { zipNodeMaps } from "../../util";
+
+export const MissingField = fact("is missing field");
+export const ExtraField = fact("is extra field");
+export const DuplicateField = fact("is duplicate field");
 
 export class StructureExpressionNode extends ExpressionNode {
     name: string;
@@ -41,23 +46,25 @@ export class StructureExpressionNode extends ExpressionNode {
             return;
         }
 
-        const replacements = new Map<Node, Node>([[structureConstructorDefinition.node, this]]);
-        for (const [name, type] of Object.entries(structureConstructorDefinition.fields)) {
-            const value = fields.get(name);
-
-            if (value != null) {
-                replacements.set(type, value);
-            } else {
-                // TODO: Handle missing field
-            }
-        }
+        const fieldValues = zipNodeMaps(
+            structureConstructorDefinition.fields,
+            Iterator.from(this.fields).map((field) => [field.name, field.value]),
+            {
+                missing: MissingField,
+                extra: ExtraField,
+                duplicate: DuplicateField,
+            },
+        );
 
         visitor.constraint(
             new InstantiateConstraint({
                 source: this,
                 definition: structureConstructorDefinition.node,
                 substitutions: new Map(),
-                replacements,
+                replacements: new Map([
+                    [structureConstructorDefinition.node, this],
+                    ...fieldValues,
+                ]),
             }),
         );
     }

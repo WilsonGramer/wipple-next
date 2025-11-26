@@ -9,6 +9,10 @@ export const Typed = fact<Group>((group) =>
         : "missing type",
 );
 
+export const MissingType = fact("is missing type");
+
+export const ExtraType = fact("is extra type");
+
 export abstract class TypeNode extends Node {
     visit(_visitor: Visitor): void {
         this.facts.set(Typed, Group.empty(this));

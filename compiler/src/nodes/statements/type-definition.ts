@@ -15,11 +15,14 @@ import {
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Node } from "../../node";
-import { InternalNode } from "../../node";
+import { fact, InternalNode } from "../../node";
 import type { Codegen } from "../../codegen";
 import { FunctionExpressionNode } from "../expressions/function";
 import { InternalPatternNode } from "../patterns";
 import { GroupConstraint } from "../../typecheck/constraints/group";
+
+export const DuplicateField = fact("is duplicate field");
+export const DuplicateVariant = fact("is duplicate variant");
 
 export class TypeDefinitionNode extends StatementNode {
     attributes: TypeAttributes;
@@ -82,11 +85,15 @@ export class TypeDefinitionNode extends StatementNode {
                             new MarkerConstructorDefinition(definition.node, this.comments),
                         );
                     } else if (this.representation instanceof StructureTypeRepresentation) {
-                        const fields: Record<string, Node> = {};
+                        const fields = new Map<string, Node>();
                         for (const field of this.representation.fields) {
                             visitor.visit(field.type);
-                            fields[field.name] = field.type;
-                            // TODO: Handle duplicate fields
+
+                            if (fields.has(field.name)) {
+                                field.type.facts.set(DuplicateField, null);
+                            } else {
+                                fields.set(field.name, field.type);
+                            }
                         }
 
                         visitor.popScope();
@@ -175,7 +182,15 @@ export class TypeDefinitionNode extends StatementNode {
 
                         visitor.popScope();
 
+                        const defined = new Set<string>();
                         for (const { name, constructorDefinition } of variantDefinitions) {
+                            if (defined.has(name)) {
+                                constructorDefinition.node.facts.set(DuplicateVariant, null);
+                                continue;
+                            }
+
+                            defined.add(name);
+
                             visitor.define(name, constructorDefinition);
                         }
                     } else {

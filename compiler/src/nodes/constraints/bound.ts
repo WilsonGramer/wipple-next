@@ -4,6 +4,8 @@ import { ConstraintNode } from "./index";
 import type { TypeNode } from "../types";
 import { TraitDefinition } from "../../visit/definitions";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
+import { zipNodes } from "../../util";
+import { ExtraType, MissingType } from "../types";
 
 export class BoundConstraintNode extends ConstraintNode {
     trait: string;
@@ -31,9 +33,11 @@ export class BoundConstraintNode extends ConstraintNode {
             visitor.visit(parameter);
         }
 
-        // TODO: Ensure `parameters` has the right length
         const substitutions = new Map(
-            trait.parameters.map((parameter, index) => [parameter, this.parameters[index]]),
+            zipNodes(trait.parameters, this.parameters, {
+                missing: MissingType,
+                extra: ExtraType,
+            }),
         );
 
         visitor.constraint(

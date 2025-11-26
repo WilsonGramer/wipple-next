@@ -29,12 +29,23 @@ export const displayType = (type: Type, root = true): string => {
     }
 };
 
-export const traverseType = (type: Type, f: (type: Type) => Type): Type => {
+export const traverseType = (type: Type, f: (type: Type) => Type, stack: Type[] = []): Type => {
     type = f(type);
 
-    return type instanceof Node
-        ? type
-        : { ...type, children: type.children.map((child) => traverseType(child, f)) };
+    if (stack.includes(type)) {
+        return type; // recursive type
+    }
+
+    stack.push(type);
+
+    const result =
+        type instanceof Node
+            ? type
+            : { ...type, children: type.children.map((child) => traverseType(child, f, stack)) };
+
+    stack.pop();
+
+    return result;
 };
 
 export const typeReferencesNode = (type: Type, ...nodes: (Node | undefined)[]) => {
