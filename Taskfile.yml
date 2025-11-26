@@ -9,8 +9,9 @@ tasks:
         env:
             NODE_OPTIONS: "--enable-source-maps"
     test:
-        dir: compiler
-        cmd: npm test -- {{.CLI_ARGS}}
+        cmds:
+            - (cd compiler && npm run test -- {{.CLI_ARGS}})
+            - npx jest --no-watchman test.js {{.CLI_ARGS}}
     install:
         cmd: (cd compiler && npm run exe)
     vscode:

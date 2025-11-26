@@ -23,7 +23,9 @@ export type CompileResult =
 export class RootNode extends Node {
     files: FileNode[] = [];
 
-    *children(): Generator<Node> {}
+    *children(): Generator<Node> {
+        yield* this.files;
+    }
 
     visit(_visitor: Visitor): void {}
 }

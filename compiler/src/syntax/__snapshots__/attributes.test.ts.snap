@@ -4,7 +4,6 @@ exports[`parsing named attribute 1`] = `
 AttributeNode {
   "isHidden": false,
   "name": "foo",
-  "value": undefined,
 }
 `;
 

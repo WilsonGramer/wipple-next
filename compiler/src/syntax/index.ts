@@ -31,10 +31,17 @@ export const testParse = <T>(name: string, rule: (parser: Parser) => T, source: 
                     delete value.facts;
                 }
 
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                // eslint-disable-next-line
                 delete value.span;
 
-                Object.values(value).forEach(filter);
+                for (const [k, v] of Object.entries(value)) {
+                    if (v === undefined) {
+                        // eslint-disable-next-line
+                        delete value[k];
+                    } else {
+                        filter(v);
+                    }
+                }
             }
         };
 

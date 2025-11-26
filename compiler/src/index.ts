@@ -156,27 +156,29 @@ const compileCommand = (options: { run: boolean }) =>
                 process.exit(1);
             }
 
-            const codegen = new Codegen(files, args.output ?? "index.mjs", db, {
-                format: { type: "iife", arg: "buildRuntime(env)" },
-                prelude: nodePrelude + runtime,
-            });
+            if (args.output != null) {
+                const codegen = new Codegen(files, args.output, db, {
+                    format: { type: "iife", arg: "buildRuntime(env)" },
+                    prelude: nodePrelude + runtime,
+                });
 
-            const script = codegen.run(root.files);
+                const script = codegen.run(root.files);
 
-            if (script != null) {
-                if (args.output != null) {
-                    writeFileSync(args.output, script);
+                if (script != null) {
+                    if (args.output != null) {
+                        writeFileSync(args.output, script);
+                    }
+
+                    if (options.run) {
+                        const tempDir = mkdtempSync(join(tmpdir(), "wipple-"));
+                        const scriptPath = `${tempDir}/index.mjs`;
+                        writeFileSync(scriptPath, script);
+                        execSync(`node ${scriptPath}`, { stdio: "inherit" });
+                        rmSync(tempDir, { recursive: true, force: true });
+                    }
+                } else {
+                    console.error(chalk.bold("Compilation failed during codegen"));
                 }
-
-                if (options.run) {
-                    const tempDir = mkdtempSync(join(tmpdir(), "wipple-"));
-                    const scriptPath = `${tempDir}/index.mjs`;
-                    writeFileSync(scriptPath, script);
-                    execSync(`node ${scriptPath}`, { stdio: "inherit" });
-                    rmSync(tempDir, { recursive: true, force: true });
-                }
-            } else {
-                console.error(chalk.bold("Compilation failed during codegen"));
             }
         },
     });

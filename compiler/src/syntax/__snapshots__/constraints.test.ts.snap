@@ -8,7 +8,6 @@ BoundConstraintNode {
       "infer": false,
       "isHidden": false,
       "name": "value",
-      "value": undefined,
     },
   ],
   "trait": "Foo",
@@ -22,7 +21,6 @@ DefaultConstraintNode {
     "infer": false,
     "isHidden": false,
     "name": "value",
-    "value": undefined,
   },
   "value": NamedTypeNode {
     "isHidden": false,
