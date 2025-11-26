@@ -6,6 +6,7 @@ import { execSync } from "node:child_process";
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
+import ProgressBar from "progress";
 import wrapAnsi from "wrap-ansi";
 import { Codegen } from "./codegen";
 import { compile, makeRoot } from "./compile";
@@ -45,8 +46,9 @@ const compileCommand = (options: { run: boolean }) =>
             }),
         },
         handler: (args) => {
-            const libs = args.lib.map((libPath) =>
-                readdirSync(libPath)
+            const libs = args.lib.map((libPath) => ({
+                path: libPath,
+                files: readdirSync(libPath)
                     .filter((fileName) => extname(fileName) === ".wipple")
                     .map((fileName) => {
                         const filePath = join(libPath, fileName);
@@ -56,14 +58,14 @@ const compileCommand = (options: { run: boolean }) =>
                             source: readFileSync(filePath, "utf8"),
                         };
                     }),
-            );
+            }));
 
             const files = args.paths.map((path) => ({
                 path,
                 source: readFileSync(path, "utf8"),
             }));
 
-            const layers = [...libs, files];
+            const layers = [...libs, { path: undefined, files }];
 
             const filters = args.filterLines.map((filterLine): Filter => {
                 if (!filterLine.includes(":")) {
@@ -80,7 +82,20 @@ const compileCommand = (options: { run: boolean }) =>
             const root = makeRoot();
             const { db } = root;
 
-            for (const files of layers) {
+            const progress = new ProgressBar(`[:bar] ${chalk.dim(":message")}`, {
+                total: layers.length,
+                width: 15,
+                complete: "=",
+                head: ">",
+                incomplete: " ",
+                clear: true,
+            });
+
+            layers.forEach(({ path, files }, index) => {
+                progress.tick(index, {
+                    message: `Compiling ${path ?? files.map(({ path }) => path).join(", ")}`,
+                });
+
                 const result = compile(root, { files });
 
                 if (!result.success) {
@@ -95,7 +110,11 @@ const compileCommand = (options: { run: boolean }) =>
                             throw new Error("unknown error");
                     }
                 }
-            }
+            });
+
+            progress.tick(layers.length, { message: "" });
+
+            progress.terminate();
 
             if (args.facts) {
                 console.log(`${chalk.bold.underline("Facts:")}\n`);
