@@ -4,19 +4,19 @@ import { PatternNode } from "./index";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
-import type { Node } from "../../node";
+import type { InternalNode, Node } from "../../node";
 
 export class TuplePatternNode extends PatternNode {
     elements: PatternNode[];
 
-    private elementTemporaries?: Node[];
+    private elementTemporaries?: InternalNode[];
 
     constructor(elements: PatternNode[], span: Span) {
         super(span);
         this.elements = elements;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.elements;
     }
 

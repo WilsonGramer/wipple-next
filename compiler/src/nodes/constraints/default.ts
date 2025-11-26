@@ -3,6 +3,7 @@ import type { Span } from "../../span";
 import { ConstraintNode } from "./index";
 import type { TypeNode } from "../types";
 import { DefaultConstraint } from "../../typecheck/constraints/default";
+import type { Node } from "../../node";
 
 export class DefaultConstraintNode extends ConstraintNode {
     parameter: TypeNode;
@@ -14,7 +15,7 @@ export class DefaultConstraintNode extends ConstraintNode {
         this.value = value;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.parameter;
         yield this.value;
     }

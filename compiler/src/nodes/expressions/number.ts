@@ -4,6 +4,7 @@ import { ExpressionNode } from "./index";
 import type { Codegen } from "../../codegen";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { NamedTypeNode } from "../types/named";
+import type { Node } from "../../node";
 
 export class NumberExpressionNode extends ExpressionNode {
     value: string;
@@ -12,6 +13,8 @@ export class NumberExpressionNode extends ExpressionNode {
         super(span);
         this.value = value;
     }
+
+    *children(): Generator<Node> {}
 
     visit(visitor: Visitor): void {
         super.visit(visitor);

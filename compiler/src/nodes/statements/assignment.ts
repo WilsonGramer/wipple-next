@@ -15,7 +15,7 @@ export class AssignmentNode extends StatementNode {
     pattern: PatternNode;
     value: ExpressionNode;
 
-    private temporary?: Node;
+    private temporary?: InternalNode;
 
     constructor(
         comments: string[],
@@ -33,14 +33,12 @@ export class AssignmentNode extends StatementNode {
         }
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.pattern;
         yield this.value;
     }
 
     visit(visitor: Visitor): void {
-        super.visit(visitor);
-
         visitor.enqueue("afterAllDefinitions", () => {
             // Try assigning to an existing constant if possible
             if (this.pattern instanceof VariablePatternNode) {

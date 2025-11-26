@@ -2,15 +2,30 @@ import { type Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { MarkerConstructorDefinition, VariantConstructorDefinition } from "../../visit/definitions";
-import { fact, InternalNode, type Node } from "../../node";
+import { InternalNode, type Node } from "../../node";
+import { Fact } from "../../db";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
 
-export const MissingElement = fact("is missing element");
-export const ExtraElement = fact("is extra element");
-export const DuplicateElement = fact("is duplicate element");
+export class MissingElement extends Fact<null> {
+    display(): string {
+        return "is missing element";
+    }
+}
+
+export class ExtraElement extends Fact<null> {
+    display(): string {
+        return "is extra element";
+    }
+}
+
+export class DuplicateElement extends Fact<null> {
+    display(): string {
+        return "is duplicate element";
+    }
+}
 
 export class ConstructorPatternNode extends PatternNode {
     constructorName: string;
@@ -18,7 +33,7 @@ export class ConstructorPatternNode extends PatternNode {
 
     private matchingConstructor?:
         | { type: "marker" }
-        | { type: "variant"; index: number; elements: (readonly [Node, PatternNode])[] };
+        | { type: "variant"; index: number; elements: (readonly [InternalNode, PatternNode])[] };
 
     constructor(constructorName: string, elements: PatternNode[], span: Span) {
         super(span);
@@ -26,7 +41,7 @@ export class ConstructorPatternNode extends PatternNode {
         this.elements = elements;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.elements;
     }
 

@@ -5,6 +5,7 @@ import { TypeDefinition } from "../../visit/definitions";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { zipNodes } from "../../util";
 import { ExtraType, MissingType } from ".";
+import type { Node } from "../../node";
 
 export class NamedTypeNode extends TypeNode {
     name: string;
@@ -16,7 +17,7 @@ export class NamedTypeNode extends TypeNode {
         this.parameters = parameters;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.parameters;
     }
 

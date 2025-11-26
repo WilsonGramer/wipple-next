@@ -15,14 +15,24 @@ import {
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Node } from "../../node";
-import { fact, InternalNode } from "../../node";
+import { InternalNode } from "../../node";
+import { Fact } from "../../db";
 import type { Codegen } from "../../codegen";
 import { FunctionExpressionNode } from "../expressions/function";
 import { InternalPatternNode } from "../patterns";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 
-export const DuplicateField = fact("is duplicate field");
-export const DuplicateVariant = fact("is duplicate variant");
+export class DuplicateField extends Fact<null> {
+    display(): string {
+        return "is duplicate field";
+    }
+}
+
+export class DuplicateVariant extends Fact<null> {
+    display(): string {
+        return "is duplicate variant";
+    }
+}
 
 export class TypeDefinitionNode extends StatementNode {
     attributes: TypeAttributes;
@@ -45,7 +55,7 @@ export class TypeDefinitionNode extends StatementNode {
         this.representation = representation;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.parameters;
 
         if (this.representation instanceof StructureTypeRepresentation) {
@@ -60,8 +70,6 @@ export class TypeDefinitionNode extends StatementNode {
     }
 
     visit(visitor: Visitor): void {
-        super.visit(visitor);
-
         visitor.defining(this, () => {
             visitor.pushScope();
 

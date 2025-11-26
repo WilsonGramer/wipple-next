@@ -1,6 +1,6 @@
 import type { ConstructedType, Type } from ".";
 import { traverseType, typeReferencesNode, typesAreEqual } from ".";
-import type { Db } from "../node";
+import type { Db } from "../db";
 import { Node } from "../node";
 import { ExpressionNode } from "../nodes/expressions";
 import { PatternNode } from "../nodes/patterns";

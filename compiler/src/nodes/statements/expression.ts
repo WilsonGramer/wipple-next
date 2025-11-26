@@ -6,6 +6,7 @@ import type { ExpressionNode } from "../expressions";
 import { StatementNode } from "./index";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class ExpressionStatementNode extends StatementNode {
     expression: ExpressionNode;
@@ -26,13 +27,11 @@ export class ExpressionStatementNode extends StatementNode {
         this.isHidden = true;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.expression;
     }
 
     visit(visitor: Visitor): void {
-        super.visit(visitor);
-
         visitor.enqueue("afterAllDefinitions", () => {
             visitor.visit(this.expression);
             visitor.constraint(new GroupConstraint(this, this.expression));

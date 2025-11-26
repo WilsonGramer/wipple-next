@@ -6,6 +6,7 @@ import { TraitDefinition } from "../../visit/definitions";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
 import { zipNodes } from "../../util";
 import { ExtraType, MissingType } from "../types";
+import type { Node } from "../../node";
 
 export class BoundConstraintNode extends ConstraintNode {
     trait: string;
@@ -17,7 +18,7 @@ export class BoundConstraintNode extends ConstraintNode {
         this.parameters = parameters;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.parameters;
     }
 

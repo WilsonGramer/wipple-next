@@ -11,7 +11,7 @@ export class WhenExpressionNode extends ExpressionNode {
     input: ExpressionNode;
     arms: Arm[];
 
-    inputTemporary?: Node;
+    inputTemporary?: InternalNode;
 
     constructor(input: ExpressionNode, arms: Arm[], span: Span) {
         super(span);
@@ -19,7 +19,7 @@ export class WhenExpressionNode extends ExpressionNode {
         this.arms = arms;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.input;
         for (const arm of this.arms) {
             yield arm.pattern;

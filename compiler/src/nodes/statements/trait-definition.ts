@@ -38,15 +38,13 @@ export class TraitDefinitionNode extends StatementNode {
         this.constraints = constraints;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.parameters;
         yield this.type;
         yield* this.constraints;
     }
 
     visit(visitor: Visitor): void {
-        super.visit(visitor);
-
         visitor.defining(this, () => {
             visitor.pushScope();
 

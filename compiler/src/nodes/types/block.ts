@@ -3,6 +3,7 @@ import type { Span } from "../../span";
 import { TypeNode } from "./index";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
+import type { Node } from "../../node";
 
 export class BlockTypeNode extends TypeNode {
     output: TypeNode;
@@ -12,7 +13,7 @@ export class BlockTypeNode extends TypeNode {
         this.output = output;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.output;
     }
 

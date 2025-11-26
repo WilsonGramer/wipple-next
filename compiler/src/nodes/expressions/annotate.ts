@@ -4,6 +4,7 @@ import { ExpressionNode } from "./index";
 import type { TypeNode } from "../types";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class AnnotateExpressionNode extends ExpressionNode {
     expression: ExpressionNode;
@@ -15,7 +16,7 @@ export class AnnotateExpressionNode extends ExpressionNode {
         this.type = type;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.expression;
         yield this.type;
     }

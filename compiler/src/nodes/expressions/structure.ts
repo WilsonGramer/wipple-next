@@ -2,14 +2,29 @@ import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { ExpressionNode } from "./index";
 import { StructureConstructorDefinition } from "../../visit/definitions";
-import { fact, type Node } from "../../node";
+import { type Node } from "../../node";
+import { Fact } from "../../db";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import type { Codegen } from "../../codegen";
 import { zipNodeMaps } from "../../util";
 
-export const MissingField = fact("is missing field");
-export const ExtraField = fact("is extra field");
-export const DuplicateField = fact("is duplicate field");
+export class MissingField extends Fact<null> {
+    display(): string {
+        return "is missing field";
+    }
+}
+
+export class ExtraField extends Fact<null> {
+    display(): string {
+        return "is extra field";
+    }
+}
+
+export class DuplicateField extends Fact<null> {
+    display(): string {
+        return "is duplicate field";
+    }
+}
 
 export class StructureExpressionNode extends ExpressionNode {
     name: string;
@@ -21,7 +36,7 @@ export class StructureExpressionNode extends ExpressionNode {
         this.fields = fields;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         for (const field of this.fields) {
             yield field.value;
         }

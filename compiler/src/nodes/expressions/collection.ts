@@ -25,7 +25,7 @@ export class CollectionExpressionNode extends ExpressionNode {
         this.elements = elements;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.elements;
     }
 

@@ -3,6 +3,7 @@ import type { Span } from "../../span";
 import { TypeNode } from "./index";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
+import type { Node } from "../../node";
 
 export class TupleTypeNode extends TypeNode {
     elements: TypeNode[];
@@ -12,7 +13,7 @@ export class TupleTypeNode extends TypeNode {
         this.elements = elements;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.elements;
     }
 

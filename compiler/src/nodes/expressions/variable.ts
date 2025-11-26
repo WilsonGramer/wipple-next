@@ -12,6 +12,8 @@ import type { Type } from "../../typecheck";
 export class VariableExpressionNode extends ExpressionNode {
     variable: string;
 
+    *children(): Generator<Node> {}
+
     private resolved?:
         | {
               type: "variable";

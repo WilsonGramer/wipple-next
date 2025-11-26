@@ -14,7 +14,7 @@ export class FileNode extends Node {
         this.isHidden = true;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.statements;
     }
 

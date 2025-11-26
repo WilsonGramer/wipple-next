@@ -25,6 +25,8 @@ export class InternalPatternNode extends PatternNode {
         super(span);
     }
 
+    *children(): Generator<Node> {}
+
     codegen(_codegen: Codegen): void {
         // No code needed
     }

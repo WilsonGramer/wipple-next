@@ -30,7 +30,7 @@ export class OperatorExpressionNode extends ExpressionNode {
         this.right = right;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.left;
         yield this.right;
     }

@@ -1,4 +1,5 @@
-import { type Fact, InternalNode, type Node } from "./node";
+import { InternalNode, type Node } from "./node";
+import { type Fact } from "./db";
 
 export function* zip<A, B>(
     left: Iterable<A>,
@@ -25,8 +26,8 @@ export const zipNodes = <A extends Node, B extends Node>(
     left: Iterable<A>,
     right: Iterable<B>,
     options: {
-        missing: Fact<null>;
-        extra: Fact<null>;
+        missing: typeof Fact<null>;
+        extra: typeof Fact<null>;
     },
 ) =>
     zip<A, B | InternalNode>(left, right, {
@@ -45,9 +46,9 @@ export const zipNodeMaps = <K, A extends Node, B extends Node>(
     left: Map<K, A>,
     right: Iterable<[K, B]>,
     options: {
-        missing: Fact<null>;
-        extra: Fact<null>;
-        duplicate: Fact<null>;
+        missing: typeof Fact<null>;
+        extra: typeof Fact<null>;
+        duplicate: typeof Fact<null>;
     },
 ) => {
     const result = new Map<K, [A, B | InternalNode]>();

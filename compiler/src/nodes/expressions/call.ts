@@ -6,6 +6,7 @@ import { ConstantDefinition } from "../../visit/definitions";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class CallExpressionNode extends ExpressionNode {
     function: ExpressionNode;
@@ -17,7 +18,7 @@ export class CallExpressionNode extends ExpressionNode {
         this.inputs = inputs;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.function;
         yield* this.inputs;
     }

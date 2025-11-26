@@ -9,6 +9,7 @@ import type { Visitor } from "../../visit";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { ConstantDefinition } from "../../visit/definitions";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class ConstantDefinitionNode extends StatementNode {
     attributes: ConstantAttributes;
@@ -31,14 +32,12 @@ export class ConstantDefinitionNode extends StatementNode {
         this.constraints = constraints;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.type;
         yield* this.constraints;
     }
 
     visit(visitor: Visitor): void {
-        super.visit(visitor);
-
         visitor.defining(this, () => {
             visitor.pushScope();
 

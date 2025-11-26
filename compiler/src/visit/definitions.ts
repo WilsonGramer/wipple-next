@@ -1,5 +1,5 @@
 import type { Node } from "../node";
-import { fact } from "../node";
+import { Fact } from "../db";
 import type {
     ConstantAttributes,
     InstanceAttributes,
@@ -13,7 +13,11 @@ import type { InstanceDefinitionNode } from "../nodes/statements/instance-defini
 import type { TypeParameterNode } from "../nodes/types/parameter";
 import type { VariablePatternNode } from "../nodes/patterns/variable";
 
-export const Defined = fact<Definition>("is a definition");
+export class Defined extends Fact<Definition> {
+    display(): string {
+        return "is a definition";
+    }
+}
 
 export abstract class Definition<N extends Node = Node> {
     node: N;

@@ -6,6 +6,7 @@ import { TypeParameterDefinition } from "../../visit/definitions";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
+import type { Node } from "../../node";
 
 export class TypeParameterNode extends TypeNode {
     name: string;
@@ -19,7 +20,7 @@ export class TypeParameterNode extends TypeNode {
         this.value = value;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         if (this.value != null) {
             yield this.value;
         }

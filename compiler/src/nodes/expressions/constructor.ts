@@ -12,6 +12,7 @@ import { BoundConstraint } from "../../typecheck/constraints/bound";
 import type { Type } from "../../typecheck";
 import type { TypeParameterNode } from "../types/parameter";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class ConstructorExpressionNode extends ExpressionNode {
     constructorName: string;
@@ -23,6 +24,8 @@ export class ConstructorExpressionNode extends ExpressionNode {
         super(span);
         this.constructorName = constructorName;
     }
+
+    *children(): Generator<Node> {}
 
     visit(visitor: Visitor): void {
         super.visit(visitor);

@@ -1,6 +1,6 @@
 import { Solver } from "../solve";
 import type { Node } from "../../node";
-import { fact } from "../../node";
+import { Fact } from "../../db";
 import { Instances } from "../../visit";
 import { Constraint } from "./constraint";
 import type { TraitDefinitionNode } from "../../nodes/statements/trait-definition";
@@ -59,17 +59,18 @@ type BoundValues = {
     instance: InstanceDefinitionNode | undefined;
 }[];
 
-export const Bounds = fact<BoundValues>(
-    (bounds) =>
-        `has bound(s) ${bounds
+export class Bounds extends Fact<BoundValues> {
+    display(bounds: BoundValues): string {
+        return `has bound(s) ${bounds
             .map(
                 ({ bound, instance }) =>
                     `\`${displayBound(bound)}\` (${
                         instance != null ? instance.toString() : "unresolved"
                     })`,
             )
-            .join(", ")}`,
-);
+            .join(", ")}`;
+    }
+}
 
 export class BoundConstraint extends Constraint {
     node: Node;

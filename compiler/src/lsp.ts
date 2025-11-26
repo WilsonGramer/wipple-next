@@ -5,7 +5,8 @@ import { collectFeedback } from "./feedback";
 import * as queries from "./queries";
 import { render } from "./feedback/render";
 import type { Node } from "./node";
-import { type Db, nodeFilter } from "./node";
+import { nodeFilter } from "./node";
+import type { Db } from "./db";
 import type { Span } from "./span";
 import { displayType } from "./typecheck";
 

@@ -1,4 +1,5 @@
-import { type Db, InternalNode, Node } from "./node";
+import { InternalNode, Node } from "./node";
+import type { Db } from "./db";
 import type { FileNode } from "./nodes";
 import type { TraitDefinitionNode } from "./nodes/statements/trait-definition";
 import { Typed } from "./nodes/types";

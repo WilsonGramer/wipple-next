@@ -3,6 +3,7 @@ import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { VariableDefinition } from "../../visit/definitions";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class VariablePatternNode extends PatternNode {
     variable: string;
@@ -11,6 +12,8 @@ export class VariablePatternNode extends PatternNode {
         super(span);
         this.variable = variable;
     }
+
+    *children(): Generator<Node> {}
 
     visit(visitor: Visitor): void {
         super.visit(visitor);

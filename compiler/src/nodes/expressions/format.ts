@@ -23,7 +23,7 @@ export class FormatExpressionNode extends ExpressionNode {
         this.inputs = inputs;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.inputs;
     }
 

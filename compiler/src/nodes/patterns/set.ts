@@ -5,6 +5,7 @@ import { VariableDefinition } from "../../visit/definitions";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
 import type { VariableExpressionNode } from "../expressions/variable";
+import type { Node } from "../../node";
 
 export class SetPatternNode extends PatternNode {
     variable: string;
@@ -15,6 +16,8 @@ export class SetPatternNode extends PatternNode {
         super(span);
         this.variable = variable;
     }
+
+    *children(): Generator<Node> {}
 
     visit(visitor: Visitor): void {
         super.visit(visitor);

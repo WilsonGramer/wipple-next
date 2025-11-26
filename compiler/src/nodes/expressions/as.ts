@@ -27,7 +27,7 @@ export class AsExpressionNode extends ExpressionNode {
         this.right = right;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.left;
         yield this.right;
     }

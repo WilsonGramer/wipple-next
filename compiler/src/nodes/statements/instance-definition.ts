@@ -16,11 +16,21 @@ import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { TraitDefinitionNode } from "./trait-definition";
 import type { Codegen } from "../../codegen";
 import { zipNodes } from "../../util";
-import { fact } from "../../node";
+import { Fact } from "../../db";
 import { ExtraType, MissingType } from "../types";
+import type { Node } from "../../node";
 
-export const MissingInstanceValue = fact("is missing instance value");
-export const ExtraInstanceValue = fact("is extra instance value");
+export class MissingInstanceValue extends Fact<null> {
+    display(): string {
+        return "is missing instance value";
+    }
+}
+
+export class ExtraInstanceValue extends Fact<null> {
+    display(): string {
+        return "is extra instance value";
+    }
+}
 
 export class InstanceDefinitionNode extends StatementNode {
     attributes: InstanceAttributes;
@@ -43,7 +53,7 @@ export class InstanceDefinitionNode extends StatementNode {
         this.value = value;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.bound;
         yield* this.constraints;
         if (this.value != null) {
@@ -52,8 +62,6 @@ export class InstanceDefinitionNode extends StatementNode {
     }
 
     visit(visitor: Visitor): void {
-        super.visit(visitor);
-
         visitor.defining(this, () => {
             visitor.pushScope();
 

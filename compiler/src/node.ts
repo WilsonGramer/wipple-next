@@ -1,6 +1,6 @@
 import type { Codegen } from "./codegen";
+import { Facts, type Db } from "./db";
 import type { Span } from "./span";
-import { compareSpans } from "./span";
 import type { Visitor } from "./visit";
 
 export abstract class Node {
@@ -13,7 +13,7 @@ export abstract class Node {
         this.span = span;
     }
 
-    *children(): Generator<Node> {}
+    abstract children(): Generator<Node>;
 
     *traverse(): Generator<Node> {
         yield this;
@@ -54,6 +54,8 @@ export class InstantiatedNode extends Node {
     from: Node;
     source: Node | undefined;
 
+    *children(): Generator<Node> {}
+
     constructor(from: Node, source: Node | undefined) {
         super(from.span);
         this.from = from;
@@ -81,92 +83,12 @@ export class InternalNode extends Node {
         }
     }
 
+    *children(): Generator<Node> {}
+
     visit(_visitor: Visitor): void {}
-}
 
-export class Fact<T> {
-    private declare _value: T;
-
-    display: (value: T) => string;
-
-    constructor(display: string | ((value: T) => string)) {
-        this.display = typeof display === "string" ? () => display : display;
-    }
-}
-
-export const fact = <T = null>(display: string | ((value: T) => string)) => new Fact(display);
-
-export class Facts {
-    private values = new Map<Fact<any>, any>();
-
-    get<T>(key: Fact<T>): T | undefined {
-        return this.values.get(key) as T | undefined;
-    }
-
-    getOr<T>(key: Fact<T>, defaultValue: NoInfer<T>): T {
-        if (!this.values.has(key)) {
-            this.values.set(key, defaultValue);
-        }
-
-        return this.values.get(key) as T;
-    }
-
-    set<T>(key: Fact<T>, value: NoInfer<T>) {
-        this.values.set(key, value);
-    }
-
-    delete<T>(key: Fact<T>) {
-        this.values.delete(key);
-    }
-
-    *[Symbol.iterator]() {
-        for (const [key, value] of this.values) {
-            yield [key, value] as const;
-        }
-    }
-}
-
-export class Db {
-    private nodes = new Set<Node>();
-
-    register(node: Node) {
-        node.db = this;
-        this.nodes.add(node);
-    }
-
-    *list<T>(key: Fact<T>) {
-        for (const node of this.nodes) {
-            const value = node.facts.get(key);
-            if (value !== undefined) {
-                yield [node, value] as const;
-            }
-        }
-    }
-
-    log(filter: (node: Node) => boolean) {
-        const nodes = Iterator.from(this.nodes).filter(filter).toArray();
-        nodes.sort((a, b) => compareSpans(a.span, b.span));
-
-        for (const node of nodes) {
-            console.log(node.toString());
-
-            const facts = Array.from(node.facts);
-            facts.sort((a, b) => a.constructor.name.localeCompare(b.constructor.name));
-
-            if (facts.length > 0) {
-                for (const [fact, value] of facts) {
-                    console.log("  " + fact.display(value));
-                }
-            } else {
-                console.log("  (no facts)");
-            }
-
-            console.log();
-        }
-    }
-
-    *[Symbol.iterator]() {
-        yield* this.nodes;
+    copy() {
+        return new InternalNode(this.span, this.codegen.bind(this));
     }
 }
 

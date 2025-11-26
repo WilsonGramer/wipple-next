@@ -18,7 +18,7 @@ export class StructurePatternNode extends PatternNode {
         this.fields = fields;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         for (const field of this.fields) {
             yield field.value;
         }

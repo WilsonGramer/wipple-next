@@ -1,4 +1,4 @@
-import type { Db } from "../node";
+import type { Db } from "../db";
 import { Node } from "../node";
 import { compareSpans } from "../span";
 import "./items";

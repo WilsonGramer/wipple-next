@@ -2,6 +2,7 @@ import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
 import { ExpressionNode } from "./index";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class IntrinsicExpressionNode extends ExpressionNode {
     name: string;
@@ -13,7 +14,7 @@ export class IntrinsicExpressionNode extends ExpressionNode {
         this.inputs = inputs;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.inputs;
     }
 

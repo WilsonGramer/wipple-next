@@ -1,4 +1,6 @@
-import { Db, fact, Node } from "./node";
+import { Fact } from "./db";
+import { Node } from "./node";
+import { Db } from "./db";
 import type { FileNode } from "./nodes";
 import type { Span } from "./span";
 import { parseFile } from "./syntax";
@@ -22,10 +24,16 @@ export type CompileResult =
 export class RootNode extends Node {
     files: FileNode[] = [];
 
+    *children(): Generator<Node> {}
+
     visit(_visitor: Visitor): void {}
 }
 
-export const TopLevelScopes = fact<Scope[]>("has top-level scopes");
+export class TopLevelScopes extends Fact<Scope[]> {
+    display(): string {
+        return "has top-level scopes";
+    }
+}
 
 export const makeRoot = () => {
     const db = new Db();

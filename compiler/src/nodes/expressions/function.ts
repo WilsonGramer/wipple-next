@@ -20,7 +20,7 @@ export class FunctionExpressionNode extends ExpressionNode {
         this.output = output;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.inputs;
         yield this.output;
     }

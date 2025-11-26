@@ -4,6 +4,7 @@ import { ExpressionNode } from "./index";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class TupleExpressionNode extends ExpressionNode {
     elements: ExpressionNode[];
@@ -13,7 +14,7 @@ export class TupleExpressionNode extends ExpressionNode {
         this.elements = elements;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.elements;
     }
 

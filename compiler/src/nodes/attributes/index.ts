@@ -13,5 +13,7 @@ export class AttributeNode extends Node {
         this.value = value;
     }
 
+    *children(): Generator<Node> {}
+
     visit(_visitor: Visitor): void {}
 }

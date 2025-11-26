@@ -5,11 +5,14 @@ import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
 import { TupleExpressionNode } from "./tuple";
+import type { Node } from "../../node";
 
 export class UnitExpressionNode extends ExpressionNode {
     constructor(span: Span) {
         super(span);
     }
+
+    *children(): Generator<Node> {}
 
     visit(visitor: Visitor): void {
         super.visit(visitor);

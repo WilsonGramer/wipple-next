@@ -4,6 +4,7 @@ import { PatternNode } from "./index";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class UnitPatternNode extends PatternNode {
     constructor(span: Span) {
@@ -15,6 +16,8 @@ export class UnitPatternNode extends PatternNode {
 
         visitor.constraint(new TypeConstraint(this, types.tuple([])));
     }
+
+    *children(): Generator<Node> {}
 
     codegen(_codegen: Codegen): void {
         // No code needed

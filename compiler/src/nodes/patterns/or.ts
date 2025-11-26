@@ -3,6 +3,7 @@ import type { Span } from "../../span";
 import { PatternNode } from "./index";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class OrPatternNode extends PatternNode {
     patterns: PatternNode[];
@@ -12,7 +13,7 @@ export class OrPatternNode extends PatternNode {
         this.patterns = patterns;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.patterns;
     }
 

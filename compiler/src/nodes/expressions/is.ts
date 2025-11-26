@@ -15,7 +15,7 @@ export class IsExpressionNode extends ExpressionNode {
     left: ExpressionNode;
     right: PatternNode;
 
-    private inputTemporary?: Node;
+    private inputTemporary?: InternalNode;
     private trueVariant?: Node;
     private falseVariant?: Node;
 
@@ -25,7 +25,7 @@ export class IsExpressionNode extends ExpressionNode {
         this.right = right;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.left;
         yield this.right;
     }

@@ -6,6 +6,7 @@ import { types } from "../../typecheck";
 import { TypeConstraint } from "../../typecheck/constraints/type";
 import { EmptyStatementNode } from "../statements/empty";
 import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 
 export class BlockExpressionNode extends ExpressionNode {
     statements: StatementNode[];
@@ -15,7 +16,7 @@ export class BlockExpressionNode extends ExpressionNode {
         this.statements = statements;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield* this.statements;
     }
 

@@ -5,6 +5,7 @@ import { TypeConstraint } from "../../typecheck/constraints/type";
 import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
 import { CallExpressionNode } from "./call";
+import type { Node } from "../../node";
 
 export class DoExpressionNode extends ExpressionNode {
     input: ExpressionNode;
@@ -14,7 +15,7 @@ export class DoExpressionNode extends ExpressionNode {
         this.input = input;
     }
 
-    *children() {
+    *children(): Generator<Node> {
         yield this.input;
     }
 

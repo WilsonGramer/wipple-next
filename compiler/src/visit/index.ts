@@ -1,20 +1,35 @@
-import type { Db, Node } from "../node";
-import { fact, InternalNode } from "../node";
+import type { Node } from "../node";
+import { InternalNode } from "../node";
+import { Fact, type Db } from "../db";
 import { Defined, type Definition, type InstanceDefinition } from "./definitions";
 import type { Instance } from "../typecheck/constraints/bound";
 import type { TypeParameterNode } from "../nodes/types/parameter";
 import type { Constraint } from "../typecheck/constraints/constraint";
 import { type PatternNode } from "../nodes/patterns";
 
-export const Resolved = fact<Definition | string>((definition) =>
-    typeof definition === "string" ? "unresolved" : `resolved to ${definition.node}`,
-);
+export class Resolved extends Fact<Definition | string> {
+    display(definition: Definition | string): string {
+        return typeof definition === "string" ? "unresolved" : `resolved to ${definition.node}`;
+    }
+}
 
-export const DefinitionConstraints = fact<Constraint[]>("has definition constraints");
+export class DefinitionConstraints extends Fact<Constraint[]> {
+    display(): string {
+        return "has definition constraints";
+    }
+}
 
-export const TypeParameters = fact<TypeParameterNode[]>("has type parameters");
+export class TypeParameters extends Fact<TypeParameterNode[]> {
+    display(): string {
+        return "has type parameters";
+    }
+}
 
-export const Instances = fact<Instance[]>("has instances");
+export class Instances extends Fact<Instance[]> {
+    display(): string {
+        return "has instances";
+    }
+}
 
 export class Visitor {
     db: Db;

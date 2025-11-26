@@ -1,6 +1,7 @@
 import * as moo from "moo";
 import type { Span } from "../span";
-import type { Db, Node } from "../node";
+import type { Node } from "../node";
+import type { Db } from "../db";
 
 export interface Token {
     span: Span;

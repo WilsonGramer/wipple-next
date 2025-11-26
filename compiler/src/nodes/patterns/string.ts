@@ -5,6 +5,7 @@ import { PatternNode } from "./index";
 import type { Codegen } from "../../codegen";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { NamedTypeNode } from "../types/named";
+import type { Node } from "../../node";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 
 export class StringPatternNode extends PatternNode {
@@ -14,6 +15,8 @@ export class StringPatternNode extends PatternNode {
         super(span);
         this.value = value;
     }
+
+    *children(): Generator<Node> {}
 
     visit(visitor: Visitor): void {
         super.visit(visitor);
