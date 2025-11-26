@@ -46,7 +46,7 @@ export default () => {
             const { db } = root;
 
             const result = compile(root, {
-                files: [{ path: e.document.uri, code }], // TODO: support multiple files
+                files: [{ path: e.document.uri, source: code }], // TODO: support multiple files
             });
 
             const diagnostics: lsp.Diagnostic[] = [];

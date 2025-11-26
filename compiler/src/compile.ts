@@ -12,7 +12,7 @@ import type { Scope } from "./visit";
 import { DefinitionConstraints, Instances, Visitor } from "./visit";
 
 export interface CompileOptions {
-    files: { path: string; code: string }[];
+    files: { path: string; source: string }[];
 }
 
 export type CompileResult =
@@ -46,7 +46,7 @@ export const makeRoot = () => {
 export const compile = (root: RootNode, options: CompileOptions): CompileResult => {
     let parsedFiles: FileNode[];
     try {
-        parsedFiles = options.files.map(({ path, code }) => parseFile(path, code));
+        parsedFiles = options.files.map(({ path, source: code }) => parseFile(path, code));
     } catch (e) {
         if (!(e instanceof SyntaxError)) {
             throw e;

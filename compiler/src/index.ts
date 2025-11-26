@@ -53,14 +53,14 @@ const compileCommand = (options: { run: boolean }) =>
 
                         return {
                             path: filePath,
-                            code: readFileSync(filePath, "utf8"),
+                            source: readFileSync(filePath, "utf8"),
                         };
                     }),
             );
 
             const files = args.paths.map((path) => ({
                 path,
-                code: readFileSync(path, "utf8"),
+                source: readFileSync(path, "utf8"),
             }));
 
             const layers = [...libs, files];
@@ -156,7 +156,7 @@ const compileCommand = (options: { run: boolean }) =>
                 process.exit(1);
             }
 
-            const codegen = new Codegen(args.output ?? "index.mjs", db, {
+            const codegen = new Codegen(files, args.output ?? "index.mjs", db, {
                 format: { type: "iife", arg: "buildRuntime(env)" },
                 prelude: nodePrelude + runtime,
             });

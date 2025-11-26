@@ -17,7 +17,7 @@ export const compileTest = (path: string) => {
     const root = makeRoot();
     const { db } = root;
 
-    const result = compile(root, { files: [{ path, code }] });
+    const result = compile(root, { files: [{ path, source: code }] });
 
     expect(result).toMatchObject({ success: true });
 

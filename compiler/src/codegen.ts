@@ -1,9 +1,10 @@
-import { SourceMapGenerator } from "source-map";
+import { SourceNode } from "source-map";
 import type { Db } from "./db";
 import { Node } from "./node";
 import type { FileNode } from "./nodes";
 import type { TraitDefinitionNode } from "./nodes/statements/trait-definition";
 import { Typed } from "./nodes/types";
+import { type Span } from "./span";
 import { displayType, typeReferencesNode, type Type } from "./typecheck";
 import { Instances } from "./visit";
 import {
@@ -12,10 +13,6 @@ import {
     InstanceDefinition,
     TraitDefinition,
 } from "./visit/definitions";
-// @ts-ignore
-import inlineSourceMapComment from "inline-source-map-comment";
-import lineColumn from "line-column";
-import type { Span } from "./span";
 
 export interface CodegenOptions {
     prelude: string;
@@ -25,20 +22,27 @@ export interface CodegenOptions {
 class CodegenError extends Error {}
 
 export class Codegen {
-    file: string;
+    files: { path: string; source: string }[];
+    outputPath: string;
     db: Db;
     options: CodegenOptions;
-    output: string;
+    output: SourceNode[];
 
     private mappings: [Span, number][] = [];
     private nodes: Node[] = [];
     private writtenTypes = new Map<string, [number, string]>();
 
-    constructor(file: string, db: Db, options: CodegenOptions) {
-        this.file = file;
+    constructor(
+        files: { path: string; source: string }[],
+        outputPath: string,
+        db: Db,
+        options: CodegenOptions,
+    ) {
+        this.files = files;
+        this.outputPath = outputPath;
         this.db = db;
         this.options = options;
-        this.output = "";
+        this.output = [];
     }
 
     node(node: Node): string {
@@ -51,14 +55,20 @@ export class Codegen {
 
     write(span: Span | undefined, ...items: (string | Node)[]) {
         for (const item of items) {
-            if (span != null) {
-                this.mappings.push([span, this.output.length]);
-            }
-
             if (typeof item === "string") {
-                this.output += item;
+                if (span != null) {
+                    const {
+                        path,
+                        start: { line, column },
+                    } = span;
+
+                    // Lines are 1-based and columns are 0-based
+                    this.output.push(new SourceNode(line, column - 1, path, item));
+                } else {
+                    this.output.push(new SourceNode(null, null, null, item));
+                }
             } else if (item instanceof Node) {
-                this.write(span, `/**! ${item.toString()} */`);
+                this.mappings.push([item.span, this.output.length]);
                 item.codegen(this);
             }
         }
@@ -207,22 +217,17 @@ export class Codegen {
         )},\n];\n`;
 
         const prelude = this.options.prelude + typeCache;
-        const script = prelude + this.output;
 
-        const lineColumnIndex = lineColumn(script);
-        const sourceMap = new SourceMapGenerator({ file: this.file });
-        for (const [span, index] of this.mappings) {
-            const { line, col } = lineColumnIndex.fromIndex(prelude.length + index)!;
+        const output = new SourceNode(null, null, null, this.output);
+        output.prepend(prelude);
 
-            sourceMap.addMapping({
-                source: span.path,
-                // Lines are 1-based and columns are 0-based
-                original: { line: span.start.line, column: span.start.column - 1 },
-                generated: { line: line + 1, column: col },
-            });
+        const { code, map } = output.toStringWithSourceMap({ file: this.outputPath });
+        for (const file of this.files) {
+            map.setSourceContent(file.path, file.source);
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        return script + inlineSourceMapComment(sourceMap.toString());
+        const sourceMapComment = `\n//# sourceMappingURL=data:application/json;base64,${btoa(map.toString())}\n`;
+
+        return code + sourceMapComment;
     }
 }
