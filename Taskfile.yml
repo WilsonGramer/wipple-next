@@ -1,9 +1,7 @@
 version: "3"
 tasks:
     setup:
-        cmds:
-            - npm install
-            - npm install
+        cmd: npm install
     compiler:
         cmd: (cd compiler && npm run build) && node compiler {{.CLI_ARGS}}
         env:
