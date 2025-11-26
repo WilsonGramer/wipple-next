@@ -1,5 +1,6 @@
-import { InternalNode, Node } from "./node";
+import { SourceMapGenerator } from "source-map";
 import type { Db } from "./db";
+import { Node } from "./node";
 import type { FileNode } from "./nodes";
 import type { TraitDefinitionNode } from "./nodes/statements/trait-definition";
 import { Typed } from "./nodes/types";
@@ -11,7 +12,6 @@ import {
     InstanceDefinition,
     TraitDefinition,
 } from "./visit/definitions";
-import { SourceMapGenerator } from "source-map";
 // @ts-ignore
 import inlineSourceMapComment from "inline-source-map-comment";
 import lineColumn from "line-column";

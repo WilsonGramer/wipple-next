@@ -1,9 +1,9 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { PatternNode } from "./index";
-import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import { PatternNode } from "./index";
 
 export class OrPatternNode extends PatternNode {
     patterns: PatternNode[];

@@ -1,10 +1,10 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { ExpressionNode } from "./index";
 import type { Codegen } from "../../codegen";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import { NamedTypeNode } from "../types/named";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import { NamedTypeNode } from "../types/named";
+import { ExpressionNode } from "./index";
 
 export class StringExpressionNode extends ExpressionNode {
     value: string;

@@ -4,13 +4,12 @@ import { compile, makeRoot } from "../src/compile";
 import { collectFeedback } from "../src/feedback";
 import type { Node } from "../src/node";
 import { nodeFilter } from "../src/node";
-import { Db } from "../src/db";
-import { WildcardPatternNode } from "../src/nodes/patterns/wildcard";
 import { PlaceholderExpressionNode } from "../src/nodes/expressions/placeholder";
+import { WildcardPatternNode } from "../src/nodes/patterns/wildcard";
+import { Typed } from "../src/nodes/types";
 import { PlaceholderTypeNode } from "../src/nodes/types/placeholder";
 import { compareSpans } from "../src/span";
 import { displayType } from "../src/typecheck";
-import { Typed } from "../src/nodes/types";
 
 export const compileTest = (path: string) => {
     const code = readFileSync(resolve(__dirname, path), "utf8");

@@ -1,13 +1,13 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { ExpressionNode } from "./index";
-import { ConstantDefinition, VariableDefinition } from "../../visit/definitions";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import type { Codegen } from "../../codegen";
 import type { Node } from "../../node";
-import type { TypeParameterNode } from "../types/parameter";
+import type { Span } from "../../span";
 import type { Type } from "../../typecheck";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import type { Visitor } from "../../visit";
+import { ConstantDefinition, VariableDefinition } from "../../visit/definitions";
+import type { TypeParameterNode } from "../types/parameter";
+import { ExpressionNode } from "./index";
 
 export class VariableExpressionNode extends ExpressionNode {
     variable: string;

@@ -1,11 +1,11 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { ExpressionNode } from "./index";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
 import type { Codegen } from "../../codegen";
-import { CallExpressionNode } from "./call";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { types } from "../../typecheck";
+import { TypeConstraint } from "../../typecheck/constraints/type";
+import type { Visitor } from "../../visit";
+import { CallExpressionNode } from "./call";
+import { ExpressionNode } from "./index";
 
 export class DoExpressionNode extends ExpressionNode {
     input: ExpressionNode;

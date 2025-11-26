@@ -1,15 +1,15 @@
-import type { Span } from "../../span";
-import type { AttributeNode } from "../attributes";
-import type { ExpressionNode } from "../expressions";
-import { StatementNode } from "./index";
-import { type PatternNode } from "../patterns";
-import { UnsupportedAttribute } from "../../visit/attributes";
-import type { Visitor } from "../../visit";
-import { VariablePatternNode } from "../patterns/variable";
-import { ConstantDefinition } from "../../visit/definitions";
-import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
 import { InternalNode, type Node } from "../../node";
+import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import { UnsupportedAttribute } from "../../visit/attributes";
+import { ConstantDefinition } from "../../visit/definitions";
+import type { AttributeNode } from "../attributes";
+import type { ExpressionNode } from "../expressions";
+import { type PatternNode } from "../patterns";
+import { VariablePatternNode } from "../patterns/variable";
+import { StatementNode } from "./index";
 
 export class AssignmentNode extends StatementNode {
     pattern: PatternNode;

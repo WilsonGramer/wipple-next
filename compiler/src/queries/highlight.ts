@@ -1,8 +1,8 @@
-import { query } from "./query";
-import { types } from "../typecheck";
 import { Typed, TypeNode } from "../nodes/types";
+import { types } from "../typecheck";
 import { Resolved } from "../visit";
 import { Defined } from "../visit/definitions";
+import { query } from "./query";
 
 export const highlightType = query(function* (node) {
     if (node instanceof TypeNode) {

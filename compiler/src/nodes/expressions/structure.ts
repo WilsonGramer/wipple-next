@@ -1,12 +1,12 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { ExpressionNode } from "./index";
-import { StructureConstructorDefinition } from "../../visit/definitions";
-import { type Node } from "../../node";
-import { Fact } from "../../db";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import type { Codegen } from "../../codegen";
+import { Fact } from "../../db";
+import { type Node } from "../../node";
+import type { Span } from "../../span";
+import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { zipNodeMaps } from "../../util";
+import type { Visitor } from "../../visit";
+import { StructureConstructorDefinition } from "../../visit/definitions";
+import { ExpressionNode } from "./index";
 
 export class MissingField extends Fact<null> {
     display(): string {

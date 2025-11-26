@@ -1,9 +1,9 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { ConstraintNode } from "./index";
-import type { TypeNode } from "../types";
-import { DefaultConstraint } from "../../typecheck/constraints/default";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { DefaultConstraint } from "../../typecheck/constraints/default";
+import type { Visitor } from "../../visit";
+import type { TypeNode } from "../types";
+import { ConstraintNode } from "./index";
 
 export class DefaultConstraintNode extends ConstraintNode {
     parameter: TypeNode;

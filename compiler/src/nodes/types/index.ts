@@ -1,5 +1,5 @@
-import { Node } from "../../node";
 import { Fact } from "../../db";
+import { Node } from "../../node";
 import { displayType } from "../../typecheck";
 import { Group } from "../../typecheck/solve";
 import type { Visitor } from "../../visit";

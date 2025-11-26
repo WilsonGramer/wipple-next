@@ -1,19 +1,14 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { ExpressionNode } from "./index";
-import type { TypeNode } from "../types";
-import type { Type } from "../../typecheck";
-import { types } from "../../typecheck";
-import { TraitDefinition } from "../../visit/definitions";
-import { InternalNode, type Node } from "../../node";
-import type { TypeParameterNode } from "../types/parameter";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import { BoundConstraint } from "../../typecheck/constraints/bound";
 import type { Codegen } from "../../codegen";
+import { type Node } from "../../node";
+import type { Span } from "../../span";
+import { types } from "../../typecheck";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import { TypeConstraint } from "../../typecheck/constraints/type";
+import type { Visitor } from "../../visit";
+import type { TypeNode } from "../types";
 import { CallExpressionNode } from "./call";
 import { ConstructorExpressionNode } from "./constructor";
+import { ExpressionNode } from "./index";
 
 export class AsExpressionNode extends ExpressionNode {
     left: ExpressionNode;

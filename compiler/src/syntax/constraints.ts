@@ -1,10 +1,10 @@
-import type { Parser } from "./parser";
-import { parseTypeName, parseTypeParameterName } from "./atoms";
-import { parseAtomicType, parseType } from "./types";
+import type { ConstraintNode } from "../nodes/constraints";
 import { BoundConstraintNode } from "../nodes/constraints/bound";
 import { DefaultConstraintNode } from "../nodes/constraints/default";
 import { TypeParameterNode } from "../nodes/types/parameter";
-import type { ConstraintNode } from "../nodes/constraints";
+import { parseTypeName, parseTypeParameterName } from "./atoms";
+import type { Parser } from "./parser";
+import { parseAtomicType, parseType } from "./types";
 
 export const parseTypeParameters = (parser: Parser) => {
     const parameters = parser.many("type parameter", parseTypeParameter);

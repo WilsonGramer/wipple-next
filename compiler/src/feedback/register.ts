@@ -1,6 +1,6 @@
-import type { RenderedFeedback } from "./render";
 import type { Node } from "../node";
 import type { Query } from "../queries";
+import type { RenderedFeedback } from "./render";
 
 interface Feedback<T extends Record<string, unknown>> {
     id: string;

@@ -1,14 +1,14 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { ExpressionNode } from "./index";
-import { type Node } from "../../node";
 import type { Codegen } from "../../codegen";
-import { TypeConstraint } from "../../typecheck/constraints/type";
+import { type Node } from "../../node";
+import type { Span } from "../../span";
 import { types } from "../../typecheck";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import { TypeConstraint } from "../../typecheck/constraints/type";
+import type { Visitor } from "../../visit";
+import { NamedTypeNode } from "../types/named";
 import { CallExpressionNode } from "./call";
 import { ConstructorExpressionNode } from "./constructor";
-import { NamedTypeNode } from "../types/named";
-import { GroupConstraint } from "../../typecheck/constraints/group";
+import { ExpressionNode } from "./index";
 
 export class FormatExpressionNode extends ExpressionNode {
     string: string;

@@ -1,6 +1,6 @@
-import { render } from "../render";
-import { registerFeedback } from "../register";
 import * as queries from "../../queries";
+import { registerFeedback } from "../register";
+import { render } from "../render";
 
 registerFeedback({
     id: "conflicting-types",

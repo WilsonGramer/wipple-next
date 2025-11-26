@@ -1,16 +1,15 @@
-import { Fact } from "./db";
+import { Db, Fact } from "./db";
 import { Node } from "./node";
-import { Db } from "./db";
 import type { FileNode } from "./nodes";
+import { BoundConstraintNode } from "./nodes/constraints/bound";
+import { Typed } from "./nodes/types";
 import type { Span } from "./span";
 import { parseFile } from "./syntax";
 import { nullSpan, SyntaxError } from "./syntax/parser";
+import { BoundConstraint } from "./typecheck/constraints/bound";
 import { Solver } from "./typecheck/solve";
 import type { Scope } from "./visit";
 import { DefinitionConstraints, Instances, Visitor } from "./visit";
-import { BoundConstraint } from "./typecheck/constraints/bound";
-import { Typed } from "./nodes/types";
-import { BoundConstraintNode } from "./nodes/constraints/bound";
 
 export interface CompileOptions {
     files: { path: string; code: string }[];

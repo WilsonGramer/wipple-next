@@ -1,12 +1,12 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import type { StatementNode } from "../statements";
-import { ExpressionNode } from "./index";
-import { types } from "../../typecheck";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { EmptyStatementNode } from "../statements/empty";
 import type { Codegen } from "../../codegen";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { types } from "../../typecheck";
+import { TypeConstraint } from "../../typecheck/constraints/type";
+import type { Visitor } from "../../visit";
+import type { StatementNode } from "../statements";
+import { EmptyStatementNode } from "../statements/empty";
+import { ExpressionNode } from "./index";
 
 export class BlockExpressionNode extends ExpressionNode {
     statements: StatementNode[];

@@ -1,6 +1,5 @@
-import { query } from "./query";
 import { Resolved } from "../visit";
-import { Defined, Definition } from "../visit/definitions";
+import { query } from "./query";
 
 export const unresolved = query(function* (node) {
     const definition = node.facts.get(Resolved);

@@ -1,14 +1,10 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { TypeDefinition } from "../../visit/definitions";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
-import { PatternNode } from "./index";
 import type { Codegen } from "../../codegen";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { NamedTypeNode } from "../types/named";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import { NamedTypeNode } from "../types/named";
+import { PatternNode } from "./index";
 
 export class NumberPatternNode extends PatternNode {
     value: string;

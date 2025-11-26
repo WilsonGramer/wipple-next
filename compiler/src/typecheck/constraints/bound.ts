@@ -1,13 +1,13 @@
-import { Solver } from "../solve";
-import type { Node } from "../../node";
-import { Fact } from "../../db";
-import { Instances } from "../../visit";
-import { Constraint } from "./constraint";
-import type { TraitDefinitionNode } from "../../nodes/statements/trait-definition";
-import { InstanceDefinitionNode } from "../../nodes/statements/instance-definition";
-import type { TypeParameterNode } from "../../nodes/types/parameter";
 import type { Type } from "..";
 import { displayType, instantiateType } from "..";
+import { Fact } from "../../db";
+import type { Node } from "../../node";
+import { InstanceDefinitionNode } from "../../nodes/statements/instance-definition";
+import type { TraitDefinitionNode } from "../../nodes/statements/trait-definition";
+import type { TypeParameterNode } from "../../nodes/types/parameter";
+import { Instances } from "../../visit";
+import { Solver } from "../solve";
+import { Constraint } from "./constraint";
 import { InstantiateConstraint } from "./instantiate";
 
 export interface Instance {

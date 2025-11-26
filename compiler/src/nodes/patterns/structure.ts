@@ -1,10 +1,10 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { PatternNode } from "./index";
-import { StructureConstructorDefinition } from "../../visit/definitions";
-import { type InternalNode, type Node } from "../../node";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import type { Codegen } from "../../codegen";
+import { type InternalNode, type Node } from "../../node";
+import type { Span } from "../../span";
+import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import type { Visitor } from "../../visit";
+import { StructureConstructorDefinition } from "../../visit/definitions";
+import { PatternNode } from "./index";
 
 export class StructurePatternNode extends PatternNode {
     name: string;

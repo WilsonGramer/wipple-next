@@ -1,8 +1,6 @@
 import { compileTest, testTypes } from ".";
 import { nodeFilter } from "../src/node";
-import type { CallExpressionNode } from "../src/nodes/expressions/call";
 import { ConstructorExpressionNode } from "../src/nodes/expressions/constructor";
-import { AssignmentNode } from "../src/nodes/statements/assignment";
 
 test("custom errors", () => {
     const { db, placeholders, feedback } = compileTest("custom-errors.wipple");

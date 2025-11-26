@@ -1,12 +1,12 @@
-import * as lsp from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import * as lsp from "vscode-languageserver/node";
 import { compile, makeRoot } from "./compile";
+import type { Db } from "./db";
 import { collectFeedback } from "./feedback";
-import * as queries from "./queries";
 import { render } from "./feedback/render";
 import type { Node } from "./node";
 import { nodeFilter } from "./node";
-import type { Db } from "./db";
+import * as queries from "./queries";
 import type { Span } from "./span";
 import { displayType } from "./typecheck";
 

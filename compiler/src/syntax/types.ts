@@ -1,5 +1,4 @@
-import type { Parser } from "./parser";
-import { parseTypeName, parseTypeParameterName } from "./atoms";
+import type { TypeNode } from "../nodes/types";
 import { BlockTypeNode } from "../nodes/types/block";
 import { FunctionTypeNode } from "../nodes/types/function";
 import { NamedTypeNode } from "../nodes/types/named";
@@ -7,7 +6,8 @@ import { TypeParameterNode } from "../nodes/types/parameter";
 import { PlaceholderTypeNode } from "../nodes/types/placeholder";
 import { TupleTypeNode } from "../nodes/types/tuple";
 import { UnitTypeNode } from "../nodes/types/unit";
-import type { TypeNode } from "../nodes/types";
+import { parseTypeName, parseTypeParameterName } from "./atoms";
+import type { Parser } from "./parser";
 
 export const parseType = (parser: Parser): TypeNode =>
     parser.alternatives<TypeNode>("type", parseType, [

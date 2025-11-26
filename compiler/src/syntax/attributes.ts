@@ -1,7 +1,7 @@
-import type { Parser } from "./parser";
-import { parseAttributeName, parseString } from "./atoms";
 import { AttributeNode } from "../nodes/attributes";
 import { StringAttributeValue } from "../nodes/attributes/value";
+import { parseAttributeName, parseString } from "./atoms";
+import type { Parser } from "./parser";
 
 export const parseAttributes = (parser: Parser) =>
     parser.optional(() => parser.many("attribute", parseAttribute, ["lineBreak"]), []);

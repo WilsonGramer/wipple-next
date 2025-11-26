@@ -1,25 +1,25 @@
-import type { Parser } from "./parser";
-import { parseComment, parseConstructorName, parseTypeName, parseVariableName } from "./atoms";
-import { parseTypeParameters, parseConstraints, parseBoundConstraint } from "./constraints";
-import { parseAttributes } from "./attributes";
-import { parseType, parseAtomicType } from "./types";
-import { parsePattern } from "./patterns";
-import { parseExpression } from "./expressions";
 import type { StatementNode } from "../nodes/statements";
-import {
-    TypeDefinitionNode,
-    StructureTypeRepresentation,
-    FieldDefinition,
-    EnumerationTypeRepresentation,
-    VariantDefinition,
-    MarkerTypeRepresentation,
-} from "../nodes/statements/type-definition";
-import { TraitDefinitionNode } from "../nodes/statements/trait-definition";
-import { ConstantDefinitionNode } from "../nodes/statements/constant-definition";
-import { InstanceDefinitionNode } from "../nodes/statements/instance-definition";
 import { AssignmentNode } from "../nodes/statements/assignment";
-import { ExpressionStatementNode } from "../nodes/statements/expression";
+import { ConstantDefinitionNode } from "../nodes/statements/constant-definition";
 import { EmptyStatementNode } from "../nodes/statements/empty";
+import { ExpressionStatementNode } from "../nodes/statements/expression";
+import { InstanceDefinitionNode } from "../nodes/statements/instance-definition";
+import { TraitDefinitionNode } from "../nodes/statements/trait-definition";
+import {
+    EnumerationTypeRepresentation,
+    FieldDefinition,
+    MarkerTypeRepresentation,
+    StructureTypeRepresentation,
+    TypeDefinitionNode,
+    VariantDefinition,
+} from "../nodes/statements/type-definition";
+import { parseComment, parseConstructorName, parseTypeName, parseVariableName } from "./atoms";
+import { parseAttributes } from "./attributes";
+import { parseBoundConstraint, parseConstraints, parseTypeParameters } from "./constraints";
+import { parseExpression } from "./expressions";
+import type { Parser } from "./parser";
+import { parsePattern } from "./patterns";
+import { parseAtomicType, parseType } from "./types";
 
 export const parseStatements = (parser: Parser) => {
     const statements = parser.optional(

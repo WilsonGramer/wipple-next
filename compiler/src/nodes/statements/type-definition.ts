@@ -1,26 +1,26 @@
+import type { Codegen } from "../../codegen";
+import { Fact } from "../../db";
+import type { Node } from "../../node";
+import { InternalNode } from "../../node";
+import type { Span } from "../../span";
+import { types } from "../../typecheck";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import { TypeConstraint } from "../../typecheck/constraints/type";
+import type { Visitor } from "../../visit";
 import type { TypeAttributes } from "../../visit/attributes";
 import { parseTypeAttributes } from "../../visit/attributes";
-import type { Span } from "../../span";
-import type { AttributeNode } from "../attributes";
-import type { TypeNode } from "../types";
-import { StatementNode } from "./index";
-import type { TypeParameterNode } from "../types/parameter";
-import type { Visitor } from "../../visit";
 import {
     MarkerConstructorDefinition,
     StructureConstructorDefinition,
     TypeDefinition,
     VariantConstructorDefinition,
 } from "../../visit/definitions";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
-import type { Node } from "../../node";
-import { InternalNode } from "../../node";
-import { Fact } from "../../db";
-import type { Codegen } from "../../codegen";
+import type { AttributeNode } from "../attributes";
 import { FunctionExpressionNode } from "../expressions/function";
 import { InternalPatternNode } from "../patterns";
-import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { TypeNode } from "../types";
+import type { TypeParameterNode } from "../types/parameter";
+import { StatementNode } from "./index";
 
 export class DuplicateField extends Fact<null> {
     display(): string {

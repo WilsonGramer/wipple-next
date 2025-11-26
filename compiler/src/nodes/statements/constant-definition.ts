@@ -1,15 +1,15 @@
-import type { Span } from "../../span";
-import type { AttributeNode } from "../attributes";
-import type { ConstraintNode } from "../constraints";
-import { StatementNode } from "./index";
-import type { TypeNode } from "../types";
-import type { ConstantAttributes } from "../../visit/attributes";
-import { parseConstantAttributes } from "../../visit/attributes";
-import type { Visitor } from "../../visit";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import { ConstantDefinition } from "../../visit/definitions";
 import type { Codegen } from "../../codegen";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import type { ConstantAttributes } from "../../visit/attributes";
+import { parseConstantAttributes } from "../../visit/attributes";
+import { ConstantDefinition } from "../../visit/definitions";
+import type { AttributeNode } from "../attributes";
+import type { ConstraintNode } from "../constraints";
+import type { TypeNode } from "../types";
+import { StatementNode } from "./index";
 
 export class ConstantDefinitionNode extends StatementNode {
     attributes: ConstantAttributes;

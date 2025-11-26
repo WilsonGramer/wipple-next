@@ -1,9 +1,9 @@
 import dedent from "dedent";
-import type { ResolvedBound } from "../typecheck/constraints/bound";
-import { applyBound, displayBound } from "../typecheck/constraints/bound";
+import type { Node } from "../node";
 import type { Type } from "../typecheck";
 import { displayType } from "../typecheck";
-import type { Node } from "../node";
+import type { ResolvedBound } from "../typecheck/constraints/bound";
+import { displayBound } from "../typecheck/constraints/bound";
 
 export interface RenderedFeedback {
     strings: readonly string[];

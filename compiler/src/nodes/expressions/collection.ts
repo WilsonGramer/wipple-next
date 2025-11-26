@@ -1,19 +1,11 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { types, type Type } from "../../typecheck";
-import { ExpressionNode } from "./index";
-import { TraitDefinition, TypeDefinition } from "../../visit/definitions";
-import { InternalNode, type Node } from "../../node";
-import { BoundConstraint } from "../../typecheck/constraints/bound";
 import type { Codegen } from "../../codegen";
+import { InternalNode, type Node } from "../../node";
+import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
 import { CallExpressionNode } from "./call";
 import { ConstructorExpressionNode } from "./constructor";
-import type { TypeParameterNode } from "../types/parameter";
-import { DefaultConstraint } from "../../typecheck/constraints/default";
-import { NamedTypeNode } from "../types/named";
+import { ExpressionNode } from "./index";
 
 export class CollectionExpressionNode extends ExpressionNode {
     elements: ExpressionNode[];

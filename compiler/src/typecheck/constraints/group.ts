@@ -1,9 +1,9 @@
-import type { Node } from "../../node";
-import type { Solver } from "../solve";
-import { Constraint } from "./constraint";
-import type { TypeParameterNode } from "../../nodes/types/parameter";
 import type { Type } from "..";
 import { getOrInstantiate } from "..";
+import type { Node } from "../../node";
+import type { TypeParameterNode } from "../../nodes/types/parameter";
+import type { Solver } from "../solve";
+import { Constraint } from "./constraint";
 
 export class GroupConstraint extends Constraint {
     left: Node;

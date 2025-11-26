@@ -1,12 +1,12 @@
-import type { Visitor } from "../../visit";
+import type { Node } from "../../node";
 import type { Span } from "../../span";
-import { ConstraintNode } from "./index";
-import type { TypeNode } from "../types";
-import { TraitDefinition } from "../../visit/definitions";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
 import { zipNodes } from "../../util";
+import type { Visitor } from "../../visit";
+import { TraitDefinition } from "../../visit/definitions";
+import type { TypeNode } from "../types";
 import { ExtraType, MissingType } from "../types";
-import type { Node } from "../../node";
+import { ConstraintNode } from "./index";
 
 export class BoundConstraintNode extends ConstraintNode {
     trait: string;

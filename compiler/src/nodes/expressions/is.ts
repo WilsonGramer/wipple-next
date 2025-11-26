@@ -1,15 +1,13 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { TypeDefinition, VariantConstructorDefinition } from "../../visit/definitions";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
-import type { PatternNode } from "../patterns";
-import { ExpressionNode } from "./index";
 import type { Codegen } from "../../codegen";
-import { Arm, WhenExpressionNode } from "./when";
 import { InternalNode, type Node } from "../../node";
+import type { Span } from "../../span";
 import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import { TypeDefinition, VariantConstructorDefinition } from "../../visit/definitions";
+import type { PatternNode } from "../patterns";
 import { WildcardPatternNode } from "../patterns/wildcard";
+import { ExpressionNode } from "./index";
+import { Arm, WhenExpressionNode } from "./when";
 
 export class IsExpressionNode extends ExpressionNode {
     left: ExpressionNode;

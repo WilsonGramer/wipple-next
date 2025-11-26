@@ -1,12 +1,12 @@
-import { UnsupportedAttribute } from "../../visit/attributes";
-import type { Visitor } from "../../visit";
+import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import { UnsupportedAttribute } from "../../visit/attributes";
 import type { AttributeNode } from "../attributes";
 import type { ExpressionNode } from "../expressions";
 import { StatementNode } from "./index";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import type { Codegen } from "../../codegen";
-import type { Node } from "../../node";
 
 export class ExpressionStatementNode extends StatementNode {
     expression: ExpressionNode;

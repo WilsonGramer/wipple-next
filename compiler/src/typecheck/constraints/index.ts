@@ -1,10 +1,10 @@
-import { BoundConstraint } from "./bound";
-import { InstantiateConstraint } from "./instantiate";
-import { TypeConstraint } from "./type";
-import type { Constraint } from "./constraint";
 import type { Solver } from "../solve";
+import { BoundConstraint } from "./bound";
+import type { Constraint } from "./constraint";
 import { DefaultConstraint } from "./default";
 import { GroupConstraint } from "./group";
+import { InstantiateConstraint } from "./instantiate";
+import { TypeConstraint } from "./type";
 
 const constraintOrder: Function[][] = [
     [GroupConstraint],

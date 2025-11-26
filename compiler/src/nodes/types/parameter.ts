@@ -1,12 +1,12 @@
-import type { Visitor } from "../../visit";
-import { TypeParameters } from "../../visit";
+import type { Node } from "../../node";
 import type { Span } from "../../span";
-import { TypeNode } from "./index";
-import { TypeParameterDefinition } from "../../visit/definitions";
+import { types } from "../../typecheck";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
-import type { Node } from "../../node";
+import type { Visitor } from "../../visit";
+import { TypeParameters } from "../../visit";
+import { TypeParameterDefinition } from "../../visit/definitions";
+import { TypeNode } from "./index";
 
 export class TypeParameterNode extends TypeNode {
     name: string;

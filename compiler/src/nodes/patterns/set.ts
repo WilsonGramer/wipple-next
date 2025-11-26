@@ -1,11 +1,11 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { PatternNode } from "./index";
-import { VariableDefinition } from "../../visit/definitions";
-import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
-import type { VariableExpressionNode } from "../expressions/variable";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import { VariableDefinition } from "../../visit/definitions";
+import type { VariableExpressionNode } from "../expressions/variable";
+import { PatternNode } from "./index";
 
 export class SetPatternNode extends PatternNode {
     variable: string;

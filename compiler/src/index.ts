@@ -1,18 +1,18 @@
+import chalk from "chalk";
 import * as cmd from "cmd-ts";
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import nodePrelude from "inline:../../runtime/node-prelude.js";
+import runtime from "inline:../../runtime/runtime.js";
 import { execSync } from "node:child_process";
-import type { Node, Filter } from "./node";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { extname, join } from "node:path";
+import wrapAnsi from "wrap-ansi";
+import { Codegen } from "./codegen";
 import { compile, makeRoot } from "./compile";
-import { nodeFilter } from "./node";
 import { collectFeedback } from "./feedback";
 import lsp from "./lsp";
-import chalk from "chalk";
-import wrapAnsi from "wrap-ansi";
-import { extname, join } from "node:path";
-import { Codegen } from "./codegen";
-import runtime from "inline:../../runtime/runtime.js";
-import nodePrelude from "inline:../../runtime/node-prelude.js";
-import { tmpdir } from "node:os";
+import type { Filter, Node } from "./node";
+import { nodeFilter } from "./node";
 
 const compileCommand = (options: { run: boolean }) =>
     cmd.command({

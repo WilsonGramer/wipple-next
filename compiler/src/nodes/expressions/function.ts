@@ -1,12 +1,11 @@
-import type { Visitor } from "../../visit";
+import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 import type { Span } from "../../span";
+import { types } from "../../typecheck";
+import { TypeConstraint } from "../../typecheck/constraints/type";
+import type { Visitor } from "../../visit";
 import { type PatternNode } from "../patterns";
 import { ExpressionNode } from "./index";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
-import type { Codegen } from "../../codegen";
-import { VariablePatternNode } from "../patterns/variable";
-import type { Node } from "../../node";
 
 export class FunctionExpressionNode extends ExpressionNode {
     inputs: PatternNode[];

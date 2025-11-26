@@ -1,10 +1,10 @@
-import type { Solver } from "../solve";
-import type { Node } from "../../node";
-import { Constraint } from "./constraint";
-import { DefinitionConstraints } from "../../visit";
-import type { TypeParameterNode } from "../../nodes/types/parameter";
 import type { Type } from "..";
 import { getOrInstantiate, instantiateType } from "..";
+import type { Node } from "../../node";
+import type { TypeParameterNode } from "../../nodes/types/parameter";
+import { DefinitionConstraints } from "../../visit";
+import type { Solver } from "../solve";
+import { Constraint } from "./constraint";
 
 export interface Instantiation {
     source: Node;

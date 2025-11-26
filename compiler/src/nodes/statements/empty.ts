@@ -1,6 +1,6 @@
+import type { Node } from "../../node";
 import type { Visitor } from "../../visit";
 import { StatementNode } from "./index";
-import type { Node } from "../../node";
 
 export class EmptyStatementNode extends StatementNode {
     *children(): Generator<Node> {}

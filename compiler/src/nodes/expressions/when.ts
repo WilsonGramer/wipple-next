@@ -1,11 +1,10 @@
-import type { Visitor } from "../../visit";
+import type { Codegen } from "../../codegen";
+import { InternalNode, type Node } from "../../node";
 import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
 import { type PatternNode } from "../patterns";
 import { ExpressionNode } from "./index";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import type { Codegen } from "../../codegen";
-import { VariablePatternNode } from "../patterns/variable";
-import { InternalNode, type Node } from "../../node";
 
 export class WhenExpressionNode extends ExpressionNode {
     input: ExpressionNode;

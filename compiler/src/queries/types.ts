@@ -1,6 +1,4 @@
 import { InstantiatedNode, Node } from "../node";
-import { ExpressionNode } from "../nodes/expressions";
-import { PatternNode } from "../nodes/patterns";
 import { Typed } from "../nodes/types";
 import { typeReferencesNode } from "../typecheck";
 import type { Group } from "../typecheck/solve";

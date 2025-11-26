@@ -1,14 +1,3 @@
-import type { Parser } from "./parser";
-import {
-    parseConstructorName,
-    parseNumber,
-    parseString,
-    parseTypeName,
-    parseVariableName,
-} from "./atoms";
-import { parseAtomicPattern, parsePattern, parsePatternElement } from "./patterns";
-import { parseTypeElement } from "./types";
-import { parseStatements } from "./statements";
 import type { ExpressionNode } from "../nodes/expressions";
 import { AnnotateExpressionNode } from "../nodes/expressions/annotate";
 import { AsExpressionNode } from "../nodes/expressions/as";
@@ -30,6 +19,17 @@ import { TupleExpressionNode } from "../nodes/expressions/tuple";
 import { UnitExpressionNode } from "../nodes/expressions/unit";
 import { VariableExpressionNode } from "../nodes/expressions/variable";
 import { Arm, WhenExpressionNode } from "../nodes/expressions/when";
+import {
+    parseConstructorName,
+    parseNumber,
+    parseString,
+    parseTypeName,
+    parseVariableName,
+} from "./atoms";
+import type { Parser } from "./parser";
+import { parseAtomicPattern, parsePattern, parsePatternElement } from "./patterns";
+import { parseStatements } from "./statements";
+import { parseTypeElement } from "./types";
 
 export const parseExpression = (parser: Parser): ExpressionNode =>
     parser.alternatives<ExpressionNode>("expression", parseExpression, [

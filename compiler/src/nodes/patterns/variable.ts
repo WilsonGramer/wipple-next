@@ -1,9 +1,9 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { PatternNode } from "./index";
-import { VariableDefinition } from "../../visit/definitions";
 import type { Codegen } from "../../codegen";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import type { Visitor } from "../../visit";
+import { VariableDefinition } from "../../visit/definitions";
+import { PatternNode } from "./index";
 
 export class VariablePatternNode extends PatternNode {
     variable: string;

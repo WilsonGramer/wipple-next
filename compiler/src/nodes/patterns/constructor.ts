@@ -1,13 +1,13 @@
-import { type Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { PatternNode } from "./index";
-import { MarkerConstructorDefinition, VariantConstructorDefinition } from "../../visit/definitions";
-import { InternalNode, type Node } from "../../node";
+import type { Codegen } from "../../codegen";
 import { Fact } from "../../db";
+import { InternalNode, type Node } from "../../node";
+import type { Span } from "../../span";
+import { types } from "../../typecheck";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
 import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
-import type { Codegen } from "../../codegen";
+import { type Visitor } from "../../visit";
+import { MarkerConstructorDefinition, VariantConstructorDefinition } from "../../visit/definitions";
+import { PatternNode } from "./index";
 
 export class MissingElement extends Fact<null> {
     display(): string {

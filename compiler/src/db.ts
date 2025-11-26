@@ -2,7 +2,7 @@ import type { Node } from "./node";
 import { compareSpans } from "./span";
 
 export abstract class Fact<T> {
-    private declare _value: T;
+    declare private _value: T;
 
     constructor() {
         throw new Error("facts can only be used as types, not values");

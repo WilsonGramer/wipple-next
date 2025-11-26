@@ -1,10 +1,10 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { ExpressionNode } from "./index";
-import type { TypeNode } from "../types";
-import { GroupConstraint } from "../../typecheck/constraints/group";
 import type { Codegen } from "../../codegen";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
+import type { TypeNode } from "../types";
+import { ExpressionNode } from "./index";
 
 export class AnnotateExpressionNode extends ExpressionNode {
     expression: ExpressionNode;

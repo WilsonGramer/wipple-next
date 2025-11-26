@@ -1,11 +1,11 @@
+import { Fact, type Db } from "../db";
 import type { Node } from "../node";
 import { InternalNode } from "../node";
-import { Fact, type Db } from "../db";
-import { Defined, type Definition, type InstanceDefinition } from "./definitions";
-import type { Instance } from "../typecheck/constraints/bound";
-import type { TypeParameterNode } from "../nodes/types/parameter";
-import type { Constraint } from "../typecheck/constraints/constraint";
 import { type PatternNode } from "../nodes/patterns";
+import type { TypeParameterNode } from "../nodes/types/parameter";
+import type { Instance } from "../typecheck/constraints/bound";
+import type { Constraint } from "../typecheck/constraints/constraint";
+import { Defined, type Definition, type InstanceDefinition } from "./definitions";
 
 export class Resolved extends Fact<Definition | string> {
     display(definition: Definition | string): string {

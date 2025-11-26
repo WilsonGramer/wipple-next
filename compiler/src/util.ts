@@ -1,5 +1,5 @@
-import { InternalNode, type Node } from "./node";
 import { type Fact } from "./db";
+import { InternalNode, type Node } from "./node";
 
 export function* zip<A, B>(
     left: Iterable<A>,

@@ -1,9 +1,9 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { TypeNode } from "./index";
-import { TypeConstraint } from "../../typecheck/constraints/type";
-import { types } from "../../typecheck";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { types } from "../../typecheck";
+import { TypeConstraint } from "../../typecheck/constraints/type";
+import type { Visitor } from "../../visit";
+import { TypeNode } from "./index";
 
 export class BlockTypeNode extends TypeNode {
     output: TypeNode;

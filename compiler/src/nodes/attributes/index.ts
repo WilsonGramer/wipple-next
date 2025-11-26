@@ -1,6 +1,6 @@
 import { Node } from "../../node";
-import type { Visitor } from "../../visit";
 import type { Span } from "../../span";
+import type { Visitor } from "../../visit";
 import type { AttributeValue } from "./value";
 
 export class AttributeNode extends Node {

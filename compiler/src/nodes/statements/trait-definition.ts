@@ -1,18 +1,16 @@
+import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 import type { Span } from "../../span";
-import type { AttributeNode } from "../attributes";
-import type { ConstraintNode } from "../constraints";
-import { StatementNode } from "./index";
-import type { TypeNode } from "../types";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import type { Visitor } from "../../visit";
 import type { TraitAttributes } from "../../visit/attributes";
 import { parseTraitAttributes } from "../../visit/attributes";
-import type { TypeParameterNode } from "../types/parameter";
-import type { Visitor } from "../../visit";
 import { TraitDefinition } from "../../visit/definitions";
-import { types } from "../../typecheck";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import { BoundConstraint } from "../../typecheck/constraints/bound";
-import type { Node } from "../../node";
-import type { Codegen } from "../../codegen";
+import type { AttributeNode } from "../attributes";
+import type { ConstraintNode } from "../constraints";
+import type { TypeNode } from "../types";
+import type { TypeParameterNode } from "../types/parameter";
+import { StatementNode } from "./index";
 
 export class TraitDefinitionNode extends StatementNode {
     attributes: TraitAttributes;

@@ -1,12 +1,4 @@
-import type { Parser } from "./parser";
-import {
-    parseConstructorName,
-    parseNumber,
-    parseString,
-    parseTypeName,
-    parseVariableName,
-} from "./atoms";
-import { parseTypeElement } from "./types";
+import type { PatternNode } from "../nodes/patterns";
 import { AnnotatePatternNode } from "../nodes/patterns/annotate";
 import { ConstructorPatternNode } from "../nodes/patterns/constructor";
 import { NumberPatternNode } from "../nodes/patterns/number";
@@ -18,7 +10,15 @@ import { TuplePatternNode } from "../nodes/patterns/tuple";
 import { UnitPatternNode } from "../nodes/patterns/unit";
 import { VariablePatternNode } from "../nodes/patterns/variable";
 import { WildcardPatternNode } from "../nodes/patterns/wildcard";
-import type { PatternNode } from "../nodes/patterns";
+import {
+    parseConstructorName,
+    parseNumber,
+    parseString,
+    parseTypeName,
+    parseVariableName,
+} from "./atoms";
+import type { Parser } from "./parser";
+import { parseTypeElement } from "./types";
 
 export const parsePattern = (parser: Parser): PatternNode =>
     parser.alternatives<PatternNode>("pattern", parsePattern, [

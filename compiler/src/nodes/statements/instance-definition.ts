@@ -1,24 +1,24 @@
-import type { InstanceAttributes } from "../../visit/attributes";
-import { parseInstanceAttributes } from "../../visit/attributes";
+import type { Codegen } from "../../codegen";
+import { Fact } from "../../db";
+import type { Node } from "../../node";
+import type { Span } from "../../span";
+import type { Type } from "../../typecheck";
+import { GroupConstraint } from "../../typecheck/constraints/group";
+import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import { zipNodes } from "../../util";
 import type { Visitor } from "../../visit";
 import { Instances } from "../../visit";
-import type { Span } from "../../span";
+import type { InstanceAttributes } from "../../visit/attributes";
+import { parseInstanceAttributes } from "../../visit/attributes";
+import { InstanceDefinition, TraitDefinition } from "../../visit/definitions";
 import type { AttributeNode } from "../attributes";
 import type { ConstraintNode } from "../constraints";
 import type { BoundConstraintNode } from "../constraints/bound";
 import type { ExpressionNode } from "../expressions";
-import { StatementNode } from "./index";
-import { type TypeParameterNode } from "../types/parameter";
-import type { Type } from "../../typecheck";
-import { InstanceDefinition, TraitDefinition } from "../../visit/definitions";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { GroupConstraint } from "../../typecheck/constraints/group";
-import type { TraitDefinitionNode } from "./trait-definition";
-import type { Codegen } from "../../codegen";
-import { zipNodes } from "../../util";
-import { Fact } from "../../db";
 import { ExtraType, MissingType } from "../types";
-import type { Node } from "../../node";
+import { type TypeParameterNode } from "../types/parameter";
+import { StatementNode } from "./index";
+import type { TraitDefinitionNode } from "./trait-definition";
 
 export class MissingInstanceValue extends Fact<null> {
     display(): string {

@@ -1,11 +1,11 @@
-import type { Visitor } from "../../visit";
-import type { Span } from "../../span";
-import { TypeNode } from "./index";
-import { TypeDefinition } from "../../visit/definitions";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { zipNodes } from "../../util";
 import { ExtraType, MissingType } from ".";
 import type { Node } from "../../node";
+import type { Span } from "../../span";
+import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import { zipNodes } from "../../util";
+import type { Visitor } from "../../visit";
+import { TypeDefinition } from "../../visit/definitions";
+import { TypeNode } from "./index";
 
 export class NamedTypeNode extends TypeNode {
     name: string;

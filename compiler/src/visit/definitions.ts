@@ -1,17 +1,17 @@
-import type { Node } from "../node";
 import { Fact } from "../db";
+import type { Node } from "../node";
+import type { VariablePatternNode } from "../nodes/patterns/variable";
+import type { ConstantDefinitionNode } from "../nodes/statements/constant-definition";
+import type { InstanceDefinitionNode } from "../nodes/statements/instance-definition";
+import type { TraitDefinitionNode } from "../nodes/statements/trait-definition";
+import type { TypeDefinitionNode } from "../nodes/statements/type-definition";
+import type { TypeParameterNode } from "../nodes/types/parameter";
 import type {
     ConstantAttributes,
     InstanceAttributes,
     TraitAttributes,
     TypeAttributes,
 } from "./attributes";
-import type { ConstantDefinitionNode } from "../nodes/statements/constant-definition";
-import type { TypeDefinitionNode } from "../nodes/statements/type-definition";
-import type { TraitDefinitionNode } from "../nodes/statements/trait-definition";
-import type { InstanceDefinitionNode } from "../nodes/statements/instance-definition";
-import type { TypeParameterNode } from "../nodes/types/parameter";
-import type { VariablePatternNode } from "../nodes/patterns/variable";
 
 export class Defined extends Fact<Definition> {
     display(): string {

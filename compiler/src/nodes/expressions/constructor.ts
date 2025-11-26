@@ -1,18 +1,18 @@
-import type { Visitor } from "../../visit";
+import type { Codegen } from "../../codegen";
+import type { Node } from "../../node";
 import type { Span } from "../../span";
-import { ExpressionNode } from "./index";
+import type { Type } from "../../typecheck";
+import { BoundConstraint } from "../../typecheck/constraints/bound";
+import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
+import type { Visitor } from "../../visit";
 import {
     MarkerConstructorDefinition,
     TraitDefinition,
     VariantConstructorDefinition,
     type Definition,
 } from "../../visit/definitions";
-import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { BoundConstraint } from "../../typecheck/constraints/bound";
-import type { Type } from "../../typecheck";
 import type { TypeParameterNode } from "../types/parameter";
-import type { Codegen } from "../../codegen";
-import type { Node } from "../../node";
+import { ExpressionNode } from "./index";
 
 export class ConstructorExpressionNode extends ExpressionNode {
     constructorName: string;
