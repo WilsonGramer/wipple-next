@@ -9,7 +9,7 @@ tasks:
     test:
         cmds:
             - (cd compiler && npm run test -- {{.CLI_ARGS}})
-            - npx jest --no-watchman test.js {{.CLI_ARGS}}
+            - (cd tests && npx jest --no-watchman test.js {{.CLI_ARGS}})
     install:
         cmd: (cd compiler && npm run exe)
     vscode:
