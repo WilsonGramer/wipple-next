@@ -156,8 +156,8 @@ const compileCommand = (options: { run: boolean }) =>
                 process.exit(1);
             }
 
-            if (args.output != null) {
-                const codegen = new Codegen(files, args.output, db, {
+            if (options.run || args.output != null) {
+                const codegen = new Codegen(files, args.output ?? "index.js", db, {
                     format: { type: "iife", arg: "buildRuntime(env)" },
                     prelude: nodePrelude + runtime,
                 });
