@@ -34,6 +34,11 @@ export class OperatorExpressionNode extends ExpressionNode {
 
         visitor.visit(this.left);
         visitor.visit(this.right);
+
+        if (!(this.operator in operators)) {
+            throw new Error(`unknown operator: ${this.operator}`);
+        }
+
         this.operatorNode = operators[this.operator](visitor, this, this.left, this.right);
     }
 

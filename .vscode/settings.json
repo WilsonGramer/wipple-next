@@ -1,4 +1,3 @@
 {
-    "typescript.preferences.preferTypeOnlyAutoImports": true,
-    "jest.runMode": "on-demand"
+    "typescript.preferences.preferTypeOnlyAutoImports": true
 }

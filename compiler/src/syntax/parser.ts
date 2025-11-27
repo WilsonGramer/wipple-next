@@ -1,446 +1,656 @@
-import * as moo from "moo";
-import { type Span } from "../span";
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 
-export interface Token {
-    span: Span;
-    type: TokenType;
-    value: string;
+import type { Interval, IterationNode, NonterminalNode } from "ohm-js";
+import { FileNode } from "../nodes";
+import { AttributeNode } from "../nodes/attributes";
+import { StringAttributeValue } from "../nodes/attributes/value";
+import { BoundConstraintNode } from "../nodes/constraints/bound";
+import { DefaultConstraintNode } from "../nodes/constraints/default";
+import { AnnotateExpressionNode } from "../nodes/expressions/annotate";
+import { AsExpressionNode } from "../nodes/expressions/as";
+import { BlockExpressionNode } from "../nodes/expressions/block";
+import { CallExpressionNode } from "../nodes/expressions/call";
+import { CollectionExpressionNode } from "../nodes/expressions/collection";
+import { ConstructorExpressionNode } from "../nodes/expressions/constructor";
+import { DoExpressionNode } from "../nodes/expressions/do";
+import { FormatExpressionNode } from "../nodes/expressions/format";
+import { FunctionExpressionNode } from "../nodes/expressions/function";
+import { IntrinsicExpressionNode } from "../nodes/expressions/intrinsic";
+import { IsExpressionNode } from "../nodes/expressions/is";
+import { NumberExpressionNode } from "../nodes/expressions/number";
+import { OperatorExpressionNode } from "../nodes/expressions/operator";
+import { PlaceholderExpressionNode } from "../nodes/expressions/placeholder";
+import { StringExpressionNode } from "../nodes/expressions/string";
+import { StructureExpressionField, StructureExpressionNode } from "../nodes/expressions/structure";
+import { TupleExpressionNode } from "../nodes/expressions/tuple";
+import { UnitExpressionNode } from "../nodes/expressions/unit";
+import { VariableExpressionNode } from "../nodes/expressions/variable";
+import { Arm, WhenExpressionNode } from "../nodes/expressions/when";
+import { AnnotatePatternNode } from "../nodes/patterns/annotate";
+import { ConstructorPatternNode } from "../nodes/patterns/constructor";
+import { NumberPatternNode } from "../nodes/patterns/number";
+import { OrPatternNode } from "../nodes/patterns/or";
+import { SetPatternNode } from "../nodes/patterns/set";
+import { StringPatternNode } from "../nodes/patterns/string";
+import { StructurePatternField, StructurePatternNode } from "../nodes/patterns/structure";
+import { TuplePatternNode } from "../nodes/patterns/tuple";
+import { UnitPatternNode } from "../nodes/patterns/unit";
+import { VariablePatternNode } from "../nodes/patterns/variable";
+import { WildcardPatternNode } from "../nodes/patterns/wildcard";
+import { AssignmentNode } from "../nodes/statements/assignment";
+import { ConstantDefinitionNode } from "../nodes/statements/constant-definition";
+import { ExpressionStatementNode } from "../nodes/statements/expression";
+import { InstanceDefinitionNode } from "../nodes/statements/instance-definition";
+import { TraitDefinitionNode } from "../nodes/statements/trait-definition";
+import {
+    EnumerationTypeRepresentation,
+    FieldDefinition,
+    MarkerTypeRepresentation,
+    StructureTypeRepresentation,
+    TypeDefinitionNode,
+    VariantDefinition,
+} from "../nodes/statements/type-definition";
+import { BlockTypeNode } from "../nodes/types/block";
+import { FunctionTypeNode } from "../nodes/types/function";
+import { NamedTypeNode } from "../nodes/types/named";
+import { TypeParameterNode } from "../nodes/types/parameter";
+import { PlaceholderTypeNode } from "../nodes/types/placeholder";
+import { TupleTypeNode } from "../nodes/types/tuple";
+import { UnitTypeNode } from "../nodes/types/unit";
+import type { Span } from "../span";
+import type { GrammarActionDict } from "./grammar.ohm-bundle";
+
+declare module "ohm-js" {
+    interface NonterminalNode {
+        parse(): any;
+    }
 }
 
-export class SyntaxError extends Error {
-    span: Span;
+interface HasInterval {
+    source: Interval;
+}
 
-    constructor(message: string, context: string | undefined, span: Span) {
-        super(
-            `${span.path}:${span.start.line}:${span.start.column}: syntax error: ${message}${context ? ` in this ${context}` : ""}`,
+type SpanFn = (left: HasInterval, right?: HasInterval) => Span;
+
+const parseOptional = (node: IterationNode) =>
+    node.numChildren > 0 ? (node.children[0] as NonterminalNode).parse() : undefined;
+
+const parseList = (node: IterationNode) =>
+    node.children.map((child) => (child as NonterminalNode).parse());
+
+const parseOptionalFirstRest = (first: IterationNode, rest: IterationNode) => {
+    if (first.numChildren > 1) {
+        throw new Error("expected optional children");
+    } else {
+        return [
+            ...(first.numChildren > 0 ? [(first.children[0] as NonterminalNode).parse()] : []),
+            ...parseList(rest),
+        ];
+    }
+};
+
+const parseFirstRest = (first: NonterminalNode, rest: IterationNode) => [
+    first.parse(),
+    ...parseList(rest),
+];
+
+const parseString = (string: NonterminalNode) => string.sourceString.slice(1, -1);
+
+const parser = (span: SpanFn): GrammarActionDict<{}> => ({
+    File: (statements, trailingLineBreak) => new FileNode(statements.parse(), span(statements)),
+
+    // Attributes
+
+    Attributes: (first, lineBreak, rest, trailingLineBreak) => parseOptionalFirstRest(first, rest),
+
+    Attribute: (
+        leftBracket,
+        leftLineBreak,
+        name,
+        assignOperator,
+        value,
+        rightLineBreak,
+        rightBracket,
+    ) => new AttributeNode(name.parse(), parseOptional(value), span(leftBracket, rightBracket)),
+
+    AttributeValue: (value) => value.parse(),
+
+    StringAttributeValue: (string) => new StringAttributeValue(parseString(string), span(string)),
+
+    // Expressions
+
+    Expression: (expression) => expression.parse(),
+
+    ExpressionElement: (expression) => expression.parse(),
+
+    AtomicExpression: (expression) => expression.parse(),
+
+    ParenthesizedExpression: (
+        leftParenthesis,
+        leftLineBreak,
+        expression,
+        rightLineBreak,
+        rightParenthesis,
+    ) => expression.parse(),
+
+    PlaceholderExpression: (underscore) => new PlaceholderExpressionNode(span(underscore)),
+
+    VariableExpression: (variableName) =>
+        new VariableExpressionNode(variableName.parse(), span(variableName)),
+
+    ConstructorExpression: (constructorName) =>
+        new ConstructorExpressionNode(constructorName.parse(), span(constructorName)),
+
+    NumberExpression: (number) => new NumberExpressionNode(number.sourceString, span(number)),
+
+    StringExpression: (string) => new StringExpressionNode(parseString(string), span(string)),
+
+    StructureExpression: (
+        typeName,
+        leftBrace,
+        leftLineBreak,
+        firstField,
+        fieldLineBreak,
+        restFields,
+        rightLineBreak,
+        rightBrace,
+    ) =>
+        new StructureExpressionNode(
+            typeName.parse(),
+            parseFirstRest(firstField, restFields),
+            span(leftBrace, rightBrace),
+        ),
+
+    StructureExpressionField: (variableName, assignOperator, expression) =>
+        new StructureExpressionField(
+            variableName.parse(),
+            expression.parse(),
+            span(variableName, expression),
+        ),
+
+    BlockExpression: (leftBrace, leftLineBreak, statements, rightLineBreak, rightBrace) =>
+        new BlockExpressionNode(statements.parse(), span(leftBrace, rightBrace)),
+
+    UnitExpression: (leftParenthesis, lineBreak, rightParenthesis) =>
+        new UnitExpressionNode(span(leftParenthesis, rightParenthesis)),
+
+    FormatExpression: (string, expressions) =>
+        new FormatExpressionNode(
+            parseString(string),
+            parseList(expressions),
+            span(string, expressions),
+        ),
+
+    CallExpression: (func, inputs) =>
+        new CallExpressionNode(func.parse(), parseList(inputs), span(func, inputs)),
+
+    DoExpression: (doKeyword, expression) =>
+        new DoExpressionNode(expression.parse(), span(doKeyword, expression)),
+
+    WhenExpression: (
+        whenKeyword,
+        expression,
+        leftBrace,
+        leftLineBreak,
+        firstArm,
+        armLineBreak,
+        restArms,
+        rightLineBreak,
+        rightBrace,
+    ) =>
+        new WhenExpressionNode(
+            expression.parse(),
+            parseOptionalFirstRest(firstArm, restArms),
+            span(whenKeyword, rightBrace),
+        ),
+
+    Arm: (pattern, functionOperator, expression) =>
+        new Arm(pattern.parse(), expression.parse(), span(pattern, expression)),
+
+    IntrinsicExpression: (intrinsicKeyword, string, expressions) =>
+        new IntrinsicExpressionNode(
+            parseString(string),
+            parseList(expressions),
+            span(intrinsicKeyword, expressions),
+        ),
+
+    ToExpression: operator("left", span),
+
+    ByExpression: operator("left", span),
+
+    PowerExpression: operator("right", span),
+
+    MultiplyExpression: operator("left", span),
+
+    AddExpression: operator("left", span),
+
+    CompareExpression: operator("left", span),
+
+    EqualExpression: operator("left", span),
+
+    AndExpression: operator("left", span),
+
+    OrExpression: operator("left", span),
+
+    ApplyExpression: operator("left", span),
+
+    TupleExpression: (
+        first,
+        tupleOperator,
+        leftLineBreak,
+        rest,
+        rightLineBreak,
+        trailingOperator,
+    ) => new TupleExpressionNode(parseOptionalFirstRest(first, rest), span(first, rest)),
+
+    EmptyCollectionExpression: (collectionOperator) =>
+        new CollectionExpressionNode([], span(collectionOperator)),
+
+    CollectionExpression: (head, leftLineBreak, collectionOperator, rightLineBreak, last) =>
+        new CollectionExpressionNode(
+            [
+                ...parseList(head),
+                ...(last.numChildren > 0 ? [(last.children[0] as NonterminalNode).parse()] : []),
+            ],
+            span(head, last),
+        ),
+
+    IsExpression: (expression, isOperator, pattern) =>
+        new IsExpressionNode(expression.parse(), pattern.parse(), span(expression, pattern)),
+
+    AsExpression: (expression, asOperator, type) =>
+        new AsExpressionNode(expression.parse(), type.parse(), span(expression, type)),
+
+    AnnotateExpression: (expression, annotateOperator, type) =>
+        new AnnotateExpressionNode(expression.parse(), type.parse(), span(expression, type)),
+
+    FunctionExpression: (inputs, expression) =>
+        new FunctionExpressionNode(inputs.parse(), expression.parse(), span(inputs, expression)),
+
+    FunctionExpressionInputs: (patterns, functionOperator, lineBreak) => parseList(patterns),
+
+    // Patterns
+
+    Pattern: (pattern) => pattern.parse(),
+
+    PatternElement: (pattern) => pattern.parse(),
+
+    AtomicPattern: (pattern) => pattern.parse(),
+
+    ParenthesizedPattern: (
+        leftParenthesis,
+        leftLineBreak,
+        pattern,
+        rightLineBreak,
+        rightParenthesis,
+    ) => pattern.parse(),
+
+    WildcardPattern: (underscoreKeyword) => new WildcardPatternNode(span(underscoreKeyword)),
+
+    VariablePattern: (variableName) =>
+        new VariablePatternNode(variableName.parse(), span(variableName)),
+
+    NumberPattern: (number) => new NumberPatternNode(number.sourceString, span(number)),
+
+    StringPattern: (string) => new StringPatternNode(parseString(string), span(string)),
+
+    StructurePattern: (
+        typeName,
+        leftBrace,
+        leftLineBreak,
+        firstField,
+        fieldLineBreak,
+        restFields,
+        rightLineBreak,
+        rightBrace,
+    ) =>
+        new StructurePatternNode(
+            typeName.parse(),
+            parseFirstRest(firstField, restFields),
+            span(leftBrace, rightBrace),
+        ),
+
+    StructurePatternField: (variableName, assignOperator, pattern) =>
+        new StructurePatternField(
+            variableName.parse(),
+            pattern.parse(),
+            span(variableName, pattern),
+        ),
+
+    UnitPattern: (leftParenthesis, lineBreak, rightParenthesis) =>
+        new UnitPatternNode(span(leftParenthesis, rightParenthesis)),
+
+    TuplePattern: (first, tupleOperator, leftLineBreak, rest, rightLineBreak, trailingOperator) =>
+        new TuplePatternNode(parseOptionalFirstRest(first, rest), span(first, rest)),
+
+    OrPattern: (first, orOperator, leftLineBreak, rest, rightLineBreak) =>
+        new OrPatternNode(parseOptionalFirstRest(first, rest), span(first, rest)),
+
+    SetPattern: (setKeyword, variableName) =>
+        new SetPatternNode(variableName.parse(), span(setKeyword, variableName)),
+
+    ConstructorPattern: (constructorName, patterns) =>
+        new ConstructorPatternNode(
+            constructorName.parse(),
+            parseList(patterns),
+            span(constructorName, patterns),
+        ),
+
+    AnnotatePattern: (pattern, annotateOperator, type) =>
+        new AnnotatePatternNode(pattern.parse(), type.parse(), span(pattern, type)),
+
+    // Types
+
+    Type: (type) => type.parse(),
+
+    TypeElement: (type) => type.parse(),
+
+    AtomicType: (type) => type.parse(),
+
+    ParenthesizedType: (leftParenthesis, leftLineBreak, type, rightLineBreak, rightParenthesis) =>
+        type.parse(),
+
+    PlaceholderType: (underscoreKeyword) => new PlaceholderTypeNode(span(underscoreKeyword)),
+
+    ParameterType: (typeParameterName) =>
+        new TypeParameterNode(typeParameterName.parse(), false, undefined, span(typeParameterName)),
+
+    AnnotatedParameterType: (typeParameterName, annotateOperator, type) =>
+        new TypeParameterNode(
+            typeParameterName.parse(),
+            false,
+            type.parse(),
+            span(typeParameterName, type),
+        ),
+
+    NamedType: (typeName) => new NamedTypeNode(typeName.parse(), [], span(typeName)),
+
+    FunctionType: (inputs, type) =>
+        new FunctionTypeNode(inputs.parse(), type.parse(), span(inputs, type)),
+
+    FunctionTypeInputs: (types, functionOperator, lineBreak) => parseList(types),
+
+    BlockType: (leftBrace, leftLineBreak, type, rightLineBreak, rightBrace) =>
+        new BlockTypeNode(type.parse(), span(leftBrace, rightBrace)),
+
+    UnitType: (leftParenthesis, lineBreak, rightParenthesis) =>
+        new UnitTypeNode(span(leftParenthesis, rightParenthesis)),
+
+    TupleType: (first, tupleOperator, leftLineBreak, rest, rightLineBreak, trailingOperator) =>
+        new TupleTypeNode(parseOptionalFirstRest(first, rest), span(first, rest)),
+
+    ParameterizedType: (typeName, types) =>
+        new NamedTypeNode(typeName.parse(), parseList(types), span(typeName, types)),
+
+    // Constraints
+
+    TypeParameters: (typeParameters, typeFunctionOperator) => parseList(typeParameters),
+
+    TypeParameter: (parameter) => parameter.parse(),
+
+    NamedTypeParameter: (typeParameterName) =>
+        new TypeParameterNode(typeParameterName.parse(), false, undefined, span(typeParameterName)),
+
+    InferTypeParameter: (
+        leftParenthesis,
+        leftLineBreak,
+        inferKeyword,
+        typeParameterName,
+        rightLineBreak,
+        rightParenthesis,
+    ) =>
+        new TypeParameterNode(
+            typeParameterName.parse(),
+            true,
+            undefined,
+            span(leftParenthesis, rightParenthesis),
+        ),
+
+    Constraints: (whereKeyword, constraints) => parseList(constraints),
+
+    Constraint: (constraint) => constraint.parse(),
+
+    BoundConstraint: (
+        leftParenthesis,
+        leftLineBreak,
+        typeName,
+        types,
+        rightLineBreak,
+        rightParenthesis,
+    ) =>
+        new BoundConstraintNode(
+            typeName.parse(),
+            parseList(types),
+            span(leftParenthesis, rightParenthesis),
+        ),
+
+    DefaultConstraint: (
+        leftParenthesis,
+        leftLineBreak,
+        typeName,
+        annotateOperator,
+        type,
+        rightLineBreak,
+        rightParenthesis,
+    ) =>
+        new DefaultConstraintNode(
+            typeName.parse(),
+            type.parse(),
+            span(leftParenthesis, rightParenthesis),
+        ),
+
+    // Statements
+
+    Statements: (first, lineBreak, rest, trailingComments) => parseOptionalFirstRest(first, rest),
+
+    Statement: (statement) => statement.parse(),
+
+    TypeDefinitionStatement: (
+        comments,
+        attributes,
+        typeName,
+        assignOperator,
+        typeParameters,
+        typeRepresentation,
+    ) =>
+        new TypeDefinitionNode(
+            comments.parse(),
+            attributes.parse(),
+            typeName.parse(),
+            parseOptional(typeParameters) ?? [],
+            typeRepresentation.parse(),
+            span(comments, typeRepresentation),
+        ),
+
+    TypeRepresentation: (representation) => representation.parse(),
+
+    MarkerTypeRepresentation: (typeKeyword) => new MarkerTypeRepresentation(span(typeKeyword)),
+
+    StructureTypeRepresentation: (
+        typeKeyword,
+        leftBrace,
+        leftLineBreak,
+        firstField,
+        fieldLineBreak,
+        restFields,
+        rightLineBreak,
+        rightBrace,
+    ) =>
+        new StructureTypeRepresentation(
+            parseFirstRest(firstField, restFields),
+            span(typeKeyword, rightBrace),
+        ),
+
+    FieldDefinition: (variableName, annotateOperator, type) =>
+        new FieldDefinition(variableName.parse(), type.parse(), span(variableName, type)),
+
+    EnumerationTypeRepresentation: (
+        typeKeyword,
+        leftBrace,
+        leftLineBreak,
+        firstVariant,
+        variantLineBreak,
+        restVariants,
+        rightLineBreak,
+        rightBrace,
+    ) =>
+        new EnumerationTypeRepresentation(
+            parseFirstRest(firstVariant, restVariants),
+            span(typeKeyword, rightBrace),
+        ),
+
+    VariantDefinition: (constructorName, types) =>
+        new VariantDefinition(
+            constructorName.parse(),
+            parseList(types),
+            span(constructorName, types),
+        ),
+
+    TraitDefinitionStatement: (
+        comments,
+        attributes,
+        typeName,
+        assignOperator,
+        typeParameters,
+        traitConstraints,
+    ) => {
+        const { type, constraints } = traitConstraints.parse();
+
+        return new TraitDefinitionNode(
+            comments.parse(),
+            attributes.parse(),
+            typeName.parse(),
+            parseOptional(typeParameters) ?? [],
+            type,
+            constraints,
+            span(comments, traitConstraints),
         );
-        this.span = span;
-    }
-}
-
-const keywords = {
-    underscoreKeyword: "_",
-    doKeyword: "do",
-    inferKeyword: "infer",
-    instanceKeyword: "instance",
-    intrinsicKeyword: "intrinsic",
-    setKeyword: "set",
-    traitKeyword: "trait",
-    typeKeyword: "type",
-    whenKeyword: "when",
-    whereKeyword: "where",
-    asOperator: "as",
-    toOperator: "to",
-    byOperator: "by",
-    isOperator: "is",
-    andOperator: "and",
-    orOperator: "or",
-};
-
-const rules = {
-    space: /[ \t]+/,
-    lineBreak: { match: /\n+/, lineBreaks: true },
-    comment: { match: /--.*/, value: (s: string) => s.slice(2) },
-    typeFunctionOperator: "=>",
-    annotateOperator: "::",
-    assignOperator: ":",
-    functionOperator: "->",
-    lessThanOrEqualOperator: "<=",
-    greaterThanOrEqualOperator: ">=",
-    notEqualOperator: "/=",
-    powerOperator: "^",
-    multiplyOperator: "*",
-    divideOperator: "/",
-    remainderOperator: "%",
-    addOperator: "+",
-    subtractOperator: "-",
-    lessThanOperator: "<",
-    greaterThanOperator: ">",
-    equalOperator: "=",
-    applyOperator: ".",
-    tupleOperator: ";",
-    collectionOperator: ",",
-    leftParenthesis: "(",
-    rightParenthesis: ")",
-    leftBracket: "[",
-    rightBracket: "]",
-    leftBrace: "{",
-    rightBrace: "}",
-    number: /[+-]?\d+(?:\.\d+)?/,
-    string: {
-        match: /"[^"]*"|'[^']*'/,
-        value: (s: string) => s.slice(1, -1),
     },
-    capitalName: /(?:\d+-)*[A-Z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*(?:[!?])?/,
-    lowercaseName: {
-        match: /(?:\d+-)*[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*(?:[!?])?/,
-        type: moo.keywords(keywords),
+
+    TraitConstraints: (traitKeyword, type, constraints) => ({
+        type: type.parse(),
+        constraints: parseOptional(constraints) ?? [],
+    }),
+
+    ConstantDefinitionStatement: (comments, attributes, variableName, constantConstraints) => {
+        const { type, constraints } = constantConstraints.parse();
+
+        return new ConstantDefinitionNode(
+            comments.parse(),
+            attributes.parse(),
+            variableName.parse(),
+            type,
+            constraints,
+            span(comments, constantConstraints),
+        );
     },
-};
 
-export type TokenType = keyof typeof rules | keyof typeof keywords;
-
-const tokenNames: Record<TokenType, string> = {
-    space: "space",
-    lineBreak: "line break",
-    comment: "comment",
-    typeFunctionOperator: "`=>`",
-    annotateOperator: "`::`",
-    assignOperator: "`:`",
-    functionOperator: "`->`",
-    lessThanOrEqualOperator: "`<=`",
-    greaterThanOrEqualOperator: "`>=`",
-    notEqualOperator: "`/=`",
-    powerOperator: "`^`",
-    multiplyOperator: "`*`",
-    divideOperator: "`/`",
-    remainderOperator: "`%`",
-    addOperator: "`+`",
-    subtractOperator: "`-`",
-    lessThanOperator: "`<`",
-    greaterThanOperator: "`>`",
-    equalOperator: "`=`",
-    applyOperator: "`.`",
-    tupleOperator: "`;`",
-    collectionOperator: "`,`",
-    leftParenthesis: "`(`",
-    rightParenthesis: "`)`",
-    leftBracket: "`[`",
-    rightBracket: "`]`",
-    leftBrace: "`{`",
-    rightBrace: "`}`",
-    number: "number",
-    string: "string",
-    capitalName: "name",
-    lowercaseName: "name",
-    underscoreKeyword: "`_`",
-    doKeyword: "`do`",
-    inferKeyword: "`infer`",
-    instanceKeyword: "`instance`",
-    intrinsicKeyword: "`intrinsic`",
-    setKeyword: "`set`",
-    traitKeyword: "`trait`",
-    typeKeyword: "`type`",
-    whenKeyword: "`when`",
-    whereKeyword: "`where`",
-    asOperator: "`as`",
-    toOperator: "`to`",
-    byOperator: "`by`",
-    isOperator: "`is`",
-    andOperator: "`and`",
-    orOperator: "`or`",
-};
-
-const lexer = moo.compile(rules);
-
-export class Parser {
-    private path: string;
-    private source: string;
-    private tokens: Token[];
-
-    private stack: { committed: boolean }[] = [];
-    private cache: Map<number, Map<Function, [any, number]>> = new Map();
-
-    private index = 0;
-    private context?: string;
-    private furthestError?: { index: number; error: SyntaxError };
-
-    constructor(path: string, source: string) {
-        this.path = path;
-        this.source = source;
-        lexer.reset(source);
-
-        this.tokens = Iterator.from<moo.Token>(lexer)
-            .filter((token) => token.type !== "space")
-            .map((token) => ({
-                type: token.type as TokenType,
-                span: {
-                    path,
-                    start: {
-                        offset: token.offset,
-                        line: token.line,
-                        column: token.col,
-                    },
-                    end: {
-                        offset: token.offset + token.text.length,
-                        line: token.line, // TODO: handle line breaks?
-                        column: token.col + token.text.length,
-                    },
-                    source: token.text,
-                },
-                value: token.value,
-            }))
-            .toArray();
-    }
-
-    spanned<T>(context: string, f: (span: () => Span) => T): T {
-        const span = () => this.tokens[this.index]?.span ?? nullSpan(this.path);
-
-        const start = span().start;
-
-        const prevContext = this.context;
-        this.context = context;
-
-        const result = f(() => {
-            const end = span().end;
-            const source = this.slice(start.offset, end.offset);
-            return { path: this.path, source, start, end };
-        });
-
-        this.context = prevContext;
-
-        return result;
-    }
-
-    delimited<T>(left: TokenType, right: TokenType, f: () => T): T {
-        this.next(left);
-        this.try("lineBreak");
-        const result = f();
-        this.try("lineBreak");
-
-        const initialIndex = this.index;
-        try {
-            this.next(right);
-        } catch (e) {
-            if (!(e instanceof SyntaxError)) {
-                throw e;
-            } else {
-                this.throwAndReset(
-                    initialIndex,
-                    `expected '${tokenNames[right]}' to close '${tokenNames[left]}'`,
-                    true,
-                );
-            }
-        }
-
-        return result;
-    }
-
-    collection<T>(
-        expected: string,
-        separators: TokenType[],
-        f: (parser: Parser) => T,
-        operator = false,
-    ): [T, Token | undefined][] {
-        this.try("lineBreak");
-
-        if (this.try(...separators) != null) {
-            // Empty collection
-            return [];
-        }
-
-        const initialIndex = this.index;
-        const elements: [T, Token | undefined][] = [[f(this), undefined]];
-        let hasTrailingSeparator = false;
-        while (true) {
-            this.try("lineBreak");
-
-            const separator = this.try(...separators);
-            if (separator == null) {
-                break;
-            } else {
-                hasTrailingSeparator = true;
-            }
-
-            this.try("lineBreak");
-
-            try {
-                const element = f(this);
-                elements.push([element, separator]);
-                hasTrailingSeparator = false;
-            } catch (e) {
-                if (!(e instanceof SyntaxError)) {
-                    throw e;
-                }
-
-                break;
-            }
-        }
-
-        if (operator) {
-            return elements;
-        }
-
-        const minElements = hasTrailingSeparator ? 1 : 2;
-
-        if (elements.length < minElements) {
-            this.throwAndReset(initialIndex, `expected ${expected}`, false);
-        }
-
-        return elements;
-    }
-
-    many<T>(expected: string, f: (parser: Parser) => T, separators: TokenType[] = []): T[] {
-        const initialIndex = this.index;
-
-        const results: T[] = [];
-        while (true) {
-            this.try(...separators);
-
-            let result: T;
-            try {
-                result = f(this);
-            } catch (e) {
-                if (!(e instanceof SyntaxError)) {
-                    throw e;
-                } else {
-                    break;
-                }
-            }
-
-            results.push(result);
-        }
-
-        if (results.length === 0) {
-            this.throwAndReset(initialIndex, `expected ${expected}`, false);
-        }
-
-        return results;
-    }
-
-    alternatives<T>(
-        expected: string,
-        key: Function | undefined,
-        alternatives: ((parser: Parser) => T)[],
-    ): T {
-        if (!this.cache.has(this.index)) {
-            this.cache.set(this.index, new Map());
-        }
-
-        const cached = this.cache.get(this.index)!;
-        if (key != null && cached.has(key)) {
-            const [result, index] = cached.get(key)!;
-            this.index = index;
-            return result as T;
-        }
-
-        const initialIndex = this.index;
-
-        const entry = { committed: false };
-        this.stack.push(entry);
-
-        for (const f of alternatives) {
-            this.index = initialIndex;
-
-            try {
-                const result = f(this);
-                this.stack.pop();
-
-                if (key != null) {
-                    cached.set(key, [result, this.index]);
-                }
-
-                return result;
-            } catch (e) {
-                if (!(e instanceof SyntaxError) || entry.committed) {
-                    this.stack.pop();
-                    throw e;
-                } else {
-                    continue;
-                }
-            }
-        }
-
-        this.stack.pop();
-
-        this.throwAndReset(initialIndex, `expected ${expected}`, false);
-    }
-
-    optional<T>(f: (parser: Parser) => T, defaultValue: T): T {
-        const initialIndex = this.index;
-        try {
-            return f(this);
-        } catch (e) {
-            if (!(e instanceof SyntaxError)) {
-                throw e;
-            }
-
-            this.index = initialIndex;
-            return defaultValue;
-        }
-    }
-
-    commit() {
-        this.stack.at(-1)!.committed = true;
-    }
-
-    try<S extends string[]>(...types: [...S]): Token | undefined {
-        const token = this.tokens[this.index];
-        if (token == null || !types.includes(token.type)) {
-            return undefined;
-        }
-
-        this.index++;
-
-        return token;
-    }
-
-    next(...types: TokenType[]): string {
-        const expected = types.map((type) => tokenNames[type]).join(" or ");
-
-        const token = this.tokens[this.index];
-        if (token == null || !types.includes(token.type)) {
-            this.throwAndReset(this.index, `expected ${expected}`, true);
-        }
-
-        this.index++;
-
-        return token.value;
-    }
-
-    slice(start: number, end: number): string {
-        return this.source.slice(start, end);
-    }
-
-    join(left: Span, right: Span): Span {
-        return {
-            path: left.path,
-            source: this.source.slice(left.start.offset, right.end.offset),
-            start: left.start,
-            end: right.end,
-        };
-    }
-
-    finish() {
-        try {
-            const token = this.tokens[this.index];
-            if (token != null) {
-                this.throwAndReset(this.index, `unexpected ${tokenNames[token.type]}`, true);
-            }
-        } catch (e) {
-            if (!(e instanceof SyntaxError)) {
-                throw e;
-            }
-        }
-
-        if (this.furthestError != null) {
-            throw this.furthestError.error;
-        }
-    }
-
-    private throwAndReset(index: number, message: string, priority: boolean): never {
-        const token = this.tokens[this.index - 1];
-
-        const error = new SyntaxError(message, this.context, token?.span ?? nullSpan(this.path));
-
-        if (
-            this.furthestError == null ||
-            (priority
-                ? this.index >= this.furthestError.index
-                : this.index > this.furthestError.index)
-        ) {
-            this.furthestError = { index: this.index, error };
-        }
-
-        this.index = index;
-
-        throw error;
-    }
-}
-
-export const nullSpan = (path: string) => ({
-    path,
-    source: "",
-    start: { line: 1, column: 1, offset: 0 },
-    end: { line: 1, column: 1, offset: 0 },
+    ConstantConstraints: (annotateOperator, type, constraints) => ({
+        type: type.parse(),
+        constraints: parseOptional(constraints) ?? [],
+    }),
+
+    InstanceDefinitionStatement: (
+        comments,
+        attributes,
+        instanceConstraints,
+        assignOperator,
+        value,
+    ) => {
+        const { bound, constraints } = instanceConstraints.parse();
+
+        return new InstanceDefinitionNode(
+            comments.parse(),
+            attributes.parse(),
+            bound,
+            constraints,
+            parseOptional(value),
+            span(comments, value.children[0] ?? instanceConstraints),
+        );
+    },
+
+    InstanceConstraints: (instanceKeyword, bound, constraints) => ({
+        bound: bound.parse(),
+        constraints: parseOptional(constraints) ?? [],
+    }),
+
+    AssignmentStatement: (comments, pattern, assignOperator, expression) =>
+        new AssignmentNode(
+            comments.parse(),
+            [],
+            pattern.parse(),
+            expression.parse(),
+            span(comments, expression),
+        ),
+
+    ExpressionStatement: (comments, expression) =>
+        new ExpressionStatementNode(
+            comments.parse(),
+            [],
+            expression.parse(),
+            span(comments, expression),
+        ),
+
+    Comments: (comments, lineBreak) => comments.children.map((comment) => comment.sourceString),
+
+    // Atoms
+
+    TypeName: (value) => value.sourceString,
+
+    ConstructorName: (value) => value.sourceString,
+
+    VariableName: (value) => value.sourceString,
+
+    TypeParameterName: (value) => value.sourceString,
+
+    AttributeName: (value) => value.sourceString,
 });
+
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+const operator =
+    (associativity: "left" | "right", span: SpanFn) =>
+    (
+        first: NonterminalNode,
+        leftLineBreak: any,
+        operator: IterationNode,
+        rightLineBreak: any,
+        rest: IterationNode,
+    ) => {
+        if (rest.children.length === 0) {
+            return first.parse();
+        }
+
+        switch (associativity) {
+            case "left": {
+                return rest.children.reduce<any>(
+                    ({ node: left, span: leftSpan }, right) => ({
+                        node: new OperatorExpressionNode(
+                            operator.children[0].sourceString,
+                            left,
+                            (right as NonterminalNode).parse(),
+                            span(leftSpan, right),
+                        ),
+                        span: right,
+                    }),
+                    { node: first.parse(), span: first },
+                ).node;
+            }
+            case "right": {
+                return rest.children.reduceRight<any>(
+                    ({ node: right, span: rightSpan }, left) => ({
+                        node: new OperatorExpressionNode(
+                            operator.sourceString,
+                            (left as NonterminalNode).parse(),
+                            right,
+                            span(left, rightSpan),
+                        ),
+                        span: left,
+                    }),
+                    { node: first.parse(), span: first },
+                ).node;
+            }
+        }
+    };
+
+export default parser;

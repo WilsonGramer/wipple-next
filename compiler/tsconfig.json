@@ -11,6 +11,7 @@
         "sourceMap": true,
         "inlineSources": true,
         "strict": true,
-        "jsx": "preserve"
+        "jsx": "preserve",
+        "allowJs": true
     }
 }

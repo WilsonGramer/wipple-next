@@ -15,6 +15,8 @@ import lsp from "./lsp";
 import type { Filter, Node } from "./node";
 import { nodeFilter } from "./node";
 
+Error.stackTraceLimit = 100;
+
 const compileCommand = (options: { run: boolean }) =>
     cmd.command({
         name: "compile",

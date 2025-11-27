@@ -1,102 +1,82 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`parsing complex constructor pattern 1`] = `
+exports[`parsing patterns > parsing complex constructor pattern 1`] = `
 ConstructorPatternNode {
   "constructorName": "Some",
   "elements": [
     VariablePatternNode {
-      "isHidden": false,
       "variable": "x",
     },
     VariablePatternNode {
-      "isHidden": false,
       "variable": "y",
     },
     VariablePatternNode {
-      "isHidden": false,
       "variable": "z",
     },
   ],
-  "isHidden": false,
 }
 `;
 
-exports[`parsing complex or pattern 1`] = `
+exports[`parsing patterns > parsing complex or pattern 1`] = `
 OrPatternNode {
-  "isHidden": false,
   "patterns": [
     VariablePatternNode {
-      "isHidden": false,
       "variable": "x",
     },
     VariablePatternNode {
-      "isHidden": false,
       "variable": "y",
     },
     VariablePatternNode {
-      "isHidden": false,
       "variable": "z",
     },
   ],
 }
 `;
 
-exports[`parsing set pattern 1`] = `
+exports[`parsing patterns > parsing set pattern 1`] = `
 SetPatternNode {
-  "isHidden": false,
   "variable": "x",
 }
 `;
 
-exports[`parsing simple constructor pattern 1`] = `
+exports[`parsing patterns > parsing simple constructor pattern 1`] = `
 ConstructorPatternNode {
   "constructorName": "None",
   "elements": [],
-  "isHidden": false,
 }
 `;
 
-exports[`parsing simple or pattern 1`] = `
+exports[`parsing patterns > parsing simple or pattern 1`] = `
 OrPatternNode {
-  "isHidden": false,
   "patterns": [
     VariablePatternNode {
-      "isHidden": false,
       "variable": "x",
     },
     VariablePatternNode {
-      "isHidden": false,
       "variable": "y",
     },
   ],
 }
 `;
 
-exports[`parsing structure pattern 1`] = `
+exports[`parsing patterns > parsing structure pattern 1`] = `
 StructurePatternNode {
   "fields": [
     StructurePatternField {
       "name": "x",
       "value": VariablePatternNode {
-        "isHidden": false,
         "variable": "y",
       },
     },
   ],
-  "isHidden": false,
   "name": "Foo",
 }
 `;
 
-exports[`parsing variable pattern 1`] = `
+exports[`parsing patterns > parsing variable pattern 1`] = `
 VariablePatternNode {
-  "isHidden": false,
   "variable": "x",
 }
 `;
 
-exports[`parsing wildcard pattern 1`] = `
-WildcardPatternNode {
-  "isHidden": false,
-}
-`;
+exports[`parsing patterns > parsing wildcard pattern 1`] = `WildcardPatternNode {}`;

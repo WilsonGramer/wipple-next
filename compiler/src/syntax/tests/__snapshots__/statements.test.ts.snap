@@ -1,21 +1,18 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`parsing complex valued instance definition 1`] = `
+exports[`parsing statements > parsing complex valued instance definition 1`] = `
 InstanceDefinitionNode {
   "attributes": {
     "default": false,
     "error": false,
   },
   "bound": BoundConstraintNode {
-    "isHidden": false,
     "parameters": [
       NamedTypeNode {
-        "isHidden": false,
         "name": "Maybe",
         "parameters": [
           TypeParameterNode {
             "infer": false,
-            "isHidden": false,
             "name": "value",
           },
         ],
@@ -26,26 +23,22 @@ InstanceDefinitionNode {
   "comments": [],
   "constraints": [
     BoundConstraintNode {
-      "isHidden": false,
       "parameters": [
         TypeParameterNode {
           "infer": false,
-          "isHidden": false,
           "name": "value",
         },
       ],
       "trait": "Foo",
     },
   ],
-  "isHidden": false,
   "value": NumberExpressionNode {
-    "isHidden": false,
     "value": "3.14",
   },
 }
 `;
 
-exports[`parsing constant definition 1`] = `
+exports[`parsing statements > parsing constant definition 1`] = `
 ConstantDefinitionNode {
   "attributes": {
     "unit": false,
@@ -53,30 +46,24 @@ ConstantDefinitionNode {
   "comments": [],
   "constraints": [
     BoundConstraintNode {
-      "isHidden": false,
       "parameters": [
         TypeParameterNode {
           "infer": false,
-          "isHidden": false,
           "name": "value",
         },
       ],
       "trait": "Show",
     },
   ],
-  "isHidden": false,
   "name": "show",
   "type": FunctionTypeNode {
     "inputs": [
       TypeParameterNode {
         "infer": false,
-        "isHidden": false,
         "name": "value",
       },
     ],
-    "isHidden": false,
     "output": NamedTypeNode {
-      "isHidden": false,
       "name": "Unit",
       "parameters": [],
     },
@@ -84,13 +71,12 @@ ConstantDefinitionNode {
 }
 `;
 
-exports[`parsing enumeration type definition 1`] = `
+exports[`parsing statements > parsing enumeration type definition 1`] = `
 TypeDefinitionNode {
   "attributes": {
     "intrinsic": false,
   },
   "comments": [],
-  "isHidden": false,
   "name": "Foo",
   "parameters": [],
   "representation": EnumerationTypeRepresentation {
@@ -98,7 +84,6 @@ TypeDefinitionNode {
       VariantDefinition {
         "elements": [
           NamedTypeNode {
-            "isHidden": false,
             "name": "Number",
             "parameters": [],
           },
@@ -114,17 +99,15 @@ TypeDefinitionNode {
 }
 `;
 
-exports[`parsing generic trait definition 1`] = `
+exports[`parsing statements > parsing generic trait definition 1`] = `
 TraitDefinitionNode {
   "attributes": {},
   "comments": [],
   "constraints": [],
-  "isHidden": false,
   "name": "Foo",
   "parameters": [
     TypeParameterNode {
       "infer": false,
-      "isHidden": false,
       "name": "value",
     },
   ],
@@ -132,13 +115,10 @@ TraitDefinitionNode {
     "inputs": [
       TypeParameterNode {
         "infer": false,
-        "isHidden": false,
         "name": "value",
       },
     ],
-    "isHidden": false,
     "output": NamedTypeNode {
-      "isHidden": false,
       "name": "Number",
       "parameters": [],
     },
@@ -146,18 +126,16 @@ TraitDefinitionNode {
 }
 `;
 
-exports[`parsing generic type definition 1`] = `
+exports[`parsing statements > parsing generic type definition 1`] = `
 TypeDefinitionNode {
   "attributes": {
     "intrinsic": false,
   },
   "comments": [],
-  "isHidden": false,
   "name": "Foo",
   "parameters": [
     TypeParameterNode {
       "infer": false,
-      "isHidden": false,
       "name": "value",
     },
   ],
@@ -165,30 +143,27 @@ TypeDefinitionNode {
 }
 `;
 
-exports[`parsing marker type definition 1`] = `
+exports[`parsing statements > parsing marker type definition 1`] = `
 TypeDefinitionNode {
   "attributes": {
     "intrinsic": false,
   },
   "comments": [],
-  "isHidden": false,
   "name": "Foo",
   "parameters": [],
   "representation": MarkerTypeRepresentation {},
 }
 `;
 
-exports[`parsing simple valued instance definition 1`] = `
+exports[`parsing statements > parsing simple valued instance definition 1`] = `
 InstanceDefinitionNode {
   "attributes": {
     "default": false,
     "error": false,
   },
   "bound": BoundConstraintNode {
-    "isHidden": false,
     "parameters": [
       NamedTypeNode {
-        "isHidden": false,
         "name": "Number",
         "parameters": [],
       },
@@ -197,21 +172,18 @@ InstanceDefinitionNode {
   },
   "comments": [],
   "constraints": [],
-  "isHidden": false,
   "value": NumberExpressionNode {
-    "isHidden": false,
     "value": "3.14",
   },
 }
 `;
 
-exports[`parsing structure type definition 1`] = `
+exports[`parsing statements > parsing structure type definition 1`] = `
 TypeDefinitionNode {
   "attributes": {
     "intrinsic": false,
   },
   "comments": [],
-  "isHidden": false,
   "name": "Foo",
   "parameters": [],
   "representation": StructureTypeRepresentation {
@@ -219,7 +191,6 @@ TypeDefinitionNode {
       FieldDefinition {
         "name": "a",
         "type": NamedTypeNode {
-          "isHidden": false,
           "name": "A",
           "parameters": [],
         },
@@ -227,7 +198,6 @@ TypeDefinitionNode {
       FieldDefinition {
         "name": "b",
         "type": NamedTypeNode {
-          "isHidden": false,
           "name": "B",
           "parameters": [],
         },
@@ -237,31 +207,28 @@ TypeDefinitionNode {
 }
 `;
 
-exports[`parsing trait definition 1`] = `
+exports[`parsing statements > parsing trait definition 1`] = `
 TraitDefinitionNode {
   "attributes": {},
   "comments": [],
   "constraints": [],
-  "isHidden": false,
   "name": "Foo",
   "parameters": [],
   "type": NamedTypeNode {
-    "isHidden": false,
     "name": "Number",
     "parameters": [],
   },
 }
 `;
 
-exports[`parsing type definition 1`] = `
+exports[`parsing statements > parsing type definition 1`] = `
 TypeDefinitionNode {
   "attributes": {
     "intrinsic": false,
   },
   "comments": [
-    " Documentation comment",
+    "-- Documentation comment",
   ],
-  "isHidden": false,
   "name": "Foo",
   "parameters": [],
   "representation": MarkerTypeRepresentation {},

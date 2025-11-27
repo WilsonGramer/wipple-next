@@ -3,7 +3,6 @@ import { Node } from "../node";
 import type { Span } from "../span";
 import type { Visitor } from "../visit";
 import type { StatementNode } from "./statements";
-import { EmptyStatementNode } from "./statements/empty";
 
 export class FileNode extends Node {
     statements: StatementNode[];
@@ -20,17 +19,13 @@ export class FileNode extends Node {
 
     visit(visitor: Visitor): void {
         for (const statement of this.statements) {
-            if (!(statement instanceof EmptyStatementNode)) {
-                visitor.visit(statement);
-            }
+            visitor.visit(statement);
         }
     }
 
     codegen(codegen: Codegen): void {
         for (const statement of this.statements) {
-            if (!(statement instanceof EmptyStatementNode)) {
-                codegen.write(this.span, statement);
-            }
+            codegen.write(this.span, statement);
         }
     }
 }

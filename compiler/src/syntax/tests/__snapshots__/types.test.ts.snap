@@ -1,0 +1,82 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parsing types > parsing block type 1`] = `
+BlockTypeNode {
+  "output": NamedTypeNode {
+    "name": "Number",
+    "parameters": [],
+  },
+}
+`;
+
+exports[`parsing types > parsing complex input function type 1`] = `
+FunctionTypeNode {
+  "inputs": [
+    NamedTypeNode {
+      "name": "Maybe",
+      "parameters": [
+        NamedTypeNode {
+          "name": "Number",
+          "parameters": [],
+        },
+      ],
+    },
+    NamedTypeNode {
+      "name": "Number",
+      "parameters": [],
+    },
+  ],
+  "output": UnitTypeNode {},
+}
+`;
+
+exports[`parsing types > parsing complex named type 1`] = `
+NamedTypeNode {
+  "name": "Maybe",
+  "parameters": [
+    NamedTypeNode {
+      "name": "Number",
+      "parameters": [],
+    },
+  ],
+}
+`;
+
+exports[`parsing types > parsing multi input function type 1`] = `
+FunctionTypeNode {
+  "inputs": [
+    NamedTypeNode {
+      "name": "Number",
+      "parameters": [],
+    },
+    NamedTypeNode {
+      "name": "Number",
+      "parameters": [],
+    },
+  ],
+  "output": UnitTypeNode {},
+}
+`;
+
+exports[`parsing types > parsing placeholder type 1`] = `PlaceholderTypeNode {}`;
+
+exports[`parsing types > parsing simple named type 1`] = `
+NamedTypeNode {
+  "name": "Number",
+  "parameters": [],
+}
+`;
+
+exports[`parsing types > parsing single input function type 1`] = `
+FunctionTypeNode {
+  "inputs": [
+    NamedTypeNode {
+      "name": "Number",
+      "parameters": [],
+    },
+  ],
+  "output": UnitTypeNode {},
+}
+`;
+
+exports[`parsing types > parsing unit type 1`] = `UnitTypeNode {}`;

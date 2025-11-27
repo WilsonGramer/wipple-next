@@ -1,3 +1,4 @@
+import * as util from "node:util";
 import type { Codegen } from "./codegen";
 import { Facts, type Db } from "./db";
 import type { Span } from "./span";
@@ -14,13 +15,6 @@ export abstract class Node {
     }
 
     abstract children(): Generator<Node>;
-
-    *traverse(): Generator<Node> {
-        yield this;
-        for (const child of this.children()) {
-            yield* child.traverse();
-        }
-    }
 
     abstract visit(visitor: Visitor): void;
 
@@ -45,7 +39,7 @@ export abstract class Node {
     }
 
     // eslint-disable-next-line
-    [require("util").inspect.custom]() {
+    [util.inspect.custom]() {
         return this.toString();
     }
 }
