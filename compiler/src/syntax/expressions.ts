@@ -26,7 +26,7 @@ import {
     parseTypeName,
     parseVariableName,
 } from "./atoms";
-import type { Parser } from "./parser";
+import type { Parser, TokenType } from "./parser";
 import { parseAtomicPattern, parsePattern, parsePatternElement } from "./patterns";
 import { parseStatements } from "./statements";
 import { parseTypeElement } from "./types";
@@ -69,25 +69,31 @@ export const parseParenthesizedExpression = (parser: Parser) =>
     parser.delimited("leftParenthesis", "rightParenthesis", () => parseExpression(parser));
 
 export const parsePlaceholderExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("placeholder", (span) => {
         parser.next("underscoreKeyword");
         return new PlaceholderExpressionNode(span());
     });
 
 export const parseVariableExpression = (parser: Parser) =>
-    parser.spanned((span) => new VariableExpressionNode(parseVariableName(parser), span()));
+    parser.spanned(
+        "variable",
+        (span) => new VariableExpressionNode(parseVariableName(parser), span()),
+    );
 
 export const parseConstructorExpression = (parser: Parser) =>
-    parser.spanned((span) => new ConstructorExpressionNode(parseConstructorName(parser), span()));
+    parser.spanned(
+        "constructor",
+        (span) => new ConstructorExpressionNode(parseConstructorName(parser), span()),
+    );
 
 export const parseNumberExpression = (parser: Parser) =>
-    parser.spanned((span) => new NumberExpressionNode(parseNumber(parser), span()));
+    parser.spanned("number", (span) => new NumberExpressionNode(parseNumber(parser), span()));
 
 export const parseStringExpression = (parser: Parser) =>
-    parser.spanned((span) => new StringExpressionNode(parseString(parser), span()));
+    parser.spanned("string", (span) => new StringExpressionNode(parseString(parser), span()));
 
 export const parseStructureExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("structure", (span) => {
         const name = parseTypeName(parser);
         const fields = parser.delimited("leftBrace", "rightBrace", () =>
             parseStructureExpressionFields(parser),
@@ -96,7 +102,7 @@ export const parseStructureExpression = (parser: Parser) =>
     });
 
 export const parseStructureExpressionField = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("field", (span) => {
         const name = parseVariableName(parser);
         parser.next("assignOperator");
         parser.commit();
@@ -108,7 +114,7 @@ export const parseStructureExpressionFields = (parser: Parser) =>
     parser.many("field", parseStructureExpressionField, ["lineBreak"]);
 
 export const parseBlockExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("block", (span) => {
         const statements = parser.delimited("leftBrace", "rightBrace", () =>
             parser.optional(parseStatements, []),
         );
@@ -116,34 +122,34 @@ export const parseBlockExpression = (parser: Parser) =>
     });
 
 export const parseUnitExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("unit", (span) => {
         parser.delimited("leftParenthesis", "rightParenthesis", () => undefined);
         return new UnitExpressionNode(span());
     });
 
 export const parseFormatExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("format", (span) => {
         const string = parseString(parser);
         const inputs = parser.many("expression", parseAtomicExpression);
         return new FormatExpressionNode(string, inputs, span());
     });
 
 export const parseCallExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("function call", (span) => {
         const func = parseAtomicExpression(parser);
         const inputs = parser.many("expression", parseAtomicExpression);
         return new CallExpressionNode(func, inputs, span());
     });
 
 export const parseDoExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("`do` expression", (span) => {
         parser.next("doKeyword");
         parser.commit();
         return new DoExpressionNode(parseAtomicExpression(parser), span());
     });
 
 export const parseWhenExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("`when` expression", (span) => {
         parser.next("whenKeyword");
         parser.commit();
         const input = parseAtomicExpression(parser);
@@ -154,7 +160,7 @@ export const parseWhenExpression = (parser: Parser) =>
     });
 
 export const parseArm = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("`when` arm", (span) => {
         const pattern = parsePattern(parser);
         parser.next("functionOperator");
         const value = parseExpression(parser);
@@ -164,7 +170,7 @@ export const parseArm = (parser: Parser) =>
 export const parseArms = (parser: Parser) => parser.many("arm", parseArm, ["lineBreak"]);
 
 export const parseIntrinsicExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("`intrinsic` expression", (span) => {
         parser.next("intrinsicKeyword");
         parser.commit();
         const name = parseString(parser);
@@ -174,7 +180,7 @@ export const parseIntrinsicExpression = (parser: Parser) =>
 
 const operatorParser =
     (
-        operators: string[],
+        operators: TokenType[],
         associativity: "left" | "right",
         parseElement: (parser: Parser) => ExpressionNode,
     ) =>
@@ -233,7 +239,7 @@ const parseApplyExpression = operatorParser(["applyOperator"], "left", parseOrEx
 export const parseOperatorExpression = (parser: Parser) => parseApplyExpression(parser);
 
 export const parseTupleExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("tuple", (span) => {
         const elements = parser
             .collection("tuple", ["tupleOperator"], parseExpressionElement)
             .map(([element]) => element);
@@ -241,7 +247,7 @@ export const parseTupleExpression = (parser: Parser) =>
     });
 
 export const parseCollectionExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("collection", (span) => {
         const elements = parser
             .collection("collection", ["collectionOperator"], parseExpressionElement)
             .map(([element]) => element);
@@ -249,7 +255,7 @@ export const parseCollectionExpression = (parser: Parser) =>
     });
 
 export const parseIsExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("`is` expression", (span) => {
         const left = parseExpressionElement(parser);
         parser.next("isOperator");
         parser.commit();
@@ -258,7 +264,7 @@ export const parseIsExpression = (parser: Parser) =>
     });
 
 export const parseAsExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("`as` expression", (span) => {
         const left = parseExpressionElement(parser);
         parser.next("asOperator");
         parser.commit();
@@ -267,7 +273,7 @@ export const parseAsExpression = (parser: Parser) =>
     });
 
 export const parseAnnotateExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("type annotation", (span) => {
         const left = parseExpressionElement(parser);
         parser.next("annotateOperator");
         parser.commit();
@@ -276,7 +282,7 @@ export const parseAnnotateExpression = (parser: Parser) =>
     });
 
 export const parseFunctionExpression = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("function", (span) => {
         const inputs = parseFunctionExpressionInputs(parser);
         const output = parseExpression(parser);
         return new FunctionExpressionNode(inputs, output, span());

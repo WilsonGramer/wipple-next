@@ -6,7 +6,7 @@ import { parseStatements } from "./statements";
 export const parseFile = (path: string, code: string) => {
     const parser = new Parser(path, code);
 
-    const file = parser.spanned((span) => {
+    const file = parser.spanned("file", (span) => {
         const statements = parseStatements(parser);
         return new FileNode(statements, span());
     });

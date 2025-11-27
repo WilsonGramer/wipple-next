@@ -7,7 +7,7 @@ export const parseAttributes = (parser: Parser) =>
     parser.optional(() => parser.many("attribute", parseAttribute, ["lineBreak"]), []);
 
 export const parseAttribute = (parser: Parser) =>
-    parser.spanned((span) =>
+    parser.spanned("attribute", (span) =>
         parser.delimited("leftBracket", "rightBracket", () => {
             const name = parseAttributeName(parser);
             const value = parser.try("assignOperator") ? parseAttributeValue(parser) : undefined;
@@ -16,4 +16,7 @@ export const parseAttribute = (parser: Parser) =>
     );
 
 export const parseAttributeValue = (parser: Parser) =>
-    parser.spanned((span) => new StringAttributeValue(parseString(parser), span()));
+    parser.spanned(
+        "attribute value",
+        (span) => new StringAttributeValue(parseString(parser), span()),
+    );

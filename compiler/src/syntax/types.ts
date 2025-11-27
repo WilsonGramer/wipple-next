@@ -37,18 +37,19 @@ export const parseParenthesizedType = (parser: Parser) =>
     parser.delimited("leftParenthesis", "rightParenthesis", () => parseType(parser));
 
 export const parsePlaceholderType = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("placeholder type", (span) => {
         parser.next("underscoreKeyword");
         return new PlaceholderTypeNode(span());
     });
 
 export const parseParameterType = (parser: Parser) =>
     parser.spanned(
+        "type parameter",
         (span) => new TypeParameterNode(parseTypeParameterName(parser), false, undefined, span()),
     );
 
 export const parseAnnotatedParameterType = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("annotated type parameter", (span) => {
         const name = parseTypeParameterName(parser);
         parser.next("annotateOperator");
         const value = parseType(parser);
@@ -56,10 +57,10 @@ export const parseAnnotatedParameterType = (parser: Parser) =>
     });
 
 export const parseNamedType = (parser: Parser) =>
-    parser.spanned((span) => new NamedTypeNode(parseTypeName(parser), [], span()));
+    parser.spanned("named type", (span) => new NamedTypeNode(parseTypeName(parser), [], span()));
 
 export const parseFunctionType = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("function type", (span) => {
         const inputs = parseFunctionTypeInputs(parser);
         const output = parseType(parser);
         return new FunctionTypeNode(inputs, output, span());
@@ -73,19 +74,19 @@ export const parseFunctionTypeInputs = (parser: Parser) => {
 };
 
 export const parseBlockType = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("block type", (span) => {
         const output = parser.delimited("leftBrace", "rightBrace", () => parseTypeElement(parser));
         return new BlockTypeNode(output, span());
     });
 
 export const parseUnitType = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("unit type", (span) => {
         parser.delimited("leftParenthesis", "rightParenthesis", () => undefined);
         return new UnitTypeNode(span());
     });
 
 export const parseTupleType = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("tuple type", (span) => {
         const elements = parser
             .collection("tuple type", ["tupleOperator"], parseTypeElement)
             .map(([element]) => element);
@@ -93,7 +94,7 @@ export const parseTupleType = (parser: Parser) =>
     });
 
 export const parseParameterizedType = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("named type", (span) => {
         const name = parseTypeName(parser);
         const parameters = parser.many("type", parseAtomicType);
         return new NamedTypeNode(name, parameters, span());

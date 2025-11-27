@@ -19,13 +19,13 @@ export const parseTypeParameter = (parser: Parser) =>
     ]);
 
 export const parseNamedTypeParameter = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("named type parameter", (span) => {
         const name = parseTypeParameterName(parser);
         return new TypeParameterNode(name, false, undefined, span());
     });
 
 export const parseInferTypeParameter = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("inferred type parameter", (span) => {
         const name = parser.delimited("leftParenthesis", "rightParenthesis", () => {
             parser.next("inferKeyword");
             return parseTypeParameterName(parser);
@@ -46,7 +46,7 @@ export const parseConstraint = (parser: Parser) =>
     ]);
 
 export const parseBoundConstraint = (parser: Parser) =>
-    parser.spanned((span) =>
+    parser.spanned("bound constraint", (span) =>
         parser.delimited("leftParenthesis", "rightParenthesis", () => {
             const trait = parseTypeName(parser);
             const parameters = parser.many("type", parseAtomicType);
@@ -55,9 +55,10 @@ export const parseBoundConstraint = (parser: Parser) =>
     );
 
 export const parseDefaultConstraint = (parser: Parser) =>
-    parser.spanned((span) =>
+    parser.spanned("default constraint", (span) =>
         parser.delimited("leftParenthesis", "rightParenthesis", () => {
             const parameter = parser.spanned(
+                "type parameter",
                 (span) =>
                     new TypeParameterNode(parseTypeParameterName(parser), false, undefined, span()),
             );

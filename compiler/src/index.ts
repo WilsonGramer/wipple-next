@@ -91,6 +91,11 @@ const compileCommand = (options: { run: boolean }) =>
                 clear: true,
             });
 
+            const clearProgress = () => {
+                progress.tick(layers.length, { message: "" });
+                progress.terminate();
+            };
+
             layers.forEach(({ path, files }, index) => {
                 progress.tick(index, {
                     message: `Compiling ${path ?? files.map(({ path }) => path).join(", ")}`,
@@ -99,6 +104,8 @@ const compileCommand = (options: { run: boolean }) =>
                 const result = compile(root, { files });
 
                 if (!result.success) {
+                    clearProgress();
+
                     switch (result.type) {
                         case "parse": {
                             console.error(result.message);
@@ -112,9 +119,7 @@ const compileCommand = (options: { run: boolean }) =>
                 }
             });
 
-            progress.tick(layers.length, { message: "" });
-
-            progress.terminate();
+            clearProgress();
 
             if (args.facts) {
                 console.log(`${chalk.bold.underline("Facts:")}\n`);

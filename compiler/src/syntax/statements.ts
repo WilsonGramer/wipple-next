@@ -46,7 +46,7 @@ export const parseStatement = (parser: Parser) =>
     ]);
 
 export const parseTypeDefinitionStatement = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("type definition", (span) => {
         const comments = parseComments(parser);
         const attributes = parseAttributes(parser);
         const name = parseTypeName(parser);
@@ -73,13 +73,13 @@ export const parseTypeRepresentation = (
     ]);
 
 export const parseMarkerTypeRepresentation = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("marker type", (span) => {
         parser.next("typeKeyword");
         return new MarkerTypeRepresentation(span());
     });
 
 export const parseStructureTypeRepresentation = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("structure type", (span) => {
         parser.next("typeKeyword");
         const fields = parser.delimited("leftBrace", "rightBrace", () =>
             parser.many("field definition", parseFieldDefinition, ["lineBreak"]),
@@ -88,7 +88,7 @@ export const parseStructureTypeRepresentation = (parser: Parser) =>
     });
 
 export const parseFieldDefinition = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("field definition", (span) => {
         const name = parseVariableName(parser);
         parser.next("annotateOperator");
         parser.commit();
@@ -97,7 +97,7 @@ export const parseFieldDefinition = (parser: Parser) =>
     });
 
 export const parseEnumerationTypeRepresentation = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("enumeration type", (span) => {
         parser.next("typeKeyword");
         const variants = parser.delimited("leftBrace", "rightBrace", () =>
             parser.many("variant definition", parseVariantDefinition, ["lineBreak"]),
@@ -106,7 +106,7 @@ export const parseEnumerationTypeRepresentation = (parser: Parser) =>
     });
 
 export const parseVariantDefinition = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("variant definition", (span) => {
         const name = parseConstructorName(parser);
         parser.commit();
         const elements = parser.optional(() => parser.many("type", parseAtomicType), []);
@@ -114,7 +114,7 @@ export const parseVariantDefinition = (parser: Parser) =>
     });
 
 export const parseTraitDefinitionStatement = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("trait definition", (span) => {
         const comments = parseComments(parser);
         const attributes = parseAttributes(parser);
         const name = parseTypeName(parser);
@@ -133,7 +133,7 @@ export const parseTraitDefinitionStatement = (parser: Parser) =>
     });
 
 export const parseTraitConstraints = (parser: Parser) =>
-    parser.spanned(() => {
+    parser.spanned("constraints", () => {
         parser.next("traitKeyword");
         parser.commit();
         const type = parseAtomicType(parser);
@@ -142,7 +142,7 @@ export const parseTraitConstraints = (parser: Parser) =>
     });
 
 export const parseConstantDefinitionStatement = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("constant definition", (span) => {
         const comments = parseComments(parser);
         const attributes = parseAttributes(parser);
         const name = parseVariableName(parser);
@@ -151,7 +151,7 @@ export const parseConstantDefinitionStatement = (parser: Parser) =>
     });
 
 export const parseConstantConstraints = (parser: Parser) =>
-    parser.spanned(() => {
+    parser.spanned("constraints", () => {
         parser.next("annotateOperator");
         parser.commit();
         const type = parseType(parser);
@@ -160,7 +160,7 @@ export const parseConstantConstraints = (parser: Parser) =>
     });
 
 export const parseInstanceDefinitionStatement = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("instance definition", (span) => {
         const comments = parseComments(parser);
         const attributes = parseAttributes(parser);
         const { bound, constraints } = parseInstanceConstraints(parser);
@@ -173,7 +173,7 @@ export const parseInstanceDefinitionStatement = (parser: Parser) =>
     });
 
 export const parseInstanceConstraints = (parser: Parser) =>
-    parser.spanned(() => {
+    parser.spanned("constraints", () => {
         parser.next("instanceKeyword");
         const bound = parseBoundConstraint(parser);
         const constraints = parser.optional(parseConstraints, []);
@@ -181,7 +181,7 @@ export const parseInstanceConstraints = (parser: Parser) =>
     });
 
 export const parseAssignmentStatement = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("assignment", (span) => {
         const comments = parseComments(parser);
         const pattern = parsePattern(parser);
         parser.next("assignOperator");
@@ -191,14 +191,14 @@ export const parseAssignmentStatement = (parser: Parser) =>
     });
 
 export const parseExpressionStatement = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("expression", (span) => {
         const comments = parseComments(parser);
         const expression = parseExpression(parser);
         return new ExpressionStatementNode(comments, [], expression, span());
     });
 
 export const parseEmptyStatement = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("empty statement", (span) => {
         const comments = parseComments(parser);
         return new EmptyStatementNode(comments, span());
     });

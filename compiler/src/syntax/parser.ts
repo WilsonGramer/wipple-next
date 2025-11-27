@@ -1,25 +1,46 @@
 import * as moo from "moo";
-import type { Span } from "../span";
+import { type Span } from "../span";
 
 export interface Token {
     span: Span;
-    type: string;
+    type: TokenType;
     value: string;
 }
 
 export class SyntaxError extends Error {
     span: Span;
 
-    constructor(message: string, span: Span) {
-        super(`${span.path}:${span.start.line}:${span.start.column}: syntax error: ${message}`);
+    constructor(message: string, context: string | undefined, span: Span) {
+        super(
+            `${span.path}:${span.start.line}:${span.start.column}: syntax error: ${message}${context ? ` in this ${context}` : ""}`,
+        );
         this.span = span;
     }
 }
 
-const lexer = moo.compile({
+const keywords = {
+    underscoreKeyword: "_",
+    doKeyword: "do",
+    inferKeyword: "infer",
+    instanceKeyword: "instance",
+    intrinsicKeyword: "intrinsic",
+    setKeyword: "set",
+    traitKeyword: "trait",
+    typeKeyword: "type",
+    whenKeyword: "when",
+    whereKeyword: "where",
+    asOperator: "as",
+    toOperator: "to",
+    byOperator: "by",
+    isOperator: "is",
+    andOperator: "and",
+    orOperator: "or",
+};
+
+const rules = {
     space: /[ \t]+/,
     lineBreak: { match: /\n+/, lineBreaks: true },
-    comment: { match: /--.*/, value: (s) => s.slice(2) },
+    comment: { match: /--.*/, value: (s: string) => s.slice(2) },
     typeFunctionOperator: "=>",
     annotateOperator: "::",
     assignOperator: ":",
@@ -48,39 +69,81 @@ const lexer = moo.compile({
     number: /[+-]?\d+(?:\.\d+)?/,
     string: {
         match: /"[^"]*"|'[^']*'/,
-        value: (s) => s.slice(1, -1),
+        value: (s: string) => s.slice(1, -1),
     },
     capitalName: /(?:\d+-)*[A-Z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*(?:[!?])?/,
     lowercaseName: {
         match: /(?:\d+-)*[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*(?:[!?])?/,
-        type: moo.keywords({
-            underscoreKeyword: "_",
-            doKeyword: "do",
-            inferKeyword: "infer",
-            instanceKeyword: "instance",
-            intrinsicKeyword: "intrinsic",
-            setKeyword: "set",
-            traitKeyword: "trait",
-            typeKeyword: "type",
-            whenKeyword: "when",
-            whereKeyword: "where",
-            asOperator: "as",
-            toOperator: "to",
-            byOperator: "by",
-            isOperator: "is",
-            andOperator: "and",
-            orOperator: "or",
-        }),
+        type: moo.keywords(keywords),
     },
-});
+};
+
+export type TokenType = keyof typeof rules | keyof typeof keywords;
+
+const tokenNames: Record<TokenType, string> = {
+    space: "space",
+    lineBreak: "line break",
+    comment: "comment",
+    typeFunctionOperator: "`=>`",
+    annotateOperator: "`::`",
+    assignOperator: "`:`",
+    functionOperator: "`->`",
+    lessThanOrEqualOperator: "`<=`",
+    greaterThanOrEqualOperator: "`>=`",
+    notEqualOperator: "`/=`",
+    powerOperator: "`^`",
+    multiplyOperator: "`*`",
+    divideOperator: "`/`",
+    remainderOperator: "`%`",
+    addOperator: "`+`",
+    subtractOperator: "`-`",
+    lessThanOperator: "`<`",
+    greaterThanOperator: "`>`",
+    equalOperator: "`=`",
+    applyOperator: "`.`",
+    tupleOperator: "`;`",
+    collectionOperator: "`,`",
+    leftParenthesis: "`(`",
+    rightParenthesis: "`)`",
+    leftBracket: "`[`",
+    rightBracket: "`]`",
+    leftBrace: "`{`",
+    rightBrace: "`}`",
+    number: "number",
+    string: "string",
+    capitalName: "name",
+    lowercaseName: "name",
+    underscoreKeyword: "`_`",
+    doKeyword: "`do`",
+    inferKeyword: "`infer`",
+    instanceKeyword: "`instance`",
+    intrinsicKeyword: "`intrinsic`",
+    setKeyword: "`set`",
+    traitKeyword: "`trait`",
+    typeKeyword: "`type`",
+    whenKeyword: "`when`",
+    whereKeyword: "`where`",
+    asOperator: "`as`",
+    toOperator: "`to`",
+    byOperator: "`by`",
+    isOperator: "`is`",
+    andOperator: "`and`",
+    orOperator: "`or`",
+};
+
+const lexer = moo.compile(rules);
 
 export class Parser {
     private path: string;
     private source: string;
     private tokens: Token[];
-    private index = 0;
+
     private stack: { committed: boolean }[] = [];
     private cache: Map<number, Map<Function, [any, number]>> = new Map();
+
+    private index = 0;
+    private context?: string;
+    private furthestError?: { index: number; error: SyntaxError };
 
     constructor(path: string, source: string) {
         this.path = path;
@@ -90,7 +153,7 @@ export class Parser {
         this.tokens = Iterator.from<moo.Token>(lexer)
             .filter((token) => token.type !== "space")
             .map((token) => ({
-                type: token.type!,
+                type: token.type as TokenType,
                 span: {
                     path,
                     start: {
@@ -110,43 +173,55 @@ export class Parser {
             .toArray();
     }
 
-    spanned<T>(f: (span: () => Span) => T): T {
-        const startIndex = this.index;
-        return f(() => {
-            const endIndex = this.index;
+    spanned<T>(context: string, f: (span: () => Span) => T): T {
+        const span = () => this.tokens[this.index]?.span ?? nullSpan(this.path);
 
-            const start = this.tokens[startIndex]?.span.start ?? nullSpan(this.path).start;
+        const start = span().start;
 
-            const end = this.tokens[endIndex - 1]?.span.end ?? nullSpan(this.path).end;
+        const prevContext = this.context;
+        this.context = context;
 
+        const result = f(() => {
+            const end = span().end;
             const source = this.slice(start.offset, end.offset);
-
-            return {
-                path: this.path,
-                source,
-                start,
-                end,
-            };
+            return { path: this.path, source, start, end };
         });
+
+        this.context = prevContext;
+
+        return result;
     }
 
-    delimited<T>(left: string, right: string, f: () => T): T {
+    delimited<T>(left: TokenType, right: TokenType, f: () => T): T {
         this.next(left);
         this.try("lineBreak");
         const result = f();
         this.try("lineBreak");
-        this.next(right);
+
+        const initialIndex = this.index;
+        try {
+            this.next(right);
+        } catch (e) {
+            if (!(e instanceof SyntaxError)) {
+                throw e;
+            } else {
+                this.throwAndReset(
+                    initialIndex,
+                    `expected '${tokenNames[right]}' to close '${tokenNames[left]}'`,
+                    true,
+                );
+            }
+        }
+
         return result;
     }
 
     collection<T>(
         expected: string,
-        separators: string[],
+        separators: TokenType[],
         f: (parser: Parser) => T,
         operator = false,
     ): [T, Token | undefined][] {
-        const initialIndex = this.index;
-
         this.try("lineBreak");
 
         if (this.try(...separators) != null) {
@@ -154,6 +229,7 @@ export class Parser {
             return [];
         }
 
+        const initialIndex = this.index;
         const elements: [T, Token | undefined][] = [[f(this), undefined]];
         let hasTrailingSeparator = false;
         while (true) {
@@ -168,13 +244,15 @@ export class Parser {
 
             this.try("lineBreak");
 
-            const initialIndex = this.index;
             try {
                 const element = f(this);
                 elements.push([element, separator]);
                 hasTrailingSeparator = false;
-            } catch {
-                this.index = initialIndex;
+            } catch (e) {
+                if (!(e instanceof SyntaxError)) {
+                    throw e;
+                }
+
                 break;
             }
         }
@@ -186,23 +264,18 @@ export class Parser {
         const minElements = hasTrailingSeparator ? 1 : 2;
 
         if (elements.length < minElements) {
-            const token = this.tokens[this.index - 1];
-            this.index = initialIndex;
-
-            throw new SyntaxError(`expected ${expected} here`, token?.span ?? nullSpan(this.path));
+            this.throwAndReset(initialIndex, `expected ${expected}`, false);
         }
 
         return elements;
     }
 
-    many<T>(expected: string, f: (parser: Parser) => T, separators: string[] = []): T[] {
+    many<T>(expected: string, f: (parser: Parser) => T, separators: TokenType[] = []): T[] {
         const initialIndex = this.index;
 
         const results: T[] = [];
         while (true) {
             this.try(...separators);
-
-            const initialIndex = this.index;
 
             let result: T;
             try {
@@ -211,7 +284,6 @@ export class Parser {
                 if (!(e instanceof SyntaxError)) {
                     throw e;
                 } else {
-                    this.index = initialIndex;
                     break;
                 }
             }
@@ -220,10 +292,7 @@ export class Parser {
         }
 
         if (results.length === 0) {
-            const token = this.tokens[this.index - 1];
-            this.index = initialIndex;
-
-            throw new SyntaxError(`expected ${expected} here`, token?.span ?? nullSpan(this.path));
+            this.throwAndReset(initialIndex, `expected ${expected}`, false);
         }
 
         return results;
@@ -234,18 +303,18 @@ export class Parser {
         key: Function | undefined,
         alternatives: ((parser: Parser) => T)[],
     ): T {
-        const initialIndex = this.index;
-
-        if (!this.cache.has(initialIndex)) {
-            this.cache.set(initialIndex, new Map());
+        if (!this.cache.has(this.index)) {
+            this.cache.set(this.index, new Map());
         }
 
-        const cached = this.cache.get(initialIndex)!;
+        const cached = this.cache.get(this.index)!;
         if (key != null && cached.has(key)) {
             const [result, index] = cached.get(key)!;
             this.index = index;
             return result as T;
         }
+
+        const initialIndex = this.index;
 
         const entry = { committed: false };
         this.stack.push(entry);
@@ -274,10 +343,7 @@ export class Parser {
 
         this.stack.pop();
 
-        const token = this.tokens[this.index - 1];
-        this.index = initialIndex;
-
-        throw new SyntaxError(`expected ${expected} here`, token?.span ?? nullSpan(this.path));
+        this.throwAndReset(initialIndex, `expected ${expected}`, false);
     }
 
     optional<T>(f: (parser: Parser) => T, defaultValue: T): T {
@@ -309,20 +375,12 @@ export class Parser {
         return token;
     }
 
-    next(...types: string[]): string {
-        const token = this.tokens[this.index];
-        if (token == null) {
-            throw new SyntaxError(
-                `expected ${types.join(" or ")} here`,
-                this.tokens[this.tokens.length - 1]?.span ?? nullSpan(this.path),
-            );
-        }
+    next(...types: TokenType[]): string {
+        const expected = types.map((type) => tokenNames[type]).join(" or ");
 
-        if (!types.includes(token.type)) {
-            throw new SyntaxError(
-                `expected ${types.join(" or ")} but found ${token.type}`,
-                token.span,
-            );
+        const token = this.tokens[this.index];
+        if (token == null || !types.includes(token.type)) {
+            this.throwAndReset(this.index, `expected ${expected}`, true);
         }
 
         this.index++;
@@ -344,10 +402,39 @@ export class Parser {
     }
 
     finish() {
-        const token = this.tokens[this.index];
-        if (token != null) {
-            throw new SyntaxError(`unexpected ${token.type}`, token.span);
+        try {
+            const token = this.tokens[this.index];
+            if (token != null) {
+                this.throwAndReset(this.index, `unexpected ${tokenNames[token.type]}`, true);
+            }
+        } catch (e) {
+            if (!(e instanceof SyntaxError)) {
+                throw e;
+            }
         }
+
+        if (this.furthestError != null) {
+            throw this.furthestError.error;
+        }
+    }
+
+    private throwAndReset(index: number, message: string, priority: boolean): never {
+        const token = this.tokens[this.index - 1];
+
+        const error = new SyntaxError(message, this.context, token?.span ?? nullSpan(this.path));
+
+        if (
+            this.furthestError == null ||
+            (priority
+                ? this.index >= this.furthestError.index
+                : this.index > this.furthestError.index)
+        ) {
+            this.furthestError = { index: this.index, error };
+        }
+
+        this.index = index;
+
+        throw error;
     }
 }
 

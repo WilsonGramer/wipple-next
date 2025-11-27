@@ -50,22 +50,25 @@ export const parseParenthesizedPattern = (parser: Parser) =>
     parser.delimited("leftParenthesis", "rightParenthesis", () => parsePattern(parser));
 
 export const parseWildcardPattern = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("wildcard pattern", (span) => {
         parser.next("underscoreKeyword");
         return new WildcardPatternNode(span());
     });
 
 export const parseVariablePattern = (parser: Parser) =>
-    parser.spanned((span) => new VariablePatternNode(parseVariableName(parser), span()));
+    parser.spanned(
+        "variable pattern",
+        (span) => new VariablePatternNode(parseVariableName(parser), span()),
+    );
 
 export const parseNumberPattern = (parser: Parser) =>
-    parser.spanned((span) => new NumberPatternNode(parseNumber(parser), span()));
+    parser.spanned("number pattern", (span) => new NumberPatternNode(parseNumber(parser), span()));
 
 export const parseStringPattern = (parser: Parser) =>
-    parser.spanned((span) => new StringPatternNode(parseString(parser), span()));
+    parser.spanned("string pattern", (span) => new StringPatternNode(parseString(parser), span()));
 
 export const parseStructurePattern = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("structure pattern", (span) => {
         const name = parseTypeName(parser);
         const fields = parser.delimited("leftBrace", "rightBrace", () =>
             parser.many("field", parseStructurePatternField, ["lineBreak"]),
@@ -74,7 +77,7 @@ export const parseStructurePattern = (parser: Parser) =>
     });
 
 export const parseStructurePatternField = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("field pattern", (span) => {
         const name = parseVariableName(parser);
         parser.next("assignOperator");
         parser.commit();
@@ -83,13 +86,13 @@ export const parseStructurePatternField = (parser: Parser) =>
     });
 
 export const parseUnitPattern = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("unit pattern", (span) => {
         parser.delimited("leftParenthesis", "rightParenthesis", () => undefined);
         return new UnitPatternNode(span());
     });
 
 export const parseTuplePattern = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("tuple pattern", (span) => {
         const elements = parser
             .collection("tuple pattern", ["tupleOperator"], parsePatternElement)
             .map(([element]) => element);
@@ -97,7 +100,7 @@ export const parseTuplePattern = (parser: Parser) =>
     });
 
 export const parseOrPattern = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("`or` pattern", (span) => {
         const patterns = parser
             .collection("or pattern", ["orOperator"], parsePatternElement)
             .map(([element]) => element);
@@ -105,20 +108,20 @@ export const parseOrPattern = (parser: Parser) =>
     });
 
 export const parseSetPattern = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("`set` pattern", (span) => {
         parser.next("setKeyword");
         return new SetPatternNode(parseVariableName(parser), span());
     });
 
 export const parseConstructorPattern = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("constructor pattern", (span) => {
         const constructor = parseConstructorName(parser);
         const elements = parser.optional(() => parser.many("pattern", parseAtomicPattern), []);
         return new ConstructorPatternNode(constructor, elements, span());
     });
 
 export const parseAnnotatePattern = (parser: Parser) =>
-    parser.spanned((span) => {
+    parser.spanned("type annotation", (span) => {
         const left = parsePatternElement(parser);
         parser.next("annotateOperator");
         const right = parseTypeElement(parser);
