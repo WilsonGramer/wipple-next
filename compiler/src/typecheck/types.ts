@@ -45,7 +45,7 @@ export const tuple = (elements: Type[]): ConstructedType => ({
         } else if (elements.length === 1) {
             return `(${elements[0](true)} ;)`;
         } else {
-            return `(${elements.map((e) => e(true)).join(" ; ")})`;
+            return `(${elements.map((e) => e(true)).join("; ")})`;
         }
     },
     codegen: (elements) => ({

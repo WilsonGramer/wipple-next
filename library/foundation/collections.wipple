@@ -11,6 +11,6 @@ instance (Initial-Collection element collection) where (Initial collection) (Bui
 
 instance (Build-Collection element (List element)) : element l -> l . append element
 
-instance (Build-Collection (key ; value) (Dictionary key value)) where (Equal key) (Hash key) : (key ; value) d -> d . insert-entry key value
+instance (Build-Collection (key; value) (Dictionary key value)) where (Equal key) (Hash key) : (key; value) d -> d . insert-entry key value
 
 instance (Build-Collection element (Set element)) where (Equal element) (Hash element) : element s -> s . insert element

@@ -7,7 +7,7 @@ instance (Describe-Type Distance "distance")
 [unit] pixels :: Number -> Distance
 pixels : Distance
 
-_ where (Error ("Missing `pixels` after `_`" Source ; Error-Description ("Try rewriting this code as `(_ pixels)`, or double-check your parentheses." Source))) =>
+_ where (Error ("Missing `pixels` after `_`" Source; Error-Description ("Try rewriting this code as `(_ pixels)`, or double-check your parentheses." Source))) =>
   instance (Mismatch Number Distance)
 
 -- Move the turtle forward by a distance.
@@ -29,7 +29,7 @@ arc :: Arc -> ()
 arc : {
   radius : (Distance radius)
   angle : (Angle angle)
-} -> external "arc" (radius ; angle)
+} -> external "arc" (radius; angle)
 
 -- Rotate the turtle counterclockwise by an angle.
 left :: Angle -> ()
@@ -41,7 +41,7 @@ right : (Angle degrees) -> external "right" degrees
 
 -- Go to a position on the screen without drawing.
 go :: Distance Distance -> ()
-go : (Distance x) (Distance y) -> external "go" (x ; y)
+go : (Distance x) (Distance y) -> external "go" (x; y)
 
 -- Set the pen color.
 color :: Color -> ()

@@ -347,23 +347,23 @@ any-helper : condition? -> sequence -> when (next sequence) {
 }
 
 -- Create a sequence that takes values from two sequences at a time until either sequence runs out.
-zip :: left right -> Sequence (left-element ; right-element) where (As-Sequence left left-element) (As-Sequence right right-element)
+zip :: left right -> Sequence (left-element; right-element) where (As-Sequence left left-element) (As-Sequence right right-element)
 zip : left right -> do {
   left : As-Sequence left
   right : As-Sequence right
 
   sequence {
-    when (next left ; next right) {
-      (Some a ; Some b) -> Some (a ; b)
+    when (next left; next right) {
+      (Some a; Some b) -> Some (a; b)
       _ -> None
     }
   }
 }
 
 -- Create a sequence that maintains a counter indicating the number of elements
--- produced. For example, `enumerate ("a" , "b" , "c")` produces `(0 ; "a")`,
--- `(1 ; "b")`, and `(2 ; "c")`.
-enumerate :: collection -> Sequence (Number ; element) where (As-Sequence collection element)
+-- produced. For example, `enumerate ("a", "b", "c")` produces `(0; "a")`,
+-- `(1; "b")`, and `(2; "c")`.
+enumerate :: collection -> Sequence (Number; element) where (As-Sequence collection element)
 enumerate : collection -> zip (0 to nan by 1) collection
 
 Extend : container (infer element) => trait ((Sequence element) -> container -> container)
@@ -373,10 +373,10 @@ instance (Extend (List element) element) : sequence -> list -> sequence . reduce
 extend :: from -> container -> container where (As-Sequence from element) (Extend container element)
 extend : collection -> Extend (As-Sequence collection)
 
-instance (Extend (left ; right) (left-element ; right-element)) where (Extend left left-element) (Extend right right-element) : sequence -> (left ; right) -> do {
+instance (Extend (left; right) (left-element; right-element)) where (Extend left left-element) (Extend right right-element) : sequence -> (left; right) -> do {
   repeat with-control-flow {
     when (next sequence) {
-      Some (a ; b) -> do {
+      Some (a; b) -> do {
         set left : left . extend (Some a)
         set right : right . extend (Some b)
         Continue ()
@@ -385,12 +385,12 @@ instance (Extend (left ; right) (left-element ; right-element)) where (Extend le
     }
   }
 
-  left ; right
+  left; right
 }
 
 -- Split a sequence that produces two values at a time into two separate collections.
-unzip :: collection -> (left ; right) where (Initial left) (Initial right) (As-Sequence collection (left-element ; right-element)) (Extend left left-element) (Extend right right-element)
-unzip : collection -> (Initial ; Initial) . extend (As-Sequence collection)
+unzip :: collection -> (left; right) where (Initial left) (Initial right) (As-Sequence collection (left-element; right-element)) (Extend left left-element) (Extend right right-element)
+unzip : collection -> (Initial; Initial) . extend (As-Sequence collection)
 
 Container : collection (infer element) => trait (element -> collection -> Boolean)
 

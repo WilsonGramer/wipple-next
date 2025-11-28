@@ -8,7 +8,7 @@ instance (Hash ()) : () -> Hash 0
 -- A collection of unique keys associated with values.
 Dictionary : key value => type {
   size :: Number
-  entries :: List (Maybe (key ; value))
+  entries :: List (Maybe (key; value))
 }
 
 instance (Initial (Dictionary key value)) : Dictionary {
@@ -24,7 +24,7 @@ entry : key -> (Dictionary {entries : entries}) -> do {
 
   repeat with-control-flow {
     when ((entries . nth index) or unreachable) {
-      Some (existing-key ; value) -> if (key = existing-key) {
+      Some (existing-key; value) -> if (key = existing-key) {
         Stop (Some value)
       } {
         set index : (index + 1) % count entries
@@ -50,7 +50,7 @@ insert-entry : key value -> (Dictionary {
 
     -- Populate the new dictionary with the entries from the old dictionary
     entries . reduce resized (entry -> dictionary -> when entry {
-      Some (key ; value) -> dictionary . insert-entry key value
+      Some (key; value) -> dictionary . insert-entry key value
       None -> dictionary
     })
   } {Dictionary {
@@ -86,7 +86,7 @@ set-entry : key value -> (Dictionary {
   -- Find a spot for the entry
   repeat with-control-flow {
     when ((entries . nth index) or unreachable) {
-      Some (existing ; _) -> do {
+      Some (existing; _) -> do {
         if (key = existing) {
           Stop ()
         } {
@@ -99,7 +99,7 @@ set-entry : key value -> (Dictionary {
   }
 
   new-entry : when value {
-    Some value -> Some (key ; value)
+    Some value -> Some (key; value)
     None -> None
   }
 
@@ -112,11 +112,11 @@ set-entry : key value -> (Dictionary {
   }
 }
 
-instance (From-Sequence (key ; value) (Dictionary key value)) where (Equal key) (Hash key) : sequence -> do {
+instance (From-Sequence (key; value) (Dictionary key value)) where (Equal key) (Hash key) : sequence -> do {
   dictionary : (,)
   repeat with-control-flow {
     when (next sequence) {
-      Some (key ; value) -> do {
+      Some (key; value) -> do {
         set dictionary : dictionary . insert-entry key value
         Continue ()
       }
@@ -127,7 +127,7 @@ instance (From-Sequence (key ; value) (Dictionary key value)) where (Equal key) 
   dictionary
 }
 
-instance (As-Sequence (Dictionary key value) (key ; value)) : (Dictionary {entries : entries}) -> flatten entries
+instance (As-Sequence (Dictionary key value) (key; value)) : (Dictionary {entries : entries}) -> flatten entries
 
 instance (Container (Dictionary key value) key) where (Equal key) (Hash key) : target -> dictionary -> (dictionary . entry target) is Some _
 
@@ -144,8 +144,8 @@ insert : element -> (Set {dictionary : dictionary}) -> Set {dictionary : diction
 remove :: element -> (Set element) -> Set element where (Equal element) (Hash element)
 remove : element -> (Set {dictionary : dictionary}) -> (Set {dictionary : dictionary . remove-entry element})
 
-instance (From-Sequence element (Set element)) where (Equal element) (Hash element) : sequence -> Set {dictionary : sequence . transform (key -> (key ; ())) . collect}
+instance (From-Sequence element (Set element)) where (Equal element) (Hash element) : sequence -> Set {dictionary : sequence . transform (key -> (key; ())) . collect}
 
-instance (As-Sequence (Set element) element) : (Set {dictionary : dictionary}) -> dictionary . transform ((key ; ()) -> key)
+instance (As-Sequence (Set element) element) : (Set {dictionary : dictionary}) -> dictionary . transform ((key; ()) -> key)
 
 instance (Container (Set element) element) where (Equal element) (Hash element) : target -> (Set {dictionary : dictionary}) -> ((dictionary . entry target) is (Some ()))
