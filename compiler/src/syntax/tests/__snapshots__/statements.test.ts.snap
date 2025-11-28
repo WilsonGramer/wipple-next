@@ -227,7 +227,7 @@ TypeDefinitionNode {
     "intrinsic": false,
   },
   "comments": [
-    "-- Documentation comment",
+    "Documentation comment",
   ],
   "name": "Foo",
   "parameters": [],

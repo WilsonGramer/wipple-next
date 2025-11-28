@@ -243,7 +243,7 @@ WildcardPatternNode(`_` @ tests/custom-errors.wipple:16:1) (unknown-type):
 
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:16:5) (error-instance):
 
-  -- Cannot add `1` and `"a"`.(This feedback comes from the instance `Add Number String _`.)
+  Cannot add `1` and `"a"`.(This feedback comes from the instance `Add Number String _`.)
 
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:16:5) (incomplete-type):
 
@@ -261,8 +261,8 @@ WildcardPatternNode(`_` @ tests/custom-errors.wipple:17:1) (unknown-type):
 
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:17:5) (error-instance):
 
-  -- Missing parentheses around the inputs to `+`.(This feedback comes from the instance `Add ()
-  Number _`.)
+  Missing parentheses around the inputs to `+`.(This feedback comes from the instance `Add () Number
+  _`.)
 
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:17:5) (incomplete-type):
 

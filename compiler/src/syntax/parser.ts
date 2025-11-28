@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 
-import type { Interval, IterationNode, NonterminalNode } from "ohm-js";
+import type { Interval, IterationNode, NonterminalNode, TerminalNode } from "ohm-js";
 import { FileNode } from "../nodes";
 import { AttributeNode } from "../nodes/attributes";
 import { StringAttributeValue } from "../nodes/attributes/value";
@@ -94,7 +94,11 @@ const parseFirstRest = (first: NonterminalNode, rest: IterationNode) => [
     ...parseList(rest),
 ];
 
-const parseString = (string: NonterminalNode) => string.sourceString.slice(1, -1);
+const parseNumber = (number: TerminalNode) => number.sourceString;
+
+const parseString = (string: TerminalNode) => string.sourceString.slice(1, -1);
+
+const parseComment = (comment: TerminalNode) => comment.sourceString.slice(2).trim();
 
 const parser = (span: SpanFn): GrammarActionDict<{}> => ({
     File: (statements, trailingLineBreak) => new FileNode(statements.parse(), span(statements)),
@@ -141,7 +145,7 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
     ConstructorExpression: (constructorName) =>
         new ConstructorExpressionNode(constructorName.parse(), span(constructorName)),
 
-    NumberExpression: (number) => new NumberExpressionNode(number.sourceString, span(number)),
+    NumberExpression: (number) => new NumberExpressionNode(parseNumber(number), span(number)),
 
     StringExpression: (string) => new StringExpressionNode(parseString(string), span(string)),
 
@@ -290,7 +294,7 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
     VariablePattern: (variableName) =>
         new VariablePatternNode(variableName.parse(), span(variableName)),
 
-    NumberPattern: (number) => new NumberPatternNode(number.sourceString, span(number)),
+    NumberPattern: (number) => new NumberPatternNode(parseNumber(number), span(number)),
 
     StringPattern: (string) => new StringPatternNode(parseString(string), span(string)),
 
@@ -591,7 +595,7 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
             span(comments, expression),
         ),
 
-    Comments: (comments, lineBreak) => comments.children.map((comment) => comment.sourceString),
+    Comments: (comments, lineBreak) => comments.children.map(parseComment),
 
     // Atoms
 
