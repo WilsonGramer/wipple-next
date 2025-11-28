@@ -33,12 +33,12 @@ TypeParameterNode(`sum` @ tests/infer-constraint.wipple:4:18)
   has type(s) `sum`
   resolved to TypeParameterNode(`sum` @ tests/infer-constraint.wipple:4:18)
 
+FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:4:32)
+  has type(s) `left right -> sum`
+
 TypeParameterNode(`left` @ tests/infer-constraint.wipple:4:32)
   has type(s) `left`
   resolved to TypeParameterNode(`left` @ tests/infer-constraint.wipple:4:7)
-
-FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:4:32)
-  has type(s) `left right -> sum`
 
 TypeParameterNode(`right` @ tests/infer-constraint.wipple:4:37)
   has type(s) `right`
@@ -93,12 +93,12 @@ ConstantDefinitionNode(`add :: left right -> sum where (Add left right sum)` @ t
   has definition constraints
   has type parameters
 
+FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:8:8)
+  has type(s) `left right -> sum`
+
 TypeParameterNode(`left` @ tests/infer-constraint.wipple:8:8)
   has type(s) `left`
   resolved to TypeParameterNode(`left` @ tests/infer-constraint.wipple:8:8)
-
-FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:8:8)
-  has type(s) `left right -> sum`
 
 TypeParameterNode(`right` @ tests/infer-constraint.wipple:8:13)
   has type(s) `right`
@@ -123,19 +123,19 @@ TypeParameterNode(`sum` @ tests/infer-constraint.wipple:8:48)
   has type(s) `sum`
   resolved to TypeParameterNode(`sum` @ tests/infer-constraint.wipple:8:22)
 
+AssignmentNode(`_ : (add 1 2 :: String)` @ tests/infer-constraint.wipple:10:1)
+  (no facts)
+
 WildcardPatternNode(`_` @ tests/infer-constraint.wipple:10:1)
   has type(s) `String`
 
-AssignmentNode(`_ : (add 1 2 :: String)` @ tests/infer-constraint.wipple:10:1)
-  (no facts)
+CallExpressionNode(`add 1 2` @ tests/infer-constraint.wipple:10:6)
+  has type(s) `String`
 
 VariableExpressionNode(`add` @ tests/infer-constraint.wipple:10:6)
   has type(s) `Number Number -> String`
   resolved to ConstantDefinitionNode(`add :: left right -> sum where (Add left right sum)` @ tests/infer-constraint.wipple:8:1)
   has bound(s) `Add Number Number String` (unresolved)
-
-CallExpressionNode(`add 1 2` @ tests/infer-constraint.wipple:10:6)
-  has type(s) `String`
 
 NumberExpressionNode(`1` @ tests/infer-constraint.wipple:10:10)
   has type(s) `Number`
@@ -173,12 +173,12 @@ TypeParameterNode(`(infer sum)` @ tests/infer-constraint.wipple:12:24)
   has type(s) `sum`
   resolved to TypeParameterNode(`(infer sum)` @ tests/infer-constraint.wipple:12:24)
 
+FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:12:46)
+  has type(s) `left right -> sum`
+
 TypeParameterNode(`left` @ tests/infer-constraint.wipple:12:46)
   has type(s) `left`
   resolved to TypeParameterNode(`left` @ tests/infer-constraint.wipple:12:13)
-
-FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:12:46)
-  has type(s) `left right -> sum`
 
 TypeParameterNode(`right` @ tests/infer-constraint.wipple:12:51)
   has type(s) `right`
@@ -233,12 +233,12 @@ ConstantDefinitionNode(`add-infer :: left right -> sum where (Add-Infer left rig
   has definition constraints
   has type parameters
 
+FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:16:14)
+  has type(s) `left right -> sum`
+
 TypeParameterNode(`left` @ tests/infer-constraint.wipple:16:14)
   has type(s) `left`
   resolved to TypeParameterNode(`left` @ tests/infer-constraint.wipple:16:14)
-
-FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:16:14)
-  has type(s) `left right -> sum`
 
 TypeParameterNode(`right` @ tests/infer-constraint.wipple:16:19)
   has type(s) `right`
@@ -263,19 +263,19 @@ TypeParameterNode(`sum` @ tests/infer-constraint.wipple:16:60)
   has type(s) `sum`
   resolved to TypeParameterNode(`sum` @ tests/infer-constraint.wipple:16:28)
 
+AssignmentNode(`_ : (add-infer 1 2 :: String)` @ tests/infer-constraint.wipple:18:1)
+  (no facts)
+
 WildcardPatternNode(`_` @ tests/infer-constraint.wipple:18:1)
   has type(s) `Number` or `String`
 
-AssignmentNode(`_ : (add-infer 1 2 :: String)` @ tests/infer-constraint.wipple:18:1)
-  (no facts)
+CallExpressionNode(`add-infer 1 2` @ tests/infer-constraint.wipple:18:6)
+  has type(s) `Number` or `String`
 
 VariableExpressionNode(`add-infer` @ tests/infer-constraint.wipple:18:6)
   has type(s) `Number Number -> String`
   resolved to ConstantDefinitionNode(`add-infer :: left right -> sum where (Add-Infer left right sum)` @ tests/infer-constraint.wipple:16:1)
   has bound(s) `Add-Infer Number Number String` (InstanceDefinitionNode(`instance (Add-Infer Number Number Number) : _` @ tests/infer-constraint.wipple:13:1))
-
-CallExpressionNode(`add-infer 1 2` @ tests/infer-constraint.wipple:18:6)
-  has type(s) `Number` or `String`
 
 NumberExpressionNode(`1` @ tests/infer-constraint.wipple:18:16)
   has type(s) `Number`

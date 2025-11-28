@@ -34,8 +34,7 @@ const parseRule = (path: string, source: string, rule = "File") => {
     const matchResult = grammar.match(source, rule);
     if (matchResult.failed()) {
         throw new SyntaxError(
-            matchResult.shortMessage?.replace(/Line \d+, col \d+: /, "").replaceAll('"', "`") ??
-                "syntax error",
+            `expected ${(matchResult as any).getExpectedText()}`,
             span({ source: matchResult.getInterval() }),
         );
     }

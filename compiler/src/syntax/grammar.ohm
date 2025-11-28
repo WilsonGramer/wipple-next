@@ -1,34 +1,35 @@
 Grammar  {
-    File (file) = Statements lineBreak?
+    File =
+        Statements Comments lineBreak?
 
     // Attributes
 
-    Attributes (attributes) =
+    Attributes =
         Attribute? (lineBreak? Attribute)* lineBreak?
 
-    Attribute (attribute) =
+    Attribute =
         "[" lineBreak? AttributeName (":" AttributeValue)? lineBreak? "]"
 
-    AttributeValue (attribute value) =
+    AttributeValue =
         | StringAttributeValue
 
-    StringAttributeValue (string attribute value) =
-        string
+    StringAttributeValue =
+        String
 
     // Expressions
 
-    Expression (expression) =
-        | FunctionExpression
+    Expression =
         | TupleExpression
-        | CollectionExpression
         | EmptyCollectionExpression
+        | CollectionExpression
+        | FunctionExpression
         | IsExpression
         | AsExpression
         | AnnotateExpression
         | OperatorExpression
         | ExpressionElement
 
-    ExpressionElement (expression) =
+    ExpressionElement =
         | FormatExpression
         | StructureExpression
         | DoExpression
@@ -37,7 +38,7 @@ Grammar  {
         | CallExpression
         | AtomicExpression
 
-    AtomicExpression (expression) =
+    AtomicExpression =
         | PlaceholderExpression
         | VariableExpression
         | ConstructorExpression
@@ -47,126 +48,126 @@ Grammar  {
         | UnitExpression
         | ParenthesizedExpression
 
-    ParenthesizedExpression (expression) =
+    ParenthesizedExpression =
         "(" lineBreak? Expression lineBreak? ")"
 
-    PlaceholderExpression (placeholder) =
-        "_"
+    PlaceholderExpression =
+        keyword<"_">
 
-    VariableExpression (variable) =
+    VariableExpression =
         VariableName
 
-    ConstructorExpression (constructor) =
+    ConstructorExpression =
         ConstructorName ~"{"
 
-    NumberExpression (number) =
-        number
+    NumberExpression =
+        Number
 
-    StringExpression (string) =
-        string
+    StringExpression =
+        String
 
-    StructureExpression (structure) =
+    StructureExpression =
         TypeName "{" lineBreak? StructureExpressionField (lineBreak StructureExpressionField)* lineBreak? "}"
 
-    StructureExpressionField (field) =
+    StructureExpressionField =
         VariableName ":" Expression
 
-    BlockExpression (block) =
-        "{" lineBreak? Statements lineBreak? "}"
+    BlockExpression =
+        "{" Statements Comments lineBreak? "}"
 
-    UnitExpression (unit expression) =
+    UnitExpression =
         "(" lineBreak? ")"
 
-    FormatExpression (formatted string) =
-        string AtomicExpression+
+    FormatExpression =
+        String AtomicExpression+
 
-    CallExpression (function call) =
+    CallExpression =
         AtomicExpression AtomicExpression+
 
-    DoExpression (`do` expression) =
-        "do" AtomicExpression
+    DoExpression =
+        keyword<"do"> AtomicExpression
 
-    WhenExpression (`when` expression) =
-        "when" AtomicExpression "{" lineBreak? Arm? (lineBreak Arm)* lineBreak? "}"
+    WhenExpression =
+        keyword<"when"> AtomicExpression "{" lineBreak? Arm? (lineBreak Arm)* lineBreak? "}"
 
-    Arm (`when` arm) =
+    Arm =
         Pattern "->" Expression
 
-    IntrinsicExpression (`intrinsic` expression) =
-        "intrinsic" string AtomicExpression*
+    IntrinsicExpression =
+        keyword<"intrinsic"> String AtomicExpression*
 
-    OperatorExpression (expression) =
+    OperatorExpression =
         ApplyExpression
 
-    ApplyExpression (expression) =
+    ApplyExpression =
         OrExpression (lineBreak? "." lineBreak? OrExpression)*
 
-    OrExpression (expression) =
-        AndExpression (lineBreak? "or" lineBreak? AndExpression)*
+    OrExpression =
+        AndExpression (lineBreak? keyword<"or"> lineBreak? AndExpression)*
 
-    AndExpression (expression) =
-        EqualExpression (lineBreak? "and" lineBreak? EqualExpression)*
+    AndExpression =
+        EqualExpression (lineBreak? keyword<"and"> lineBreak? EqualExpression)*
 
-    EqualExpression (expression) =
+    EqualExpression =
         CompareExpression ((lineBreak? ("=" | "/=") lineBreak? CompareExpression))*
 
-    CompareExpression (expression) =
+    CompareExpression =
         AddExpression ((lineBreak? ("<=" | "<" | ">=" | ">") lineBreak? AddExpression))*
 
-    AddExpression (expression) =
+    AddExpression =
         MultiplyExpression ((lineBreak? ("+" | "-") lineBreak? MultiplyExpression))*
 
-    MultiplyExpression (expression) =
+    MultiplyExpression =
         PowerExpression ((lineBreak? ("*" | "/" | "%") lineBreak? PowerExpression))*
 
-    PowerExpression (expression) =
+    PowerExpression =
         ByExpression ((lineBreak? "^" lineBreak? ByExpression))*
 
-    ByExpression (expression) =
-        ToExpression ((lineBreak? "by" lineBreak? ToExpression))*
+    ByExpression =
+        ToExpression ((lineBreak? keyword<"by"> lineBreak? ToExpression))*
 
-    ToExpression (expression) =
-        ExpressionElement ((lineBreak? "to" lineBreak? ExpressionElement))*
+    ToExpression =
+        ExpressionElement ((lineBreak? keyword<"to"> lineBreak? ExpressionElement))*
 
-    TupleExpression (tuple) =
-        | ExpressionElement (";" lineBreak? ExpressionElement lineBreak?)+ ";"?
+    TupleExpression =
+        ExpressionElement (";" lineBreak? ExpressionElement lineBreak?)+ ";"?
 
-    CollectionExpression (collection) =
+    CollectionExpression =
         (ExpressionElement lineBreak? "," lineBreak?)+ ExpressionElement?
 
-    EmptyCollectionExpression (collection) =
+    EmptyCollectionExpression =
         ","
 
-    IsExpression (`is` expression) =
-        ExpressionElement "is" PatternElement
+    IsExpression =
+        ExpressionElement keyword<"is"> PatternElement
 
-    AsExpression (`as` expression) =
-        ExpressionElement "as" TypeElement
+    AsExpression =
+        ExpressionElement keyword<"as"> TypeElement
 
-    AnnotateExpression (type annotation) =
-        ExpressionElement "::" TypeElement
+    AnnotateExpression =
+        ExpressionElement "::" Type
 
-    FunctionExpression (function) =
+    FunctionExpression =
         FunctionExpressionInputs Expression
 
-    FunctionExpressionInputs (function inputs) =
+    FunctionExpressionInputs =
         AtomicPattern+ "->" lineBreak?
 
     // Patterns
 
-    Pattern (pattern) =
+    Pattern =
         | TuplePattern
         | OrPattern
         | AnnotatePattern
         | PatternElement
 
-    PatternElement (pattern) =
+    PatternElement =
         | StructurePattern
         | ConstructorPattern
         | SetPattern
         | AtomicPattern
 
-    AtomicPattern (pattern) =
+    AtomicPattern =
         | WildcardPattern
         | VariablePattern
         | NumberPattern
@@ -174,58 +175,58 @@ Grammar  {
         | UnitPattern
         | ParenthesizedPattern
 
-    ParenthesizedPattern (pattern) =
+    ParenthesizedPattern =
         "(" lineBreak? Pattern lineBreak? ")"
 
-    WildcardPattern (wildcard pattern) =
-        "_"
+    WildcardPattern =
+        keyword<"_">
 
-    VariablePattern (variable pattern) =
+    VariablePattern =
         VariableName
 
-    NumberPattern (number pattern) =
-        number
+    NumberPattern =
+        Number
 
-    StringPattern (string pattern) =
-        string
+    StringPattern =
+        String
 
-    StructurePattern (structure pattern) =
+    StructurePattern =
         TypeName "{" lineBreak? StructurePatternField (lineBreak StructurePatternField)* lineBreak? "}"
 
-    StructurePatternField (field) =
+    StructurePatternField =
         VariableName ":" Pattern
 
-    UnitPattern (unit pattern) =
+    UnitPattern =
         "(" lineBreak? ")"
 
-    TuplePattern (tuple pattern) =
+    TuplePattern =
         PatternElement (";" lineBreak? PatternElement lineBreak?)+ ";"?
 
-    OrPattern (`or` pattern) =
-        PatternElement ("or" lineBreak? PatternElement lineBreak?)+
+    OrPattern =
+        PatternElement (keyword<"or"> lineBreak? PatternElement lineBreak?)+
 
-    SetPattern (`set` pattern) =
-        "set" VariableName
+    SetPattern =
+        keyword<"set"> VariableName
 
-    ConstructorPattern (constructor pattern) =
+    ConstructorPattern =
         ConstructorName AtomicPattern*
 
-    AnnotatePattern (type annotation) =
+    AnnotatePattern =
         PatternElement "::" TypeElement
 
     // Types
 
-    Type (type) =
+    Type =
         | TupleType
         | FunctionType
         | AnnotatedParameterType
         | TypeElement
 
-    TypeElement (type) =
+    TypeElement =
         | ParameterizedType
         | AtomicType
 
-    AtomicType (type) =
+    AtomicType =
         | PlaceholderType
         | ParameterType
         | NamedType
@@ -233,73 +234,73 @@ Grammar  {
         | UnitType
         | ParenthesizedType
 
-    ParenthesizedType (type) =
+    ParenthesizedType =
         "(" lineBreak? Type lineBreak? ")"
 
-    PlaceholderType (placeholder type) =
-        "_"
+    PlaceholderType =
+        keyword<"_">
 
-    ParameterType (type parameter) =
+    ParameterType =
         TypeParameterName
 
-    AnnotatedParameterType (type annotation) =
+    AnnotatedParameterType =
         TypeParameterName "::" Type
 
-    NamedType (type) =
+    NamedType =
         TypeName
 
-    FunctionType (function type) =
+    FunctionType =
         FunctionTypeInputs Type
 
-    FunctionTypeInputs (function inputs) =
+    FunctionTypeInputs =
         AtomicType+ "->" lineBreak?
 
-    BlockType (block type) =
+    BlockType =
         "{" lineBreak? TypeElement lineBreak? "}"
 
-    UnitType (unit type) =
+    UnitType =
         "(" lineBreak? ")"
 
-    TupleType (tuple type) =
+    TupleType =
         TypeElement (";" lineBreak? TypeElement lineBreak?)+ ";"?
 
-    ParameterizedType (type) =
+    ParameterizedType =
         TypeName AtomicType+
 
     // Constraints
 
-    TypeParameters (type parameters) =
+    TypeParameters =
         TypeParameter+ "=>"
 
-    TypeParameter (type parameter) =
+    TypeParameter =
         | NamedTypeParameter
         | InferTypeParameter
 
-    NamedTypeParameter (type parameter) =
+    NamedTypeParameter =
         TypeParameterName
 
-    InferTypeParameter (inferred type parameter) =
-        "(" lineBreak? "infer" TypeParameterName lineBreak? ")"
+    InferTypeParameter =
+        "(" lineBreak? keyword<"infer"> TypeParameterName lineBreak? ")"
 
-    Constraints (constraints) =
-        "where" Constraint+
+    Constraints =
+        keyword<"where"> Constraint+
 
-    Constraint (constraint) =
+    Constraint =
         | BoundConstraint
         | DefaultConstraint
 
-    BoundConstraint (bound constraint) =
+    BoundConstraint =
         "(" lineBreak? TypeName AtomicType* lineBreak? ")"
 
-    DefaultConstraint (default constraint) =
+    DefaultConstraint =
         "(" lineBreak? AtomicType "::" Type lineBreak? ")"
 
     // Statements
 
-    Statements (statements) =
-        Statement? (lineBreak Statement)* Comments
+    Statements =
+        (lineBreak? Statement)*
 
-    Statement (statement) =
+    Statement =
         | TypeDefinitionStatement
         | TraitDefinitionStatement
         | ConstantDefinitionStatement
@@ -307,66 +308,83 @@ Grammar  {
         | AssignmentStatement
         | ExpressionStatement
 
-    TypeDefinitionStatement (type definition) =
+    TypeDefinitionStatement =
         Comments Attributes TypeName ":" TypeParameters? TypeRepresentation
 
-    TypeRepresentation (type definition) =
+    TypeRepresentation =
         | StructureTypeRepresentation
         | EnumerationTypeRepresentation
         | MarkerTypeRepresentation
 
-    MarkerTypeRepresentation (marker type definition) =
-        "type"
+    MarkerTypeRepresentation =
+        keyword<"type">
 
-    StructureTypeRepresentation (structure type definition) =
-        "type" "{" lineBreak? FieldDefinition (lineBreak FieldDefinition)* lineBreak? "}"
+    StructureTypeRepresentation =
+        keyword<"type"> "{" lineBreak? FieldDefinition (lineBreak FieldDefinition)* lineBreak? "}"
 
-    FieldDefinition (field) =
+    FieldDefinition =
         VariableName "::" Type
 
-    EnumerationTypeRepresentation (enumeration type definition) =
-        "type" "{" lineBreak? VariantDefinition (lineBreak VariantDefinition)* lineBreak? "}"
+    EnumerationTypeRepresentation =
+        keyword<"type"> "{" lineBreak? VariantDefinition (lineBreak VariantDefinition)* lineBreak? "}"
 
-    VariantDefinition (variant) =
+    VariantDefinition =
         ConstructorName AtomicType*
 
-    TraitDefinitionStatement (trait definition) =
+    TraitDefinitionStatement =
         Comments Attributes TypeName ":" TypeParameters? TraitConstraints
 
-    TraitConstraints (constraints) =
-        "trait" AtomicType Constraints?
+    TraitConstraints =
+        keyword<"trait"> AtomicType Constraints?
 
-    ConstantDefinitionStatement (constant definition) =
+    ConstantDefinitionStatement =
         Comments Attributes VariableName ConstantConstraints
 
-    ConstantConstraints (constraints) =
+    ConstantConstraints =
         "::" Type Constraints?
 
-    InstanceDefinitionStatement (instance definition) =
+    InstanceDefinitionStatement =
         Comments Attributes InstanceConstraints (":" Expression)?
 
-    InstanceConstraints (constraints) =
-        "instance" BoundConstraint Constraints?
+    InstanceConstraints =
+        keyword<"instance"> BoundConstraint Constraints?
 
-    AssignmentStatement (assignment) =
+    AssignmentStatement =
         Comments Pattern ":" Expression
 
-    ExpressionStatement (expression) =
+    ExpressionStatement =
         Comments Expression
 
-    Comments (comments) =
+    Comments =
         (comment lineBreak)*
 
     // Atoms
 
-    TypeName (type name) = capitalName
-    ConstructorName (constructor name) = capitalName
-    VariableName (variable name) = lowercaseName
-    TypeParameterName (type parameter name) = lowercaseName
-    AttributeName (attribute name) = lowercaseName | "intrinsic"
+    Number (number) =
+        number
+
+    String (string) =
+        string
+
+    TypeName (type name) =
+        capitalName
+
+    ConstructorName (constructor name) =
+        capitalName
+
+    VariableName (variable name) =
+        lowercaseName
+
+    TypeParameterName (type parameter name) =
+        lowercaseName
+
+    AttributeName (attribute name) =
+        lowercaseName | keyword<"intrinsic">
 
     // Tokens
-    space := " " | "\t"
+
+    space :=
+        " " | "\t"
 
     lineBreak (line break) =
         "\n"+
@@ -384,7 +402,9 @@ Grammar  {
         upper (alnum | "_")* ("-" (alnum | "_")+)* ("!" | "?")?
 
     lowercaseName (lowercase name) =
-        ~keyword lower (alnum | "_")* ("-" (alnum | "_")+)* ("!" | "?")?
+        ~anyKeyword lower (alnum | "_")* ("-" (alnum | "_")+)* ("!" | "?")?
 
-    keyword = ("and" | "as" | "by" | "do" | "infer" | "instance" | "intrinsic" | "is" | "or" | "set" | "to" | "trait" | "type" | "_" | "when" | "where") ~("-" | alnum | "_")
+    anyKeyword = keyword<("and" | "as" | "by" | "do" | "infer" | "instance" | "intrinsic" | "is" | "or" | "set" | "to" | "trait" | "type" | "when" | "where")>
+
+    keyword<k> = k ~("-" | alnum)
 }

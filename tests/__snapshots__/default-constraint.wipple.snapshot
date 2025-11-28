@@ -47,12 +47,12 @@ TypeParameterNode(`collection` @ tests/default-constraint.wipple:6:19)
   has type(s) `collection`
   resolved to TypeParameterNode(`collection` @ tests/default-constraint.wipple:6:19)
 
+FunctionTypeNode(`element -> collection` @ tests/default-constraint.wipple:6:40)
+  has type(s) `element -> collection`
+
 TypeParameterNode(`element` @ tests/default-constraint.wipple:6:40)
   has type(s) `element`
   resolved to TypeParameterNode(`element` @ tests/default-constraint.wipple:6:11)
-
-FunctionTypeNode(`element -> collection` @ tests/default-constraint.wipple:6:40)
-  has type(s) `element -> collection`
 
 TypeParameterNode(`collection` @ tests/default-constraint.wipple:6:51)
   has type(s) `collection`
@@ -101,12 +101,12 @@ ConstantDefinitionNode(`-- Default and bound constraints are resolved in source 
   has definition constraints
   has type parameters
 
+FunctionTypeNode(`element -> output` @ tests/default-constraint.wipple:11:12)
+  has type(s) `element -> output`
+
 TypeParameterNode(`element` @ tests/default-constraint.wipple:11:12)
   has type(s) `element`
   resolved to TypeParameterNode(`element` @ tests/default-constraint.wipple:11:12)
-
-FunctionTypeNode(`element -> output` @ tests/default-constraint.wipple:11:12)
-  has type(s) `element -> output`
 
 TypeParameterNode(`output` @ tests/default-constraint.wipple:11:23)
   has type(s) `output`
@@ -137,19 +137,19 @@ TypeParameterNode(`output` @ tests/default-constraint.wipple:11:72)
   has type(s) `output`
   resolved to TypeParameterNode(`output` @ tests/default-constraint.wipple:11:23)
 
+AssignmentNode(`_ : collect "hi"` @ tests/default-constraint.wipple:13:1)
+  (no facts)
+
 WildcardPatternNode(`_` @ tests/default-constraint.wipple:13:1)
   has type(s) `List String`
 
-AssignmentNode(`_ : collect "hi"` @ tests/default-constraint.wipple:13:1)
-  (no facts)
+CallExpressionNode(`collect "hi"` @ tests/default-constraint.wipple:13:5)
+  has type(s) `List String`
 
 VariableExpressionNode(`collect` @ tests/default-constraint.wipple:13:5)
   has type(s) `String -> List String`
   resolved to ConstantDefinitionNode(`-- Default and bound constraints are resolved in source code order⋯` @ tests/default-constraint.wipple:10:1)
   has bound(s) `Collect String (List String)` (InstanceDefinitionNode(`instance (Collect element (List element))` @ tests/default-constraint.wipple:7:1))
-
-CallExpressionNode(`collect "hi"` @ tests/default-constraint.wipple:13:5)
-  has type(s) `List String`
 
 StringExpressionNode(`"hi"` @ tests/default-constraint.wipple:13:13)
   has type(s) `String`
@@ -158,19 +158,19 @@ NamedTypeNode(`"hi"` @ tests/default-constraint.wipple:13:13)
   has type(s) `String`
   resolved to TypeDefinitionNode(`[intrinsic] String : type` @ tests/default-constraint.wipple:2:1)
 
+AssignmentNode(`_ : (collect "hi" :: Set _)` @ tests/default-constraint.wipple:14:1)
+  (no facts)
+
 WildcardPatternNode(`_` @ tests/default-constraint.wipple:14:1)
   has type(s) `Set String`
 
-AssignmentNode(`_ : (collect "hi" :: Set _)` @ tests/default-constraint.wipple:14:1)
-  (no facts)
+CallExpressionNode(`collect "hi"` @ tests/default-constraint.wipple:14:6)
+  has type(s) `Set String`
 
 VariableExpressionNode(`collect` @ tests/default-constraint.wipple:14:6)
   has type(s) `String -> Set String`
   resolved to ConstantDefinitionNode(`-- Default and bound constraints are resolved in source code order⋯` @ tests/default-constraint.wipple:10:1)
   has bound(s) `Collect String (Set String)` (InstanceDefinitionNode(`instance (Collect element (Set element))` @ tests/default-constraint.wipple:8:1))
-
-CallExpressionNode(`collect "hi"` @ tests/default-constraint.wipple:14:6)
-  has type(s) `Set String`
 
 StringExpressionNode(`"hi"` @ tests/default-constraint.wipple:14:14)
   has type(s) `String`

@@ -87,7 +87,7 @@ describe("parsing expressions", () => {
     });
 
     test("parsing single line collection expression", () => {
-        expect(testParse("Expression", "a , b , c")).toMatchSnapshot();
+        expect(testParse("Expression", "(a , b , c)")).toMatchSnapshot();
     });
 
     test("parsing multiline collection expression", () => {

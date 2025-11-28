@@ -24,12 +24,12 @@ TypeParameterNode(`value` @ tests/implied-instance.wipple:4:5)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:4:5)
 
+FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:4:21)
+  has type(s) `value -> ()`
+
 TypeParameterNode(`value` @ tests/implied-instance.wipple:4:21)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:4:5)
-
-FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:4:21)
-  has type(s) `value -> ()`
 
 UnitTypeNode(`()` @ tests/implied-instance.wipple:4:30)
   has type(s) `()`
@@ -43,12 +43,12 @@ TypeParameterNode(`value` @ tests/implied-instance.wipple:5:5)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:5:5)
 
+FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:5:21)
+  has type(s) `value -> ()`
+
 TypeParameterNode(`value` @ tests/implied-instance.wipple:5:21)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:5:5)
-
-FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:5:21)
-  has type(s) `value -> ()`
 
 UnitTypeNode(`()` @ tests/implied-instance.wipple:5:30)
   has type(s) `()`
@@ -76,12 +76,12 @@ ConstantDefinitionNode(`t :: value -> () where (U value)` @ tests/implied-instan
   has definition constraints
   has type parameters
 
+FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:9:6)
+  has type(s) `value -> ()`
+
 TypeParameterNode(`value` @ tests/implied-instance.wipple:9:6)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:9:6)
-
-FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:9:6)
-  has type(s) `value -> ()`
 
 UnitTypeNode(`()` @ tests/implied-instance.wipple:9:15)
   has type(s) `()`

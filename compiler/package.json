@@ -13,7 +13,6 @@
         "cmd-ts": "^0.14.2",
         "dedent": "^1.7.0",
         "moo": "^0.5.2",
-        "ohm-js": "^17.2.1",
         "progress": "^2.0.3",
         "source-map": "^0.7.6",
         "vscode-languageserver": "^9.0.1",

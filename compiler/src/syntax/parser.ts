@@ -101,13 +101,17 @@ const parseString = (string: TerminalNode) => string.sourceString.slice(1, -1);
 const parseComment = (comment: TerminalNode) => comment.sourceString.slice(2).trim();
 
 const parser = (span: SpanFn): GrammarActionDict<{}> => ({
-    File: (statements, trailingLineBreak) => new FileNode(statements.parse(), span(statements)),
+    File(statements, comments, endLineBreak) {
+        return new FileNode(statements.parse(), span(this));
+    },
 
     // Attributes
 
-    Attributes: (first, lineBreak, rest, trailingLineBreak) => parseOptionalFirstRest(first, rest),
+    Attributes(first, lineBreak, rest, trailingLineBreak) {
+        return parseOptionalFirstRest(first, rest);
+    },
 
-    Attribute: (
+    Attribute(
         leftBracket,
         leftLineBreak,
         name,
@@ -115,41 +119,63 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         value,
         rightLineBreak,
         rightBracket,
-    ) => new AttributeNode(name.parse(), parseOptional(value), span(leftBracket, rightBracket)),
+    ) {
+        return new AttributeNode(name.parse(), parseOptional(value), span(this));
+    },
 
-    AttributeValue: (value) => value.parse(),
+    AttributeValue(value) {
+        return value.parse();
+    },
 
-    StringAttributeValue: (string) => new StringAttributeValue(parseString(string), span(string)),
+    StringAttributeValue(string) {
+        return new StringAttributeValue(parseString(string), span(string));
+    },
 
     // Expressions
 
-    Expression: (expression) => expression.parse(),
+    Expression(expression) {
+        return expression.parse();
+    },
 
-    ExpressionElement: (expression) => expression.parse(),
+    ExpressionElement(expression) {
+        return expression.parse();
+    },
 
-    AtomicExpression: (expression) => expression.parse(),
+    AtomicExpression(expression) {
+        return expression.parse();
+    },
 
-    ParenthesizedExpression: (
+    ParenthesizedExpression(
         leftParenthesis,
         leftLineBreak,
         expression,
         rightLineBreak,
         rightParenthesis,
-    ) => expression.parse(),
+    ) {
+        return expression.parse();
+    },
 
-    PlaceholderExpression: (underscore) => new PlaceholderExpressionNode(span(underscore)),
+    PlaceholderExpression(underscore) {
+        return new PlaceholderExpressionNode(span(underscore));
+    },
 
-    VariableExpression: (variableName) =>
-        new VariableExpressionNode(variableName.parse(), span(variableName)),
+    VariableExpression(variableName) {
+        return new VariableExpressionNode(variableName.parse(), span(variableName));
+    },
 
-    ConstructorExpression: (constructorName) =>
-        new ConstructorExpressionNode(constructorName.parse(), span(constructorName)),
+    ConstructorExpression(constructorName) {
+        return new ConstructorExpressionNode(constructorName.parse(), span(constructorName));
+    },
 
-    NumberExpression: (number) => new NumberExpressionNode(parseNumber(number), span(number)),
+    NumberExpression(number) {
+        return new NumberExpressionNode(parseNumber(number), span(number));
+    },
 
-    StringExpression: (string) => new StringExpressionNode(parseString(string), span(string)),
+    StringExpression(string) {
+        return new StringExpressionNode(parseString(string), span(string));
+    },
 
-    StructureExpression: (
+    StructureExpression(
         typeName,
         leftBrace,
         leftLineBreak,
@@ -158,40 +184,39 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         restFields,
         rightLineBreak,
         rightBrace,
-    ) =>
-        new StructureExpressionNode(
+    ) {
+        return new StructureExpressionNode(
             typeName.parse(),
             parseFirstRest(firstField, restFields),
-            span(leftBrace, rightBrace),
-        ),
+            span(this),
+        );
+    },
 
-    StructureExpressionField: (variableName, assignOperator, expression) =>
-        new StructureExpressionField(
-            variableName.parse(),
-            expression.parse(),
-            span(variableName, expression),
-        ),
+    StructureExpressionField(variableName, assignOperator, expression) {
+        return new StructureExpressionField(variableName.parse(), expression.parse(), span(this));
+    },
 
-    BlockExpression: (leftBrace, leftLineBreak, statements, rightLineBreak, rightBrace) =>
-        new BlockExpressionNode(statements.parse(), span(leftBrace, rightBrace)),
+    BlockExpression(leftBrace, statements, comments, rightLineBreak, rightBrace) {
+        return new BlockExpressionNode(statements.parse(), span(this));
+    },
 
-    UnitExpression: (leftParenthesis, lineBreak, rightParenthesis) =>
-        new UnitExpressionNode(span(leftParenthesis, rightParenthesis)),
+    UnitExpression(leftParenthesis, lineBreak, rightParenthesis) {
+        return new UnitExpressionNode(span(this));
+    },
 
-    FormatExpression: (string, expressions) =>
-        new FormatExpressionNode(
-            parseString(string),
-            parseList(expressions),
-            span(string, expressions),
-        ),
+    FormatExpression(string, expressions) {
+        return new FormatExpressionNode(parseString(string), parseList(expressions), span(this));
+    },
 
-    CallExpression: (func, inputs) =>
-        new CallExpressionNode(func.parse(), parseList(inputs), span(func, inputs)),
+    CallExpression(func, inputs) {
+        return new CallExpressionNode(func.parse(), parseList(inputs), span(this));
+    },
 
-    DoExpression: (doKeyword, expression) =>
-        new DoExpressionNode(expression.parse(), span(doKeyword, expression)),
+    DoExpression(doKeyword, expression) {
+        return new DoExpressionNode(expression.parse(), span(this));
+    },
 
-    WhenExpression: (
+    WhenExpression(
         whenKeyword,
         expression,
         leftBrace,
@@ -201,22 +226,21 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         restArms,
         rightLineBreak,
         rightBrace,
-    ) =>
-        new WhenExpressionNode(
+    ) {
+        return new WhenExpressionNode(
             expression.parse(),
             parseOptionalFirstRest(firstArm, restArms),
-            span(whenKeyword, rightBrace),
-        ),
+            span(this),
+        );
+    },
 
-    Arm: (pattern, functionOperator, expression) =>
-        new Arm(pattern.parse(), expression.parse(), span(pattern, expression)),
+    Arm(pattern, functionOperator, expression) {
+        return new Arm(pattern.parse(), expression.parse(), span(this));
+    },
 
-    IntrinsicExpression: (intrinsicKeyword, string, expressions) =>
-        new IntrinsicExpressionNode(
-            parseString(string),
-            parseList(expressions),
-            span(intrinsicKeyword, expressions),
-        ),
+    IntrinsicExpression(intrinsicKeyword, string, expressions) {
+        return new IntrinsicExpressionNode(parseString(string), parseList(expressions), span(this));
+    },
 
     ToExpression: operator("left", span),
 
@@ -238,67 +262,85 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
 
     ApplyExpression: operator("left", span),
 
-    TupleExpression: (
-        first,
-        tupleOperator,
-        leftLineBreak,
-        rest,
-        rightLineBreak,
-        trailingOperator,
-    ) => new TupleExpressionNode(parseOptionalFirstRest(first, rest), span(first, rest)),
+    TupleExpression(first, tupleOperator, leftLineBreak, rest, rightLineBreak, trailingOperator) {
+        return new TupleExpressionNode(parseOptionalFirstRest(first, rest), span(this));
+    },
 
-    EmptyCollectionExpression: (collectionOperator) =>
-        new CollectionExpressionNode([], span(collectionOperator)),
+    EmptyCollectionExpression(collectionOperator) {
+        return new CollectionExpressionNode([], span(collectionOperator));
+    },
 
-    CollectionExpression: (head, leftLineBreak, collectionOperator, rightLineBreak, last) =>
-        new CollectionExpressionNode(
+    CollectionExpression(head, leftLineBreak, collectionOperator, rightLineBreak, last) {
+        return new CollectionExpressionNode(
             [
                 ...parseList(head),
                 ...(last.numChildren > 0 ? [(last.children[0] as NonterminalNode).parse()] : []),
             ],
-            span(head, last),
-        ),
+            span(this),
+        );
+    },
 
-    IsExpression: (expression, isOperator, pattern) =>
-        new IsExpressionNode(expression.parse(), pattern.parse(), span(expression, pattern)),
+    IsExpression(expression, isOperator, pattern) {
+        return new IsExpressionNode(expression.parse(), pattern.parse(), span(this));
+    },
 
-    AsExpression: (expression, asOperator, type) =>
-        new AsExpressionNode(expression.parse(), type.parse(), span(expression, type)),
+    AsExpression(expression, asOperator, type) {
+        return new AsExpressionNode(expression.parse(), type.parse(), span(this));
+    },
 
-    AnnotateExpression: (expression, annotateOperator, type) =>
-        new AnnotateExpressionNode(expression.parse(), type.parse(), span(expression, type)),
+    AnnotateExpression(expression, annotateOperator, type) {
+        return new AnnotateExpressionNode(expression.parse(), type.parse(), span(this));
+    },
 
-    FunctionExpression: (inputs, expression) =>
-        new FunctionExpressionNode(inputs.parse(), expression.parse(), span(inputs, expression)),
+    FunctionExpression(inputs, expression) {
+        return new FunctionExpressionNode(inputs.parse(), expression.parse(), span(this));
+    },
 
-    FunctionExpressionInputs: (patterns, functionOperator, lineBreak) => parseList(patterns),
+    FunctionExpressionInputs(patterns, functionOperator, lineBreak) {
+        return parseList(patterns);
+    },
 
     // Patterns
 
-    Pattern: (pattern) => pattern.parse(),
+    Pattern(pattern) {
+        return pattern.parse();
+    },
 
-    PatternElement: (pattern) => pattern.parse(),
+    PatternElement(pattern) {
+        return pattern.parse();
+    },
 
-    AtomicPattern: (pattern) => pattern.parse(),
+    AtomicPattern(pattern) {
+        return pattern.parse();
+    },
 
-    ParenthesizedPattern: (
+    ParenthesizedPattern(
         leftParenthesis,
         leftLineBreak,
         pattern,
         rightLineBreak,
         rightParenthesis,
-    ) => pattern.parse(),
+    ) {
+        return pattern.parse();
+    },
 
-    WildcardPattern: (underscoreKeyword) => new WildcardPatternNode(span(underscoreKeyword)),
+    WildcardPattern(underscoreKeyword) {
+        return new WildcardPatternNode(span(underscoreKeyword));
+    },
 
-    VariablePattern: (variableName) =>
-        new VariablePatternNode(variableName.parse(), span(variableName)),
+    VariablePattern(variableName) {
+        return new VariablePatternNode(variableName.parse(), span(variableName));
+    },
 
-    NumberPattern: (number) => new NumberPatternNode(parseNumber(number), span(number)),
+    NumberPattern(number) {
+        return new NumberPatternNode(parseNumber(number), span(number));
+    },
 
-    StringPattern: (string) => new StringPatternNode(parseString(string), span(string)),
+    StringPattern(string) {
+        return new StringPatternNode(parseString(string), span(string));
+    },
 
-    StructurePattern: (
+    StructurePattern(
         typeName,
         leftBrace,
         leftLineBreak,
@@ -307,128 +349,155 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         restFields,
         rightLineBreak,
         rightBrace,
-    ) =>
-        new StructurePatternNode(
+    ) {
+        return new StructurePatternNode(
             typeName.parse(),
             parseFirstRest(firstField, restFields),
-            span(leftBrace, rightBrace),
-        ),
+            span(this),
+        );
+    },
 
-    StructurePatternField: (variableName, assignOperator, pattern) =>
-        new StructurePatternField(
-            variableName.parse(),
-            pattern.parse(),
-            span(variableName, pattern),
-        ),
+    StructurePatternField(variableName, assignOperator, pattern) {
+        return new StructurePatternField(variableName.parse(), pattern.parse(), span(this));
+    },
 
-    UnitPattern: (leftParenthesis, lineBreak, rightParenthesis) =>
-        new UnitPatternNode(span(leftParenthesis, rightParenthesis)),
+    UnitPattern(leftParenthesis, lineBreak, rightParenthesis) {
+        return new UnitPatternNode(span(this));
+    },
 
-    TuplePattern: (first, tupleOperator, leftLineBreak, rest, rightLineBreak, trailingOperator) =>
-        new TuplePatternNode(parseOptionalFirstRest(first, rest), span(first, rest)),
+    TuplePattern(first, tupleOperator, leftLineBreak, rest, rightLineBreak, trailingOperator) {
+        return new TuplePatternNode(parseOptionalFirstRest(first, rest), span(this));
+    },
 
-    OrPattern: (first, orOperator, leftLineBreak, rest, rightLineBreak) =>
-        new OrPatternNode(parseOptionalFirstRest(first, rest), span(first, rest)),
+    OrPattern(first, orOperator, leftLineBreak, rest, rightLineBreak) {
+        return new OrPatternNode(parseOptionalFirstRest(first, rest), span(this));
+    },
 
-    SetPattern: (setKeyword, variableName) =>
-        new SetPatternNode(variableName.parse(), span(setKeyword, variableName)),
+    SetPattern(setKeyword, variableName) {
+        return new SetPatternNode(variableName.parse(), span(this));
+    },
 
-    ConstructorPattern: (constructorName, patterns) =>
-        new ConstructorPatternNode(
-            constructorName.parse(),
-            parseList(patterns),
-            span(constructorName, patterns),
-        ),
+    ConstructorPattern(constructorName, patterns) {
+        return new ConstructorPatternNode(constructorName.parse(), parseList(patterns), span(this));
+    },
 
-    AnnotatePattern: (pattern, annotateOperator, type) =>
-        new AnnotatePatternNode(pattern.parse(), type.parse(), span(pattern, type)),
+    AnnotatePattern(pattern, annotateOperator, type) {
+        return new AnnotatePatternNode(pattern.parse(), type.parse(), span(this));
+    },
 
     // Types
 
-    Type: (type) => type.parse(),
+    Type(type) {
+        return type.parse();
+    },
 
-    TypeElement: (type) => type.parse(),
+    TypeElement(type) {
+        return type.parse();
+    },
 
-    AtomicType: (type) => type.parse(),
+    AtomicType(type) {
+        return type.parse();
+    },
 
-    ParenthesizedType: (leftParenthesis, leftLineBreak, type, rightLineBreak, rightParenthesis) =>
-        type.parse(),
+    ParenthesizedType(leftParenthesis, leftLineBreak, type, rightLineBreak, rightParenthesis) {
+        return type.parse();
+    },
 
-    PlaceholderType: (underscoreKeyword) => new PlaceholderTypeNode(span(underscoreKeyword)),
+    PlaceholderType(underscoreKeyword) {
+        return new PlaceholderTypeNode(span(underscoreKeyword));
+    },
 
-    ParameterType: (typeParameterName) =>
-        new TypeParameterNode(typeParameterName.parse(), false, undefined, span(typeParameterName)),
-
-    AnnotatedParameterType: (typeParameterName, annotateOperator, type) =>
-        new TypeParameterNode(
+    ParameterType(typeParameterName) {
+        return new TypeParameterNode(
             typeParameterName.parse(),
             false,
-            type.parse(),
-            span(typeParameterName, type),
-        ),
+            undefined,
+            span(typeParameterName),
+        );
+    },
 
-    NamedType: (typeName) => new NamedTypeNode(typeName.parse(), [], span(typeName)),
+    AnnotatedParameterType(typeParameterName, annotateOperator, type) {
+        return new TypeParameterNode(typeParameterName.parse(), false, type.parse(), span(this));
+    },
 
-    FunctionType: (inputs, type) =>
-        new FunctionTypeNode(inputs.parse(), type.parse(), span(inputs, type)),
+    NamedType(typeName) {
+        return new NamedTypeNode(typeName.parse(), [], span(typeName));
+    },
 
-    FunctionTypeInputs: (types, functionOperator, lineBreak) => parseList(types),
+    FunctionType(inputs, type) {
+        return new FunctionTypeNode(inputs.parse(), type.parse(), span(this));
+    },
 
-    BlockType: (leftBrace, leftLineBreak, type, rightLineBreak, rightBrace) =>
-        new BlockTypeNode(type.parse(), span(leftBrace, rightBrace)),
+    FunctionTypeInputs(types, functionOperator, lineBreak) {
+        return parseList(types);
+    },
 
-    UnitType: (leftParenthesis, lineBreak, rightParenthesis) =>
-        new UnitTypeNode(span(leftParenthesis, rightParenthesis)),
+    BlockType(leftBrace, leftLineBreak, type, rightLineBreak, rightBrace) {
+        return new BlockTypeNode(type.parse(), span(this));
+    },
 
-    TupleType: (first, tupleOperator, leftLineBreak, rest, rightLineBreak, trailingOperator) =>
-        new TupleTypeNode(parseOptionalFirstRest(first, rest), span(first, rest)),
+    UnitType(leftParenthesis, lineBreak, rightParenthesis) {
+        return new UnitTypeNode(span(this));
+    },
 
-    ParameterizedType: (typeName, types) =>
-        new NamedTypeNode(typeName.parse(), parseList(types), span(typeName, types)),
+    TupleType(first, tupleOperator, leftLineBreak, rest, rightLineBreak, trailingOperator) {
+        return new TupleTypeNode(parseOptionalFirstRest(first, rest), span(this));
+    },
+
+    ParameterizedType(typeName, types) {
+        return new NamedTypeNode(typeName.parse(), parseList(types), span(this));
+    },
 
     // Constraints
 
-    TypeParameters: (typeParameters, typeFunctionOperator) => parseList(typeParameters),
+    TypeParameters(typeParameters, typeFunctionOperator) {
+        return parseList(typeParameters);
+    },
 
-    TypeParameter: (parameter) => parameter.parse(),
+    TypeParameter(parameter) {
+        return parameter.parse();
+    },
 
-    NamedTypeParameter: (typeParameterName) =>
-        new TypeParameterNode(typeParameterName.parse(), false, undefined, span(typeParameterName)),
+    NamedTypeParameter(typeParameterName) {
+        return new TypeParameterNode(
+            typeParameterName.parse(),
+            false,
+            undefined,
+            span(typeParameterName),
+        );
+    },
 
-    InferTypeParameter: (
+    InferTypeParameter(
         leftParenthesis,
         leftLineBreak,
         inferKeyword,
         typeParameterName,
         rightLineBreak,
         rightParenthesis,
-    ) =>
-        new TypeParameterNode(
-            typeParameterName.parse(),
-            true,
-            undefined,
-            span(leftParenthesis, rightParenthesis),
-        ),
+    ) {
+        return new TypeParameterNode(typeParameterName.parse(), true, undefined, span(this));
+    },
 
-    Constraints: (whereKeyword, constraints) => parseList(constraints),
+    Constraints(whereKeyword, constraints) {
+        return parseList(constraints);
+    },
 
-    Constraint: (constraint) => constraint.parse(),
+    Constraint(constraint) {
+        return constraint.parse();
+    },
 
-    BoundConstraint: (
+    BoundConstraint(
         leftParenthesis,
         leftLineBreak,
         typeName,
         types,
         rightLineBreak,
         rightParenthesis,
-    ) =>
-        new BoundConstraintNode(
-            typeName.parse(),
-            parseList(types),
-            span(leftParenthesis, rightParenthesis),
-        ),
+    ) {
+        return new BoundConstraintNode(typeName.parse(), parseList(types), span(this));
+    },
 
-    DefaultConstraint: (
+    DefaultConstraint(
         leftParenthesis,
         leftLineBreak,
         typeName,
@@ -436,41 +505,47 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         type,
         rightLineBreak,
         rightParenthesis,
-    ) =>
-        new DefaultConstraintNode(
-            typeName.parse(),
-            type.parse(),
-            span(leftParenthesis, rightParenthesis),
-        ),
+    ) {
+        return new DefaultConstraintNode(typeName.parse(), type.parse(), span(this));
+    },
 
     // Statements
 
-    Statements: (first, lineBreak, rest, trailingComments) => parseOptionalFirstRest(first, rest),
+    Statements(lineBreak, statements) {
+        return parseList(statements);
+    },
 
-    Statement: (statement) => statement.parse(),
+    Statement(statement) {
+        return statement.parse();
+    },
 
-    TypeDefinitionStatement: (
+    TypeDefinitionStatement(
         comments,
         attributes,
         typeName,
         assignOperator,
         typeParameters,
         typeRepresentation,
-    ) =>
-        new TypeDefinitionNode(
+    ) {
+        return new TypeDefinitionNode(
             comments.parse(),
             attributes.parse(),
             typeName.parse(),
             parseOptional(typeParameters) ?? [],
             typeRepresentation.parse(),
-            span(comments, typeRepresentation),
-        ),
+            span(this),
+        );
+    },
 
-    TypeRepresentation: (representation) => representation.parse(),
+    TypeRepresentation(representation) {
+        return representation.parse();
+    },
 
-    MarkerTypeRepresentation: (typeKeyword) => new MarkerTypeRepresentation(span(typeKeyword)),
+    MarkerTypeRepresentation(typeKeyword) {
+        return new MarkerTypeRepresentation(span(typeKeyword));
+    },
 
-    StructureTypeRepresentation: (
+    StructureTypeRepresentation(
         typeKeyword,
         leftBrace,
         leftLineBreak,
@@ -479,16 +554,15 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         restFields,
         rightLineBreak,
         rightBrace,
-    ) =>
-        new StructureTypeRepresentation(
-            parseFirstRest(firstField, restFields),
-            span(typeKeyword, rightBrace),
-        ),
+    ) {
+        return new StructureTypeRepresentation(parseFirstRest(firstField, restFields), span(this));
+    },
 
-    FieldDefinition: (variableName, annotateOperator, type) =>
-        new FieldDefinition(variableName.parse(), type.parse(), span(variableName, type)),
+    FieldDefinition(variableName, annotateOperator, type) {
+        return new FieldDefinition(variableName.parse(), type.parse(), span(this));
+    },
 
-    EnumerationTypeRepresentation: (
+    EnumerationTypeRepresentation(
         typeKeyword,
         leftBrace,
         leftLineBreak,
@@ -497,27 +571,25 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         restVariants,
         rightLineBreak,
         rightBrace,
-    ) =>
-        new EnumerationTypeRepresentation(
+    ) {
+        return new EnumerationTypeRepresentation(
             parseFirstRest(firstVariant, restVariants),
-            span(typeKeyword, rightBrace),
-        ),
+            span(this),
+        );
+    },
 
-    VariantDefinition: (constructorName, types) =>
-        new VariantDefinition(
-            constructorName.parse(),
-            parseList(types),
-            span(constructorName, types),
-        ),
+    VariantDefinition(constructorName, types) {
+        return new VariantDefinition(constructorName.parse(), parseList(types), span(this));
+    },
 
-    TraitDefinitionStatement: (
+    TraitDefinitionStatement(
         comments,
         attributes,
         typeName,
         assignOperator,
         typeParameters,
         traitConstraints,
-    ) => {
+    ) {
         const { type, constraints } = traitConstraints.parse();
 
         return new TraitDefinitionNode(
@@ -527,16 +599,18 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
             parseOptional(typeParameters) ?? [],
             type,
             constraints,
-            span(comments, traitConstraints),
+            span(this),
         );
     },
 
-    TraitConstraints: (traitKeyword, type, constraints) => ({
-        type: type.parse(),
-        constraints: parseOptional(constraints) ?? [],
-    }),
+    TraitConstraints(traitKeyword, type, constraints) {
+        return {
+            type: type.parse(),
+            constraints: parseOptional(constraints) ?? [],
+        };
+    },
 
-    ConstantDefinitionStatement: (comments, attributes, variableName, constantConstraints) => {
+    ConstantDefinitionStatement(comments, attributes, variableName, constantConstraints) {
         const { type, constraints } = constantConstraints.parse();
 
         return new ConstantDefinitionNode(
@@ -545,22 +619,18 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
             variableName.parse(),
             type,
             constraints,
-            span(comments, constantConstraints),
+            span(this),
         );
     },
 
-    ConstantConstraints: (annotateOperator, type, constraints) => ({
-        type: type.parse(),
-        constraints: parseOptional(constraints) ?? [],
-    }),
+    ConstantConstraints(annotateOperator, type, constraints) {
+        return {
+            type: type.parse(),
+            constraints: parseOptional(constraints) ?? [],
+        };
+    },
 
-    InstanceDefinitionStatement: (
-        comments,
-        attributes,
-        instanceConstraints,
-        assignOperator,
-        value,
-    ) => {
+    InstanceDefinitionStatement(comments, attributes, instanceConstraints, assignOperator, value) {
         const { bound, constraints } = instanceConstraints.parse();
 
         return new InstanceDefinitionNode(
@@ -569,45 +639,64 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
             bound,
             constraints,
             parseOptional(value),
-            span(comments, value.children[0] ?? instanceConstraints),
+            span(this),
         );
     },
 
-    InstanceConstraints: (instanceKeyword, bound, constraints) => ({
-        bound: bound.parse(),
-        constraints: parseOptional(constraints) ?? [],
-    }),
+    InstanceConstraints(instanceKeyword, bound, constraints) {
+        return {
+            bound: bound.parse(),
+            constraints: parseOptional(constraints) ?? [],
+        };
+    },
 
-    AssignmentStatement: (comments, pattern, assignOperator, expression) =>
-        new AssignmentNode(
+    AssignmentStatement(comments, pattern, assignOperator, expression) {
+        return new AssignmentNode(
             comments.parse(),
             [],
             pattern.parse(),
             expression.parse(),
-            span(comments, expression),
-        ),
+            span(this),
+        );
+    },
 
-    ExpressionStatement: (comments, expression) =>
-        new ExpressionStatementNode(
-            comments.parse(),
-            [],
-            expression.parse(),
-            span(comments, expression),
-        ),
+    ExpressionStatement(comments, expression) {
+        return new ExpressionStatementNode(comments.parse(), [], expression.parse(), span(this));
+    },
 
-    Comments: (comments, lineBreak) => comments.children.map(parseComment),
+    Comments(comments, lineBreak) {
+        return comments.children.map(parseComment);
+    },
 
     // Atoms
 
-    TypeName: (value) => value.sourceString,
+    Number(value) {
+        return parseNumber(value);
+    },
 
-    ConstructorName: (value) => value.sourceString,
+    String(value) {
+        return parseString(value);
+    },
 
-    VariableName: (value) => value.sourceString,
+    TypeName(value) {
+        return value.sourceString;
+    },
 
-    TypeParameterName: (value) => value.sourceString,
+    ConstructorName(value) {
+        return value.sourceString;
+    },
 
-    AttributeName: (value) => value.sourceString,
+    VariableName(value) {
+        return value.sourceString;
+    },
+
+    TypeParameterName(value) {
+        return value.sourceString;
+    },
+
+    AttributeName(value) {
+        return value.sourceString;
+    },
 });
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
