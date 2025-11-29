@@ -45,3 +45,17 @@ registerFeedback({
         Wipple needs to know the type of this code before running it. Try using a function or assigning it to a variable.
     `,
 });
+
+registerFeedback({
+    id: "conflicting-instances",
+    query: queries.overlappingInstances,
+    on: (node) => node,
+    render: (node, { instances }) => render`
+        ${render.node(node)} has multiple overlapping instances: ${render.list(
+            instances.map((instance) => render.node(instance)),
+            "and",
+        )}.
+
+        Only one of these instances can be defined at a time. Try making your instance more specific.
+    `,
+});

@@ -16,6 +16,10 @@ export abstract class Fact<T> {
 export class Facts {
     private values = new Map<typeof Fact<any>, any>();
 
+    has<T>(key: typeof Fact<T>): boolean {
+        return this.values.has(key);
+    }
+
     get<T>(key: typeof Fact<T>): T | undefined {
         return this.values.get(key) as T | undefined;
     }

@@ -18,10 +18,19 @@ export const errorInstance = query(function* (node) {
 });
 
 export const comments = query(function* (node) {
-    const definition = node.facts.get(Resolved);
-    if (definition instanceof Definition) {
-        const links = getLinks(definition.node, node);
-        yield { node, comments: definition.comments, links };
+    const resolved = node.facts.get(Resolved);
+    if (resolved == null) {
+        return;
+    }
+
+    const [_name, definitions] = resolved;
+    if (definitions.length === 1) {
+        const [definition] = definitions;
+
+        if (definition instanceof Definition) {
+            const links = getLinks(definition.node, node);
+            yield { node, comments: definition.comments, links };
+        }
     }
 });
 

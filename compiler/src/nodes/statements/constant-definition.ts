@@ -1,4 +1,5 @@
 import type { Codegen } from "../../codegen";
+import { Fact } from "../../db";
 import type { Node } from "../../node";
 import type { Span } from "../../span";
 import { GroupConstraint } from "../../typecheck/constraints/group";
@@ -10,6 +11,12 @@ import type { AttributeNode } from "../attributes";
 import type { ConstraintNode } from "../constraints";
 import type { TypeNode } from "../types";
 import { StatementNode } from "./index";
+
+export class MissingConstantValue extends Fact<null> {
+    display(): string {
+        return "is missing constant value";
+    }
+}
 
 export class ConstantDefinitionNode extends StatementNode {
     attributes: ConstantAttributes;
@@ -63,6 +70,12 @@ export class ConstantDefinitionNode extends StatementNode {
             );
 
             visitor.define(this.name, definition);
+
+            visitor.enqueue("afterAllExpressions", () => {
+                if (!definition.value.assigned) {
+                    this.facts.set(MissingConstantValue, null);
+                }
+            });
 
             return definition;
         });

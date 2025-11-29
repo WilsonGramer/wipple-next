@@ -120,6 +120,8 @@ export class InstanceDefinitionNode extends StatementNode {
                     this.facts.set(MissingInstanceValue, null);
                 }
 
+                definition.trait = trait;
+
                 trait.facts.getOr(Instances, []).push({
                     node: this,
                     trait,

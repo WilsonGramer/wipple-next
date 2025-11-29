@@ -1,4 +1,5 @@
 import type { Codegen } from "../../codegen";
+import { Fact } from "../../db";
 import type { Node } from "../../node";
 import type { Span } from "../../span";
 import { GroupConstraint } from "../../typecheck/constraints/group";
@@ -6,6 +7,12 @@ import type { Visitor } from "../../visit";
 import { VariableDefinition } from "../../visit/definitions";
 import type { VariableExpressionNode } from "../expressions/variable";
 import { PatternNode } from "./index";
+
+export class NestedSetPattern extends Fact<null> {
+    display(): string {
+        return "is a nested `set` pattern";
+    }
+}
 
 export class SetPatternNode extends PatternNode {
     variable: string;
@@ -30,6 +37,10 @@ export class SetPatternNode extends PatternNode {
         visitor.constraint(new GroupConstraint(this, variableDefinition.node));
 
         this.matchingVariable = variableDefinition.node;
+
+        if (!visitor.currentMatch.root) {
+            this.facts.set(NestedSetPattern, null);
+        }
     }
 
     codegen(codegen: Codegen): void {

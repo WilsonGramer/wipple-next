@@ -160,7 +160,9 @@ FormatExpressionNode {
       "variable": "name",
     },
   ],
+  "segments": [],
   "string": "Hello, _!",
+  "trailing": "",
 }
 `;
 

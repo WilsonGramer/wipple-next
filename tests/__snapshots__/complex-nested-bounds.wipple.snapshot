@@ -1,138 +1,138 @@
 {
-  "facts": "RootNode(`` @ <root>:1:1)
+  "facts": "RootNode(`` (<root>:1:1))
   has top-level scopes
 
-TypeDefinitionNode(`[intrinsic] Boolean : type` @ tests/complex-nested-bounds.wipple:1:1)
+TypeDefinitionNode(`[intrinsic] Boolean` (tests/complex-nested-bounds.wipple:1:1))
   has definition constraints
   is a definition
   has type(s) `Boolean`
 
-TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
+TraitDefinitionNode(`Not` (tests/complex-nested-bounds.wipple:3:1))
   has definition constraints
   has type parameters
   is a definition
   has instances
   has type(s) `value -> value`
 
-TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:3:7)
+TypeParameterNode(`value` (tests/complex-nested-bounds.wipple:3:7))
   has type(s) `value`
-  resolved to TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:3:7)
+  resolved to 1 definition(s)
 
-TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:3:23)
+TypeParameterNode(`value` (tests/complex-nested-bounds.wipple:3:23))
   has type(s) `value`
-  resolved to TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:3:7)
+  resolved to 1 definition(s)
 
-FunctionTypeNode(`value -> value` @ tests/complex-nested-bounds.wipple:3:23)
+FunctionTypeNode(`value -> value` (tests/complex-nested-bounds.wipple:3:23))
   has type(s) `value -> value`
 
-TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:3:32)
+TypeParameterNode(`value` (tests/complex-nested-bounds.wipple:3:32))
   has type(s) `value`
-  resolved to TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:3:7)
+  resolved to 1 definition(s)
 
-InstanceDefinitionNode(`instance (Not Boolean) : _` @ tests/complex-nested-bounds.wipple:4:1)
+InstanceDefinitionNode(`instance (Not Boolean)` (tests/complex-nested-bounds.wipple:4:1))
   is a definition
-  resolved to TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
+  resolved to 1 definition(s)
   has definition constraints
   has type(s) `Boolean -> Boolean`
 
-NamedTypeNode(`Boolean` @ tests/complex-nested-bounds.wipple:4:15)
+NamedTypeNode(`Boolean` (tests/complex-nested-bounds.wipple:4:15))
   has type(s) `Boolean`
-  resolved to TypeDefinitionNode(`[intrinsic] Boolean : type` @ tests/complex-nested-bounds.wipple:1:1)
+  resolved to 1 definition(s)
 
-PlaceholderExpressionNode(`_` @ tests/complex-nested-bounds.wipple:4:26)
+PlaceholderExpressionNode(`_` (tests/complex-nested-bounds.wipple:4:26))
   has type(s) `Boolean -> Boolean`
 
-InstanceDefinitionNode(`instance (Not (a -> b)) where (Not b) : f -> x -> not (f x)` @ tests/complex-nested-bounds.wipple:5:1)
+InstanceDefinitionNode(`instance (Not (a -> b)) where (Not b)` (tests/complex-nested-bounds.wipple:5:1))
   is a definition
-  resolved to TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
+  resolved to 1 definition(s)
   has definition constraints
   has type parameters
   has type(s) `(a -> b) -> a -> b`
 
-TypeParameterNode(`a` @ tests/complex-nested-bounds.wipple:5:16)
+TypeParameterNode(`a` (tests/complex-nested-bounds.wipple:5:16))
   has type(s) `a`
-  resolved to TypeParameterNode(`a` @ tests/complex-nested-bounds.wipple:5:16)
+  resolved to 1 definition(s)
 
-FunctionTypeNode(`a -> b` @ tests/complex-nested-bounds.wipple:5:16)
+FunctionTypeNode(`a -> b` (tests/complex-nested-bounds.wipple:5:16))
   has type(s) `a -> b`
 
-TypeParameterNode(`b` @ tests/complex-nested-bounds.wipple:5:21)
+TypeParameterNode(`b` (tests/complex-nested-bounds.wipple:5:21))
   has type(s) `b`
-  resolved to TypeParameterNode(`b` @ tests/complex-nested-bounds.wipple:5:21)
+  resolved to 1 definition(s)
 
-BoundConstraintNode(`(Not b)` @ tests/complex-nested-bounds.wipple:5:31)
-  resolved to TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
+BoundConstraintNode(`(Not b)` (tests/complex-nested-bounds.wipple:5:31))
+  resolved to 1 definition(s)
 
-TypeParameterNode(`b` @ tests/complex-nested-bounds.wipple:5:36)
+TypeParameterNode(`b` (tests/complex-nested-bounds.wipple:5:36))
   has type(s) `b`
-  resolved to TypeParameterNode(`b` @ tests/complex-nested-bounds.wipple:5:21)
+  resolved to 1 definition(s)
 
-InternalNode(`f` @ tests/complex-nested-bounds.wipple:5:41)
+InternalNode(`f` (tests/complex-nested-bounds.wipple:5:41))
   has type(s) `a -> b`
 
-VariablePatternNode(`f` @ tests/complex-nested-bounds.wipple:5:41)
+VariablePatternNode(`f` (tests/complex-nested-bounds.wipple:5:41))
   has type(s) `a -> b`
 
-FunctionExpressionNode(`f -> x -> not (f x)` @ tests/complex-nested-bounds.wipple:5:41)
+FunctionExpressionNode(`f -> x -> not (f x)` (tests/complex-nested-bounds.wipple:5:41))
   has type(s) `(a -> b) -> a -> b`
 
-InternalNode(`x` @ tests/complex-nested-bounds.wipple:5:46)
+InternalNode(`x` (tests/complex-nested-bounds.wipple:5:46))
   has type(s) `a`
 
-VariablePatternNode(`x` @ tests/complex-nested-bounds.wipple:5:46)
+VariablePatternNode(`x` (tests/complex-nested-bounds.wipple:5:46))
   has type(s) `a`
 
-FunctionExpressionNode(`x -> not (f x)` @ tests/complex-nested-bounds.wipple:5:46)
+FunctionExpressionNode(`x -> not (f x)` (tests/complex-nested-bounds.wipple:5:46))
   has type(s) `a -> b`
 
-VariableExpressionNode(`not` @ tests/complex-nested-bounds.wipple:5:51)
+VariableExpressionNode(`not` (tests/complex-nested-bounds.wipple:5:51))
   has type(s) `b -> b`
-  resolved to ConstantDefinitionNode(`not :: value -> value where (Not value)` @ tests/complex-nested-bounds.wipple:7:1)
+  resolved to 1 definition(s)
 
-CallExpressionNode(`not (f x)` @ tests/complex-nested-bounds.wipple:5:51)
+CallExpressionNode(`not (f x)` (tests/complex-nested-bounds.wipple:5:51))
   has type(s) `b`
 
-VariableExpressionNode(`f` @ tests/complex-nested-bounds.wipple:5:56)
+VariableExpressionNode(`f` (tests/complex-nested-bounds.wipple:5:56))
   has type(s) `a -> b`
-  resolved to VariablePatternNode(`f` @ tests/complex-nested-bounds.wipple:5:41)
+  resolved to 1 definition(s)
 
-CallExpressionNode(`f x` @ tests/complex-nested-bounds.wipple:5:56)
+CallExpressionNode(`f x` (tests/complex-nested-bounds.wipple:5:56))
   has type(s) `b`
 
-VariableExpressionNode(`x` @ tests/complex-nested-bounds.wipple:5:58)
+VariableExpressionNode(`x` (tests/complex-nested-bounds.wipple:5:58))
   has type(s) `a`
-  resolved to VariablePatternNode(`x` @ tests/complex-nested-bounds.wipple:5:46)
+  resolved to 1 definition(s)
 
-ConstantDefinitionNode(`not :: value -> value where (Not value)` @ tests/complex-nested-bounds.wipple:7:1)
+ConstantDefinitionNode(`not` (tests/complex-nested-bounds.wipple:7:1))
   is a definition
   has definition constraints
   has type parameters
   has type(s) `value -> value`
 
-TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:7:8)
+TypeParameterNode(`value` (tests/complex-nested-bounds.wipple:7:8))
   has type(s) `value`
-  resolved to TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:7:8)
+  resolved to 1 definition(s)
 
-FunctionTypeNode(`value -> value` @ tests/complex-nested-bounds.wipple:7:8)
+FunctionTypeNode(`value -> value` (tests/complex-nested-bounds.wipple:7:8))
   has type(s) `value -> value`
 
-TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:7:17)
+TypeParameterNode(`value` (tests/complex-nested-bounds.wipple:7:17))
   has type(s) `value`
-  resolved to TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:7:8)
+  resolved to 1 definition(s)
 
-BoundConstraintNode(`(Not value)` @ tests/complex-nested-bounds.wipple:7:29)
-  resolved to TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
+BoundConstraintNode(`(Not value)` (tests/complex-nested-bounds.wipple:7:29))
+  resolved to 1 definition(s)
 
-TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:7:34)
+TypeParameterNode(`value` (tests/complex-nested-bounds.wipple:7:34))
   has type(s) `value`
-  resolved to TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:7:8)
+  resolved to 1 definition(s)
 
-AssignmentNode(`not : Not` @ tests/complex-nested-bounds.wipple:8:1)
+AssignmentNode(`not` (tests/complex-nested-bounds.wipple:8:1))
   (no facts)
 
-ConstructorExpressionNode(`Not` @ tests/complex-nested-bounds.wipple:8:7)
+ConstructorExpressionNode(`Not` (tests/complex-nested-bounds.wipple:8:7))
   has type(s) `value -> value`
-  resolved to TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
+  resolved to 1 definition(s)
 
 ",
   "feedback": "",

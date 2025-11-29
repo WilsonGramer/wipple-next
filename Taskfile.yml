@@ -27,7 +27,7 @@ tasks:
         deps:
             - build
         cmds:
-            - npm test -- {{.CLI_ARGS}}
+            - npm test run -- {{.CLI_ARGS}}
     install:
         deps:
             - build

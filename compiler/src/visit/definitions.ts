@@ -88,6 +88,7 @@ export class TraitDefinition extends Definition<TraitDefinitionNode> {
 
 export class InstanceDefinition extends Definition<InstanceDefinitionNode> {
     attributes: InstanceAttributes;
+    trait?: TraitDefinitionNode;
     value: Node | undefined;
 
     constructor(

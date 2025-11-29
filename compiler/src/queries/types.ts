@@ -1,3 +1,4 @@
+import { OverlappingInstances } from "../compile";
 import { InstantiatedNode, Node } from "../node";
 import { Typed } from "../nodes/types";
 import { typeReferencesNode } from "../typecheck";
@@ -77,3 +78,12 @@ export const unknownType = query(function* (node, filter) {
 
 const isFirstNodeInGroup = (node: Node, group: Group, filter: (node: Node) => boolean) =>
     group.nodes.filter(filter)[0] === node;
+
+export const overlappingInstances = query(function* (node) {
+    const instances = node.facts.get(OverlappingInstances);
+    if (instances == null) {
+        return;
+    }
+
+    yield { instances };
+});

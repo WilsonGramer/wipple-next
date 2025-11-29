@@ -7,9 +7,11 @@ import type { Instance } from "../typecheck/constraints/bound";
 import type { Constraint } from "../typecheck/constraints/constraint";
 import { Defined, type Definition, type InstanceDefinition } from "./definitions";
 
-export class Resolved extends Fact<Definition | string> {
-    display(definition: Definition | string): string {
-        return typeof definition === "string" ? "unresolved" : `resolved to ${definition.node}`;
+export class Resolved extends Fact<[string, Definition[]]> {
+    display([_name, definitions]: [string, Definition[]]): string {
+        return definitions.length === 0
+            ? "unresolved"
+            : `resolved to ${definitions.length} definition(s)`;
     }
 }
 
@@ -36,7 +38,7 @@ export class Visitor {
     scopes: Scope[];
     currentNode!: Node;
     currentDefinition?: VisitorCurrentDefinition;
-    currentMatch!: Node;
+    currentMatch!: { node: Node; root: boolean };
 
     private constraints: Constraint[] = [];
     private definitions = new Map<Node, Definition>();
@@ -83,19 +85,19 @@ export class Visitor {
         type: T[],
         node: Node,
     ): InstanceType<T> | undefined {
-        const definition = this.peek(name, type);
-        node.facts.set(Resolved, definition ?? name);
-        return definition;
+        const definitions = this.peek(name, type);
+        node.facts.set(Resolved, [name, definitions]);
+        return definitions[0];
     }
 
     peek<T extends abstract new (...args: any[]) => Definition>(
         name: string,
         types: T[],
-    ): InstanceType<T> | undefined {
+    ): InstanceType<T>[] {
         return this.scopes
             .toReversed()
             .flatMap((scope) => scope.definitions.get(name)?.toReversed() ?? [])
-            .find((definition): definition is InstanceType<T> =>
+            .filter((definition): definition is InstanceType<T> =>
                 types.some((type) => definition instanceof type),
             );
     }
@@ -134,7 +136,7 @@ export class Visitor {
 
     matching<T>(temporary: InternalNode, f: () => T): T {
         const existingMatching = this.currentMatch;
-        this.currentMatch = temporary;
+        this.currentMatch = { node: temporary, root: existingMatching == null };
         const result = f();
         this.currentMatch = existingMatching;
         return result;
@@ -145,7 +147,7 @@ export class Visitor {
         this.db.register(temporary);
 
         const previousMatch = this.currentMatch;
-        this.currentMatch = temporary;
+        this.currentMatch = { node: temporary, root: false };
         this.visit(pattern);
         this.currentMatch = previousMatch;
 
@@ -222,10 +224,12 @@ export class VisitorCurrentDefinition {
 class Queue {
     afterTypeDefinitions: QueuedVisit[] = [];
     afterAllDefinitions: QueuedVisit[] = [];
+    afterAllExpressions: QueuedVisit[] = [];
 
     *[Symbol.iterator]() {
         yield* this.afterTypeDefinitions;
         yield* this.afterAllDefinitions;
+        yield* this.afterAllExpressions;
     }
 }
 

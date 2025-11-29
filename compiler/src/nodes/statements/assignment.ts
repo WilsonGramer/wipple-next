@@ -42,7 +42,7 @@ export class AssignmentNode extends StatementNode {
         visitor.enqueue("afterAllDefinitions", () => {
             // Try assigning to an existing constant if possible
             if (this.pattern instanceof VariablePatternNode) {
-                const constantDefinition = visitor.peek(this.pattern.variable, [
+                const [constantDefinition] = visitor.peek(this.pattern.variable, [
                     ConstantDefinition,
                 ]);
 

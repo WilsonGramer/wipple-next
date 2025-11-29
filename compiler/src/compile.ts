@@ -4,7 +4,11 @@ import type { FileNode } from "./nodes";
 import { BoundConstraintNode } from "./nodes/constraints/bound";
 import { Typed } from "./nodes/types";
 import { nullSpan, parseFile } from "./syntax";
-import { BoundConstraint } from "./typecheck/constraints/bound";
+import {
+    BoundConstraint,
+    type Instance,
+    substitutionsOverlap,
+} from "./typecheck/constraints/bound";
 import { Solver } from "./typecheck/solve";
 import type { Scope } from "./visit";
 import { DefinitionConstraints, Instances, Visitor } from "./visit";
@@ -42,8 +46,12 @@ export const makeRoot = () => {
 export const compile = (root: RootNode, options: CompileOptions) => {
     const { db } = root;
 
+    // Parse
+
     const parsedFiles = options.files.map(({ path, source }) => parseFile(db, path, source));
     root.files.push(...parsedFiles);
+
+    // Define/resolve names and collect constraints
 
     const topLevelScopes = db
         .list(TopLevelScopes)
@@ -60,14 +68,8 @@ export const compile = (root: RootNode, options: CompileOptions) => {
 
     root.facts.getOr(TopLevelScopes, []).push(topLevel.scope);
 
-    const definitionSolver = new Solver(db);
-    for (const [, group] of db.list(Typed)) {
-        if (!group.isEmpty()) {
-            definitionSolver.setGroup(group);
-        }
-    }
-
     // Solve constraints from each definition, implying all bounds
+
     for (const [definitionNode, constraints] of db.list(DefinitionConstraints)) {
         const existingGroup = definitionNode.facts.get(Typed);
         if (existingGroup != null && !existingGroup.isEmpty()) {
@@ -75,7 +77,7 @@ export const compile = (root: RootNode, options: CompileOptions) => {
             continue;
         }
 
-        const solver = Solver.from(definitionSolver);
+        const solver = new Solver(db);
 
         const instance = Iterator.from(db)
             .flatMap((node) => node.facts.get(Instances) ?? [])
@@ -105,10 +107,17 @@ export const compile = (root: RootNode, options: CompileOptions) => {
     // Solve constraints from top-level expressions
 
     const solver = new Solver(db); // definition constraints will be retrieved from `db` as needed
+    for (const [, group] of db.list(Typed)) {
+        if (!group.isEmpty()) {
+            solver.setGroup(group);
+        }
+    }
+
     solver.add(...topLevel.constraints);
     solver.run();
 
     addGroupsFrom(solver);
+    checkForOverlappingInstances(db, solver);
 };
 
 const addGroupsFrom = (solver: Solver) => {
@@ -121,6 +130,54 @@ const addGroupsFrom = (solver: Solver) => {
 
         for (const node of group.nodes) {
             node.facts.set(Typed, group);
+        }
+    }
+};
+
+export class OverlappingInstances extends Fact<Node[]> {
+    display(instances: Node[]): string {
+        return `has ${instances.length} overlapping instances`;
+    }
+}
+
+const checkForOverlappingInstances = (db: Db, solver: Solver) => {
+    for (const [traitDefinition, instances] of db.list(Instances)) {
+        const { defaultInstances = [], nonDefaultInstances = [] } = Object.groupBy(
+            instances,
+            (instance) => (instance.default ? "defaultInstances" : "nonDefaultInstances"),
+        );
+
+        for (const instances of [defaultInstances, nonDefaultInstances]) {
+            const overlapping = new Set<Instance>();
+            for (const leftInstance of instances) {
+                for (const rightInstance of instances) {
+                    if (leftInstance === rightInstance) {
+                        continue;
+                    }
+
+                    if (
+                        substitutionsOverlap(
+                            traitDefinition,
+                            leftInstance.substitutions,
+                            rightInstance.substitutions,
+                            solver,
+                        )
+                    ) {
+                        overlapping.add(leftInstance);
+                        overlapping.add(rightInstance);
+                    }
+                }
+            }
+
+            if (overlapping.size > 0) {
+                traitDefinition.facts.set(
+                    OverlappingInstances,
+                    overlapping
+                        .values()
+                        .map((instance) => instance.node)
+                        .toArray(),
+                );
+            }
         }
     }
 };

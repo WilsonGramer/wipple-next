@@ -15,7 +15,7 @@ import { nodeFilter } from "./node";
 
 Error.stackTraceLimit = 100;
 
-let jsonOutput: Record<string, any> = {};
+const jsonOutput: Record<string, any> = {};
 
 const compileCommand = (options: { run: boolean }) =>
     cmd.command({
@@ -53,7 +53,7 @@ const compileCommand = (options: { run: boolean }) =>
         },
         handler: async (args) => {
             if (args.json) {
-                jsonOutput = {};
+                chalk.level = 0; // disable colors
             }
 
             const libs = args.lib.map((libPath) => ({
@@ -181,13 +181,11 @@ const compileCommand = (options: { run: boolean }) =>
             }
 
             if (feedbackCount > 0) {
-                if (jsonOutput == null) {
+                if (require.main === module) {
                     console.error(
                         chalk.bold(`Compilation failed with ${feedbackCount} feedback item(s)`),
                     );
-                }
 
-                if (require.main === module) {
                     process.exit(1);
                 } else {
                     return;

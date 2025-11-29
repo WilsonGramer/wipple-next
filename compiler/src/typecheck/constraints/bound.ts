@@ -1,7 +1,7 @@
 import type { Type } from "..";
-import { displayType, instantiateType } from "..";
+import { displayType, instantiateType, traverseType, types, typesAreEqual } from "..";
 import { Fact } from "../../db";
-import type { Node } from "../../node";
+import { type Node } from "../../node";
 import { InstanceDefinitionNode } from "../../nodes/statements/instance-definition";
 import type { TraitDefinitionNode } from "../../nodes/statements/trait-definition";
 import type { TypeParameterNode } from "../../nodes/types/parameter";
@@ -258,3 +258,43 @@ const unifySubstitutions = (
 
 const applySubstitutions = (substitutions: Map<TypeParameterNode, Type>, solver: Solver) =>
     new Map(substitutions.entries().map(([parameter, type]) => [parameter, solver.apply(type)]));
+
+// Used for checking if instances overlap
+export const substitutionsOverlap = (
+    traitNode: Node,
+    left: Map<TypeParameterNode, Type>,
+    right: Map<TypeParameterNode, Type>,
+    solver: Solver,
+) => {
+    left = applySubstitutions(left, solver);
+    right = applySubstitutions(right, solver);
+
+    // Use the trait node as an arbitrary placeholder
+    const placeholder = traitNode;
+
+    let overlap = true;
+    for (let [parameter, leftType] of left) {
+        let rightType = right.get(parameter);
+        if (rightType == null) {
+            continue;
+        }
+
+        const replace = (type: Type) => {
+            if ("tag" in type && type.tag === types.parameter) {
+                return placeholder;
+            } else {
+                return type;
+            }
+        };
+
+        leftType = traverseType(leftType, replace);
+        rightType = traverseType(rightType, replace);
+
+        if (!typesAreEqual(leftType, rightType)) {
+            overlap = false;
+            break;
+        }
+    }
+
+    return overlap;
+};

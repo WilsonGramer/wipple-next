@@ -1,14 +1,14 @@
 import { type Fact } from "./db";
 import { InternalNode, type Node } from "./node";
 
-export function* zip<A, B>(
+export function* zip<A, B1, B2 = never>(
     left: Iterable<A>,
-    right: Iterable<B>,
+    right: Iterable<B1>,
     options: {
-        onmissing: (value: NoInfer<A>) => NoInfer<B>;
-        onextra: (value: NoInfer<B>) => void;
+        onmissing: (value: NoInfer<A>) => NoInfer<B1> | B2;
+        onextra: (value: NoInfer<B1>) => void;
     },
-): Generator<[A, B]> {
+): Generator<[A, B1 | B2]> {
     const leftIter = Iterator.from(left);
     const rightIter = Iterator.from(right);
 
@@ -31,16 +31,20 @@ export const zipNodes = <A extends Node, B extends Node>(
     },
 ) =>
     zip<A, B | InternalNode>(left, right, {
-        onmissing: (node: Node) => {
-            node.facts.set(options.missing, null);
-            const missing = new InternalNode(node.span);
-            node.db.register(missing);
-            return missing;
-        },
-        onextra: (node: Node) => {
-            node.facts.set(options.extra, null);
-        },
+        onmissing: zipNodes.onmissing(options.missing),
+        onextra: zipNodes.onextra(options.extra),
     });
+
+zipNodes.onmissing = (fact: typeof Fact<null>) => (node: Node) => {
+    node.facts.set(fact, null);
+    const missing = new InternalNode(node.span);
+    node.db.register(missing);
+    return missing;
+};
+
+zipNodes.onextra = (fact: typeof Fact<null>) => (node: Node) => {
+    node.facts.set(fact, null);
+};
 
 export const zipNodeMaps = <K, A extends Node, B extends Node>(
     left: Map<K, A>,

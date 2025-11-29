@@ -12,9 +12,9 @@ export abstract class PatternNode extends Node {
 
     visit(visitor: Visitor): void {
         this.facts.set(Typed, Group.empty(this));
-        this.matching = visitor.currentMatch;
+        this.matching = visitor.currentMatch.node;
 
-        visitor.constraint(new GroupConstraint(this, visitor.currentMatch));
+        visitor.constraint(new GroupConstraint(this, this.matching));
     }
 
     abstract temporaries(): Generator<InternalNode | VariablePatternNode>;

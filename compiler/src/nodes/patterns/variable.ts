@@ -18,7 +18,7 @@ export class VariablePatternNode extends PatternNode {
     visit(visitor: Visitor): void {
         super.visit(visitor);
 
-        visitor.define(this.variable, new VariableDefinition(this, visitor.currentMatch));
+        visitor.define(this.variable, new VariableDefinition(this, visitor.currentMatch.node));
     }
 
     codegen(codegen: Codegen): void {

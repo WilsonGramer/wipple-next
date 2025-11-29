@@ -30,7 +30,7 @@ export class CallExpressionNode extends ExpressionNode {
             const [unit] = this.inputs;
 
             if (unit instanceof VariableExpressionNode) {
-                const unitDefinition = visitor.peek(unit.variable, [ConstantDefinition]);
+                const unitDefinition = visitor.peek(unit.variable, [ConstantDefinition])[0];
 
                 if (unitDefinition?.attributes.unit) {
                     visitor.visit(unit);

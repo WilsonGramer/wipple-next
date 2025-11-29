@@ -27,15 +27,22 @@ export abstract class Node {
     }
 
     toString() {
-        return `${this.constructor.name}(${this.render()} @ ${this.span.path}:${
-            this.span.start.line
-        }:${this.span.start.column})`;
+        return `${this.constructor.name}(${this.render()})`;
     }
 
     render() {
-        // Collapse multiple lines
-        const source = this.span.source.trim().replace(/\n.*$/s, "⋯");
-        return "`" + source + "`";
+        const source = this.span.source
+            .replaceAll(/^--.*\n/g, "") // strip comments
+            .replace(/:.*/, "") // remove assigned value
+            .replace(/\n.*$/s, "⋯") // collapse multiple lines
+            .trim();
+
+        return (
+            "`" +
+            source +
+            "`" +
+            ` (${this.span.path}:${this.span.start.line}:${this.span.start.column})`
+        );
     }
 
     [util.inspect.custom]() {
