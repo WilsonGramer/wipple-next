@@ -11,7 +11,7 @@ import * as queries from "./queries";
 import type { Span } from "./span";
 import { displayType } from "./typecheck";
 
-const tokenTypes = ["type", "function", "typeParameter"] as const;
+const tokenTypes = ["type", "interface", "typeParameter", "function"] as const;
 
 export default () => {
     process.env.WIPPLE_LSP = "1";
@@ -150,8 +150,19 @@ export default () => {
         for (const node of db) {
             if (!filter(node)) continue;
 
+            // Don't highlight across whitespace
+            if (node.span.source.match(/\s/)) continue;
+
             for (const {} of queries.highlightType(node, filter)) {
                 tokens.push([node, "type"]);
+            }
+
+            for (const {} of queries.highlightTrait(node, filter)) {
+                tokens.push([node, "interface"]);
+            }
+
+            for (const {} of queries.highlightTypeParameter(node, filter)) {
+                tokens.push([node, "typeParameter"]);
             }
 
             for (const {} of queries.highlightFunction(node, filter)) {

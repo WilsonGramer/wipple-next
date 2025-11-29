@@ -1,18 +1,28 @@
 import { Typed, TypeNode } from "../nodes/types";
+import { TypeParameterNode } from "../nodes/types/parameter";
 import { types } from "../typecheck";
 import { Resolved } from "../visit";
-import { Defined } from "../visit/definitions";
+import { Defined, TraitDefinition } from "../visit/definitions";
 import { query } from "./query";
 
 export const highlightType = query(function* (node) {
-    if (node instanceof TypeNode) {
+    if (node instanceof TypeNode && !(node instanceof TypeParameterNode)) {
+        yield {};
+    }
+});
+
+export const highlightTrait = query(function* (node) {
+    if (
+        node.facts.get(Resolved)?.[1].some((d) => d instanceof TraitDefinition) ||
+        node.facts.get(Defined) instanceof TraitDefinition
+    ) {
         yield {};
     }
 });
 
 const highlightTag = (tag: unknown) =>
     query(function* (node) {
-        if (node.facts.get(Resolved) == null && node.facts.get(Defined) == null) {
+        if (node.facts.get(Resolved) == null || node.facts.get(Defined) != null) {
             return;
         }
 
