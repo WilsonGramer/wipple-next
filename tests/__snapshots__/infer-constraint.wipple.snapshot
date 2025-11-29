@@ -10,16 +10,19 @@ RootNode(`` @ <root>:1:1)
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/infer-constraint.wipple:1:1)
   has definition constraints
   is a definition
+  has type(s) `Number`
 
 TypeDefinitionNode(`[intrinsic] String : type` @ tests/infer-constraint.wipple:2:1)
   has definition constraints
   is a definition
+  has type(s) `String`
 
 TraitDefinitionNode(`Add : left right sum => trait (left right -> sum)` @ tests/infer-constraint.wipple:4:1)
   has definition constraints
   has type parameters
   is a definition
   has instances
+  has type(s) `left right -> sum`
 
 TypeParameterNode(`left` @ tests/infer-constraint.wipple:4:7)
   has type(s) `left`
@@ -52,6 +55,7 @@ InstanceDefinitionNode(`instance (Add Number Number Number) : _` @ tests/infer-c
   is a definition
   resolved to TraitDefinitionNode(`Add : left right sum => trait (left right -> sum)` @ tests/infer-constraint.wipple:4:1)
   has definition constraints
+  has type(s) `Number Number -> Number`
 
 NamedTypeNode(`Number` @ tests/infer-constraint.wipple:5:15)
   has type(s) `Number`
@@ -72,6 +76,7 @@ InstanceDefinitionNode(`instance (Add String String String) : _` @ tests/infer-c
   is a definition
   resolved to TraitDefinitionNode(`Add : left right sum => trait (left right -> sum)` @ tests/infer-constraint.wipple:4:1)
   has definition constraints
+  has type(s) `String String -> String`
 
 NamedTypeNode(`String` @ tests/infer-constraint.wipple:6:15)
   has type(s) `String`
@@ -92,6 +97,7 @@ ConstantDefinitionNode(`add :: left right -> sum where (Add left right sum)` @ t
   is a definition
   has definition constraints
   has type parameters
+  has type(s) `left right -> sum`
 
 FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:8:8)
   has type(s) `left right -> sum`
@@ -160,6 +166,7 @@ TraitDefinitionNode(`Add-Infer : left right (infer sum) => trait (left right -> 
   has type parameters
   is a definition
   has instances
+  has type(s) `left right -> sum`
 
 TypeParameterNode(`left` @ tests/infer-constraint.wipple:12:13)
   has type(s) `left`
@@ -192,6 +199,7 @@ InstanceDefinitionNode(`instance (Add-Infer Number Number Number) : _` @ tests/i
   is a definition
   resolved to TraitDefinitionNode(`Add-Infer : left right (infer sum) => trait (left right -> sum)` @ tests/infer-constraint.wipple:12:1)
   has definition constraints
+  has type(s) `Number Number -> Number`
 
 NamedTypeNode(`Number` @ tests/infer-constraint.wipple:13:21)
   has type(s) `Number`
@@ -212,6 +220,7 @@ InstanceDefinitionNode(`instance (Add-Infer String String String) : _` @ tests/i
   is a definition
   resolved to TraitDefinitionNode(`Add-Infer : left right (infer sum) => trait (left right -> sum)` @ tests/infer-constraint.wipple:12:1)
   has definition constraints
+  has type(s) `String String -> String`
 
 NamedTypeNode(`String` @ tests/infer-constraint.wipple:14:21)
   has type(s) `String`
@@ -232,6 +241,7 @@ ConstantDefinitionNode(`add-infer :: left right -> sum where (Add-Infer left rig
   is a definition
   has definition constraints
   has type parameters
+  has type(s) `left right -> sum`
 
 FunctionTypeNode(`left right -> sum` @ tests/infer-constraint.wipple:16:14)
   has type(s) `left right -> sum`

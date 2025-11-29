@@ -10,15 +10,18 @@ RootNode(`` @ <root>:1:1)
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/default-constraint.wipple:1:1)
   has definition constraints
   is a definition
+  has type(s) `Number`
 
 TypeDefinitionNode(`[intrinsic] String : type` @ tests/default-constraint.wipple:2:1)
   has definition constraints
   is a definition
+  has type(s) `String`
 
 TypeDefinitionNode(`[intrinsic] List : element => type` @ tests/default-constraint.wipple:3:1)
   has definition constraints
   has type parameters
   is a definition
+  has type(s) `List element`
 
 TypeParameterNode(`element` @ tests/default-constraint.wipple:3:20)
   has type(s) `element`
@@ -28,6 +31,7 @@ TypeDefinitionNode(`[intrinsic] Set : element => type` @ tests/default-constrain
   has definition constraints
   has type parameters
   is a definition
+  has type(s) `Set element`
 
 TypeParameterNode(`element` @ tests/default-constraint.wipple:4:19)
   has type(s) `element`
@@ -38,6 +42,7 @@ TraitDefinitionNode(`Collect : element collection => trait (element -> collectio
   has type parameters
   is a definition
   has instances
+  has type(s) `element -> collection`
 
 TypeParameterNode(`element` @ tests/default-constraint.wipple:6:11)
   has type(s) `element`
@@ -64,6 +69,7 @@ InstanceDefinitionNode(`instance (Collect element (List element))` @ tests/defau
   has definition constraints
   has type parameters
   is missing instance value
+  has type(s) `element -> List element`
 
 TypeParameterNode(`element` @ tests/default-constraint.wipple:7:19)
   has type(s) `element`
@@ -83,6 +89,7 @@ InstanceDefinitionNode(`instance (Collect element (Set element))` @ tests/defaul
   has definition constraints
   has type parameters
   is missing instance value
+  has type(s) `element -> Set element`
 
 TypeParameterNode(`element` @ tests/default-constraint.wipple:8:19)
   has type(s) `element`
@@ -100,6 +107,7 @@ ConstantDefinitionNode(`-- Default and bound constraints are resolved in source 
   is a definition
   has definition constraints
   has type parameters
+  has type(s) `element -> output`
 
 FunctionTypeNode(`element -> output` @ tests/default-constraint.wipple:11:12)
   has type(s) `element -> output`

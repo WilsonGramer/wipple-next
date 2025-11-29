@@ -9,12 +9,14 @@ RootNode(`` @ <root>:1:1)
 TypeDefinitionNode(`[intrinsic] Boolean : type` @ tests/complex-nested-bounds.wipple:1:1)
   has definition constraints
   is a definition
+  has type(s) `Boolean`
 
 TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
   has definition constraints
   has type parameters
   is a definition
   has instances
+  has type(s) `value -> value`
 
 TypeParameterNode(`value` @ tests/complex-nested-bounds.wipple:3:7)
   has type(s) `value`
@@ -35,6 +37,7 @@ InstanceDefinitionNode(`instance (Not Boolean) : _` @ tests/complex-nested-bound
   is a definition
   resolved to TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
   has definition constraints
+  has type(s) `Boolean -> Boolean`
 
 NamedTypeNode(`Boolean` @ tests/complex-nested-bounds.wipple:4:15)
   has type(s) `Boolean`
@@ -48,6 +51,7 @@ InstanceDefinitionNode(`instance (Not (a -> b)) where (Not b) : f -> x -> not (f
   resolved to TraitDefinitionNode(`Not : value => trait (value -> value)` @ tests/complex-nested-bounds.wipple:3:1)
   has definition constraints
   has type parameters
+  has type(s) `(a -> b) -> a -> b`
 
 FunctionTypeNode(`a -> b` @ tests/complex-nested-bounds.wipple:5:16)
   has type(s) `a -> b`
@@ -107,6 +111,7 @@ ConstantDefinitionNode(`not :: value -> value where (Not value)` @ tests/complex
   is a definition
   has definition constraints
   has type parameters
+  has type(s) `value -> value`
 
 FunctionTypeNode(`value -> value` @ tests/complex-nested-bounds.wipple:7:8)
   has type(s) `value -> value`

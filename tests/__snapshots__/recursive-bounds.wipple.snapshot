@@ -10,15 +10,18 @@ RootNode(`` @ <root>:1:1)
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/recursive-bounds.wipple:1:1)
   has definition constraints
   is a definition
+  has type(s) `Number`
 
 TypeDefinitionNode(`[intrinsic] String : type` @ tests/recursive-bounds.wipple:2:1)
   has definition constraints
   is a definition
+  has type(s) `String`
 
 TypeDefinitionNode(`[intrinsic] Maybe : value => type` @ tests/recursive-bounds.wipple:3:1)
   has definition constraints
   has type parameters
   is a definition
+  has type(s) `Maybe value`
 
 TypeParameterNode(`value` @ tests/recursive-bounds.wipple:3:21)
   has type(s) `value`
@@ -29,6 +32,7 @@ TraitDefinitionNode(`Describe : value => trait (value -> String)` @ tests/recurs
   has type parameters
   is a definition
   has instances
+  has type(s) `value -> String`
 
 TypeParameterNode(`value` @ tests/recursive-bounds.wipple:5:12)
   has type(s) `value`
@@ -50,6 +54,7 @@ InstanceDefinitionNode(`instance (Describe String)` @ tests/recursive-bounds.wip
   resolved to TraitDefinitionNode(`Describe : value => trait (value -> String)` @ tests/recursive-bounds.wipple:5:1)
   has definition constraints
   is missing instance value
+  has type(s) `String -> String`
 
 NamedTypeNode(`String` @ tests/recursive-bounds.wipple:6:20)
   has type(s) `String`
@@ -61,6 +66,7 @@ InstanceDefinitionNode(`instance (Describe (Maybe value)) where (Describe value)
   has definition constraints
   has type parameters
   is missing instance value
+  has type(s) `(Maybe value) -> String`
 
 NamedTypeNode(`Maybe value` @ tests/recursive-bounds.wipple:7:21)
   has type(s) `Maybe value`

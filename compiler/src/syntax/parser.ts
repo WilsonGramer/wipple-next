@@ -123,28 +123,11 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         return new AttributeNode(name.parse(), parseOptional(value), span(this));
     },
 
-    AttributeValue(value) {
-        return value.parse();
-    },
-
     StringAttributeValue(string) {
         return new StringAttributeValue(parseString(string), span(string));
     },
 
     // Expressions
-
-    Expression(expression) {
-        return expression.parse();
-    },
-
-    ExpressionElement(expression) {
-        return expression.parse();
-    },
-
-    AtomicExpression(expression) {
-        return expression.parse();
-    },
-
     ParenthesizedExpression(
         leftParenthesis,
         leftLineBreak,
@@ -242,25 +225,16 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         return new IntrinsicExpressionNode(parseString(string), parseList(expressions), span(this));
     },
 
-    ToExpression: operator("left", span),
-
-    ByExpression: operator("left", span),
-
-    PowerExpression: operator("right", span),
-
-    MultiplyExpression: operator("left", span),
-
-    AddExpression: operator("left", span),
-
-    CompareExpression: operator("left", span),
-
-    EqualExpression: operator("left", span),
-
-    AndExpression: operator("left", span),
-
-    OrExpression: operator("left", span),
-
-    ApplyExpression: operator("left", span),
+    ToExpression_binary: operator(span),
+    ByExpression_binary: operator(span),
+    PowerExpression_binary: operator(span),
+    MultiplyExpression_binary: operator(span),
+    AddExpression_binary: operator(span),
+    CompareExpression_binary: operator(span),
+    EqualExpression_binary: operator(span),
+    AndExpression_binary: operator(span),
+    OrExpression_binary: operator(span),
+    ApplyExpression_binary: operator(span),
 
     TupleExpression(first, tupleOperator, leftLineBreak, rest, rightLineBreak, trailingOperator) {
         return new TupleExpressionNode(parseOptionalFirstRest(first, rest), span(this));
@@ -301,19 +275,6 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
     },
 
     // Patterns
-
-    Pattern(pattern) {
-        return pattern.parse();
-    },
-
-    PatternElement(pattern) {
-        return pattern.parse();
-    },
-
-    AtomicPattern(pattern) {
-        return pattern.parse();
-    },
-
     ParenthesizedPattern(
         leftParenthesis,
         leftLineBreak,
@@ -386,19 +347,6 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
     },
 
     // Types
-
-    Type(type) {
-        return type.parse();
-    },
-
-    TypeElement(type) {
-        return type.parse();
-    },
-
-    AtomicType(type) {
-        return type.parse();
-    },
-
     ParenthesizedType(leftParenthesis, leftLineBreak, type, rightLineBreak, rightParenthesis) {
         return type.parse();
     },
@@ -454,10 +402,6 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         return parseList(typeParameters);
     },
 
-    TypeParameter(parameter) {
-        return parameter.parse();
-    },
-
     NamedTypeParameter(typeParameterName) {
         return new TypeParameterNode(
             typeParameterName.parse(),
@@ -480,10 +424,6 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
 
     Constraints(whereKeyword, constraints) {
         return parseList(constraints);
-    },
-
-    Constraint(constraint) {
-        return constraint.parse();
     },
 
     BoundConstraint(
@@ -515,10 +455,6 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
         return parseList(statements);
     },
 
-    Statement(statement) {
-        return statement.parse();
-    },
-
     TypeDefinitionStatement(
         comments,
         attributes,
@@ -535,10 +471,6 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
             typeRepresentation.parse(),
             span(this),
         );
-    },
-
-    TypeRepresentation(representation) {
-        return representation.parse();
     },
 
     MarkerTypeRepresentation(typeKeyword) {
@@ -699,51 +631,21 @@ const parser = (span: SpanFn): GrammarActionDict<{}> => ({
     },
 });
 
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-const operator =
-    (associativity: "left" | "right", span: SpanFn) =>
-    (
-        first: NonterminalNode,
-        leftLineBreak: any,
-        operator: IterationNode,
-        rightLineBreak: any,
-        rest: IterationNode,
-    ) => {
-        if (rest.children.length === 0) {
-            return first.parse();
-        }
-
-        switch (associativity) {
-            case "left": {
-                return rest.children.reduce<any>(
-                    ({ node: left, span: leftSpan }, right) => ({
-                        node: new OperatorExpressionNode(
-                            operator.children[0].sourceString,
-                            left,
-                            (right as NonterminalNode).parse(),
-                            span(leftSpan, right),
-                        ),
-                        span: right,
-                    }),
-                    { node: first.parse(), span: first },
-                ).node;
-            }
-            case "right": {
-                return rest.children.reduceRight<any>(
-                    ({ node: right, span: rightSpan }, left) => ({
-                        node: new OperatorExpressionNode(
-                            operator.sourceString,
-                            (left as NonterminalNode).parse(),
-                            right,
-                            span(left, rightSpan),
-                        ),
-                        span: left,
-                    }),
-                    { node: first.parse(), span: first },
-                ).node;
-            }
-        }
+const operator = (span: SpanFn) =>
+    function (
+        this: NonterminalNode,
+        left: NonterminalNode,
+        leftLineBreak: IterationNode,
+        operator: TerminalNode,
+        rightLineBreak: IterationNode,
+        right: NonterminalNode,
+    ) {
+        return new OperatorExpressionNode(
+            operator.sourceString,
+            left.parse(),
+            right.parse(),
+            span(this),
+        );
     };
 
 export default parser;

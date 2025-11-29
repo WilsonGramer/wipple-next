@@ -10,10 +10,12 @@ RootNode(`` @ <root>:1:1)
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/sequence.wipple:1:1)
   has definition constraints
   is a definition
+  has type(s) `Number`
 
 TypeDefinitionNode(`[intrinsic] String : type` @ tests/sequence.wipple:2:1)
   has definition constraints
   is a definition
+  has type(s) `String`
 
 TypeDefinitionNode(`Boolean : type {⋯` @ tests/sequence.wipple:4:1)
   has definition constraints
@@ -23,15 +25,18 @@ TypeDefinitionNode(`Boolean : type {⋯` @ tests/sequence.wipple:4:1)
 _InternalNode(`True` @ tests/sequence.wipple:5:5)
   has definition constraints
   is a definition
+  has type(s) `Boolean`
 
 _InternalNode(`False` @ tests/sequence.wipple:6:5)
   has definition constraints
   is a definition
+  has type(s) `Boolean`
 
 TypeDefinitionNode(`Sequence : element => type {⋯` @ tests/sequence.wipple:9:1)
   has definition constraints
   has type parameters
   is a definition
+  has type(s) `Sequence element`
 
 TypeParameterNode(`element` @ tests/sequence.wipple:9:12)
   has type(s) `element`
@@ -48,6 +53,7 @@ TypeDefinitionNode(`Box : value => type {⋯` @ tests/sequence.wipple:13:1)
   has definition constraints
   has type parameters
   is a definition
+  has type(s) `Box value`
 
 TypeParameterNode(`value` @ tests/sequence.wipple:13:7)
   has type(s) `value`
@@ -62,6 +68,7 @@ TraitDefinitionNode(`As-Sequence : collection (infer element) => trait (collecti
   has type parameters
   is a definition
   has instances
+  has type(s) `collection -> Sequence element`
 
 TypeParameterNode(`collection` @ tests/sequence.wipple:17:15)
   has type(s) `collection`
@@ -91,6 +98,7 @@ InstanceDefinitionNode(`instance (As-Sequence (Box value) value) : _` @ tests/se
   resolved to TraitDefinitionNode(`As-Sequence : collection (infer element) => trait (collection -> Sequence element)` @ tests/sequence.wipple:17:1)
   has definition constraints
   has type parameters
+  has type(s) `(Box value) -> Sequence value`
 
 NamedTypeNode(`Box value` @ tests/sequence.wipple:18:24)
   has type(s) `Box value`
@@ -111,6 +119,7 @@ ConstantDefinitionNode(`filter :: (item -> Boolean) -> collection -> Sequence it
   is a definition
   has definition constraints
   has type parameters
+  has type(s) `(item -> Boolean) -> collection -> Sequence item`
 
 FunctionTypeNode(`(item -> Boolean) -> collection -> Sequence item` @ tests/sequence.wipple:20:11)
   has type(s) `(item -> Boolean) -> collection -> Sequence item`

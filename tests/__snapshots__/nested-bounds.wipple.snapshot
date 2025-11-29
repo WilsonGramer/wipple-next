@@ -10,16 +10,19 @@ RootNode(`` @ <root>:1:1)
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/nested-bounds.wipple:1:1)
   has definition constraints
   is a definition
+  has type(s) `Number`
 
 TypeDefinitionNode(`[intrinsic] String : type` @ tests/nested-bounds.wipple:2:1)
   has definition constraints
   is a definition
+  has type(s) `String`
 
 TraitDefinitionNode(`A : value => trait (value -> ())` @ tests/nested-bounds.wipple:4:1)
   has definition constraints
   has type parameters
   is a definition
   has instances
+  has type(s) `value -> ()`
 
 TypeParameterNode(`value` @ tests/nested-bounds.wipple:4:5)
   has type(s) `value`
@@ -40,6 +43,7 @@ InstanceDefinitionNode(`instance (A Number)` @ tests/nested-bounds.wipple:5:1)
   resolved to TraitDefinitionNode(`A : value => trait (value -> ())` @ tests/nested-bounds.wipple:4:1)
   has definition constraints
   is missing instance value
+  has type(s) `Number -> ()`
 
 NamedTypeNode(`Number` @ tests/nested-bounds.wipple:5:13)
   has type(s) `Number`
@@ -50,6 +54,7 @@ InstanceDefinitionNode(`instance (A String)` @ tests/nested-bounds.wipple:6:1)
   resolved to TraitDefinitionNode(`A : value => trait (value -> ())` @ tests/nested-bounds.wipple:4:1)
   has definition constraints
   is missing instance value
+  has type(s) `String -> ()`
 
 NamedTypeNode(`String` @ tests/nested-bounds.wipple:6:13)
   has type(s) `String`
@@ -60,6 +65,7 @@ TraitDefinitionNode(`B : value => trait (value -> ())` @ tests/nested-bounds.wip
   has type parameters
   is a definition
   has instances
+  has type(s) `value -> ()`
 
 TypeParameterNode(`value` @ tests/nested-bounds.wipple:8:5)
   has type(s) `value`
@@ -81,6 +87,7 @@ InstanceDefinitionNode(`instance (B value) where (A value)` @ tests/nested-bound
   has definition constraints
   has type parameters
   is missing instance value
+  has type(s) `value -> ()`
 
 TypeParameterNode(`value` @ tests/nested-bounds.wipple:9:13)
   has type(s) `value`

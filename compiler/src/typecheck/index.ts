@@ -60,9 +60,9 @@ export const typeReferencesNode = (type: Type, ...nodes: (Node | undefined)[]) =
 };
 
 export const typesAreEqual = (left: Type, right: Type): boolean => {
-    if (left instanceof Node || right instanceof Node) {
-        return left === right;
-    } else {
+    if (left === right) {
+        return true;
+    } else if (!(left instanceof Node) && !(right instanceof Node)) {
         return (
             left.tag === right.tag &&
             left.children.length === right.children.length &&
@@ -71,6 +71,8 @@ export const typesAreEqual = (left: Type, right: Type): boolean => {
                 return typesAreEqual(leftChild, rightChild);
             })
         );
+    } else {
+        return false;
     }
 };
 

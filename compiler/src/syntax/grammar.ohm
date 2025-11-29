@@ -27,7 +27,6 @@ Grammar  {
         | AsExpression
         | AnnotateExpression
         | OperatorExpression
-        | ExpressionElement
 
     ExpressionElement =
         | FormatExpression
@@ -100,34 +99,44 @@ Grammar  {
         ApplyExpression
 
     ApplyExpression =
-        OrExpression (lineBreak? "." lineBreak? OrExpression)*
+        | ApplyExpression lineBreak? "." lineBreak? OrExpression -- binary
+        | OrExpression
 
     OrExpression =
-        AndExpression (lineBreak? keyword<"or"> lineBreak? AndExpression)*
+        | OrExpression lineBreak? keyword<"or"> lineBreak? AndExpression -- binary
+        | AndExpression
 
     AndExpression =
-        EqualExpression (lineBreak? keyword<"and"> lineBreak? EqualExpression)*
+        | AndExpression lineBreak? keyword<"and"> lineBreak? EqualExpression -- binary
+        | EqualExpression
 
     EqualExpression =
-        CompareExpression ((lineBreak? ("=" | "/=") lineBreak? CompareExpression))*
+        | EqualExpression lineBreak? ("=" | "/=") lineBreak? CompareExpression -- binary
+        | CompareExpression
 
     CompareExpression =
-        AddExpression ((lineBreak? ("<=" | "<" | ">=" | ">") lineBreak? AddExpression))*
+        | CompareExpression lineBreak? ("<=" | "<" | ">=" | ">") lineBreak? AddExpression -- binary
+        | AddExpression
 
     AddExpression =
-        MultiplyExpression ((lineBreak? ("+" | "-") lineBreak? MultiplyExpression))*
+        | AddExpression lineBreak? ("+" | "-") lineBreak? MultiplyExpression -- binary
+        | MultiplyExpression
 
     MultiplyExpression =
-        PowerExpression ((lineBreak? ("*" | "/" | "%") lineBreak? PowerExpression))*
+        | MultiplyExpression lineBreak? ("*" | "/" | "%") lineBreak? PowerExpression -- binary
+        | PowerExpression
 
     PowerExpression =
-        ByExpression ((lineBreak? "^" lineBreak? ByExpression))*
+        | ByExpression lineBreak? "^" lineBreak? PowerExpression -- binary
+        | ByExpression
 
     ByExpression =
-        ToExpression ((lineBreak? keyword<"by"> lineBreak? ToExpression))*
+        | ByExpression lineBreak? keyword<"by"> lineBreak? ToExpression -- binary
+        | ToExpression
 
     ToExpression =
-        ExpressionElement ((lineBreak? keyword<"to"> lineBreak? ExpressionElement))*
+        | ToExpression lineBreak? keyword<"to"> lineBreak? ExpressionElement -- binary
+        | ExpressionElement
 
     TupleExpression =
         ExpressionElement (";" lineBreak? ExpressionElement lineBreak?)+ ";"?

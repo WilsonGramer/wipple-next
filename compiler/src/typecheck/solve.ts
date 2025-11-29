@@ -228,14 +228,11 @@ export class Solver {
         }
     }
 
-    finish(): Group[] {
-        return this.groups
-            .entries()
-            .map(([nodes, types]): Group => {
-                types = types.map((type) => this.apply(type) as ConstructedType);
-                return new Group(nodes, types).normalize();
-            })
-            .toArray();
+    *toGroups() {
+        for (let [nodes, types] of this.groups) {
+            types = types.map((type) => this.apply(type) as ConstructedType);
+            yield new Group(nodes, types).normalize();
+        }
     }
 }
 

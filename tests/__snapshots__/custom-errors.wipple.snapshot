@@ -10,16 +10,19 @@ RootNode(`` @ <root>:1:1)
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/custom-errors.wipple:1:1)
   has definition constraints
   is a definition
+  has type(s) `Number`
 
 TypeDefinitionNode(`[intrinsic] String : type` @ tests/custom-errors.wipple:2:1)
   has definition constraints
   is a definition
+  has type(s) `String`
 
 TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has definition constraints
   has type parameters
   is a definition
   has instances
+  has type(s) `left right -> sum`
 
 TypeParameterNode(`left` @ tests/custom-errors.wipple:4:7)
   has type(s) `left`
@@ -52,6 +55,7 @@ InstanceDefinitionNode(`instance (Add Number Number Number) : _` @ tests/custom-
   is a definition
   resolved to TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has definition constraints
+  has type(s) `Number Number -> Number`
 
 NamedTypeNode(`Number` @ tests/custom-errors.wipple:5:15)
   has type(s) `Number`
@@ -72,6 +76,7 @@ InstanceDefinitionNode(`instance (Add String String String) : _` @ tests/custom-
   is a definition
   resolved to TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has definition constraints
+  has type(s) `String String -> String`
 
 NamedTypeNode(`String` @ tests/custom-errors.wipple:6:15)
   has type(s) `String`
@@ -93,6 +98,7 @@ InstanceDefinitionNode(`-- Missing parentheses around the inputs to `+`.⋯` @ t
   resolved to TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has definition constraints
   has type parameters
+  has type(s) `() right -> sum`
 
 UnitTypeNode(`()` @ tests/custom-errors.wipple:9:23)
   has type(s) `()`
@@ -110,6 +116,7 @@ InstanceDefinitionNode(`-- Cannot add [`left`] and [`right`].⋯` @ tests/custom
   resolved to TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has definition constraints
   has type parameters
+  has type(s) `left right -> sum`
 
 TypeParameterNode(`left` @ tests/custom-errors.wipple:12:33)
   has type(s) `left`

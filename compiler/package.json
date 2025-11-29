@@ -6,22 +6,25 @@
         "build": "rm -rf dist && npm run build:ohm && node build.mjs",
         "build:ohm": "ohm generateBundles --withTypes --esm 'src/**/*.ohm'",
         "test": "npm run build && vitest run",
-        "exe": "npm run build && (EXE=/usr/local/bin/wipple; echo '#!/usr/bin/env node' > $EXE && cat ./dist/index.js >> $EXE && chmod +x $EXE)"
+        "exe": "EXE=/usr/local/bin/wipple; echo '#!/usr/bin/env node' > $EXE && cat ./dist/index.js >> $EXE && chmod +x $EXE"
     },
     "dependencies": {
         "chalk": "^5.6.2",
         "cmd-ts": "^0.14.2",
         "dedent": "^1.7.0",
+        "line-column": "^1.0.2",
         "moo": "^0.5.2",
         "progress": "^2.0.3",
         "source-map": "^0.7.6",
         "vscode-languageserver": "^9.0.1",
         "vscode-languageserver-textdocument": "^1.0.12",
+        "wipple-syntax": "file:../syntax/pkg",
         "wrap-ansi": "^9.0.2"
     },
     "devDependencies": {
         "@eslint/js": "^9.39.1",
         "@ohm-js/cli": "^2.0.1",
+        "@types/line-column": "^1.0.2",
         "@types/moo": "^0.5.10",
         "@types/node": "^24.5.2",
         "@types/progress": "^2.0.7",
@@ -31,6 +34,7 @@
         "eslint": "^9.39.1",
         "source-map-support": "^0.5.21",
         "typescript": "^5.9.3",
-        "typescript-eslint": "^8.47.0"
+        "typescript-eslint": "^8.47.0",
+        "vite-plugin-wasm": "^3.5.0"
     }
 }

@@ -38,7 +38,6 @@ export abstract class Node {
         return "`" + source + "`";
     }
 
-    // eslint-disable-next-line
     [util.inspect.custom]() {
         return this.toString();
     }

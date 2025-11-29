@@ -1,7 +1,7 @@
 test*.wipple
 out.mjs
 
-*.0x/
+*.cpuprofile
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,node

@@ -9,16 +9,19 @@ RootNode(`` @ <root>:1:1)
 TypeDefinitionNode(`A : type` @ tests/implied-instance.wipple:1:1)
   has definition constraints
   is a definition
+  has type(s) `A`
 
 TypeDefinitionNode(`B : type` @ tests/implied-instance.wipple:2:1)
   has definition constraints
   is a definition
+  has type(s) `B`
 
 TraitDefinitionNode(`T : value => trait (value -> ())` @ tests/implied-instance.wipple:4:1)
   has definition constraints
   has type parameters
   is a definition
   has instances
+  has type(s) `value -> ()`
 
 TypeParameterNode(`value` @ tests/implied-instance.wipple:4:5)
   has type(s) `value`
@@ -38,6 +41,7 @@ TraitDefinitionNode(`U : value => trait (value -> ())` @ tests/implied-instance.
   has definition constraints
   has type parameters
   is a definition
+  has type(s) `value -> ()`
 
 TypeParameterNode(`value` @ tests/implied-instance.wipple:5:5)
   has type(s) `value`
@@ -59,6 +63,7 @@ InstanceDefinitionNode(`instance (T value) where (U value)` @ tests/implied-inst
   has definition constraints
   has type parameters
   is missing instance value
+  has type(s) `value -> ()`
 
 TypeParameterNode(`value` @ tests/implied-instance.wipple:7:13)
   has type(s) `value`
@@ -75,6 +80,7 @@ ConstantDefinitionNode(`t :: value -> () where (U value)` @ tests/implied-instan
   is a definition
   has definition constraints
   has type parameters
+  has type(s) `value -> ()`
 
 FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:9:6)
   has type(s) `value -> ()`

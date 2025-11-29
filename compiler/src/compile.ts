@@ -4,7 +4,7 @@ import type { FileNode } from "./nodes";
 import { BoundConstraintNode } from "./nodes/constraints/bound";
 import { Typed } from "./nodes/types";
 import type { Span } from "./span";
-import { debugParseTree, nullSpan, parseFile, SyntaxError } from "./syntax";
+import { nullSpan, parseFile, SyntaxError } from "./syntax";
 import { BoundConstraint } from "./typecheck/constraints/bound";
 import { Solver } from "./typecheck/solve";
 import type { Scope } from "./visit";
@@ -120,7 +120,6 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
         solver.run();
 
         addGroupsFrom(solver);
-        definitionNode.facts.delete(Typed);
     }
 
     // Solve constraints from top-level expressions
@@ -135,7 +134,7 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
 };
 
 const addGroupsFrom = (solver: Solver) => {
-    const groups = solver.finish();
+    const groups = solver.toGroups();
 
     for (const group of groups) {
         if (group.isEmpty()) {
