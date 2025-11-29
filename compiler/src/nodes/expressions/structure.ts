@@ -3,7 +3,7 @@ import { Fact } from "../../db";
 import { type Node } from "../../node";
 import type { Span } from "../../span";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { zipNodeMaps } from "../../util";
+import { zipNodeMaps } from "../../util/zip";
 import type { Visitor } from "../../visit";
 import { StructureConstructorDefinition } from "../../visit/definitions";
 import { ExpressionNode } from "./index";

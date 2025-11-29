@@ -98,7 +98,7 @@ NamedTypeNode(`Number` (tests/recursive-bounds.wipple:10:22))
   resolved to 1 definition(s)
 
 ",
-  "feedback": "ConstructorExpressionNode(`Describe` (tests/recursive-bounds.wipple:10:1)) (unresolved-bound):
+  "feedback": "`Describe` (tests/recursive-bounds.wipple:10:1) (unresolved-bound):
 
   `Describe` (tests/recursive-bounds.wipple:10:1) requires the instance `Describe Number`, but this
   instance isn't defined.

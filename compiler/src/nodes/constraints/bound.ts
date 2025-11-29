@@ -1,7 +1,7 @@
 import type { Node } from "../../node";
 import type { Span } from "../../span";
 import { BoundConstraint } from "../../typecheck/constraints/bound";
-import { zipNodes } from "../../util";
+import { zipNodes } from "../../util/zip";
 import type { Visitor } from "../../visit";
 import { TraitDefinition } from "../../visit/definitions";
 import type { TypeNode } from "../types";

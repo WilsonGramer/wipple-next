@@ -18,7 +18,6 @@
         "source-map": "^0.7.6",
         "vscode-languageserver": "^9.0.1",
         "vscode-languageserver-textdocument": "^1.0.12",
-        "wipple-syntax": "file:../syntax/pkg",
         "wrap-ansi": "^9.0.2"
     },
     "devDependencies": {

@@ -137,7 +137,7 @@ UnitExpressionNode(`()` (tests/nested-bounds.wipple:13:3))
   has type(s) `()`
 
 ",
-  "feedback": "ConstructorExpressionNode(`B` (tests/nested-bounds.wipple:13:1)) (unresolved-bound):
+  "feedback": "`B` (tests/nested-bounds.wipple:13:1) (unresolved-bound):
 
   `B` (tests/nested-bounds.wipple:13:1) requires the instance `A ()`, but this instance isn't
   defined.

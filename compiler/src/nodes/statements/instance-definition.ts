@@ -5,7 +5,7 @@ import type { Span } from "../../span";
 import type { Type } from "../../typecheck";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { zipNodes } from "../../util";
+import { zipNodes } from "../../util/zip";
 import type { Visitor } from "../../visit";
 import { Instances } from "../../visit";
 import type { InstanceAttributes } from "../../visit/attributes";

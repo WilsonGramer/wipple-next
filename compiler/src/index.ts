@@ -170,12 +170,10 @@ const compileCommand = (options: { run: boolean }) =>
                     .join("\n\n");
 
                 if (args.json) {
-                    jsonOutput.feedback += `${feedback.on.toString()} (${feedback.id}):\n\n${rendered}\n`;
+                    jsonOutput.feedback += `${feedback.on.render()} (${feedback.id}):\n\n${rendered}\n`;
                 } else {
                     console.log(
-                        `${chalk.underline(feedback.on.toString())}${chalk.underline(
-                            ` (${feedback.id}):`,
-                        )}\n\n${rendered}\n`,
+                        `${chalk.underline(`${feedback.on.render()} (${feedback.id}):`)}\n\n${rendered}\n`,
                     );
                 }
             }

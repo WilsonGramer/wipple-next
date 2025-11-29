@@ -5,7 +5,7 @@ import type { Span } from "../../span";
 import { types } from "../../typecheck";
 import { GroupConstraint } from "../../typecheck/constraints/group";
 import { TypeConstraint } from "../../typecheck/constraints/type";
-import { zip, zipNodes } from "../../util";
+import { zip, zipNodes } from "../../util/zip";
 import type { Visitor } from "../../visit";
 import { NamedTypeNode } from "../types/named";
 import { CallExpressionNode } from "./call";

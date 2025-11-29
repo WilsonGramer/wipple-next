@@ -216,7 +216,7 @@ VariableExpressionNode(`box` (tests/sequence.wipple:24:20))
   resolved to 1 definition(s)
 
 ",
-  "feedback": "WildcardPatternNode(`_` (tests/sequence.wipple:23:14)) (conflicting-types):
+  "feedback": "`_` (tests/sequence.wipple:23:14) (conflicting-types):
 
   `_` (tests/sequence.wipple:23:14) is `String` or `Number`, but it can only be one of these.
 

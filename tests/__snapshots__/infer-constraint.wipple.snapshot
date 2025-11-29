@@ -303,13 +303,13 @@ NamedTypeNode(`String` (tests/infer-constraint.wipple:18:23))
   resolved to 1 definition(s)
 
 ",
-  "feedback": "VariableExpressionNode(`add` (tests/infer-constraint.wipple:10:6)) (unresolved-bound):
+  "feedback": "`add` (tests/infer-constraint.wipple:10:6) (unresolved-bound):
 
   `add` (tests/infer-constraint.wipple:10:6) requires the instance `Add Number Number String`, but
   this instance isn't defined.
 
   Double-check that these types are correct.
-WildcardPatternNode(`_` (tests/infer-constraint.wipple:18:1)) (conflicting-types):
+`_` (tests/infer-constraint.wipple:18:1) (conflicting-types):
 
   `_` (tests/infer-constraint.wipple:18:1) is `Number` or `String`, but it can only be one of these.
 

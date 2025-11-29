@@ -191,13 +191,13 @@ PlaceholderTypeNode(`_` (tests/default-constraint.wipple:14:26))
   has type(s) `String`
 
 ",
-  "feedback": "NamedTypeNode(`List _` (tests/default-constraint.wipple:11:47)) (incomplete-type):
+  "feedback": "`List _` (tests/default-constraint.wipple:11:47) (incomplete-type):
 
   Missing information for the type of `List _` (tests/default-constraint.wipple:11:47).
 
   Wipple determined this code is `List _`, but it needs some more information for the `_`
   placeholders.
-PlaceholderTypeNode(`_` (tests/default-constraint.wipple:11:52)) (unknown-type):
+`_` (tests/default-constraint.wipple:11:52) (unknown-type):
 
   Could not determine the type of `_` (tests/default-constraint.wipple:11:52).
 

@@ -2,6 +2,7 @@ import * as util from "node:util";
 import type { Codegen } from "./codegen";
 import { Facts, type Db } from "./db";
 import type { Span } from "./span";
+import { code, extra } from "./util/color";
 import type { Visitor } from "./visit";
 
 export abstract class Node {
@@ -37,12 +38,13 @@ export abstract class Node {
             .replace(/\n.*$/s, "⋯") // collapse multiple lines
             .trim();
 
-        return (
-            "`" +
-            source +
-            "`" +
-            ` (${this.span.path}:${this.span.start.line}:${this.span.start.column})`
-        );
+        const span = `(${this.span.path}:${this.span.start.line}:${this.span.start.column})`;
+
+        if (process.env.WIPPLE_LSP) {
+            return code(source);
+        } else {
+            return `${code(source)} ${extra(span, "dim")}`;
+        }
     }
 
     [util.inspect.custom]() {

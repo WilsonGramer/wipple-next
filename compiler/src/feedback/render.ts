@@ -4,6 +4,7 @@ import type { Type } from "../typecheck";
 import { displayType } from "../typecheck";
 import type { ResolvedBound } from "../typecheck/constraints/bound";
 import { displayBound } from "../typecheck/constraints/bound";
+import { code } from "../util/color";
 
 export interface RenderedFeedback {
     strings: readonly string[];
@@ -64,7 +65,7 @@ export class RenderableCode extends Renderable {
     }
 
     render() {
-        return "`" + this.code + "`";
+        return code(this.code);
     }
 }
 
@@ -79,7 +80,7 @@ export class RenderableType extends Renderable {
     }
 
     render() {
-        return "`" + displayType(this.type) + "`";
+        return code(displayType(this.type));
     }
 }
 
@@ -94,7 +95,7 @@ export class RenderableBound extends Renderable {
     }
 
     render() {
-        return "`" + displayBound(this.bound) + "`";
+        return code(displayBound(this.bound));
     }
 }
 

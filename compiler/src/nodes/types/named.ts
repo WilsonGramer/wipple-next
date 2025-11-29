@@ -2,7 +2,7 @@ import { ExtraType, MissingType } from ".";
 import type { Node } from "../../node";
 import type { Span } from "../../span";
 import { InstantiateConstraint } from "../../typecheck/constraints/instantiate";
-import { zipNodes } from "../../util";
+import { zipNodes } from "../../util/zip";
 import type { Visitor } from "../../visit";
 import { TypeDefinition } from "../../visit/definitions";
 import { TypeNode } from "./index";
