@@ -25,6 +25,21 @@ export abstract class Renderable {
     abstract render(): string;
 }
 
+export class RenderableString extends Renderable {
+    value: string;
+
+    constructor(value: string) {
+        super();
+        this.value = value;
+    }
+
+    render() {
+        return this.value;
+    }
+}
+
+render.string = (value: string) => new RenderableString(value);
+
 export class RenderableNode extends Renderable {
     node: Node;
 

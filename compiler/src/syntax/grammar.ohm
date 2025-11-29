@@ -369,25 +369,25 @@ Grammar  {
 
     // Atoms
 
-    Number (number) =
+    Number (a number) =
         number
 
-    String (string) =
+    String (a string) =
         string
 
-    TypeName (type name) =
+    TypeName (a type name) =
         capitalName
 
-    ConstructorName (constructor name) =
+    ConstructorName (a constructor name) =
         capitalName
 
-    VariableName (variable name) =
+    VariableName (a variable name) =
         lowercaseName
 
-    TypeParameterName (type parameter name) =
+    TypeParameterName (a type parameter name) =
         lowercaseName
 
-    AttributeName (attribute name) =
+    AttributeName (an attribute name) =
         lowercaseName | keyword<"intrinsic">
 
     // Tokens
@@ -395,22 +395,22 @@ Grammar  {
     space :=
         " " | "\t"
 
-    lineBreak (line break) =
+    lineBreak (a line break) =
         "\n"+
 
-    comment (comment) =
+    comment (a comment) =
         "--" (~"\n" any)*
 
-    number (number) =
+    number (a number) =
         ("+" | "-")? digit+ ("." digit+)?
 
-    string (string) =
+    string (a string) =
         "\"" (~"\"" any)* "\"" | "'" (~"'" any)* "'"
 
-    capitalName (capital name) =
+    capitalName (a capital name) =
         upper (alnum | "_")* ("-" (alnum | "_")+)* ("!" | "?")?
 
-    lowercaseName (lowercase name) =
+    lowercaseName (a lowercase name) =
         ~anyKeyword lower (alnum | "_")* ("-" (alnum | "_")+)* ("!" | "?")?
 
     anyKeyword = keyword<("and" | "as" | "by" | "do" | "infer" | "instance" | "intrinsic" | "is" | "or" | "set" | "to" | "trait" | "type" | "when" | "where")>

@@ -1,22 +1,24 @@
-import { spawnSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
+import { chdir } from "node:process";
 import { expect, test } from "vitest";
+import { run } from "../compiler/src";
 
-for (const testFile of readdirSync(__dirname)) {
+const testFiles = readdirSync(__dirname);
+
+chdir(dirname(__dirname));
+
+for (const testFile of testFiles) {
     if (extname(testFile) !== ".wipple") continue;
 
-    test(testFile, async (t) => {
-        const { status, stdout, stderr } = spawnSync(
-            "node",
-            ["compiler", "compile", "--facts", join(basename(__dirname), testFile)],
-            { cwd: dirname(__dirname) },
-        );
+    test(testFile, async () => {
+        const output = await run([
+            "compile",
+            "--json",
+            "--facts",
+            join(basename(__dirname), testFile),
+        ]);
 
-        await expect({
-            status,
-            stdout: stdout.toString(),
-            stderr: stderr.toString(),
-        }).toMatchFileSnapshot(join("__snapshots__", `${testFile}.snapshot`));
+        await expect(output).toMatchFileSnapshot(join("__snapshots__", `${testFile}.snapshot`));
     });
 }

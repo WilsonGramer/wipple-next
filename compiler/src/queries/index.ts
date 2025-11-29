@@ -3,4 +3,5 @@ export * from "./comments";
 export * from "./definitions";
 export * from "./highlight";
 export * from "./query";
+export * from "./syntax";
 export * from "./types";

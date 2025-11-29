@@ -45,30 +45,11 @@ export default () => {
             const root = makeRoot();
             const { db } = root;
 
-            const result = compile(root, {
+            compile(root, {
                 files: [{ path: e.document.uri, source: code }], // TODO: support multiple files
             });
 
-            const diagnostics: lsp.Diagnostic[] = [];
-            if (result.success) {
-                addFeedback(db, filter, diagnostics);
-            } else {
-                switch (result.type) {
-                    case "parse": {
-                        diagnostics.push({
-                            severity: lsp.DiagnosticSeverity.Error,
-                            range: convertSpan(result.span),
-                            message: result.message,
-                            source: "wipple",
-                        });
-
-                        break;
-                    }
-                    default:
-                        result.type satisfies never;
-                        throw new Error("unknown error");
-                }
-            }
+            const diagnostics = addFeedback(db, filter);
 
             await connection.sendDiagnostics({
                 uri: e.document.uri,
@@ -122,7 +103,8 @@ const convertSpan = (span: Span): lsp.Range => ({
     },
 });
 
-const addFeedback = (db: Db, filter: (node: Node) => boolean, diagnostics: lsp.Diagnostic[]) => {
+const addFeedback = (db: Db, filter: (node: Node) => boolean): lsp.Diagnostic[] => {
+    const diagnostics: lsp.Diagnostic[] = [];
     const seenFeedback = new Map<Node, Set<string>>();
     for (const feedback of collectFeedback(db, filter)) {
         if (!seenFeedback.get(feedback.on)) {
@@ -144,6 +126,8 @@ const addFeedback = (db: Db, filter: (node: Node) => boolean, diagnostics: lsp.D
             source: "wipple",
         });
     }
+
+    return diagnostics;
 };
 
 const addSemanticTokens = (uri: string, db: Db) => {

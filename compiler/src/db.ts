@@ -69,26 +69,30 @@ export class Db {
         }
     }
 
-    log(filter: (node: Node) => boolean) {
+    display(filter: (node: Node) => boolean): string {
+        let output = "";
+
         const nodes = Iterator.from(this.nodes).filter(filter).toArray();
         nodes.sort((a, b) => compareSpans(a.span, b.span));
 
         for (const node of nodes) {
-            console.log(node.toString());
+            output += node.toString() + "\n";
 
             const facts = Array.from(node.facts);
             facts.sort((a, b) => a.constructor.name.localeCompare(b.constructor.name));
 
             if (facts.length > 0) {
                 for (const [fact, value] of facts) {
-                    console.log("  " + fact.prototype.display(value));
+                    output += "  " + fact.prototype.display(value) + "\n";
                 }
             } else {
-                console.log("  (no facts)");
+                output += "  (no facts)\n";
             }
 
-            console.log();
+            output += "\n";
         }
+
+        return output;
     }
 
     *[Symbol.iterator]() {

@@ -1,10 +1,5 @@
 {
-  "status": 1,
-  "stderr": "Compilation failed with 6 feedback item(s)
-",
-  "stdout": "Facts:
-
-RootNode(`` @ <root>:1:1)
+  "facts": "RootNode(`` @ <root>:1:1)
   has top-level scopes
 
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/custom-errors.wipple:1:1)
@@ -36,12 +31,12 @@ TypeParameterNode(`(infer sum)` @ tests/custom-errors.wipple:4:18)
   has type(s) `sum`
   resolved to TypeParameterNode(`(infer sum)` @ tests/custom-errors.wipple:4:18)
 
-FunctionTypeNode(`left right -> sum` @ tests/custom-errors.wipple:4:40)
-  has type(s) `left right -> sum`
-
 TypeParameterNode(`left` @ tests/custom-errors.wipple:4:40)
   has type(s) `left`
   resolved to TypeParameterNode(`left` @ tests/custom-errors.wipple:4:7)
+
+FunctionTypeNode(`left right -> sum` @ tests/custom-errors.wipple:4:40)
+  has type(s) `left right -> sum`
 
 TypeParameterNode(`right` @ tests/custom-errors.wipple:4:45)
   has type(s) `right`
@@ -130,19 +125,19 @@ TypeParameterNode(`sum` @ tests/custom-errors.wipple:12:44)
   has type(s) `sum`
   resolved to TypeParameterNode(`sum` @ tests/custom-errors.wipple:12:44)
 
-AssignmentNode(`_ : Add 1 2` @ tests/custom-errors.wipple:14:1)
-  (no facts)
-
 WildcardPatternNode(`_` @ tests/custom-errors.wipple:14:1)
   has type(s) `Number`
 
-CallExpressionNode(`Add 1 2` @ tests/custom-errors.wipple:14:5)
-  has type(s) `Number`
+AssignmentNode(`_ : Add 1 2` @ tests/custom-errors.wipple:14:1)
+  (no facts)
 
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:14:5)
   has type(s) `Number Number -> Number`
   resolved to TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has bound(s) `Add Number Number Number` (InstanceDefinitionNode(`instance (Add Number Number Number) : _` @ tests/custom-errors.wipple:5:1))
+
+CallExpressionNode(`Add 1 2` @ tests/custom-errors.wipple:14:5)
+  has type(s) `Number`
 
 NumberExpressionNode(`1` @ tests/custom-errors.wipple:14:9)
   has type(s) `Number`
@@ -158,19 +153,19 @@ NamedTypeNode(`2` @ tests/custom-errors.wipple:14:11)
   has type(s) `Number`
   resolved to TypeDefinitionNode(`[intrinsic] Number : type` @ tests/custom-errors.wipple:1:1)
 
-AssignmentNode(`_ : Add "a" "b"` @ tests/custom-errors.wipple:15:1)
-  (no facts)
-
 WildcardPatternNode(`_` @ tests/custom-errors.wipple:15:1)
   has type(s) `String`
 
-CallExpressionNode(`Add "a" "b"` @ tests/custom-errors.wipple:15:5)
-  has type(s) `String`
+AssignmentNode(`_ : Add "a" "b"` @ tests/custom-errors.wipple:15:1)
+  (no facts)
 
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:15:5)
   has type(s) `String String -> String`
   resolved to TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has bound(s) `Add String String String` (InstanceDefinitionNode(`instance (Add String String String) : _` @ tests/custom-errors.wipple:6:1))
+
+CallExpressionNode(`Add "a" "b"` @ tests/custom-errors.wipple:15:5)
+  has type(s) `String`
 
 StringExpressionNode(`"a"` @ tests/custom-errors.wipple:15:9)
   has type(s) `String`
@@ -186,19 +181,19 @@ NamedTypeNode(`"b"` @ tests/custom-errors.wipple:15:13)
   has type(s) `String`
   resolved to TypeDefinitionNode(`[intrinsic] String : type` @ tests/custom-errors.wipple:2:1)
 
-AssignmentNode(`_ : Add 1 "a"` @ tests/custom-errors.wipple:16:1)
-  (no facts)
-
 WildcardPatternNode(`_` @ tests/custom-errors.wipple:16:1)
   missing type
 
-CallExpressionNode(`Add 1 "a"` @ tests/custom-errors.wipple:16:5)
-  missing type
+AssignmentNode(`_ : Add 1 "a"` @ tests/custom-errors.wipple:16:1)
+  (no facts)
 
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:16:5)
   has type(s) `Number String -> _`
   resolved to TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has bound(s) `Add Number String _` (InstanceDefinitionNode(`-- Cannot add [`left`] and [`right`].⋯` @ tests/custom-errors.wipple:11:1))
+
+CallExpressionNode(`Add 1 "a"` @ tests/custom-errors.wipple:16:5)
+  missing type
 
 NumberExpressionNode(`1` @ tests/custom-errors.wipple:16:9)
   has type(s) `Number`
@@ -214,19 +209,19 @@ NamedTypeNode(`"a"` @ tests/custom-errors.wipple:16:11)
   has type(s) `String`
   resolved to TypeDefinitionNode(`[intrinsic] String : type` @ tests/custom-errors.wipple:2:1)
 
-AssignmentNode(`_ : Add () 2` @ tests/custom-errors.wipple:17:1)
-  (no facts)
-
 WildcardPatternNode(`_` @ tests/custom-errors.wipple:17:1)
   missing type
 
-CallExpressionNode(`Add () 2` @ tests/custom-errors.wipple:17:5)
-  missing type
+AssignmentNode(`_ : Add () 2` @ tests/custom-errors.wipple:17:1)
+  (no facts)
 
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:17:5)
   has type(s) `() Number -> _`
   resolved to TraitDefinitionNode(`Add : left right (infer sum) => trait (left right -> sum)` @ tests/custom-errors.wipple:4:1)
   has bound(s) `Add () Number _` (InstanceDefinitionNode(`-- Missing parentheses around the inputs to `+`.⋯` @ tests/custom-errors.wipple:8:1))
+
+CallExpressionNode(`Add () 2` @ tests/custom-errors.wipple:17:5)
+  missing type
 
 UnitExpressionNode(`()` @ tests/custom-errors.wipple:17:9)
   has type(s) `()`
@@ -238,45 +233,37 @@ NamedTypeNode(`2` @ tests/custom-errors.wipple:17:12)
   has type(s) `Number`
   resolved to TypeDefinitionNode(`[intrinsic] Number : type` @ tests/custom-errors.wipple:1:1)
 
-
-Feedback:
-
-WildcardPatternNode(`_` @ tests/custom-errors.wipple:16:1) (unknown-type):
+",
+  "feedback": "WildcardPatternNode(`_` @ tests/custom-errors.wipple:16:1) (unknown-type):
 
   Could not determine the type of `_`.
 
   Wipple needs to know the type of this code before running it. Try using a function or assigning it
   to a variable.
-
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:16:5) (error-instance):
 
   Cannot add `1` and `"a"`.(This feedback comes from the instance `Add Number String _`.)
-
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:16:5) (incomplete-type):
 
   Missing information for the type of `Add`.
 
   Wipple determined this code is `Number String -> _`, but it needs some more information for the
   `_` placeholders.
-
 WildcardPatternNode(`_` @ tests/custom-errors.wipple:17:1) (unknown-type):
 
   Could not determine the type of `_`.
 
   Wipple needs to know the type of this code before running it. Try using a function or assigning it
   to a variable.
-
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:17:5) (error-instance):
 
   Missing parentheses around the inputs to `+`.(This feedback comes from the instance `Add () Number
   _`.)
-
 ConstructorExpressionNode(`Add` @ tests/custom-errors.wipple:17:5) (incomplete-type):
 
   Missing information for the type of `Add`.
 
   Wipple determined this code is `() Number -> _`, but it needs some more information for the `_`
   placeholders.
-
 ",
 }

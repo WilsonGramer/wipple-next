@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-
 import type { Interval, IterationNode, NonterminalNode, TerminalNode } from "ohm-js";
 import { FileNode } from "../nodes";
 import { AttributeNode } from "../nodes/attributes";
@@ -70,7 +68,7 @@ interface HasInterval {
     source: Interval;
 }
 
-type SpanFn = (left: HasInterval, right?: HasInterval) => Span;
+type SpanFn = (node: HasInterval) => Span;
 
 const parseOptional = (node: IterationNode) =>
     node.numChildren > 0 ? (node.children[0] as NonterminalNode).parse() : undefined;

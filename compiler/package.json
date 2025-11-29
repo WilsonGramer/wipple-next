@@ -3,9 +3,9 @@
     "private": true,
     "main": "./dist/index.js",
     "scripts": {
-        "build": "rm -rf dist && npm run build:ohm && node build.mjs",
+        "build": "rm -rf dist && npm run build:ohm && tsc && node build.mjs",
         "build:ohm": "ohm generateBundles --withTypes --esm 'src/**/*.ohm'",
-        "test": "npm run build && vitest run",
+        "lint": "eslint",
         "exe": "EXE=/usr/local/bin/wipple; echo '#!/usr/bin/env node' > $EXE && cat ./dist/index.js >> $EXE && chmod +x $EXE"
     },
     "dependencies": {
@@ -28,6 +28,7 @@
         "@types/moo": "^0.5.10",
         "@types/node": "^24.5.2",
         "@types/progress": "^2.0.7",
+        "@vitest/coverage-v8": "^4.0.14",
         "esbuild": "^0.27.0",
         "esbuild-plugin-inline-import": "^1.1.0",
         "esbuild-runner": "^2.2.2",

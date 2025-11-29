@@ -1,10 +1,5 @@
 {
-  "status": 1,
-  "stderr": "Compilation failed with 1 feedback item(s)
-",
-  "stdout": "Facts:
-
-RootNode(`` @ <root>:1:1)
+  "facts": "RootNode(`` @ <root>:1:1)
   has top-level scopes
 
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/nested-bounds.wipple:1:1)
@@ -28,12 +23,12 @@ TypeParameterNode(`value` @ tests/nested-bounds.wipple:4:5)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/nested-bounds.wipple:4:5)
 
-FunctionTypeNode(`value -> ()` @ tests/nested-bounds.wipple:4:21)
-  has type(s) `value -> ()`
-
 TypeParameterNode(`value` @ tests/nested-bounds.wipple:4:21)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/nested-bounds.wipple:4:5)
+
+FunctionTypeNode(`value -> ()` @ tests/nested-bounds.wipple:4:21)
+  has type(s) `value -> ()`
 
 UnitTypeNode(`()` @ tests/nested-bounds.wipple:4:30)
   has type(s) `()`
@@ -71,12 +66,12 @@ TypeParameterNode(`value` @ tests/nested-bounds.wipple:8:5)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/nested-bounds.wipple:8:5)
 
-FunctionTypeNode(`value -> ()` @ tests/nested-bounds.wipple:8:21)
-  has type(s) `value -> ()`
-
 TypeParameterNode(`value` @ tests/nested-bounds.wipple:8:21)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/nested-bounds.wipple:8:5)
+
+FunctionTypeNode(`value -> ()` @ tests/nested-bounds.wipple:8:21)
+  has type(s) `value -> ()`
 
 UnitTypeNode(`()` @ tests/nested-bounds.wipple:8:30)
   has type(s) `()`
@@ -100,13 +95,13 @@ TypeParameterNode(`value` @ tests/nested-bounds.wipple:9:29)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/nested-bounds.wipple:9:13)
 
-CallExpressionNode(`B 123` @ tests/nested-bounds.wipple:11:1)
-  has type(s) `()`
-
 ConstructorExpressionNode(`B` @ tests/nested-bounds.wipple:11:1)
   has type(s) `Number -> ()`
   resolved to TraitDefinitionNode(`B : value => trait (value -> ())` @ tests/nested-bounds.wipple:8:1)
   has bound(s) `B Number` (InstanceDefinitionNode(`instance (B value) where (A value)` @ tests/nested-bounds.wipple:9:1)), `A Number` (InstanceDefinitionNode(`instance (A Number)` @ tests/nested-bounds.wipple:5:1))
+
+CallExpressionNode(`B 123` @ tests/nested-bounds.wipple:11:1)
+  has type(s) `()`
 
 NumberExpressionNode(`123` @ tests/nested-bounds.wipple:11:3)
   has type(s) `Number`
@@ -115,13 +110,13 @@ NamedTypeNode(`123` @ tests/nested-bounds.wipple:11:3)
   has type(s) `Number`
   resolved to TypeDefinitionNode(`[intrinsic] Number : type` @ tests/nested-bounds.wipple:1:1)
 
-CallExpressionNode(`B "abc"` @ tests/nested-bounds.wipple:12:1)
-  has type(s) `()`
-
 ConstructorExpressionNode(`B` @ tests/nested-bounds.wipple:12:1)
   has type(s) `String -> ()`
   resolved to TraitDefinitionNode(`B : value => trait (value -> ())` @ tests/nested-bounds.wipple:8:1)
   has bound(s) `B String` (InstanceDefinitionNode(`instance (B value) where (A value)` @ tests/nested-bounds.wipple:9:1)), `A String` (InstanceDefinitionNode(`instance (A String)` @ tests/nested-bounds.wipple:6:1))
+
+CallExpressionNode(`B "abc"` @ tests/nested-bounds.wipple:12:1)
+  has type(s) `()`
 
 StringExpressionNode(`"abc"` @ tests/nested-bounds.wipple:12:3)
   has type(s) `String`
@@ -130,25 +125,22 @@ NamedTypeNode(`"abc"` @ tests/nested-bounds.wipple:12:3)
   has type(s) `String`
   resolved to TypeDefinitionNode(`[intrinsic] String : type` @ tests/nested-bounds.wipple:2:1)
 
-CallExpressionNode(`B ()` @ tests/nested-bounds.wipple:13:1)
-  has type(s) `()`
-
 ConstructorExpressionNode(`B` @ tests/nested-bounds.wipple:13:1)
   has type(s) `() -> ()`
   resolved to TraitDefinitionNode(`B : value => trait (value -> ())` @ tests/nested-bounds.wipple:8:1)
   has bound(s) `B ()` (InstanceDefinitionNode(`instance (B value) where (A value)` @ tests/nested-bounds.wipple:9:1)), `A ()` (unresolved)
 
+CallExpressionNode(`B ()` @ tests/nested-bounds.wipple:13:1)
+  has type(s) `()`
+
 UnitExpressionNode(`()` @ tests/nested-bounds.wipple:13:3)
   has type(s) `()`
 
-
-Feedback:
-
-ConstructorExpressionNode(`B` @ tests/nested-bounds.wipple:13:1) (unresolved-bound):
+",
+  "feedback": "ConstructorExpressionNode(`B` @ tests/nested-bounds.wipple:13:1) (unresolved-bound):
 
   `B` requires the instance `A ()`, but this instance isn't defined.
 
   Double-check that these types are correct.
-
 ",
 }

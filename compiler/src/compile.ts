@@ -3,8 +3,7 @@ import { Node } from "./node";
 import type { FileNode } from "./nodes";
 import { BoundConstraintNode } from "./nodes/constraints/bound";
 import { Typed } from "./nodes/types";
-import type { Span } from "./span";
-import { nullSpan, parseFile, SyntaxError } from "./syntax";
+import { nullSpan, parseFile } from "./syntax";
 import { BoundConstraint } from "./typecheck/constraints/bound";
 import { Solver } from "./typecheck/solve";
 import type { Scope } from "./visit";
@@ -13,10 +12,6 @@ import { DefinitionConstraints, Instances, Visitor } from "./visit";
 export interface CompileOptions {
     files: { path: string; source: string }[];
 }
-
-export type CompileResult =
-    | { success: true }
-    | { success: false; type: "parse"; span: Span; message: string };
 
 // Marker for e.g. top-level scopes
 export class RootNode extends Node {
@@ -44,26 +39,11 @@ export const makeRoot = () => {
     return root;
 };
 
-export const compile = (root: RootNode, options: CompileOptions): CompileResult => {
-    let parsedFiles: FileNode[];
-    try {
-        parsedFiles = options.files.map(({ path, source: code }) => parseFile(path, code));
-    } catch (e) {
-        if (!(e instanceof SyntaxError)) {
-            throw e;
-        }
-
-        return {
-            success: false,
-            type: "parse",
-            span: e.span,
-            message: e.message,
-        };
-    }
-
-    root.files.push(...parsedFiles);
-
+export const compile = (root: RootNode, options: CompileOptions) => {
     const { db } = root;
+
+    const parsedFiles = options.files.map(({ path, source }) => parseFile(db, path, source));
+    root.files.push(...parsedFiles);
 
     const topLevelScopes = db
         .list(TopLevelScopes)
@@ -129,8 +109,6 @@ export const compile = (root: RootNode, options: CompileOptions): CompileResult 
     solver.run();
 
     addGroupsFrom(solver);
-
-    return { success: true };
 };
 
 const addGroupsFrom = (solver: Solver) => {

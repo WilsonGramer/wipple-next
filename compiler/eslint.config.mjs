@@ -1,8 +1,9 @@
 import js from "@eslint/js";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
+    globalIgnores(["dist/", "**/*.ohm-bundle*"]),
     js.configs.recommended,
     tseslint.configs.recommendedTypeChecked,
     {
@@ -23,6 +24,9 @@ export default defineConfig([
             "@typescript-eslint/restrict-template-expressions": "off",
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-argument": "off",
+            "@typescript-eslint/no-unsafe-call": "off",
+            "@typescript-eslint/no-unsafe-member-access": "off",
+            "@typescript-eslint/no-unsafe-return": "off",
             "@typescript-eslint/ban-ts-comment": "off",
             "@typescript-eslint/consistent-type-imports": [
                 "error",

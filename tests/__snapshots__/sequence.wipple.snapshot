@@ -1,10 +1,5 @@
 {
-  "status": 1,
-  "stderr": "Compilation failed with 1 feedback item(s)
-",
-  "stdout": "Facts:
-
-RootNode(`` @ <root>:1:1)
+  "facts": "RootNode(`` @ <root>:1:1)
   has top-level scopes
 
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/sequence.wipple:1:1)
@@ -22,12 +17,12 @@ TypeDefinitionNode(`Boolean : type {⋯` @ tests/sequence.wipple:4:1)
   is a definition
   has type(s) `Boolean`
 
-_InternalNode(`True` @ tests/sequence.wipple:5:5)
+InternalNode(`True` @ tests/sequence.wipple:5:5)
   has definition constraints
   is a definition
   has type(s) `Boolean`
 
-_InternalNode(`False` @ tests/sequence.wipple:6:5)
+InternalNode(`False` @ tests/sequence.wipple:6:5)
   has definition constraints
   is a definition
   has type(s) `Boolean`
@@ -78,12 +73,12 @@ TypeParameterNode(`(infer element)` @ tests/sequence.wipple:17:26)
   has type(s) `element`
   resolved to TypeParameterNode(`(infer element)` @ tests/sequence.wipple:17:26)
 
-FunctionTypeNode(`collection -> Sequence element` @ tests/sequence.wipple:17:52)
-  has type(s) `collection -> Sequence element`
-
 TypeParameterNode(`collection` @ tests/sequence.wipple:17:52)
   has type(s) `collection`
   resolved to TypeParameterNode(`collection` @ tests/sequence.wipple:17:15)
+
+FunctionTypeNode(`collection -> Sequence element` @ tests/sequence.wipple:17:52)
+  has type(s) `collection -> Sequence element`
 
 NamedTypeNode(`Sequence element` @ tests/sequence.wipple:17:66)
   has type(s) `Sequence element`
@@ -124,23 +119,23 @@ ConstantDefinitionNode(`filter :: (item -> Boolean) -> collection -> Sequence it
 FunctionTypeNode(`(item -> Boolean) -> collection -> Sequence item` @ tests/sequence.wipple:20:11)
   has type(s) `(item -> Boolean) -> collection -> Sequence item`
 
-FunctionTypeNode(`item -> Boolean` @ tests/sequence.wipple:20:12)
-  has type(s) `item -> Boolean`
-
 TypeParameterNode(`item` @ tests/sequence.wipple:20:12)
   has type(s) `item`
   resolved to TypeParameterNode(`item` @ tests/sequence.wipple:20:12)
+
+FunctionTypeNode(`item -> Boolean` @ tests/sequence.wipple:20:12)
+  has type(s) `item -> Boolean`
 
 NamedTypeNode(`Boolean` @ tests/sequence.wipple:20:20)
   has type(s) `Boolean`
   resolved to TypeDefinitionNode(`Boolean : type {⋯` @ tests/sequence.wipple:4:1)
 
-FunctionTypeNode(`collection -> Sequence item` @ tests/sequence.wipple:20:32)
-  has type(s) `collection -> Sequence item`
-
 TypeParameterNode(`collection` @ tests/sequence.wipple:20:32)
   has type(s) `collection`
   resolved to TypeParameterNode(`collection` @ tests/sequence.wipple:20:32)
+
+FunctionTypeNode(`collection -> Sequence item` @ tests/sequence.wipple:20:32)
+  has type(s) `collection -> Sequence item`
 
 NamedTypeNode(`Sequence item` @ tests/sequence.wipple:20:46)
   has type(s) `Sequence item`
@@ -161,11 +156,11 @@ TypeParameterNode(`item` @ tests/sequence.wipple:20:90)
   has type(s) `item`
   resolved to TypeParameterNode(`item` @ tests/sequence.wipple:20:12)
 
-AssignmentNode(`box : (_ :: Box String)` @ tests/sequence.wipple:22:1)
-  (no facts)
-
 VariablePatternNode(`box` @ tests/sequence.wipple:22:1)
   has type(s) `Box Number`
+
+AssignmentNode(`box : (_ :: Box String)` @ tests/sequence.wipple:22:1)
+  (no facts)
 
 PlaceholderExpressionNode(`_` @ tests/sequence.wipple:22:8)
   has type(s) `Box Number`
@@ -178,19 +173,19 @@ NamedTypeNode(`String` @ tests/sequence.wipple:22:17)
   has type(s) `String` or `Number`
   resolved to TypeDefinitionNode(`[intrinsic] String : type` @ tests/sequence.wipple:2:1)
 
-AssignmentNode(`positive? : (_ :: Number) -> _` @ tests/sequence.wipple:23:1)
-  (no facts)
-
 VariablePatternNode(`positive?` @ tests/sequence.wipple:23:1)
   has type(s) `Number -> Boolean`
+
+AssignmentNode(`positive? : (_ :: Number) -> _` @ tests/sequence.wipple:23:1)
+  (no facts)
 
 FunctionExpressionNode(`(_ :: Number) -> _` @ tests/sequence.wipple:23:13)
   has type(s) `Number -> Boolean`
 
-_InternalNode(`_ :: Number` @ tests/sequence.wipple:23:14)
+WildcardPatternNode(`_` @ tests/sequence.wipple:23:14)
   has type(s) `String` or `Number`
 
-WildcardPatternNode(`_` @ tests/sequence.wipple:23:14)
+InternalNode(`_ :: Number` @ tests/sequence.wipple:23:14)
   has type(s) `String` or `Number`
 
 NamedTypeNode(`Number` @ tests/sequence.wipple:23:19)
@@ -203,13 +198,13 @@ PlaceholderExpressionNode(`_` @ tests/sequence.wipple:23:30)
 CallExpressionNode(`(filter positive?) box` @ tests/sequence.wipple:24:1)
   has type(s) `Sequence Number`
 
-CallExpressionNode(`filter positive?` @ tests/sequence.wipple:24:2)
-  has type(s) `(Box Number) -> Sequence Number`
-
 VariableExpressionNode(`filter` @ tests/sequence.wipple:24:2)
   has type(s) `(Number -> Boolean) -> (Box Number) -> Sequence Number`
   resolved to ConstantDefinitionNode(`filter :: (item -> Boolean) -> collection -> Sequence item where (As-Sequence collection item)` @ tests/sequence.wipple:20:1)
   has bound(s) `As-Sequence (Box Number) Number` (InstanceDefinitionNode(`instance (As-Sequence (Box value) value) : _` @ tests/sequence.wipple:18:1))
+
+CallExpressionNode(`filter positive?` @ tests/sequence.wipple:24:2)
+  has type(s) `(Box Number) -> Sequence Number`
 
 VariableExpressionNode(`positive?` @ tests/sequence.wipple:24:9)
   has type(s) `Number -> Boolean`
@@ -219,14 +214,11 @@ VariableExpressionNode(`box` @ tests/sequence.wipple:24:20)
   has type(s) `Box Number`
   resolved to VariablePatternNode(`box` @ tests/sequence.wipple:22:1)
 
-
-Feedback:
-
-WildcardPatternNode(`_` @ tests/sequence.wipple:23:14) (conflicting-types):
+",
+  "feedback": "WildcardPatternNode(`_` @ tests/sequence.wipple:23:14) (conflicting-types):
 
   `_` is `String` or `Number`, but it can only be one of these.
 
   `_` must be the same type as `String`, `_ :: Number`, and `Number`; double-check these.
-
 ",
 }

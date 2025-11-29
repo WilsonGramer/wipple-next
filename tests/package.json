@@ -1,0 +1,7 @@
+{
+    "name": "wipple-tests",
+    "private": true,
+    "dependencies": {
+        "wipple-compiler": "file:../compiler"
+    }
+}

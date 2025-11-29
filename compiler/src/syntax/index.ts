@@ -1,42 +1,49 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 import type { Interval } from "ohm-js";
+import { Db, Fact } from "../db";
 import { Node } from "../node";
+
+import lineColumn from "line-column";
 import type { FileNode } from "../nodes";
 import type { Location, Span } from "../span";
+import type { Visitor } from "../visit";
 import grammar from "./grammar.ohm-bundle";
 import parser from "./parser";
 
-export class SyntaxError extends Error {
-    span: Span;
+class SyntaxErrorNode extends Node {
+    *children() {}
 
-    constructor(message: string, span: Span) {
-        super(`${span.path}:${span.start.line}:${span.start.column}: syntax error: ${message}`);
-        this.span = span;
+    visit(_visitor: Visitor): void {}
+}
+
+export class SyntaxError extends Fact<string> {
+    display(expected: string): string {
+        return `syntax error: expected ${expected}`;
     }
 }
 
-const parseRule = (path: string, source: string, rule = "File") => {
-    const location = (interval: Interval): Location => {
-        const { lineNum, colNum, offset } = interval.getLineAndColumn();
-        return { line: lineNum, column: colNum, offset };
+const parseRule = (db: Db, path: string, source: string, rule = "File") => {
+    const index = lineColumn(source);
+
+    const location = (offset: number): Location => {
+        const { line, col } = index.fromIndex(offset) ?? index.fromIndex(offset - 1)!;
+        return { line, column: col, offset };
     };
 
-    const span = (left: { source: Interval }, right = left): Span => ({
+    const span = (node: { source: Interval }): Span => ({
         path,
-        start: location(left.source),
-        end: location(right.source),
-        source: source.slice(left.source.startIdx, right.source.endIdx),
+        start: location(node.source.startIdx),
+        end: location(node.source.endIdx),
+        source: source.slice(node.source.startIdx, node.source.endIdx),
     });
 
     const matchResult = grammar.match(source, rule);
     if (matchResult.failed()) {
-        throw new SyntaxError(
-            `expected ${(matchResult as any).getExpectedText()}`,
-            span({ source: matchResult.getInterval() }),
-        );
+        const node = new SyntaxErrorNode(span({ source: matchResult.getInterval() }));
+        db.register(node);
+
+        node.facts.set(SyntaxError, (matchResult as any).getExpectedText());
+
+        return node;
     }
 
     const semantics = grammar.createSemantics();
@@ -47,11 +54,12 @@ const parseRule = (path: string, source: string, rule = "File") => {
     return result;
 };
 
-export const parseFile = (path: string, source: string): FileNode =>
-    parseRule(path, source, "File");
+export const parseFile = (db: Db, path: string, source: string): FileNode =>
+    parseRule(db, path, source, "File");
 
 export const testParse = (rule: string, source: string) => {
-    const ast = parseRule("test", source, rule);
+    const db = new Db();
+    const ast = parseRule(db, "test", source, rule);
 
     const filter = (value: any) => {
         if (Array.isArray(value)) {

@@ -1,9 +1,5 @@
 {
-  "status": 0,
-  "stderr": "",
-  "stdout": "Facts:
-
-RootNode(`` @ <root>:1:1)
+  "facts": "RootNode(`` @ <root>:1:1)
   has top-level scopes
 
 TypeDefinitionNode(`A : type` @ tests/implied-instance.wipple:1:1)
@@ -27,12 +23,12 @@ TypeParameterNode(`value` @ tests/implied-instance.wipple:4:5)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:4:5)
 
-FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:4:21)
-  has type(s) `value -> ()`
-
 TypeParameterNode(`value` @ tests/implied-instance.wipple:4:21)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:4:5)
+
+FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:4:21)
+  has type(s) `value -> ()`
 
 UnitTypeNode(`()` @ tests/implied-instance.wipple:4:30)
   has type(s) `()`
@@ -47,12 +43,12 @@ TypeParameterNode(`value` @ tests/implied-instance.wipple:5:5)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:5:5)
 
-FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:5:21)
-  has type(s) `value -> ()`
-
 TypeParameterNode(`value` @ tests/implied-instance.wipple:5:21)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:5:5)
+
+FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:5:21)
+  has type(s) `value -> ()`
 
 UnitTypeNode(`()` @ tests/implied-instance.wipple:5:30)
   has type(s) `()`
@@ -82,12 +78,12 @@ ConstantDefinitionNode(`t :: value -> () where (U value)` @ tests/implied-instan
   has type parameters
   has type(s) `value -> ()`
 
-FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:9:6)
-  has type(s) `value -> ()`
-
 TypeParameterNode(`value` @ tests/implied-instance.wipple:9:6)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/implied-instance.wipple:9:6)
+
+FunctionTypeNode(`value -> ()` @ tests/implied-instance.wipple:9:6)
+  has type(s) `value -> ()`
 
 UnitTypeNode(`()` @ tests/implied-instance.wipple:9:15)
   has type(s) `()`
@@ -107,8 +103,6 @@ ConstructorExpressionNode(`T` @ tests/implied-instance.wipple:10:5)
   resolved to TraitDefinitionNode(`T : value => trait (value -> ())` @ tests/implied-instance.wipple:4:1)
   has bound(s) `T value` (InstanceDefinitionNode(`instance (T value) where (U value)` @ tests/implied-instance.wipple:7:1))
 
-
-Feedback:
-
 ",
+  "feedback": "",
 }

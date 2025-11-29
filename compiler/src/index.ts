@@ -1,7 +1,5 @@
 import chalk from "chalk";
 import * as cmd from "cmd-ts";
-import nodePrelude from "inline:../../runtime/node-prelude.js";
-import runtime from "inline:../../runtime/runtime.js";
 import { execSync } from "node:child_process";
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -16,6 +14,8 @@ import type { Filter, Node } from "./node";
 import { nodeFilter } from "./node";
 
 Error.stackTraceLimit = 100;
+
+let jsonOutput: Record<string, any> = {};
 
 const compileCommand = (options: { run: boolean }) =>
     cmd.command({
@@ -46,8 +46,16 @@ const compileCommand = (options: { run: boolean }) =>
             paths: cmd.restPositionals({
                 type: cmd.string,
             }),
+            json: cmd.flag({
+                long: "json",
+                type: cmd.boolean,
+            }),
         },
-        handler: (args) => {
+        handler: async (args) => {
+            if (args.json) {
+                jsonOutput = {};
+            }
+
             const libs = args.lib.map((libPath) => ({
                 path: libPath,
                 files: readdirSync(libPath)
@@ -103,31 +111,24 @@ const compileCommand = (options: { run: boolean }) =>
                     message: `Compiling ${path ?? files.map(({ path }) => path).join(", ")}`,
                 });
 
-                const result = compile(root, { files });
-
-                if (!result.success) {
-                    clearProgress();
-
-                    switch (result.type) {
-                        case "parse": {
-                            console.error(result.message);
-
-                            return;
-                        }
-                        default:
-                            result.type satisfies never;
-                            throw new Error("unknown error");
-                    }
-                }
+                compile(root, { files });
             });
 
             clearProgress();
 
             if (args.facts) {
-                console.log(`${chalk.bold.underline("Facts:")}\n`);
-                db.log(filter);
+                const dbString = db.display(filter);
 
-                console.log(`\n${chalk.bold.underline("Feedback:")}\n`);
+                if (args.json) {
+                    jsonOutput.facts = dbString;
+                } else {
+                    console.log(`${chalk.bold.underline("Facts:")}\n`);
+                    console.log(dbString);
+                }
+            }
+
+            if (args.json) {
+                jsonOutput.feedback = "";
             }
 
             const seenFeedback = new Map<Node, Set<string>>();
@@ -168,21 +169,39 @@ const compileCommand = (options: { run: boolean }) =>
                     )
                     .join("\n\n");
 
-                console.log(
-                    `${chalk.underline(feedback.on.toString())}${chalk.underline(
-                        ` (${feedback.id}):`,
-                    )}\n\n${rendered}\n`,
-                );
+                if (args.json) {
+                    jsonOutput.feedback += `${feedback.on.toString()} (${feedback.id}):\n\n${rendered}\n`;
+                } else {
+                    console.log(
+                        `${chalk.underline(feedback.on.toString())}${chalk.underline(
+                            ` (${feedback.id}):`,
+                        )}\n\n${rendered}\n`,
+                    );
+                }
             }
 
             if (feedbackCount > 0) {
-                console.error(
-                    chalk.bold(`Compilation failed with ${feedbackCount} feedback item(s)`),
-                );
-                process.exit(1);
+                if (jsonOutput == null) {
+                    console.error(
+                        chalk.bold(`Compilation failed with ${feedbackCount} feedback item(s)`),
+                    );
+                }
+
+                if (require.main === module) {
+                    process.exit(1);
+                } else {
+                    return;
+                }
             }
 
             if (options.run || args.output != null) {
+                if (require.main !== module) {
+                    throw new Error("codegen only supported in the CLI");
+                }
+
+                const nodePrelude = (await import("inline:../../runtime/node-prelude.js")).default;
+                const runtime = (await import("inline:../../runtime/runtime.js")).default;
+
                 const codegen = new Codegen(files, args.output ?? "index.js", db, {
                     format: { type: "iife", arg: "buildRuntime(env)" },
                     prelude: nodePrelude + runtime,
@@ -222,14 +241,22 @@ const lspCommand = cmd.command({
     },
 });
 
-void cmd.run(
-    cmd.subcommands({
-        name: "wipple",
-        cmds: {
-            compile: compileCommand({ run: false }),
-            run: compileCommand({ run: true }),
-            lsp: lspCommand,
-        },
-    }),
-    process.argv.slice(2),
-);
+export const run = async (args: string[]) => {
+    await cmd.run(
+        cmd.subcommands({
+            name: "wipple",
+            cmds: {
+                compile: compileCommand({ run: false }),
+                run: compileCommand({ run: true }),
+                lsp: lspCommand,
+            },
+        }),
+        args,
+    );
+
+    return jsonOutput;
+};
+
+if (require.main === module) {
+    void run(process.argv.slice(2));
+}

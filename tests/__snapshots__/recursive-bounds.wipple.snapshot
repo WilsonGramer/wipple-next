@@ -1,10 +1,5 @@
 {
-  "status": 1,
-  "stderr": "Compilation failed with 1 feedback item(s)
-",
-  "stdout": "Facts:
-
-RootNode(`` @ <root>:1:1)
+  "facts": "RootNode(`` @ <root>:1:1)
   has top-level scopes
 
 TypeDefinitionNode(`[intrinsic] Number : type` @ tests/recursive-bounds.wipple:1:1)
@@ -38,12 +33,12 @@ TypeParameterNode(`value` @ tests/recursive-bounds.wipple:5:12)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/recursive-bounds.wipple:5:12)
 
-FunctionTypeNode(`value -> String` @ tests/recursive-bounds.wipple:5:28)
-  has type(s) `value -> String`
-
 TypeParameterNode(`value` @ tests/recursive-bounds.wipple:5:28)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/recursive-bounds.wipple:5:12)
+
+FunctionTypeNode(`value -> String` @ tests/recursive-bounds.wipple:5:28)
+  has type(s) `value -> String`
 
 NamedTypeNode(`String` @ tests/recursive-bounds.wipple:5:37)
   has type(s) `String`
@@ -83,13 +78,13 @@ TypeParameterNode(`value` @ tests/recursive-bounds.wipple:7:51)
   has type(s) `value`
   resolved to TypeParameterNode(`value` @ tests/recursive-bounds.wipple:7:27)
 
-CallExpressionNode(`Describe (_ :: Maybe Number)` @ tests/recursive-bounds.wipple:10:1)
-  has type(s) `String`
-
 ConstructorExpressionNode(`Describe` @ tests/recursive-bounds.wipple:10:1)
   has type(s) `(Maybe Number) -> String`
   resolved to TraitDefinitionNode(`Describe : value => trait (value -> String)` @ tests/recursive-bounds.wipple:5:1)
   has bound(s) `Describe (Maybe Number)` (InstanceDefinitionNode(`instance (Describe (Maybe value)) where (Describe value)` @ tests/recursive-bounds.wipple:7:1)), `Describe Number` (unresolved)
+
+CallExpressionNode(`Describe (_ :: Maybe Number)` @ tests/recursive-bounds.wipple:10:1)
+  has type(s) `String`
 
 PlaceholderExpressionNode(`_` @ tests/recursive-bounds.wipple:10:11)
   has type(s) `Maybe Number`
@@ -102,14 +97,11 @@ NamedTypeNode(`Number` @ tests/recursive-bounds.wipple:10:22)
   has type(s) `Number`
   resolved to TypeDefinitionNode(`[intrinsic] Number : type` @ tests/recursive-bounds.wipple:1:1)
 
-
-Feedback:
-
-ConstructorExpressionNode(`Describe` @ tests/recursive-bounds.wipple:10:1) (unresolved-bound):
+",
+  "feedback": "ConstructorExpressionNode(`Describe` @ tests/recursive-bounds.wipple:10:1) (unresolved-bound):
 
   `Describe` requires the instance `Describe Number`, but this instance isn't defined.
 
   Double-check that these types are correct.
-
 ",
 }
