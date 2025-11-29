@@ -37,23 +37,27 @@ InstanceDefinitionNode(`instance (A Number)` (tests/nested-bounds.wipple:5:1))
   is a definition
   resolved to 1 definition(s)
   has definition constraints
-  is missing instance value
   has type(s) `Number -> ()`
 
 NamedTypeNode(`Number` (tests/nested-bounds.wipple:5:13))
   has type(s) `Number`
   resolved to 1 definition(s)
 
+PlaceholderExpressionNode(`_` (tests/nested-bounds.wipple:5:23))
+  has type(s) `Number -> ()`
+
 InstanceDefinitionNode(`instance (A String)` (tests/nested-bounds.wipple:6:1))
   is a definition
   resolved to 1 definition(s)
   has definition constraints
-  is missing instance value
   has type(s) `String -> ()`
 
 NamedTypeNode(`String` (tests/nested-bounds.wipple:6:13))
   has type(s) `String`
   resolved to 1 definition(s)
+
+PlaceholderExpressionNode(`_` (tests/nested-bounds.wipple:6:23))
+  has type(s) `String -> ()`
 
 TraitDefinitionNode(`B` (tests/nested-bounds.wipple:8:1))
   has definition constraints
@@ -81,7 +85,6 @@ InstanceDefinitionNode(`instance (B value) where (A value)` (tests/nested-bounds
   resolved to 1 definition(s)
   has definition constraints
   has type parameters
-  is missing instance value
   has type(s) `value -> ()`
 
 TypeParameterNode(`value` (tests/nested-bounds.wipple:9:13))
@@ -94,6 +97,9 @@ BoundConstraintNode(`(A value)` (tests/nested-bounds.wipple:9:26))
 TypeParameterNode(`value` (tests/nested-bounds.wipple:9:29))
   has type(s) `value`
   resolved to 1 definition(s)
+
+PlaceholderExpressionNode(`_` (tests/nested-bounds.wipple:9:38))
+  has type(s) `value -> ()`
 
 ConstructorExpressionNode(`B` (tests/nested-bounds.wipple:11:1))
   has type(s) `Number -> ()`

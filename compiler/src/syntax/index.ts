@@ -25,7 +25,8 @@ const parseRule = (db: Db, path: string, source: string, rule = "File") => {
     const index = lineColumn(source);
 
     const location = (offset: number): Location => {
-        const { line, col } = index.fromIndex(offset) ?? index.fromIndex(offset - 1)!;
+        const { line, col } = index.fromIndex(offset) ??
+            index.fromIndex(offset - 1)! ?? { line: 1, col: 1 };
         return { line, column: col, offset };
     };
 

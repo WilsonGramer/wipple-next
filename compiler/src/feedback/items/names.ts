@@ -12,3 +12,17 @@ registerFeedback({
         Double-check your spelling.
     `,
 });
+
+registerFeedback({
+    id: "ambiguous",
+    query: queries.ambigious,
+    on: (node) => node,
+    render: (_node, { name, definitions }) => render`
+        ${render.code(name)} could refer to ${render.list(
+            definitions.map((definition) => render.node(definition.node)),
+            "or",
+        )}.
+
+        Rename the extra definitions.
+    `,
+});

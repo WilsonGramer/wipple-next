@@ -35,7 +35,7 @@ export class BoundConstraintNode extends ConstraintNode {
         }
 
         const substitutions = new Map(
-            zipNodes(trait.parameters, this.parameters, {
+            zipNodes(this, trait.parameters, this.parameters, {
                 missing: MissingType,
                 extra: ExtraType,
             }),

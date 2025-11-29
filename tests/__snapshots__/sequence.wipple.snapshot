@@ -37,7 +37,7 @@ TypeParameterNode(`element` (tests/sequence.wipple:9:12))
   has type(s) `element`
   resolved to 1 definition(s)
 
-BlockTypeNode(`{element}` (tests/sequence.wipple:10:13))
+BlockTypeNode(`{⋯}` (tests/sequence.wipple:10:13))
   has type(s) `{element}`
 
 TypeParameterNode(`element` (tests/sequence.wipple:10:14))
@@ -114,7 +114,6 @@ ConstantDefinitionNode(`filter` (tests/sequence.wipple:20:1))
   is a definition
   has definition constraints
   has type parameters
-  is missing constant value
   has type(s) `(item -> Boolean) -> collection -> Sequence item`
 
 FunctionTypeNode(`(item -> Boolean) -> collection -> Sequence item` (tests/sequence.wipple:20:11))
@@ -157,70 +156,76 @@ TypeParameterNode(`item` (tests/sequence.wipple:20:90))
   has type(s) `item`
   resolved to 1 definition(s)
 
-VariablePatternNode(`box` (tests/sequence.wipple:22:1))
-  has type(s) `Box Number`
-
-AssignmentNode(`box` (tests/sequence.wipple:22:1))
+AssignmentNode(`filter` (tests/sequence.wipple:21:1))
   (no facts)
 
-PlaceholderExpressionNode(`_` (tests/sequence.wipple:22:8))
+PlaceholderExpressionNode(`_` (tests/sequence.wipple:21:10))
+  has type(s) `(item -> Boolean) -> collection -> Sequence item`
+
+VariablePatternNode(`box` (tests/sequence.wipple:23:1))
   has type(s) `Box Number`
 
-NamedTypeNode(`Box String` (tests/sequence.wipple:22:13))
-  has type(s) `Box Number`
-  resolved to 1 definition(s)
-
-NamedTypeNode(`String` (tests/sequence.wipple:22:17))
-  has type(s) `String` or `Number`
-  resolved to 1 definition(s)
-
-VariablePatternNode(`positive?` (tests/sequence.wipple:23:1))
-  has type(s) `Number -> Boolean`
-
-AssignmentNode(`positive?` (tests/sequence.wipple:23:1))
+AssignmentNode(`box` (tests/sequence.wipple:23:1))
   (no facts)
 
-FunctionExpressionNode(`(_` (tests/sequence.wipple:23:13))
-  has type(s) `Number -> Boolean`
+PlaceholderExpressionNode(`_` (tests/sequence.wipple:23:8))
+  has type(s) `Box Number`
 
-WildcardPatternNode(`_` (tests/sequence.wipple:23:14))
-  has type(s) `String` or `Number`
+NamedTypeNode(`Box String` (tests/sequence.wipple:23:13))
+  has type(s) `Box Number`
+  resolved to 1 definition(s)
 
-InternalNode(`_` (tests/sequence.wipple:23:14))
-  has type(s) `String` or `Number`
-
-NamedTypeNode(`Number` (tests/sequence.wipple:23:19))
+NamedTypeNode(`String` (tests/sequence.wipple:23:17))
   has type(s) `String` or `Number`
   resolved to 1 definition(s)
 
-PlaceholderExpressionNode(`_` (tests/sequence.wipple:23:30))
+VariablePatternNode(`positive?` (tests/sequence.wipple:24:1))
+  has type(s) `Number -> Boolean`
+
+AssignmentNode(`positive?` (tests/sequence.wipple:24:1))
+  (no facts)
+
+FunctionExpressionNode(`(_` (tests/sequence.wipple:24:13))
+  has type(s) `Number -> Boolean`
+
+WildcardPatternNode(`_` (tests/sequence.wipple:24:14))
+  has type(s) `String` or `Number`
+
+InternalNode(`_` (tests/sequence.wipple:24:14))
+  has type(s) `String` or `Number`
+
+NamedTypeNode(`Number` (tests/sequence.wipple:24:19))
+  has type(s) `String` or `Number`
+  resolved to 1 definition(s)
+
+PlaceholderExpressionNode(`_` (tests/sequence.wipple:24:30))
   has type(s) `Boolean`
 
-CallExpressionNode(`(filter positive?) box` (tests/sequence.wipple:24:1))
+CallExpressionNode(`(filter positive?) box` (tests/sequence.wipple:25:1))
   has type(s) `Sequence Number`
 
-VariableExpressionNode(`filter` (tests/sequence.wipple:24:2))
+VariableExpressionNode(`filter` (tests/sequence.wipple:25:2))
   has type(s) `(Number -> Boolean) -> (Box Number) -> Sequence Number`
   resolved to 1 definition(s)
   has bound(s) `As-Sequence (Box Number) Number` (InstanceDefinitionNode(`instance (As-Sequence (Box value) value)` (tests/sequence.wipple:18:1)))
 
-CallExpressionNode(`filter positive?` (tests/sequence.wipple:24:2))
+CallExpressionNode(`filter positive?` (tests/sequence.wipple:25:2))
   has type(s) `(Box Number) -> Sequence Number`
 
-VariableExpressionNode(`positive?` (tests/sequence.wipple:24:9))
+VariableExpressionNode(`positive?` (tests/sequence.wipple:25:9))
   has type(s) `Number -> Boolean`
   resolved to 1 definition(s)
 
-VariableExpressionNode(`box` (tests/sequence.wipple:24:20))
+VariableExpressionNode(`box` (tests/sequence.wipple:25:20))
   has type(s) `Box Number`
   resolved to 1 definition(s)
 
 ",
-  "feedback": "`_` (tests/sequence.wipple:23:14) (conflicting-types):
+  "feedback": "`_` (tests/sequence.wipple:24:14) (conflicting-types):
 
-  `_` (tests/sequence.wipple:23:14) is `String` or `Number`, but it can only be one of these.
+  `_` (tests/sequence.wipple:24:14) is `String` or `Number`, but it can only be one of these.
 
-  `_` (tests/sequence.wipple:23:14) must be the same type as `String` (tests/sequence.wipple:22:17),
-  `_` (tests/sequence.wipple:23:14), and `Number` (tests/sequence.wipple:23:19); double-check these.
+  `_` (tests/sequence.wipple:24:14) must be the same type as `String` (tests/sequence.wipple:23:17),
+  `_` (tests/sequence.wipple:24:14), and `Number` (tests/sequence.wipple:24:19); double-check these.
 ",
 }

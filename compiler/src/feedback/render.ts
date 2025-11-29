@@ -41,6 +41,26 @@ export class RenderableString extends Renderable {
 
 render.string = (value: string) => new RenderableString(value);
 
+export class RenderableNumber extends Renderable {
+    value: number;
+    singular: string;
+    plural: string;
+
+    constructor(value: number, singular: string, plural: string) {
+        super();
+        this.value = value;
+        this.singular = singular;
+        this.plural = plural;
+    }
+
+    render() {
+        return `${this.value} ${this.value === 1 ? this.singular : this.plural}`;
+    }
+}
+
+render.number = (value: number, singular: string, plural: string) =>
+    new RenderableNumber(value, singular, plural);
+
 export class RenderableNode extends Renderable {
     node: Node;
 

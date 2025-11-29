@@ -1,5 +1,11 @@
+import "./attributes";
 import "./bounds";
+import "./constants";
 import "./names";
+import "./format";
+import "./instances";
 import "./patterns";
+import "./structures";
 import "./syntax";
+import "./type-definitions";
 import "./types";

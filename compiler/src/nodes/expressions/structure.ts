@@ -8,13 +8,13 @@ import type { Visitor } from "../../visit";
 import { StructureConstructorDefinition } from "../../visit/definitions";
 import { ExpressionNode } from "./index";
 
-export class MissingField extends Fact<null> {
+export class MissingField extends Fact<string> {
     display(): string {
         return "is missing field";
     }
 }
 
-export class ExtraField extends Fact<null> {
+export class ExtraField extends Fact<string> {
     display(): string {
         return "is extra field";
     }
@@ -62,6 +62,7 @@ export class StructureExpressionNode extends ExpressionNode {
         }
 
         const fieldValues = zipNodeMaps(
+            this,
             structureConstructorDefinition.fields,
             Iterator.from(this.fields).map((field) => [field.name, field.value]),
             {

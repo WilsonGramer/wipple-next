@@ -63,7 +63,6 @@ InstanceDefinitionNode(`instance (Collect element (List element))` (tests/defaul
   resolved to 1 definition(s)
   has definition constraints
   has type parameters
-  is missing instance value
   has type(s) `element -> List element`
 
 TypeParameterNode(`element` (tests/default-constraint.wipple:7:19))
@@ -78,12 +77,14 @@ TypeParameterNode(`element` (tests/default-constraint.wipple:7:33))
   has type(s) `element`
   resolved to 1 definition(s)
 
+PlaceholderExpressionNode(`_` (tests/default-constraint.wipple:7:45))
+  has type(s) `element -> List element`
+
 InstanceDefinitionNode(`instance (Collect element (Set element))` (tests/default-constraint.wipple:8:1))
   is a definition
   resolved to 1 definition(s)
   has definition constraints
   has type parameters
-  is missing instance value
   has type(s) `element -> Set element`
 
 TypeParameterNode(`element` (tests/default-constraint.wipple:8:19))
@@ -98,11 +99,13 @@ TypeParameterNode(`element` (tests/default-constraint.wipple:8:32))
   has type(s) `element`
   resolved to 1 definition(s)
 
+PlaceholderExpressionNode(`_` (tests/default-constraint.wipple:8:44))
+  has type(s) `element -> Set element`
+
 ConstantDefinitionNode(`collect` (tests/default-constraint.wipple:10:1))
   is a definition
   has definition constraints
   has type parameters
-  is missing constant value
   has type(s) `element -> output`
 
 TypeParameterNode(`element` (tests/default-constraint.wipple:11:12))
@@ -141,53 +144,59 @@ TypeParameterNode(`output` (tests/default-constraint.wipple:11:72))
   has type(s) `output`
   resolved to 1 definition(s)
 
-WildcardPatternNode(`_` (tests/default-constraint.wipple:13:1))
-  has type(s) `List String`
-
-AssignmentNode(`_` (tests/default-constraint.wipple:13:1))
+AssignmentNode(`collect` (tests/default-constraint.wipple:12:1))
   (no facts)
 
-VariableExpressionNode(`collect` (tests/default-constraint.wipple:13:5))
-  has type(s) `String -> List String`
-  resolved to 1 definition(s)
-  has bound(s) `Collect String (List String)` (InstanceDefinitionNode(`instance (Collect element (List element))` (tests/default-constraint.wipple:7:1)))
-
-CallExpressionNode(`collect "hi"` (tests/default-constraint.wipple:13:5))
-  has type(s) `List String`
-
-StringExpressionNode(`"hi"` (tests/default-constraint.wipple:13:13))
-  has type(s) `String`
-
-NamedTypeNode(`"hi"` (tests/default-constraint.wipple:13:13))
-  has type(s) `String`
-  resolved to 1 definition(s)
+PlaceholderExpressionNode(`_` (tests/default-constraint.wipple:12:11))
+  has type(s) `element -> output`
 
 WildcardPatternNode(`_` (tests/default-constraint.wipple:14:1))
-  has type(s) `Set String`
+  has type(s) `List String`
 
 AssignmentNode(`_` (tests/default-constraint.wipple:14:1))
   (no facts)
 
-VariableExpressionNode(`collect` (tests/default-constraint.wipple:14:6))
+VariableExpressionNode(`collect` (tests/default-constraint.wipple:14:5))
+  has type(s) `String -> List String`
+  resolved to 1 definition(s)
+  has bound(s) `Collect String (List String)` (InstanceDefinitionNode(`instance (Collect element (List element))` (tests/default-constraint.wipple:7:1)))
+
+CallExpressionNode(`collect "hi"` (tests/default-constraint.wipple:14:5))
+  has type(s) `List String`
+
+StringExpressionNode(`"hi"` (tests/default-constraint.wipple:14:13))
+  has type(s) `String`
+
+NamedTypeNode(`"hi"` (tests/default-constraint.wipple:14:13))
+  has type(s) `String`
+  resolved to 1 definition(s)
+
+WildcardPatternNode(`_` (tests/default-constraint.wipple:15:1))
+  has type(s) `Set String`
+
+AssignmentNode(`_` (tests/default-constraint.wipple:15:1))
+  (no facts)
+
+VariableExpressionNode(`collect` (tests/default-constraint.wipple:15:6))
   has type(s) `String -> Set String`
   resolved to 1 definition(s)
   has bound(s) `Collect String (Set String)` (InstanceDefinitionNode(`instance (Collect element (Set element))` (tests/default-constraint.wipple:8:1)))
 
-CallExpressionNode(`collect "hi"` (tests/default-constraint.wipple:14:6))
+CallExpressionNode(`collect "hi"` (tests/default-constraint.wipple:15:6))
   has type(s) `Set String`
 
-StringExpressionNode(`"hi"` (tests/default-constraint.wipple:14:14))
+StringExpressionNode(`"hi"` (tests/default-constraint.wipple:15:14))
   has type(s) `String`
 
-NamedTypeNode(`"hi"` (tests/default-constraint.wipple:14:14))
+NamedTypeNode(`"hi"` (tests/default-constraint.wipple:15:14))
   has type(s) `String`
   resolved to 1 definition(s)
 
-NamedTypeNode(`Set _` (tests/default-constraint.wipple:14:22))
+NamedTypeNode(`Set _` (tests/default-constraint.wipple:15:22))
   has type(s) `Set String`
   resolved to 1 definition(s)
 
-PlaceholderTypeNode(`_` (tests/default-constraint.wipple:14:26))
+PlaceholderTypeNode(`_` (tests/default-constraint.wipple:15:26))
   has type(s) `String`
 
 ",

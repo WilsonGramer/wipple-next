@@ -2,11 +2,11 @@
 [intrinsic] String : type
 
 A : value => trait (value -> ())
-instance (A Number)
-instance (A String)
+instance (A Number) : _
+instance (A String) : _
 
 B : value => trait (value -> ())
-instance (B value) where (A value)
+instance (B value) where (A value) : _
 
 B 123
 B "abc"

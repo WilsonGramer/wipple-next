@@ -58,7 +58,6 @@ InstanceDefinitionNode(`instance (T value) where (U value)` (tests/implied-insta
   resolved to 1 definition(s)
   has definition constraints
   has type parameters
-  is missing instance value
   has type(s) `value -> ()`
 
 TypeParameterNode(`value` (tests/implied-instance.wipple:7:13))
@@ -71,6 +70,9 @@ BoundConstraintNode(`(U value)` (tests/implied-instance.wipple:7:26))
 TypeParameterNode(`value` (tests/implied-instance.wipple:7:29))
   has type(s) `value`
   resolved to 1 definition(s)
+
+PlaceholderExpressionNode(`_` (tests/implied-instance.wipple:7:38))
+  has type(s) `value -> ()`
 
 ConstantDefinitionNode(`t` (tests/implied-instance.wipple:9:1))
   is a definition

@@ -81,7 +81,7 @@ export class InstanceDefinitionNode extends StatementNode {
                     }
 
                     substitutions = new Map(
-                        zipNodes(traitDefinition.parameters, this.bound.parameters, {
+                        zipNodes(this, traitDefinition.parameters, this.bound.parameters, {
                             missing: MissingType,
                             extra: ExtraType,
                         }),

@@ -9,21 +9,9 @@ import { type Visitor } from "../../visit";
 import { MarkerConstructorDefinition, VariantConstructorDefinition } from "../../visit/definitions";
 import { PatternNode } from "./index";
 
-export class MissingElement extends Fact<null> {
-    display(): string {
-        return "is missing element";
-    }
-}
-
 export class ExtraElement extends Fact<null> {
     display(): string {
         return "is extra element";
-    }
-}
-
-export class DuplicateElement extends Fact<null> {
-    display(): string {
-        return "is duplicate element";
     }
 }
 

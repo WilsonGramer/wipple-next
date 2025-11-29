@@ -34,6 +34,7 @@ export abstract class Node {
     render() {
         const source = this.span.source
             .replaceAll(/^--.*\n/g, "") // strip comments
+            .replace(/\{.*\}/, "{⋯}") // collapse braces
             .replace(/:.*/, "") // remove assigned value
             .replace(/\n.*$/s, "⋯") // collapse multiple lines
             .trim();

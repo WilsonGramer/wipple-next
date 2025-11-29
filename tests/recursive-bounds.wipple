@@ -3,8 +3,8 @@
 [intrinsic] Maybe : value => type
 
 Describe : value => trait (value -> String)
-instance (Describe String)
-instance (Describe (Maybe value)) where (Describe value)
+instance (Describe String) : _
+instance (Describe (Maybe value)) where (Describe value) : _
 
 --Describe (_ :: Maybe String)
 Describe (_ :: Maybe Number)

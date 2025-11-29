@@ -48,19 +48,20 @@ InstanceDefinitionNode(`instance (Describe String)` (tests/recursive-bounds.wipp
   is a definition
   resolved to 1 definition(s)
   has definition constraints
-  is missing instance value
   has type(s) `String -> String`
 
 NamedTypeNode(`String` (tests/recursive-bounds.wipple:6:20))
   has type(s) `String`
   resolved to 1 definition(s)
 
+PlaceholderExpressionNode(`_` (tests/recursive-bounds.wipple:6:30))
+  has type(s) `String -> String`
+
 InstanceDefinitionNode(`instance (Describe (Maybe value)) where (Describe value)` (tests/recursive-bounds.wipple:7:1))
   is a definition
   resolved to 1 definition(s)
   has definition constraints
   has type parameters
-  is missing instance value
   has type(s) `(Maybe value) -> String`
 
 NamedTypeNode(`Maybe value` (tests/recursive-bounds.wipple:7:21))
@@ -77,6 +78,9 @@ BoundConstraintNode(`(Describe value)` (tests/recursive-bounds.wipple:7:41))
 TypeParameterNode(`value` (tests/recursive-bounds.wipple:7:51))
   has type(s) `value`
   resolved to 1 definition(s)
+
+PlaceholderExpressionNode(`_` (tests/recursive-bounds.wipple:7:60))
+  has type(s) `(Maybe value) -> String`
 
 ConstructorExpressionNode(`Describe` (tests/recursive-bounds.wipple:10:1))
   has type(s) `(Maybe Number) -> String`

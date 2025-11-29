@@ -1,6 +1,6 @@
 import { OverlappingInstances } from "../compile";
 import { InstantiatedNode, Node } from "../node";
-import { Typed } from "../nodes/types";
+import { ExtraType, MissingType, Typed } from "../nodes/types";
 import { typeReferencesNode } from "../typecheck";
 import type { Group } from "../typecheck/solve";
 import { query } from "./query";
@@ -73,6 +73,20 @@ export const unknownType = query(function* (node, filter) {
 
     if (group.types.length === 0 && isFirstNodeInGroup(node, group, filter)) {
         yield { group };
+    }
+});
+
+export const missingType = query(function* (node) {
+    const parameter = node.facts.get(MissingType);
+
+    if (parameter != null) {
+        yield { parameter };
+    }
+});
+
+export const extraType = query(function* (node) {
+    if (node.facts.has(ExtraType)) {
+        yield {};
     }
 });
 

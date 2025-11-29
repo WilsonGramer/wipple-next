@@ -94,9 +94,14 @@ export class Visitor {
         name: string,
         types: T[],
     ): InstanceType<T>[] {
-        return this.scopes
+        const definitions =
+            this.scopes
+                .toReversed()
+                .map((scope) => scope.definitions.get(name))
+                .find((definitions) => definitions != null) ?? [];
+
+        return definitions
             .toReversed()
-            .flatMap((scope) => scope.definitions.get(name)?.toReversed() ?? [])
             .filter((definition): definition is InstanceType<T> =>
                 types.some((type) => definition instanceof type),
             );

@@ -22,15 +22,15 @@ import type { TypeNode } from "../types";
 import type { TypeParameterNode } from "../types/parameter";
 import { StatementNode } from "./index";
 
-export class DuplicateField extends Fact<null> {
+export class DuplicateFieldDefinition extends Fact<null> {
     display(): string {
-        return "is duplicate field";
+        return "is duplicate field definition";
     }
 }
 
-export class DuplicateVariant extends Fact<null> {
+export class DuplicateVariantDefinition extends Fact<null> {
     display(): string {
-        return "is duplicate variant";
+        return "is duplicate variant definition";
     }
 }
 
@@ -98,7 +98,7 @@ export class TypeDefinitionNode extends StatementNode {
                             visitor.visit(field.type);
 
                             if (fields.has(field.name)) {
-                                field.type.facts.set(DuplicateField, null);
+                                field.type.facts.set(DuplicateFieldDefinition, null);
                             } else {
                                 fields.set(field.name, field.type);
                             }
@@ -193,7 +193,10 @@ export class TypeDefinitionNode extends StatementNode {
                         const defined = new Set<string>();
                         for (const { name, constructorDefinition } of variantDefinitions) {
                             if (defined.has(name)) {
-                                constructorDefinition.node.facts.set(DuplicateVariant, null);
+                                constructorDefinition.node.facts.set(
+                                    DuplicateVariantDefinition,
+                                    null,
+                                );
                                 continue;
                             }
 

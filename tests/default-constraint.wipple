@@ -4,11 +4,12 @@
 [intrinsic] Set : element => type
 
 Collect : element collection => trait (element -> collection)
-instance (Collect element (List element))
-instance (Collect element (Set element))
+instance (Collect element (List element)) : _
+instance (Collect element (Set element)) : _
 
 -- Default and bound constraints are resolved in source code order
 collect :: element -> output where (output :: List _) (Collect element output)
+collect : _
 
 _ : collect "hi"
 _ : (collect "hi" :: Set _)

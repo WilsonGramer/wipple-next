@@ -47,6 +47,28 @@ registerFeedback({
 });
 
 registerFeedback({
+    id: "missing-type",
+    query: queries.missingType,
+    on: (node) => node,
+    render: (node, { parameter }) => render`
+        ${render.node(node)} is missing a type for ${render.node(parameter)}.
+
+        Try adding another type here, or double-check your parentheses.
+    `,
+});
+
+registerFeedback({
+    id: "extra-type",
+    query: queries.extraType,
+    on: (node) => node,
+    render: (node) => render`
+        ${render.node(node)} doesn't match any parameter of this type.
+
+        Try removing this type, or double-check your parentheses.
+    `,
+});
+
+registerFeedback({
     id: "conflicting-instances",
     query: queries.overlappingInstances,
     on: (node) => node,

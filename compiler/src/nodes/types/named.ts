@@ -32,7 +32,7 @@ export class NamedTypeNode extends TypeNode {
 
         if (typeDefinition != null) {
             const substitutions = new Map(
-                zipNodes(typeDefinition.parameters, this.parameters, {
+                zipNodes(this, typeDefinition.parameters, this.parameters, {
                     missing: MissingType,
                     extra: ExtraType,
                 }),

@@ -3,6 +3,7 @@ import { Node } from "../../node";
 import { displayType } from "../../typecheck";
 import { Group } from "../../typecheck/solve";
 import type { Visitor } from "../../visit";
+import type { TypeParameterNode } from "./parameter";
 
 export class Typed extends Fact<Group> {
     display(group: Group): string {
@@ -12,7 +13,7 @@ export class Typed extends Fact<Group> {
     }
 }
 
-export class MissingType extends Fact<null> {
+export class MissingType extends Fact<TypeParameterNode> {
     display(): string {
         return "is missing type";
     }
