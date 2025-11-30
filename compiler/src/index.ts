@@ -3,7 +3,7 @@ import * as cmd from "cmd-ts";
 import { execSync } from "node:child_process";
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { extname, join } from "node:path";
+import { dirname, extname, join } from "node:path";
 import ProgressBar from "progress";
 import wrapAnsi from "wrap-ansi";
 import { Codegen } from "./codegen";
@@ -12,6 +12,7 @@ import { collectFeedback } from "./feedback";
 import lsp from "./lsp";
 import type { Filter, Node } from "./node";
 import { nodeFilter } from "./node";
+import { parseFile } from "./syntax";
 
 Error.stackTraceLimit = 100;
 
@@ -56,26 +57,38 @@ const compileCommand = (options: { run: boolean }) =>
                 chalk.level = 0; // disable colors
             }
 
-            const libs = args.lib.map((libPath) => ({
-                path: libPath,
-                files: readdirSync(libPath)
+            const root = makeRoot();
+            const { db } = root;
+
+            const readFile = (path: string) => {
+                const source = readFileSync(path, "utf8");
+                return parseFile(db, path, source);
+            };
+
+            const resolveImport = (path: string, base: string) => ({
+                name: path,
+                files: readdirSync(join(base, path))
                     .filter((fileName) => extname(fileName) === ".wipple")
-                    .map((fileName) => {
-                        const filePath = join(libPath, fileName);
+                    .map((fileName) => readFile(join(base, path, fileName))),
+            });
 
-                        return {
-                            path: filePath,
-                            source: readFileSync(filePath, "utf8"),
-                        };
-                    }),
-            }));
+            const libs = args.lib.map((path) => resolveImport(path, "."));
 
-            const files = args.paths.map((path) => ({
-                path,
-                source: readFileSync(path, "utf8"),
-            }));
+            const files = args.paths.map((path) => readFile(path));
 
-            const layers = [...libs, { path: undefined, files }];
+            const layers = [...libs];
+
+            for (const file of files) {
+                for (const importItem of file.imports) {
+                    layers.push(resolveImport(importItem.path, dirname(file.span.path)));
+                    // TODO: Nested imports are not supported (show error)
+                }
+            }
+
+            layers.push({
+                name: files.map((file) => file.span.path).join(", "),
+                files,
+            });
 
             const filters = args.filterLines.map((filterLine): Filter => {
                 if (!filterLine.includes(":")) {
@@ -88,9 +101,6 @@ const compileCommand = (options: { run: boolean }) =>
             });
 
             const filter = nodeFilter(filters);
-
-            const root = makeRoot();
-            const { db } = root;
 
             const progress = new ProgressBar(`[:bar] ${chalk.dim(":message")}`, {
                 total: layers.length,
@@ -106,12 +116,12 @@ const compileCommand = (options: { run: boolean }) =>
                 progress.terminate();
             };
 
-            layers.forEach(({ path, files }, index) => {
+            layers.forEach(({ name: path, files }, index) => {
                 progress.tick(index, {
-                    message: `Compiling ${path ?? files.map(({ path }) => path).join(", ")}`,
+                    message: `Compiling ${path}`,
                 });
 
-                compile(root, { files });
+                compile(root, files);
             });
 
             clearProgress();

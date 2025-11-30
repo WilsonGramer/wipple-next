@@ -3,7 +3,7 @@ import { Node } from "./node";
 import type { FileNode } from "./nodes";
 import { BoundConstraintNode } from "./nodes/constraints/bound";
 import { Typed } from "./nodes/types";
-import { nullSpan, parseFile } from "./syntax";
+import { nullSpan } from "./syntax";
 import {
     BoundConstraint,
     type Instance,
@@ -12,10 +12,6 @@ import {
 import { Solver } from "./typecheck/solve";
 import type { Scope } from "./visit";
 import { DefinitionConstraints, Instances, Visitor } from "./visit";
-
-export interface CompileOptions {
-    files: { path: string; source: string }[];
-}
 
 // Marker for e.g. top-level scopes
 export class RootNode extends Node {
@@ -43,13 +39,11 @@ export const makeRoot = () => {
     return root;
 };
 
-export const compile = (root: RootNode, options: CompileOptions) => {
+export const compile = (root: RootNode, files: FileNode[]) => {
     const { db } = root;
+    root.files.push(...files);
 
-    // Parse
-
-    const parsedFiles = options.files.map(({ path, source }) => parseFile(db, path, source));
-    root.files.push(...parsedFiles);
+    const nodeIsFromFiles = (node: Node) => files.some((file) => node.isFromFile(file));
 
     // Define/resolve names and collect constraints
 
@@ -60,7 +54,7 @@ export const compile = (root: RootNode, options: CompileOptions) => {
 
     const visitor = new Visitor(db, topLevelScopes);
 
-    for (const file of parsedFiles) {
+    for (const file of files) {
         visitor.visit(file);
     }
 
@@ -101,7 +95,7 @@ export const compile = (root: RootNode, options: CompileOptions) => {
         solver.add(...constraints);
         solver.run();
 
-        addGroupsFrom(solver);
+        addGroupsFrom(solver, nodeIsFromFiles);
     }
 
     // Solve constraints from top-level expressions
@@ -116,11 +110,11 @@ export const compile = (root: RootNode, options: CompileOptions) => {
     solver.add(...topLevel.constraints);
     solver.run();
 
-    addGroupsFrom(solver);
+    addGroupsFrom(solver, nodeIsFromFiles);
     checkForOverlappingInstances(db, solver);
 };
 
-const addGroupsFrom = (solver: Solver) => {
+const addGroupsFrom = (solver: Solver, filter: (node: Node) => boolean) => {
     const groups = solver.toGroups();
 
     for (const group of groups) {
@@ -129,6 +123,10 @@ const addGroupsFrom = (solver: Solver) => {
         }
 
         for (const node of group.nodes) {
+            if (!filter(node)) {
+                continue;
+            }
+
             node.facts.set(Typed, group);
         }
     }

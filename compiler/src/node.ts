@@ -23,8 +23,12 @@ export abstract class Node {
         codegen.fail(`cannot codegen ${this}`);
     }
 
-    instantiate(source: Node | undefined): Node {
+    instantiate(source: Node): Node {
         return new InstantiatedNode(this, source);
+    }
+
+    isFromFile(file: Node): boolean {
+        return this.span.path === file.span.path;
     }
 
     toString() {
@@ -55,11 +59,11 @@ export abstract class Node {
 
 export class InstantiatedNode extends Node {
     from: Node;
-    source: Node | undefined;
+    source: Node;
 
     *children(): Generator<Node> {}
 
-    constructor(from: Node, source: Node | undefined) {
+    constructor(from: Node, source: Node) {
         super(from.span);
         this.from = from;
         this.source = source;
@@ -75,6 +79,10 @@ export class InstantiatedNode extends Node {
     }
 
     visit(_visitor: Visitor): void {}
+
+    override isFromFile(file: Node): boolean {
+        return this.source.isFromFile(file);
+    }
 }
 
 export class InternalNode extends Node {

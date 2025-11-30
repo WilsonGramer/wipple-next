@@ -1,5 +1,5 @@
 import type { Interval, IterationNode, NonterminalNode, TerminalNode } from "ohm-js";
-import { FileNode } from "../nodes";
+import { FileNode, Import } from "../nodes";
 import { AttributeNode } from "../nodes/attributes";
 import { StringAttributeValue } from "../nodes/attributes/value";
 import { BoundConstraintNode } from "../nodes/constraints/bound";
@@ -99,8 +99,16 @@ const parseString = (string: TerminalNode) => string.sourceString.slice(1, -1);
 const parseComment = (comment: TerminalNode) => comment.sourceString.slice(2).trim();
 
 const parser = (span: SpanFn): GrammarActionDict<{}> => ({
-    File(statements, comments, endLineBreak) {
-        return new FileNode(statements.parse(), span(this));
+    File(imports, statements, comments, endLineBreak) {
+        return new FileNode(imports.parse(), statements.parse(), span(this));
+    },
+
+    Imports(lineBreak, imports) {
+        return parseList(imports);
+    },
+
+    Import(importKeyword, path) {
+        return new Import(parseString(path), span(this));
     },
 
     // Attributes

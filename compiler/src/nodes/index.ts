@@ -5,10 +5,13 @@ import type { Visitor } from "../visit";
 import type { StatementNode } from "./statements";
 
 export class FileNode extends Node {
+    imports: Import[];
     statements: StatementNode[];
 
-    constructor(statements: StatementNode[], span: Span) {
+    constructor(imports: Import[], statements: StatementNode[], span: Span) {
         super(span);
+
+        this.imports = imports;
         this.statements = statements;
         this.isHidden = true;
     }
@@ -27,5 +30,15 @@ export class FileNode extends Node {
         for (const statement of this.statements) {
             codegen.write(this.span, statement);
         }
+    }
+}
+
+export class Import {
+    path: string;
+    span: Span;
+
+    constructor(path: string, span: Span) {
+        this.path = path;
+        this.span = span;
     }
 }

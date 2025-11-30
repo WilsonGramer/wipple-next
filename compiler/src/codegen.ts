@@ -22,7 +22,7 @@ export interface CodegenOptions {
 class CodegenError extends Error {}
 
 export class Codegen {
-    files: { path: string; source: string }[];
+    files: FileNode[];
     outputPath: string;
     db: Db;
     options: CodegenOptions;
@@ -32,12 +32,7 @@ export class Codegen {
     private nodes: Node[] = [];
     private writtenTypes = new Map<string, [number, string]>();
 
-    constructor(
-        files: { path: string; source: string }[],
-        outputPath: string,
-        db: Db,
-        options: CodegenOptions,
-    ) {
+    constructor(files: FileNode[], outputPath: string, db: Db, options: CodegenOptions) {
         this.files = files;
         this.outputPath = outputPath;
         this.db = db;
@@ -223,7 +218,7 @@ export class Codegen {
 
         const { code, map } = output.toStringWithSourceMap({ file: this.outputPath });
         for (const file of this.files) {
-            map.setSourceContent(file.path, file.source);
+            map.setSourceContent(file.span.path, file.span.source);
         }
 
         const sourceMapComment = `\n//# sourceMappingURL=data:application/json;base64,${btoa(map.toString())}\n`;
