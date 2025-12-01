@@ -3,7 +3,7 @@ import * as cmd from "cmd-ts";
 import { execSync } from "node:child_process";
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, extname, join } from "node:path";
+import { extname, join } from "node:path";
 import ProgressBar from "progress";
 import wrapAnsi from "wrap-ansi";
 import { Codegen } from "./codegen";
@@ -65,30 +65,19 @@ const compileCommand = (options: { run: boolean }) =>
                 return parseFile(db, path, source);
             };
 
-            const resolveImport = (path: string, base: string) => ({
+            const libs = args.lib.map((path) => ({
                 name: path,
-                files: readdirSync(join(base, path))
+                files: readdirSync(path)
                     .filter((fileName) => extname(fileName) === ".wipple")
-                    .map((fileName) => readFile(join(base, path, fileName))),
-            });
-
-            const libs = args.lib.map((path) => resolveImport(path, "."));
+                    .map((fileName) => readFile(join(path, fileName))),
+            }));
 
             const files = args.paths.map((path) => readFile(path));
 
-            const layers = [...libs];
-
-            for (const file of files) {
-                for (const importItem of file.imports) {
-                    layers.push(resolveImport(importItem.path, dirname(file.span.path)));
-                    // TODO: Nested imports are not supported (show error)
-                }
-            }
-
-            layers.push({
-                name: files.map((file) => file.span.path).join(", "),
-                files,
-            });
+            const layers = [
+                ...libs,
+                { name: files.map((file) => file.span.path).join(", "), files },
+            ];
 
             const filters = args.filterLines.map((filterLine): Filter => {
                 if (!filterLine.includes(":")) {

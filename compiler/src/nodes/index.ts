@@ -5,13 +5,13 @@ import type { Visitor } from "../visit";
 import type { StatementNode } from "./statements";
 
 export class FileNode extends Node {
-    imports: Import[];
+    frontMatter?: string;
     statements: StatementNode[];
 
-    constructor(imports: Import[], statements: StatementNode[], span: Span) {
+    constructor(frontMatter: string | undefined, statements: StatementNode[], span: Span) {
         super(span);
 
-        this.imports = imports;
+        this.frontMatter = frontMatter;
         this.statements = statements;
         this.isHidden = true;
     }

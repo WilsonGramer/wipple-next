@@ -1,12 +1,10 @@
 Grammar  {
     File =
-        Imports Statements Comments lineBreak?
+        shebang? frontMatter? Statements Comments lineBreak?
 
-    Imports =
-        (lineBreak? Import)*
+    shebang = "#!" (~"\n" any)* lineBreak
 
-    Import =
-        keyword<"import"> String
+    frontMatter = "---\n" (~("\n---\n") any)* "\n---" lineBreak
 
     // Attributes
 
@@ -419,7 +417,7 @@ Grammar  {
     lowercaseName (a lowercase name) =
         ~anyKeyword lower (alnum | "_")* ("-" (alnum | "_")+)* ("!" | "?")?
 
-    anyKeyword = keyword<("and" | "as" | "by" | "do" | "import" | "infer" | "instance" | "intrinsic" | "is" | "or" | "set" | "to" | "trait" | "type" | "when" | "where")>
+    anyKeyword = keyword<("and" | "as" | "by" | "do" | "infer" | "instance" | "intrinsic" | "is" | "or" | "set" | "to" | "trait" | "type" | "when" | "where")>
 
     keyword<k> = k ~("-" | alnum)
 }
