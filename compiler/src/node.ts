@@ -1,7 +1,7 @@
 import * as util from "node:util";
 import type { Codegen } from "./codegen";
 import { Facts, type Db } from "./db";
-import type { Span } from "./span";
+import { displaySpan, type Span } from "./span";
 import { code, extra } from "./util/color";
 import type { Visitor } from "./visit";
 
@@ -43,7 +43,7 @@ export abstract class Node {
             .replace(/\n.*$/s, "⋯") // collapse multiple lines
             .trim();
 
-        const span = `(${this.span.path}:${this.span.start.line}:${this.span.start.column})`;
+        const span = `(${displaySpan(this.span)})`;
 
         if (process.env.WIPPLE_LSP) {
             return code(source);

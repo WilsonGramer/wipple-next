@@ -1,0 +1,123 @@
+import * as moo from "moo";
+import { type Span } from "../span";
+
+export interface Token {
+    span: Span;
+    type: TokenType;
+    value: string;
+}
+
+const keywords = {
+    underscoreKeyword: "_",
+    doKeyword: "do",
+    inferKeyword: "infer",
+    instanceKeyword: "instance",
+    intrinsicKeyword: "intrinsic",
+    setKeyword: "set",
+    traitKeyword: "trait",
+    typeKeyword: "type",
+    whenKeyword: "when",
+    whereKeyword: "where",
+    asOperator: "as",
+    toOperator: "to",
+    byOperator: "by",
+    isOperator: "is",
+    andOperator: "and",
+    orOperator: "or",
+};
+
+const rules = {
+    space: /[ \t]+/,
+    lineBreak: { match: /\n+/, lineBreaks: true },
+    comment: { match: /--.*/, value: (s: string) => s.slice(2).trim() },
+    typeFunctionOperator: "=>",
+    annotateOperator: "::",
+    assignOperator: ":",
+    functionOperator: "->",
+    lessThanOrEqualOperator: "<=",
+    greaterThanOrEqualOperator: ">=",
+    notEqualOperator: "/=",
+    powerOperator: "^",
+    multiplyOperator: "*",
+    divideOperator: "/",
+    remainderOperator: "%",
+    addOperator: "+",
+    subtractOperator: "-",
+    lessThanOperator: "<",
+    greaterThanOperator: ">",
+    equalOperator: "=",
+    applyOperator: ".",
+    tupleOperator: ";",
+    collectionOperator: ",",
+    leftParenthesis: "(",
+    rightParenthesis: ")",
+    leftBracket: "[",
+    rightBracket: "]",
+    leftBrace: "{",
+    rightBrace: "}",
+    number: /[+-]?\d+(?:\.\d+)?/,
+    string: {
+        match: /"[^"]*"|'[^']*'/,
+        value: (s: string) => s.slice(1, -1),
+    },
+    capitalName: /(?:\d+-)*[A-Z][A-Za-z0-9_]*(?:-[A-Za-z0-9_]+)*(?:[!?])?/,
+    lowercaseName: {
+        match: /(?:\d+-)*[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*(?:[!?])?/,
+        type: moo.keywords(keywords),
+    },
+};
+
+export type TokenType = keyof typeof rules | keyof typeof keywords;
+
+export const tokenNames: Record<TokenType, string> = {
+    space: "space",
+    lineBreak: "line break",
+    comment: "comment",
+    typeFunctionOperator: "`=>`",
+    annotateOperator: "`::`",
+    assignOperator: "`:`",
+    functionOperator: "`->`",
+    lessThanOrEqualOperator: "`<=`",
+    greaterThanOrEqualOperator: "`>=`",
+    notEqualOperator: "`/=`",
+    powerOperator: "`^`",
+    multiplyOperator: "`*`",
+    divideOperator: "`/`",
+    remainderOperator: "`%`",
+    addOperator: "`+`",
+    subtractOperator: "`-`",
+    lessThanOperator: "`<`",
+    greaterThanOperator: "`>`",
+    equalOperator: "`=`",
+    applyOperator: "`.`",
+    tupleOperator: "`;`",
+    collectionOperator: "`,`",
+    leftParenthesis: "`(`",
+    rightParenthesis: "`)`",
+    leftBracket: "`[`",
+    rightBracket: "`]`",
+    leftBrace: "`{`",
+    rightBrace: "`}`",
+    number: "number",
+    string: "string",
+    capitalName: "capital name",
+    lowercaseName: "lowercase name",
+    underscoreKeyword: "`_`",
+    doKeyword: "`do`",
+    inferKeyword: "`infer`",
+    instanceKeyword: "`instance`",
+    intrinsicKeyword: "`intrinsic`",
+    setKeyword: "`set`",
+    traitKeyword: "`trait`",
+    typeKeyword: "`type`",
+    whenKeyword: "`when`",
+    whereKeyword: "`where`",
+    asOperator: "`as`",
+    toOperator: "`to`",
+    byOperator: "`by`",
+    isOperator: "`is`",
+    andOperator: "`and`",
+    orOperator: "`or`",
+};
+
+export const lexer = moo.compile(rules);

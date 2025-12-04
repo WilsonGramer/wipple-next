@@ -3,7 +3,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
-    globalIgnores(["dist/", "**/*.ohm-bundle*"]),
+    globalIgnores(["dist/"]),
     js.configs.recommended,
     tseslint.configs.recommendedTypeChecked,
     {

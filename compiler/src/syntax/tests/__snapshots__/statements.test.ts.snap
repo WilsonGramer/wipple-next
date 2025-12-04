@@ -1,5 +1,17 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`parsing statements > parsing assignment 1`] = `
+AssignmentNode {
+  "comments": [],
+  "pattern": VariablePatternNode {
+    "variable": "x",
+  },
+  "value": NumberExpressionNode {
+    "value": "123",
+  },
+}
+`;
+
 exports[`parsing statements > parsing complex valued instance definition 1`] = `
 InstanceDefinitionNode {
   "attributes": {
@@ -95,6 +107,15 @@ TypeDefinitionNode {
         "name": "None",
       },
     ],
+  },
+}
+`;
+
+exports[`parsing statements > parsing expression statement 1`] = `
+ExpressionStatementNode {
+  "comments": [],
+  "expression": NumberExpressionNode {
+    "value": "123",
   },
 }
 `;

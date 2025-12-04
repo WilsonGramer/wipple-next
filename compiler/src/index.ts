@@ -12,7 +12,8 @@ import { collectFeedback } from "./feedback";
 import lsp from "./lsp";
 import type { Filter, Node } from "./node";
 import { nodeFilter } from "./node";
-import { parseFile } from "./syntax";
+import { parse } from "./syntax";
+import { parseFile } from "./syntax/grammar";
 
 Error.stackTraceLimit = 100;
 
@@ -62,17 +63,18 @@ const compileCommand = (options: { run: boolean }) =>
 
             const readFile = (path: string) => {
                 const source = readFileSync(path, "utf8");
-                return parseFile(db, path, source);
+                const file = parse(db, path, source, parseFile);
+                return file ? [file] : [];
             };
 
             const libs = args.lib.map((path) => ({
                 name: path,
                 files: readdirSync(path)
                     .filter((fileName) => extname(fileName) === ".wipple")
-                    .map((fileName) => readFile(join(path, fileName))),
+                    .flatMap((fileName) => readFile(join(path, fileName))),
             }));
 
-            const files = args.paths.map((path) => readFile(path));
+            const files = args.paths.flatMap((path) => readFile(path));
 
             const layers = [
                 ...libs,

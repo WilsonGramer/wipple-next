@@ -1,27 +1,28 @@
 import { describe, expect, test } from "vitest";
 import { testParse } from "..";
+import { parseBlockExpression, parseExpression } from "../grammar";
 
 describe("parsing expressions", () => {
     test("parsing variable expression", () => {
-        expect(testParse("Expression", "foo")).toMatchSnapshot();
+        expect(testParse(parseExpression, "foo")).toMatchSnapshot();
     });
 
     test("parsing number expression", () => {
-        expect(testParse("Expression", "3.14")).toMatchSnapshot();
+        expect(testParse(parseExpression, "3.14")).toMatchSnapshot();
     });
 
     test("parsing string expression", () => {
-        expect(testParse("Expression", `"abc"`)).toMatchSnapshot();
+        expect(testParse(parseExpression, `"abc"`)).toMatchSnapshot();
     });
 
     test("parsing format expression", () => {
-        expect(testParse("Expression", `"Hello, _!" name`)).toMatchSnapshot();
+        expect(testParse(parseExpression, `"Hello, _!" name`)).toMatchSnapshot();
     });
 
     test("parsing structure expression", () => {
         expect(
             testParse(
-                "Expression",
+                parseExpression,
                 `Foo {
     a : b
     c : d
@@ -30,26 +31,30 @@ describe("parsing expressions", () => {
         ).toMatchSnapshot();
     });
 
+    test("parsing empty block expression", () => {
+        expect(testParse(parseBlockExpression, "{}")).toMatchSnapshot();
+    });
+
     test("parsing block expression", () => {
-        expect(testParse("Expression", "{foo}")).toMatchSnapshot();
+        expect(testParse(parseExpression, "{foo}")).toMatchSnapshot();
     });
 
     test("parsing do expression", () => {
-        expect(testParse("Expression", "do foo")).toMatchSnapshot();
+        expect(testParse(parseExpression, "do foo")).toMatchSnapshot();
     });
 
     test("parsing simple intrinsic expression", () => {
-        expect(testParse("Expression", `intrinsic "message"`)).toMatchSnapshot();
+        expect(testParse(parseExpression, `intrinsic "message"`)).toMatchSnapshot();
     });
 
     test("parsing complex intrinsic expression", () => {
-        expect(testParse("Expression", `intrinsic "message" x y`)).toMatchSnapshot();
+        expect(testParse(parseExpression, `intrinsic "message" x y`)).toMatchSnapshot();
     });
 
     test("parsing when expression", () => {
         expect(
             testParse(
-                "Expression",
+                parseExpression,
                 `when x {
     a -> b
     c -> d
@@ -59,41 +64,45 @@ describe("parsing expressions", () => {
     });
 
     test("parsing call expression", () => {
-        expect(testParse("Expression", "f x y")).toMatchSnapshot();
+        expect(testParse(parseExpression, "f x y")).toMatchSnapshot();
     });
 
     test("parsing annotate expression", () => {
-        expect(testParse("Expression", "(3.14 :: Number)")).toMatchSnapshot();
+        expect(testParse(parseExpression, "(3.14 :: Number)")).toMatchSnapshot();
     });
 
     test("parsing simple apply expression", () => {
-        expect(testParse("Expression", "x . f")).toMatchSnapshot();
+        expect(testParse(parseExpression, "x . f")).toMatchSnapshot();
     });
 
     test("parsing complex apply expression", () => {
-        expect(testParse("Expression", "a b . c d")).toMatchSnapshot();
+        expect(testParse(parseExpression, "a b . c d")).toMatchSnapshot();
     });
 
     test("parsing as expression", () => {
-        expect(testParse("Expression", "x as T")).toMatchSnapshot();
+        expect(testParse(parseExpression, "x as T")).toMatchSnapshot();
     });
 
     test("parsing add expression", () => {
-        expect(testParse("Expression", "a + b")).toMatchSnapshot();
+        expect(testParse(parseExpression, "a + b")).toMatchSnapshot();
     });
 
     test("parsing empty collection expression", () => {
-        expect(testParse("Expression", "(,)")).toMatchSnapshot();
+        expect(testParse(parseExpression, "(,)")).toMatchSnapshot();
+    });
+
+    test("parsing single element collection expression", () => {
+        expect(testParse(parseExpression, "a,")).toMatchSnapshot();
     });
 
     test("parsing single line collection expression", () => {
-        expect(testParse("Expression", "a, b, c")).toMatchSnapshot();
+        expect(testParse(parseExpression, "a, b, c")).toMatchSnapshot();
     });
 
     test("parsing multiline collection expression", () => {
         expect(
             testParse(
-                "Expression",
+                parseExpression,
                 `(
     a,
     b,
@@ -104,22 +113,22 @@ describe("parsing expressions", () => {
     });
 
     test("parsing single input function expression", () => {
-        expect(testParse("Expression", "x -> y")).toMatchSnapshot();
+        expect(testParse(parseExpression, "x -> y")).toMatchSnapshot();
     });
 
     test("parsing multi input function expression", () => {
-        expect(testParse("Expression", "x y -> z")).toMatchSnapshot();
+        expect(testParse(parseExpression, "x y -> z")).toMatchSnapshot();
     });
 
     test("parsing complex input function expression", () => {
-        expect(testParse("Expression", "(X y) -> z")).toMatchSnapshot();
+        expect(testParse(parseExpression, "(X y) -> z")).toMatchSnapshot();
     });
 
     test("parsing simple is expression", () => {
-        expect(testParse("Expression", "x is None")).toMatchSnapshot();
+        expect(testParse(parseExpression, "x is None")).toMatchSnapshot();
     });
 
     test("parsing complex is expression", () => {
-        expect(testParse("Expression", "x is Some 3.14")).toMatchSnapshot();
+        expect(testParse(parseExpression, "x is Some 3.14")).toMatchSnapshot();
     });
 });

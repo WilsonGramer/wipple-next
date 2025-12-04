@@ -9,7 +9,8 @@ import type { Node } from "./node";
 import { nodeFilter } from "./node";
 import * as queries from "./queries";
 import type { Span } from "./span";
-import { parseFile } from "./syntax";
+import { parse } from "./syntax";
+import { parseFile } from "./syntax/grammar";
 import { displayType } from "./typecheck";
 
 const tokenTypes = ["type", "interface", "typeParameter", "function"] as const;
@@ -54,8 +55,11 @@ export default () => {
             const root = makeRoot();
             const { db } = root;
 
-            const file = parseFile(db, path(e.document), code);
-            compile(root, [file]); // TODO: Support multiple files
+            // TODO: Support multiple files
+            const file = parse(db, path(e.document), code, parseFile);
+            if (file != null) {
+                compile(root, [file]);
+            }
 
             const diagnostics = addFeedback(db, filter);
 

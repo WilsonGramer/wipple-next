@@ -1,25 +1,26 @@
 import { describe, expect, test } from "vitest";
 import { testParse } from "..";
+import { parseStatement } from "../grammar";
 
 describe("parsing statements", () => {
     test("parsing type definition", () => {
         expect(
-            testParse("Statement", "-- Documentation comment\n[foo]\nFoo : type"),
+            testParse(parseStatement, "-- Documentation comment\n[foo]\nFoo : type"),
         ).toMatchSnapshot();
     });
 
     test("parsing generic type definition", () => {
-        expect(testParse("Statement", "Foo : value => type")).toMatchSnapshot();
+        expect(testParse(parseStatement, "Foo : value => type")).toMatchSnapshot();
     });
 
     test("parsing marker type definition", () => {
-        expect(testParse("Statement", "Foo : type")).toMatchSnapshot();
+        expect(testParse(parseStatement, "Foo : type")).toMatchSnapshot();
     });
 
     test("parsing structure type definition", () => {
         expect(
             testParse(
-                "Statement",
+                parseStatement,
                 `Foo : type {
     a :: A
     b :: B
@@ -31,7 +32,7 @@ describe("parsing statements", () => {
     test("parsing enumeration type definition", () => {
         expect(
             testParse(
-                "Statement",
+                parseStatement,
                 `Foo : type {
     Some Number
     None
@@ -41,26 +42,36 @@ describe("parsing statements", () => {
     });
 
     test("parsing trait definition", () => {
-        expect(testParse("Statement", "Foo : trait Number")).toMatchSnapshot();
+        expect(testParse(parseStatement, "Foo : trait Number")).toMatchSnapshot();
     });
 
     test("parsing generic trait definition", () => {
-        expect(testParse("Statement", "Foo : value => trait (value -> Number)")).toMatchSnapshot();
+        expect(
+            testParse(parseStatement, "Foo : value => trait (value -> Number)"),
+        ).toMatchSnapshot();
     });
 
     test("parsing constant definition", () => {
         expect(
-            testParse("Statement", "show :: value -> Unit where (Show value)"),
+            testParse(parseStatement, "show :: value -> Unit where (Show value)"),
         ).toMatchSnapshot();
     });
 
     test("parsing simple valued instance definition", () => {
-        expect(testParse("Statement", "instance (Foo Number) : 3.14")).toMatchSnapshot();
+        expect(testParse(parseStatement, "instance (Foo Number) : 3.14")).toMatchSnapshot();
     });
 
     test("parsing complex valued instance definition", () => {
         expect(
-            testParse("Statement", "instance (Foo (Maybe value)) where (Foo value) : 3.14"),
+            testParse(parseStatement, "instance (Foo (Maybe value)) where (Foo value) : 3.14"),
         ).toMatchSnapshot();
+    });
+
+    test("parsing assignment", () => {
+        expect(testParse(parseStatement, "x : 123")).toMatchSnapshot();
+    });
+
+    test("parsing expression statement", () => {
+        expect(testParse(parseStatement, "123")).toMatchSnapshot();
     });
 });

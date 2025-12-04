@@ -13,7 +13,7 @@ Dictionary : key value => type {
 
 instance (Initial (Dictionary key value)) : Dictionary {
   size : 0
-  entries : (None ,)
+  entries : (None,)
 }
 
 -- Retrieve the value for a key stored in a dictionary.

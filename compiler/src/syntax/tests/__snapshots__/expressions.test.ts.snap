@@ -147,6 +147,12 @@ DoExpressionNode {
 }
 `;
 
+exports[`parsing expressions > parsing empty block expression 1`] = `
+BlockExpressionNode {
+  "statements": [],
+}
+`;
+
 exports[`parsing expressions > parsing empty collection expression 1`] = `
 CollectionExpressionNode {
   "elements": [],
@@ -232,6 +238,16 @@ IsExpressionNode {
     "constructorName": "None",
     "elements": [],
   },
+}
+`;
+
+exports[`parsing expressions > parsing single element collection expression 1`] = `
+CollectionExpressionNode {
+  "elements": [
+    VariableExpressionNode {
+      "variable": "a",
+    },
+  ],
 }
 `;
 

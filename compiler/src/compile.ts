@@ -3,7 +3,7 @@ import { Node } from "./node";
 import type { FileNode } from "./nodes";
 import { BoundConstraintNode } from "./nodes/constraints/bound";
 import { Typed } from "./nodes/types";
-import { nullSpan } from "./syntax";
+import { nullSpan } from "./span";
 import {
     BoundConstraint,
     type Instance,

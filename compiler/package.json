@@ -3,13 +3,13 @@
     "private": true,
     "main": "./dist/index.js",
     "scripts": {
-        "build": "rm -rf dist && npm run build:ohm && tsc && node build.mjs",
-        "build:ohm": "ohm generateBundles --withTypes --esm 'src/**/*.ohm'",
+        "build": "rm -rf dist && tsc && node build.mjs",
         "lint": "eslint",
         "exe": "EXE=/usr/local/bin/wipple; echo '#!/usr/bin/env node' > $EXE && cat ./dist/index.js >> $EXE && chmod +x $EXE"
     },
     "dependencies": {
         "chalk": "^5.6.2",
+        "chevrotain": "^11.0.3",
         "cmd-ts": "^0.14.2",
         "dedent": "^1.7.0",
         "line-column": "^1.0.2",
@@ -22,7 +22,6 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.39.1",
-        "@ohm-js/cli": "^2.0.1",
         "@types/line-column": "^1.0.2",
         "@types/moo": "^0.5.10",
         "@types/node": "^24.5.2",

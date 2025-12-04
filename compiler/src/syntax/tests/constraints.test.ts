@@ -1,12 +1,13 @@
 import { describe, expect, test } from "vitest";
 import { testParse } from "..";
+import { parseConstraint } from "../grammar";
 
 describe("parsing constraints", () => {
     test("parsing bound constraint", () => {
-        expect(testParse("Constraint", `(Foo value)`)).toMatchSnapshot();
+        expect(testParse(parseConstraint, `(Foo value)`)).toMatchSnapshot();
     });
 
     test("parsing default constraint", () => {
-        expect(testParse("Constraint", `(value :: Number)`)).toMatchSnapshot();
+        expect(testParse(parseConstraint, `(value :: Number)`)).toMatchSnapshot();
     });
 });

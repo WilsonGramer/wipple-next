@@ -6,8 +6,8 @@ registerFeedback({
     id: "syntax-error",
     query: queries.syntaxError,
     on: (node) => node,
-    render: (_node, { expected }) => render`
-        Expected ${render.string(expected)} here.
+    render: (_node, { message }) => render`
+        ${render.string(message)}.
 
         Check your spelling.
     `,
