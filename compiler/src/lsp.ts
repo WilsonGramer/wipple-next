@@ -138,7 +138,7 @@ export default () => {
             diagnostics.push({
                 severity: lsp.DiagnosticSeverity.Information,
                 range: convertSpan(feedback.on.span),
-                message: feedback.rendered.render(),
+                message: feedback.rendered.render(true),
                 source: "wipple",
             });
         }

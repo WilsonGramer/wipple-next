@@ -159,7 +159,7 @@ const compileCommand = (options: { run: boolean }) =>
                 const indent = "  ";
 
                 const rendered = feedback.rendered
-                    .render()
+                    .render(true)
                     .trim()
                     .split("\n\n")
                     .map((s) =>

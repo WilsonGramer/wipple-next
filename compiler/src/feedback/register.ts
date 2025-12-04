@@ -6,7 +6,7 @@ interface Feedback<T extends Record<string, unknown>> {
     id: string;
     query: Query<T>;
     on: (node: Node, props: T) => Node;
-    render: (node: Node, props: T) => RenderedFeedback;
+    render: (node: Node, props: T, root?: boolean) => RenderedFeedback;
 }
 
 const feedback: Feedback<Record<string, any>>[] = [];

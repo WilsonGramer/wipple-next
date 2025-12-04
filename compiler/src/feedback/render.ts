@@ -9,17 +9,25 @@ import { code } from "../util/color";
 export interface RenderedFeedback {
     strings: readonly string[];
     values: Renderable[];
-    render: () => string;
+    render: (root?: boolean) => string;
 }
 
 export const render = (strings: readonly string[], ...values: Renderable[]): RenderedFeedback => ({
     strings,
     values,
-    render: () =>
-        dedent(
+    render: (root) => {
+        let rendered =
             values.map((value, index) => strings[index] + value.render()).join("") +
-                strings[strings.length - 1],
-        ),
+            strings[strings.length - 1];
+
+        if (root) {
+            rendered = dedent(rendered)
+                .replaceAll(/\n{2,}/g, "\n\n")
+                .trim();
+        }
+
+        return rendered;
+    },
 });
 
 export abstract class Renderable {

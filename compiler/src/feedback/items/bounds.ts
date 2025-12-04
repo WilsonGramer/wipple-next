@@ -23,6 +23,6 @@ registerFeedback({
         render`${render.comments(
             comments,
             { source: render.node(node), ...links },
-            render`\n\(This feedback comes from the instance ${render.bound(bound)}.)`,
+            render`\n\n(This feedback comes from the instance ${render.bound(bound)}.)`,
         )}`,
 });

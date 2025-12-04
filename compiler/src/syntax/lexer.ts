@@ -70,9 +70,9 @@ const rules = {
 export type TokenType = keyof typeof rules | keyof typeof keywords;
 
 export const tokenNames: Record<TokenType, string> = {
-    space: "space",
-    lineBreak: "line break",
-    comment: "comment",
+    space: "a space",
+    lineBreak: "a line break",
+    comment: "a comment",
     typeFunctionOperator: "`=>`",
     annotateOperator: "`::`",
     assignOperator: "`:`",
@@ -98,10 +98,10 @@ export const tokenNames: Record<TokenType, string> = {
     rightBracket: "`]`",
     leftBrace: "`{`",
     rightBrace: "`}`",
-    number: "number",
-    string: "string",
-    capitalName: "capital name",
-    lowercaseName: "lowercase name",
+    number: "a number",
+    string: "a string",
+    capitalName: "a capital name",
+    lowercaseName: "a lowercase name",
     underscoreKeyword: "`_`",
     doKeyword: "`do`",
     inferKeyword: "`infer`",

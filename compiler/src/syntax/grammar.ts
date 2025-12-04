@@ -130,7 +130,7 @@ export const parseStructureTypeRepresentation = (parser: Parser) => {
 
     const fields = parser.linesN(1, () => parseFieldDefinition(parser));
 
-    parser.token("rightBrace");
+    parser.token("rightBrace", reasons.closingBrace);
 
     return new StructureTypeRepresentation(fields, span());
 };
@@ -139,7 +139,8 @@ export const parseFieldDefinition = (parser: Parser) => {
     const span = parser.position();
 
     const name = parseVariableName(parser);
-    parser.commitToken("annotateOperator");
+    parser.commit("in this field definition");
+    parser.commitToken("annotateOperator", "in this type annotation");
     parser.consumeLineBreaks();
 
     const type = parseType(parser);
@@ -156,7 +157,7 @@ export const parseEnumerationTypeRepresentation = (parser: Parser) => {
 
     const variants = parser.linesN(1, () => parseVariantDefinition(parser));
 
-    parser.token("rightBrace");
+    parser.token("rightBrace", reasons.closingBrace);
 
     return new EnumerationTypeRepresentation(variants, span());
 };
@@ -164,7 +165,7 @@ export const parseEnumerationTypeRepresentation = (parser: Parser) => {
 export const parseMarkerTypeRepresentation = (parser: Parser) => {
     const span = parser.position();
 
-    parser.commitToken("typeKeyword");
+    parser.commitToken("typeKeyword", "in this type definition");
 
     return new MarkerTypeRepresentation(span());
 };
@@ -173,6 +174,7 @@ export const parseVariantDefinition = (parser: Parser) => {
     const span = parser.position();
 
     const name = parseConstructorName(parser);
+    parser.commit("in this variant definition");
 
     const elements = parser.try(() => parser.many(() => parseAtomicType(parser), undefined)) ?? [];
 
@@ -204,7 +206,7 @@ export const parseTraitDefinitionStatement = (parser: Parser) => {
 };
 
 export const parseTraitConstraints = (parser: Parser) => {
-    parser.commitToken("traitKeyword");
+    parser.commitToken("traitKeyword", "in this trait definition");
 
     const type = parseAtomicType(parser);
     const constraints = parser.try(() => parseConstraints(parser)) ?? [];
@@ -225,7 +227,7 @@ export const parseConstantDefinitionStatement = (parser: Parser) => {
 };
 
 export const parseConstantConstraints = (parser: Parser) => {
-    parser.commitToken("annotateOperator");
+    parser.commitToken("annotateOperator", "in this constant definition");
     parser.consumeLineBreaks();
 
     const type = parseType(parser);
@@ -252,7 +254,7 @@ export const parseInstanceDefinitionStatement = (parser: Parser) => {
 };
 
 export const parseInstanceConstraints = (parser: Parser) => {
-    parser.commitToken("instanceKeyword");
+    parser.commitToken("instanceKeyword", "in this instance definition");
 
     const bound = parseBoundConstraint(parser);
     const constraints = parser.try(() => parseConstraints(parser)) ?? [];
@@ -266,7 +268,7 @@ export const parseAssignmentStatement = (parser: Parser) => {
     const comments = parseComments(parser);
     const pattern = parsePattern(parser);
 
-    parser.commitToken("assignOperator");
+    parser.commitToken("assignOperator", "in this variable assignment");
     parser.consumeLineBreaks();
 
     const value = parseExpression(parser);
@@ -336,18 +338,18 @@ export const parseAtomicExpression = (parser: Parser): ExpressionNode =>
     );
 
 export const parseParenthesizedExpression = (parser: Parser) => {
-    parser.token("leftParenthesis");
+    parser.commitToken("leftParenthesis", "between these parentheses");
     parser.consumeLineBreaks();
     const value = parseExpression(parser);
     parser.consumeLineBreaks();
-    parser.token("rightParenthesis");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
     return value;
 };
 
 export const parsePlaceholderExpression = (parser: Parser) => {
     const span = parser.position();
 
-    parser.commitToken("underscoreKeyword");
+    parser.commitToken("underscoreKeyword", "in this placeholder expression");
 
     return new PlaceholderExpressionNode(span());
 };
@@ -391,7 +393,7 @@ export const parseStructureExpression = (parser: Parser) => {
 
     parser.token("leftBrace");
     const fields = parseStructureExpressionFields(parser);
-    parser.token("rightBrace");
+    parser.token("rightBrace", reasons.closingBrace);
 
     return new StructureExpressionNode(name, fields, span());
 };
@@ -416,7 +418,7 @@ export const parseBlockExpression = (parser: Parser) => {
     parser.token("leftBrace");
     const statements = parseStatements(parser);
     parseComments(parser);
-    parser.token("rightBrace");
+    parser.token("rightBrace", reasons.closingBrace);
 
     return new BlockExpressionNode(statements, span());
 };
@@ -424,8 +426,8 @@ export const parseBlockExpression = (parser: Parser) => {
 export const parseUnitExpression = (parser: Parser) => {
     const span = parser.position();
 
-    parser.token("leftParenthesis");
-    parser.token("rightParenthesis");
+    parser.token("leftParenthesis", "between these parentheses");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
 
     return new UnitExpressionNode(span());
 };
@@ -451,7 +453,7 @@ export const parseCallExpression = (parser: Parser) => {
 export const parseDoExpression = (parser: Parser) => {
     const span = parser.position();
 
-    parser.commitToken("doKeyword");
+    parser.commitToken("doKeyword", "in this `do` expression");
 
     const value = parseAtomicExpression(parser);
 
@@ -461,13 +463,13 @@ export const parseDoExpression = (parser: Parser) => {
 export const parseWhenExpression = (parser: Parser) => {
     const span = parser.position();
 
-    parser.commitToken("whenKeyword");
+    parser.commitToken("whenKeyword", "in this `when` expression");
 
     const input = parseAtomicExpression(parser);
 
     parser.token("leftBrace");
     const arms = parser.try(() => parseArms(parser)) ?? [];
-    parser.token("rightBrace");
+    parser.token("rightBrace", reasons.closingBrace);
 
     return new WhenExpressionNode(input, arms, span());
 };
@@ -476,7 +478,7 @@ export const parseArm = (parser: Parser) => {
     const span = parser.position();
 
     const pattern = parsePattern(parser);
-    parser.commitToken("functionOperator");
+    parser.commitToken("functionOperator", "in this `when` arm");
     parser.consumeLineBreaks();
     const value = parseExpression(parser);
 
@@ -488,7 +490,7 @@ export const parseArms = (parser: Parser) => parser.lines(() => parseArm(parser)
 export const parseIntrinsicExpression = (parser: Parser) => {
     const span = parser.position();
 
-    parser.commitToken("intrinsicKeyword");
+    parser.commitToken("intrinsicKeyword", "in this `intrinsic` expression");
 
     const name = parseString(parser);
     const inputs =
@@ -683,7 +685,7 @@ export const parseAnnotateExpression = (parser: Parser) => {
     const span = parser.position();
 
     const left = parseExpressionElement(parser);
-    parser.commitToken("annotateOperator");
+    parser.commitToken("annotateOperator", "in this type annotation");
     parser.consumeLineBreaks();
     const right = parseTypeElement(parser);
 
@@ -702,7 +704,7 @@ export const parseFunctionExpression = (parser: Parser) => {
 export const parseFunctionExpressionInputs = (parser: Parser) => {
     const inputs = parser.manyN(1, () => parseAtomicPattern(parser), undefined);
 
-    parser.commitToken("functionOperator");
+    parser.commitToken("functionOperator", "in this function");
     parser.consumeLineBreaks();
 
     return inputs;
@@ -749,18 +751,18 @@ export const parseAtomicPattern = (parser: Parser): PatternNode =>
     );
 
 export const parseParenthesizedPattern = (parser: Parser) => {
-    parser.token("leftParenthesis");
+    parser.token("leftParenthesis", "between these parentheses");
     parser.consumeLineBreaks();
     const value = parsePattern(parser);
     parser.consumeLineBreaks();
-    parser.token("rightParenthesis");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
     return value;
 };
 
 export const parseWildcardPattern = (parser: Parser) => {
     const span = parser.position();
 
-    parser.commitToken("underscoreKeyword");
+    parser.commitToken("underscoreKeyword", "in this wildcard pattern");
 
     return new WildcardPatternNode(span());
 };
@@ -798,7 +800,7 @@ export const parseStructurePattern = (parser: Parser) => {
 
     const fields = parser.linesN(1, () => parseStructurePatternField(parser));
 
-    parser.token("rightBrace");
+    parser.token("rightBrace", reasons.closingBrace);
 
     return new StructurePatternNode(name, fields, span());
 };
@@ -828,8 +830,8 @@ export const parseConstructorPattern = (parser: Parser) => {
 export const parseUnitPattern = (parser: Parser) => {
     const span = parser.position();
 
-    parser.token("leftParenthesis");
-    parser.token("rightParenthesis");
+    parser.token("leftParenthesis", "between these parentheses");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
 
     return new UnitPatternNode(span());
 };
@@ -877,7 +879,7 @@ export const parseOrPattern = (parser: Parser) => {
 export const parseSetPattern = (parser: Parser) => {
     const span = parser.position();
 
-    parser.commitToken("setKeyword");
+    parser.commitToken("setKeyword", "in this `set` pattern");
 
     const name = parseVariableName(parser);
 
@@ -888,7 +890,7 @@ export const parseAnnotatePattern = (parser: Parser) => {
     const span = parser.position();
 
     const left = parsePatternElement(parser);
-    parser.commitToken("annotateOperator");
+    parser.commitToken("annotateOperator", "in this type annotation");
     parser.consumeLineBreaks();
     const right = parseTypeElement(parser);
 
@@ -931,18 +933,18 @@ export const parseAtomicType = (parser: Parser): TypeNode =>
     );
 
 export const parseParenthesizedType = (parser: Parser) => {
-    parser.token("leftParenthesis");
+    parser.token("leftParenthesis", "between these parentheses");
     parser.consumeLineBreaks();
     const value = parseType(parser);
     parser.consumeLineBreaks();
-    parser.token("rightParenthesis");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
     return value;
 };
 
 export const parsePlaceholderType = (parser: Parser) => {
     const span = parser.position();
 
-    parser.commitToken("underscoreKeyword");
+    parser.commitToken("underscoreKeyword", "in this placeholder type");
 
     return new PlaceholderTypeNode(span());
 };
@@ -951,7 +953,7 @@ export const parseAnnotatedParameterType = (parser: Parser) => {
     const span = parser.position();
 
     const name = parseTypeParameterName(parser);
-    parser.commitToken("annotateOperator");
+    parser.commitToken("annotateOperator", "in this type annotation");
     parser.consumeLineBreaks();
     const value = parseType(parser);
 
@@ -986,7 +988,7 @@ export const parseFunctionType = (parser: Parser) => {
 export const parseFunctionTypeInputs = (parser: Parser) => {
     const inputs = parser.manyN(1, () => parseAtomicType(parser), undefined);
 
-    parser.commitToken("functionOperator");
+    parser.commitToken("functionOperator", "in this function type");
     parser.consumeLineBreaks();
 
     return inputs;
@@ -997,7 +999,7 @@ export const parseBlockType = (parser: Parser) => {
 
     parser.token("leftBrace");
     const output = parseTypeElement(parser);
-    parser.token("rightBrace");
+    parser.token("rightBrace", reasons.closingBrace);
 
     return new BlockTypeNode(output, span());
 };
@@ -1005,8 +1007,8 @@ export const parseBlockType = (parser: Parser) => {
 export const parseUnitType = (parser: Parser) => {
     const span = parser.position();
 
-    parser.token("leftParenthesis");
-    parser.token("rightParenthesis");
+    parser.token("leftParenthesis", "between these parentheses");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
 
     return new UnitTypeNode(span());
 };
@@ -1049,7 +1051,7 @@ export const parseTypeParameters = (parser: Parser) => {
     const parameters = parser.many(() => parseTypeParameter(parser), undefined);
 
     if (parameters.length > 0) {
-        parser.commitToken("typeFunctionOperator");
+        parser.commitToken("typeFunctionOperator", "in this generic item");
         parser.consumeLineBreaks();
     }
 
@@ -1074,16 +1076,16 @@ export const parseNamedTypeParameter = (parser: Parser) => {
 export const parseInferTypeParameter = (parser: Parser) => {
     const span = parser.position();
 
-    parser.token("leftParenthesis");
-    parser.commitToken("inferKeyword");
+    parser.token("leftParenthesis", "between these parentheses");
+    parser.commitToken("inferKeyword", "in this inferred type parameter");
     const name = parseTypeParameterName(parser);
-    parser.token("rightParenthesis");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
 
     return new TypeParameterNode(name, true, undefined, span());
 };
 
 export const parseConstraints = (parser: Parser) => {
-    parser.commitToken("whereKeyword");
+    parser.commitToken("whereKeyword", "in these constraints");
 
     return parser.many(() => parseConstraint(parser), undefined);
 };
@@ -1098,10 +1100,10 @@ export const parseConstraint = (parser: Parser) =>
 export const parseBoundConstraint = (parser: Parser) => {
     const span = parser.position();
 
-    parser.token("leftParenthesis");
+    parser.token("leftParenthesis", "between these parentheses");
     const trait = parseTypeName(parser);
     const parameters = parser.many(() => parseAtomicType(parser), undefined);
-    parser.token("rightParenthesis");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
 
     return new BoundConstraintNode(trait, parameters, span());
 };
@@ -1109,7 +1111,7 @@ export const parseBoundConstraint = (parser: Parser) => {
 export const parseDefaultConstraint = (parser: Parser) => {
     const span = parser.position();
 
-    parser.token("leftParenthesis");
+    parser.token("leftParenthesis", "between these parentheses");
 
     const parameterSpan = parser.position();
     const parameter = new TypeParameterNode(
@@ -1119,12 +1121,12 @@ export const parseDefaultConstraint = (parser: Parser) => {
         parameterSpan(),
     );
 
-    parser.commitToken("annotateOperator");
+    parser.commitToken("annotateOperator", "in this type annotation");
     parser.consumeLineBreaks();
 
     const value = parseType(parser);
 
-    parser.token("rightParenthesis");
+    parser.token("rightParenthesis", reasons.closingParenthesis);
 
     return new DefaultConstraintNode(parameter, value, span());
 };
@@ -1146,7 +1148,7 @@ export const parseAttribute = (parser: Parser) => {
         return parseAttributeValue(parser);
     });
 
-    parser.token("rightBracket");
+    parser.token("rightBracket", reasons.closingBracket);
 
     return new AttributeNode(name, value, span());
 };
@@ -1191,3 +1193,11 @@ export const parseAttributeName = (parser: Parser) =>
     );
 
 export const parseComment = (parser: Parser) => parser.token("comment").value;
+
+// Reasons
+
+const reasons = {
+    closingParenthesis: "Every opening `(` must have a closing `)`.",
+    closingBracket: "Every opening `[` must have a closing `]`.",
+    closingBrace: "Every opening `{` must have a closing `}`.",
+};

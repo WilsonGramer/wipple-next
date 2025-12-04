@@ -242,8 +242,9 @@ NamedTypeNode(`2` (tests/custom-errors.wipple:17:12))
   to a variable.
 `Add` (tests/custom-errors.wipple:16:5) (error-instance):
 
-  Cannot add `1` (tests/custom-errors.wipple:16:9) and `"a"`
-  (tests/custom-errors.wipple:16:11).(This feedback comes from the instance `Add Number String _`.)
+  Cannot add `1` (tests/custom-errors.wipple:16:9) and `"a"` (tests/custom-errors.wipple:16:11).
+
+  (This feedback comes from the instance `Add Number String _`.)
 `Add` (tests/custom-errors.wipple:16:5) (incomplete-type):
 
   Missing information for the type of `Add` (tests/custom-errors.wipple:16:5).
@@ -258,8 +259,9 @@ NamedTypeNode(`2` (tests/custom-errors.wipple:17:12))
   to a variable.
 `Add` (tests/custom-errors.wipple:17:5) (error-instance):
 
-  Missing parentheses around the inputs to `+`.(This feedback comes from the instance `Add () Number
-  _`.)
+  Missing parentheses around the inputs to `+`.
+
+  (This feedback comes from the instance `Add () Number _`.)
 `Add` (tests/custom-errors.wipple:17:5) (incomplete-type):
 
   Missing information for the type of `Add` (tests/custom-errors.wipple:17:5).

@@ -11,7 +11,7 @@ class SyntaxErrorNode extends Node {
 
 export class SyntaxError extends Fact<ParseError> {
     display(error: ParseError): string {
-        return error.message;
+        return error.message + (error.committed ? ` ${error.committed}` : "");
     }
 }
 

@@ -22,7 +22,7 @@ export const collectFeedback = (db: Db, filter: (node: Node) => boolean) => {
                 }
 
                 const on = item.on(node, props);
-                const rendered = item.render(node, props);
+                const rendered = item.render(node, props, true);
                 items.push({ id, on, rendered });
             }
         }
