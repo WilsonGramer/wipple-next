@@ -231,21 +231,33 @@ export class Parser {
     }
 
     token(type: TokenType, reason?: string): Token {
-        return this._token(type, undefined, reason);
+        return this._token(type, undefined, undefined, reason);
+    }
+
+    tokenWithName(type: TokenType, name: string, reason?: string): Token {
+        return this._token(type, name, undefined, reason);
     }
 
     commitToken(type: TokenType, trace: string): Token {
-        return this._token(type, trace);
+        return this._token(type, undefined, trace);
     }
 
-    private _token(type: TokenType, commitTrace: string | undefined, reason?: string): Token {
+    private _token(
+        type: TokenType,
+        name: string | undefined,
+        commitTrace: string | undefined,
+        reason?: string,
+    ): Token {
         const token = this.tokens[this.index];
         if (token == null) {
-            this.error(`Expected ${tokenNames[type]}`, reason);
+            this.error(`Expected ${name ?? tokenNames[type]}`, reason);
         }
 
         if (token.type !== type) {
-            this.error(`Expected ${tokenNames[type]}, but found ${tokenNames[token.type]}`, reason);
+            this.error(
+                `Expected ${name ?? tokenNames[type]}, but found ${tokenNames[token.type]}`,
+                reason,
+            );
         }
 
         this.index++;

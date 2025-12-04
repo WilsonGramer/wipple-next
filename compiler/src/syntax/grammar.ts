@@ -245,7 +245,7 @@ export const parseInstanceDefinitionStatement = (parser: Parser) => {
     const { bound, constraints } = parseInstanceConstraints(parser);
 
     const value = parser.try(() => {
-        parser.token("assignOperator");
+        parser.commitToken("assignOperator", "in this instance definition");
         parser.consumeLineBreaks();
         return parseExpression(parser);
     });
@@ -1177,18 +1177,25 @@ export const parseString = (parser: Parser) => parser.token("string").value;
 
 export const parseNumber = (parser: Parser) => parser.token("number").value;
 
-export const parseTypeName = (parser: Parser) => parser.token("capitalName").value;
+export const parseTypeName = (parser: Parser) =>
+    parser.tokenWithName("capitalName", "a type name").value;
 
-export const parseConstructorName = (parser: Parser) => parser.token("capitalName").value;
+export const parseConstructorName = (parser: Parser) =>
+    parser.tokenWithName("capitalName", "a constructor name").value;
 
-export const parseVariableName = (parser: Parser) => parser.token("lowercaseName").value;
+export const parseVariableName = (parser: Parser) =>
+    parser.tokenWithName("lowercaseName", "a variable name").value;
 
-export const parseTypeParameterName = (parser: Parser) => parser.token("lowercaseName").value;
+export const parseTypeParameterName = (parser: Parser) =>
+    parser.tokenWithName("lowercaseName", "a type parameter name").value;
 
 export const parseAttributeName = (parser: Parser) =>
     parser.or(
         parseAttributeName,
-        [() => parser.token("lowercaseName").value, () => parser.token("intrinsicKeyword").value],
+        [
+            () => parser.tokenWithName("lowercaseName", "an attribute name").value,
+            () => parser.token("intrinsicKeyword").value,
+        ],
         "Expected attribute name",
     );
 
