@@ -338,7 +338,7 @@ export const parseAtomicExpression = (parser: Parser): ExpressionNode =>
     );
 
 export const parseParenthesizedExpression = (parser: Parser) => {
-    parser.commitToken("leftParenthesis", "between these parentheses");
+    parser.token("leftParenthesis", "between these parentheses");
     parser.consumeLineBreaks();
     const value = parseExpression(parser);
     parser.consumeLineBreaks();
@@ -477,7 +477,7 @@ export const parseWhenExpression = (parser: Parser) => {
 export const parseArm = (parser: Parser) => {
     const span = parser.position();
 
-    const pattern = parsePattern(parser);
+    const pattern = parseAtomicPattern(parser);
     parser.commitToken("functionOperator", "in this `when` arm");
     parser.consumeLineBreaks();
     const value = parseExpression(parser);
