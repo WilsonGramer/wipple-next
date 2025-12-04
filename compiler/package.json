@@ -9,7 +9,6 @@
     },
     "dependencies": {
         "chalk": "^5.6.2",
-        "chevrotain": "^11.0.3",
         "cmd-ts": "^0.14.2",
         "dedent": "^1.7.0",
         "line-column": "^1.0.2",
