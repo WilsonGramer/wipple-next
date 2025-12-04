@@ -12,6 +12,8 @@ export class CallExpressionNode extends ExpressionNode {
     function: ExpressionNode;
     inputs: ExpressionNode[];
 
+    private isUnit?: boolean;
+
     constructor(func: ExpressionNode, inputs: ExpressionNode[], span: Span) {
         super(span);
         this.function = func;
@@ -40,6 +42,8 @@ export class CallExpressionNode extends ExpressionNode {
 
                     visitor.constraint(new TypeConstraint(unitNode, types.function([input], this)));
 
+                    this.isUnit = true;
+
                     return;
                 }
             }
@@ -55,15 +59,16 @@ export class CallExpressionNode extends ExpressionNode {
     }
 
     codegen(codegen: Codegen): void {
-        codegen.write(this.span, "await (");
-        codegen.write(this.span, this.function);
-        codegen.write(this.span, ")(");
+        if (this.isUnit) {
+            codegen.write(this.span, "await (", this.inputs[0], ")(", this.function, ")");
+        } else {
+            codegen.write(this.span, "await (", this.function, ")(");
 
-        for (const input of this.inputs) {
-            codegen.write(this.span, input);
-            codegen.write(this.span, ", ");
+            for (const input of this.inputs) {
+                codegen.write(this.span, input, ", ");
+            }
+
+            codegen.write(this.span, ")");
         }
-
-        codegen.write(this.span, ")");
     }
 }
