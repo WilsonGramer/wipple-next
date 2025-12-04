@@ -287,7 +287,7 @@ export class Parser {
 
     finish() {
         if (this.index < this.tokens.length) {
-            this.error(`unexpected ${tokenNames[this.tokens[this.index].type]}`);
+            this.error(`Unexpected ${tokenNames[this.tokens[this.index].type]}`);
         }
     }
 }

@@ -91,7 +91,7 @@ export const parseStatement = (parser: Parser) =>
             () => parseAssignmentStatement(parser),
             () => parseExpressionStatement(parser),
         ],
-        "expected statement",
+        "Expected statement",
     );
 
 export const parseTypeDefinitionStatement = (parser: Parser) => {
@@ -118,7 +118,7 @@ export const parseTypeRepresentation = (parser: Parser) =>
             () => parseEnumerationTypeRepresentation(parser),
             () => parseMarkerTypeRepresentation(parser),
         ],
-        "expected type representation",
+        "Expected type representation",
     );
 
 export const parseStructureTypeRepresentation = (parser: Parser) => {
@@ -301,7 +301,7 @@ export const parseExpression = (parser: Parser): ExpressionNode =>
             () => parseOperatorExpression(parser),
             () => parseExpressionElement(parser),
         ],
-        "expected expression",
+        "Expected expression",
     );
 
 export const parseExpressionElement = (parser: Parser): ExpressionNode =>
@@ -316,7 +316,7 @@ export const parseExpressionElement = (parser: Parser): ExpressionNode =>
             () => parseIntrinsicExpression(parser),
             () => parseAtomicExpression(parser),
         ],
-        "expected expression",
+        "Expected expression",
     );
 
 export const parseAtomicExpression = (parser: Parser): ExpressionNode =>
@@ -332,7 +332,7 @@ export const parseAtomicExpression = (parser: Parser): ExpressionNode =>
             () => parseUnitExpression(parser),
             () => parseParenthesizedExpression(parser),
         ],
-        "expected expression",
+        "Expected expression",
     );
 
 export const parseParenthesizedExpression = (parser: Parser) => {
@@ -513,7 +513,7 @@ const parseOperator = (
             const operator = parser.or(
                 key,
                 operators.map((operator) => () => parser.token(operator)),
-                "expected operator",
+                "Expected operator",
             );
 
             parser.consumeLineBreaks();
@@ -719,7 +719,7 @@ export const parsePattern = (parser: Parser): PatternNode =>
             () => parseAnnotatePattern(parser),
             () => parsePatternElement(parser),
         ],
-        "expected pattern",
+        "Expected pattern",
     );
 
 export const parsePatternElement = (parser: Parser): PatternNode =>
@@ -731,7 +731,7 @@ export const parsePatternElement = (parser: Parser): PatternNode =>
             () => parseSetPattern(parser),
             () => parseAtomicPattern(parser),
         ],
-        "expected pattern",
+        "Expected pattern",
     );
 
 export const parseAtomicPattern = (parser: Parser): PatternNode =>
@@ -745,7 +745,7 @@ export const parseAtomicPattern = (parser: Parser): PatternNode =>
             () => parseUnitPattern(parser),
             () => parseParenthesizedPattern(parser),
         ],
-        "expected pattern",
+        "Expected pattern",
     );
 
 export const parseParenthesizedPattern = (parser: Parser) => {
@@ -906,14 +906,14 @@ export const parseType = (parser: Parser): TypeNode =>
             () => parseAnnotatedParameterType(parser),
             () => parseTypeElement(parser),
         ],
-        "expected type",
+        "Expected type",
     );
 
 export const parseTypeElement = (parser: Parser): TypeNode =>
     parser.or<TypeNode>(
         parseTypeElement,
         [() => parseParameterizedType(parser), () => parseAtomicType(parser)],
-        "expected type",
+        "Expected type",
     );
 
 export const parseAtomicType = (parser: Parser): TypeNode =>
@@ -927,7 +927,7 @@ export const parseAtomicType = (parser: Parser): TypeNode =>
             () => parseUnitType(parser),
             () => parseParenthesizedType(parser),
         ],
-        "expected type",
+        "Expected type",
     );
 
 export const parseParenthesizedType = (parser: Parser) => {
@@ -1060,7 +1060,7 @@ export const parseTypeParameter = (parser: Parser) =>
     parser.or<TypeParameterNode>(
         parseTypeParameter,
         [() => parseNamedTypeParameter(parser), () => parseInferTypeParameter(parser)],
-        "expected type parameter",
+        "Expected type parameter",
     );
 
 export const parseNamedTypeParameter = (parser: Parser) => {
@@ -1092,7 +1092,7 @@ export const parseConstraint = (parser: Parser) =>
     parser.or<ConstraintNode>(
         parseConstraint,
         [() => parseBoundConstraint(parser), () => parseDefaultConstraint(parser)],
-        "expected constraint",
+        "Expected constraint",
     );
 
 export const parseBoundConstraint = (parser: Parser) => {
@@ -1155,7 +1155,7 @@ export const parseAttributeValue = (parser: Parser) =>
     parser.or<AttributeValue>(
         parseAttributeValue,
         [() => parseStringAttributeValue(parser)],
-        "expected attribute value",
+        "Expected attribute value",
     );
 
 export const parseStringAttributeValue = (parser: Parser) => {
@@ -1187,7 +1187,7 @@ export const parseAttributeName = (parser: Parser) =>
     parser.or(
         parseAttributeName,
         [() => parser.token("lowercaseName").value, () => parser.token("intrinsicKeyword").value],
-        "expected attribute name",
+        "Expected attribute name",
     );
 
 export const parseComment = (parser: Parser) => parser.token("comment").value;
