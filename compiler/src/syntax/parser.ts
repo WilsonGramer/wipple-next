@@ -6,12 +6,15 @@ interface Position {
     index: number;
 }
 
-export class ParseError extends Error {
+// NOTE: `ParseError` deliberately does not extend `Error` because constructing
+// `Error`s is expensive
+export class ParseError {
+    message: string;
     span: Span;
-    committedAt?: string;
+    committed = false;
 
     constructor(message: string, span: Span) {
-        super(message);
+        this.message = message;
         this.span = span;
     }
 }
@@ -22,7 +25,7 @@ export class Parser {
     private tokens: Token[];
 
     private index = 0;
-    private stack: { committed: string | undefined }[] = [];
+    private stack: { committed: boolean }[] = [];
     private cache: Map<number, Map<Function, [any, number]>> = new Map();
 
     constructor(path: string, source: string) {
@@ -72,52 +75,39 @@ export class Parser {
     }
 
     or<T>(key: Function, options: (() => T)[], elseMessage: string): T {
-        if (this.cache.has(this.index)) {
-            const cached = this.cache.get(this.index)!.get(key);
-            if (cached != null) {
-                const [result, newIndex] = cached;
-                this.index = newIndex;
-                return result;
-            }
-        }
+        return this.cached(key, () => {
+            const start = this.position();
 
-        const start = this.position();
+            const commitEntry = { committed: false };
+            this.stack.push(commitEntry);
 
-        const commitEntry = { committed: undefined as string | undefined };
-        this.stack.push(commitEntry);
+            try {
+                for (const option of options) {
+                    let result: T;
+                    try {
+                        result = option();
+                    } catch (e) {
+                        if (!(e instanceof ParseError) || e.committed) {
+                            throw e;
+                        }
 
-        try {
-            for (const option of options) {
-                let result: T;
-                try {
-                    result = option();
-                } catch (e) {
-                    if (!(e instanceof ParseError) || e.committedAt != null) {
-                        throw e;
+                        if (commitEntry.committed) {
+                            e.committed = true;
+                            throw e;
+                        } else {
+                            this.backtrack(start);
+                            continue;
+                        }
                     }
 
-                    if (commitEntry.committed != null) {
-                        e.committedAt = commitEntry.committed;
-                        throw e;
-                    } else {
-                        this.backtrack(start);
-                        continue;
-                    }
+                    return result;
                 }
-
-                if (!this.cache.has(start.index)) {
-                    this.cache.set(start.index, new Map());
-                }
-
-                this.cache.get(start.index)!.set(key, [result, this.index]);
-
-                return result;
+            } finally {
+                this.stack.pop();
             }
-        } finally {
-            this.stack.pop();
-        }
 
-        this.error(elseMessage);
+            this.error(elseMessage);
+        });
     }
 
     many<T>(f: () => T, separator: undefined): T[];
@@ -134,7 +124,7 @@ export class Parser {
                 try {
                     separatorResult = separator();
                 } catch (e) {
-                    if (!(e instanceof ParseError) || e.committedAt != null) {
+                    if (!(e instanceof ParseError) || e.committed) {
                         throw e;
                     }
 
@@ -143,19 +133,19 @@ export class Parser {
                 }
             }
 
-            const commitEntry = { committed: undefined as string | undefined };
+            const commitEntry = { committed: false };
             this.stack.push(commitEntry);
 
             let result: T;
             try {
                 result = f();
             } catch (e) {
-                if (!(e instanceof ParseError) || e.committedAt != null) {
+                if (!(e instanceof ParseError) || e.committed) {
                     throw e;
                 }
 
-                if (commitEntry.committed != null) {
-                    e.committedAt = commitEntry.committed;
+                if (commitEntry.committed) {
+                    e.committed = true;
                     throw e;
                 } else {
                     this.backtrack(start);
@@ -184,33 +174,6 @@ export class Parser {
         return results;
     }
 
-    try<T>(f: () => T): T | undefined {
-        const commitEntry = { committed: undefined as string | undefined };
-        this.stack.push(commitEntry);
-
-        const start = this.position();
-
-        let result: T | undefined;
-        try {
-            result = f();
-        } catch (e) {
-            if (!(e instanceof ParseError) || e.committedAt != null) {
-                throw e;
-            }
-
-            if (commitEntry.committed != null) {
-                e.committedAt = commitEntry.committed;
-                throw e;
-            } else {
-                this.backtrack(start);
-            }
-        } finally {
-            this.stack.pop();
-        }
-
-        return result;
-    }
-
     lines<T>(f: () => T, { requireLineBreaks = true } = {}): T[] {
         this.consumeLineBreaks();
 
@@ -231,6 +194,33 @@ export class Parser {
         this.consumeLineBreaks();
 
         return result.map(([, result]) => result);
+    }
+
+    try<T>(f: () => T): T | undefined {
+        const commitEntry = { committed: false };
+        this.stack.push(commitEntry);
+
+        const start = this.position();
+
+        let result: T | undefined;
+        try {
+            result = f();
+        } catch (e) {
+            if (!(e instanceof ParseError) || e.committed) {
+                throw e;
+            }
+
+            if (commitEntry.committed) {
+                e.committed = true;
+                throw e;
+            } else {
+                this.backtrack(start);
+            }
+        } finally {
+            this.stack.pop();
+        }
+
+        return result;
     }
 
     token(type: TokenType): Token {
@@ -268,20 +258,45 @@ export class Parser {
 
     commit() {
         if (this.stack.length > 0) {
-            this.stack.at(-1)!.committed = new Error().stack;
+            this.stack.at(-1)!.committed = true;
         }
     }
 
     error(message: string): never {
         const span = this.tokens[this.index]?.span ?? this.eofSpan();
+
+        // (See comment on `ParseError`)
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
         throw new ParseError(message, span);
+    }
+
+    private cached<T>(key: Function, f: () => T): T {
+        if (this.cache.has(this.index)) {
+            const cached = this.cache.get(this.index)!;
+            if (cached.has(key)) {
+                const [result, newIndex] = cached.get(key)!;
+                this.index = newIndex;
+                return result;
+            }
+        }
+
+        const start = this.position();
+        const result = f();
+
+        if (!this.cache.has(start.index)) {
+            this.cache.set(start.index, new Map());
+        }
+
+        this.cache.get(start.index)!.set(key, [result, this.index]);
+
+        return result;
     }
 
     join(left: Span, right: Span): Span {
         return joinSpans(left, right, this.source);
     }
 
-    eofSpan(): Span {
+    private eofSpan(): Span {
         return this.tokens[this.tokens.length - 1]?.span ?? nullSpan(this.path);
     }
 
@@ -291,5 +306,3 @@ export class Parser {
         }
     }
 }
-
-// TODO: commit when `symbol()` succeeds
