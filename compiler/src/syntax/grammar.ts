@@ -729,7 +729,7 @@ export const parsePatternElement = (parser: Parser): PatternNode =>
         parsePatternElement,
         [
             () => parseStructurePattern(parser),
-            () => parseConstructorPattern(parser),
+            () => parseParameterizedConstructorPattern(parser),
             () => parseSetPattern(parser),
             () => parseAtomicPattern(parser),
         ],
@@ -740,6 +740,7 @@ export const parseAtomicPattern = (parser: Parser): PatternNode =>
     parser.or<PatternNode>(
         parseAtomicPattern,
         [
+            () => parseConstructorPattern(parser),
             () => parseWildcardPattern(parser),
             () => parseVariablePattern(parser),
             () => parseNumberPattern(parser),
@@ -816,15 +817,23 @@ export const parseStructurePatternField = (parser: Parser) => {
     return new StructurePatternField(name, value, span());
 };
 
-export const parseConstructorPattern = (parser: Parser) => {
+export const parseParameterizedConstructorPattern = (parser: Parser) => {
     const span = parser.position();
 
     const constructor = parseConstructorName(parser);
 
     const elements =
-        parser.try(() => parser.many(() => parseAtomicPattern(parser), undefined)) ?? [];
+        parser.try(() => parser.manyN(1, () => parseAtomicPattern(parser), undefined)) ?? [];
 
     return new ConstructorPatternNode(constructor, elements, span());
+};
+
+export const parseConstructorPattern = (parser: Parser) => {
+    const span = parser.position();
+
+    const constructor = parseConstructorName(parser);
+
+    return new ConstructorPatternNode(constructor, [], span());
 };
 
 export const parseUnitPattern = (parser: Parser) => {

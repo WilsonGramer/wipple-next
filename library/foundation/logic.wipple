@@ -29,7 +29,7 @@ instance (And Boolean Boolean Boolean) : a b -> if a b {False}
 Or : left (infer right) (infer output) => trait (left {right} -> output)
 instance (Or Boolean Boolean Boolean) : a b -> if a {True} b
 instance (Or (Maybe value) value value) : maybe other -> when maybe {
-  Some value -> value
+  (Some value) -> value
   None -> do other
 }
 

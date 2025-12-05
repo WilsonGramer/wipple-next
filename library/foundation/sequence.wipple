@@ -34,7 +34,7 @@ build-sequence : initial transform -> do {
 
   sequence {
     when next {
-      Some current -> do {
+      (Some current) -> do {
         set next : transform current
         Some current
       }
@@ -55,7 +55,7 @@ instance (As-Sequence (Sequence element) element) : sequence -> sequence
 
 instance (As-Sequence (Maybe element) element) : maybe -> sequence {
   when maybe {
-    Some value -> do {
+    (Some value) -> do {
       set maybe : None
       Some value
     }
@@ -69,7 +69,7 @@ transform : f -> container -> do {
 
   sequence {
     when (next base) {
-      Some value -> Some (f value)
+      (Some value) -> Some (f value)
       None -> None
     }
   }
@@ -83,7 +83,7 @@ filter : include? -> container -> do {
   sequence {
     repeat with-control-flow {
       when (next base) {
-        Some value -> if (include? value) {Stop (Some value)} {Continue ()}
+        (Some value) -> if (include? value) {Stop (Some value)} {Continue ()}
         None -> Stop None
       }
     }
@@ -98,8 +98,8 @@ filter-by : transform -> container -> do {
   sequence {
     repeat with-control-flow {
       when (next base) {
-        Some value -> when (transform value) {
-          Some value -> Stop (Some value)
+        (Some value) -> when (transform value) {
+          (Some value) -> Stop (Some value)
           None -> Continue ()
         }
         None -> Stop None
@@ -114,15 +114,15 @@ flatten : outer -> do {
   outer : As-Sequence outer
 
   when (next outer) {
-    Some inner -> do {
+    (Some inner) -> do {
       inner : As-Sequence inner
 
       sequence {
         repeat with-control-flow {
           when (next inner) {
-            Some value -> Stop (Some value)
+            (Some value) -> Stop (Some value)
             None -> when (next outer) {
-              Some next-inner -> do {
+              (Some next-inner) -> do {
                 set inner : As-Sequence next-inner
                 Continue ()
               }
@@ -143,8 +143,8 @@ find-by : f -> collection -> do {
 
   repeat with-control-flow {
     when (next base) {
-      Some element -> when (f element) {
-        Some result -> Stop (Some result)
+      (Some element) -> when (f element) {
+        (Some result) -> Stop (Some result)
         None -> Continue ()
       }
       None -> Stop None
@@ -158,7 +158,7 @@ reduce : result f -> container -> As-Sequence container . reduce-helper result f
 
 reduce-helper :: result (element -> result -> result) -> (Sequence element) -> result
 reduce-helper : result f -> sequence -> when (next sequence) {
-  Some next -> (reduce-helper (result . f next) f) sequence
+  (Some next) -> (reduce-helper (result . f next) f) sequence
   None -> result
 }
 
@@ -182,7 +182,7 @@ instance (From-Sequence element (List element)) : sequence -> do {
 
   repeat with-control-flow {
     when (next sequence) {
-      Some value -> do {
+      (Some value) -> do {
         set list : list . append value
         Continue ()
       }
@@ -198,7 +198,7 @@ instance (As-Sequence (List element) element) : list -> do {
 
   sequence {
     when (list . nth index) {
-      Some element -> do {
+      (Some element) -> do {
         set index : index + 1
         Some element
       }
@@ -209,7 +209,7 @@ instance (As-Sequence (List element) element) : list -> do {
 
 instance (From-Sequence () ()) : sequence -> repeat with-control-flow {
   when (next sequence) {
-    Some () -> Continue ()
+    (Some ()) -> Continue ()
     None -> Stop ()
   }
 }
@@ -227,14 +227,14 @@ split-by : separator -> collection -> do {
   sequence {
     repeat with-control-flow {
       when (next base) {
-        Some x -> do {
+        (Some x) -> do {
           if (separator x) {
             result : group
             set group : None
             Stop result
           } {
             inner : when group {
-              Some inner -> inner
+              (Some inner) -> inner
               None -> (,)
             }
 
@@ -265,7 +265,7 @@ count : collection -> do {
   count : 0
   repeat with-control-flow {
     when (next base) {
-      Some _ -> do {
+      (Some _) -> do {
         set count : count + 1
         Continue ()
       }
@@ -301,7 +301,7 @@ find : found? -> collection -> do {
 
   repeat with-control-flow {
     when (next base) {
-      Some element -> if (found? element) {Stop (Some element)} {Continue ()}
+      (Some element) -> if (found? element) {Stop (Some element)} {Continue ()}
       None -> Stop None
     }
   }
@@ -315,7 +315,7 @@ find-position : found? -> collection -> do {
 
   repeat with-control-flow {
     when (next base) {
-      Some element -> if (found? element) {
+      (Some element) -> if (found? element) {
         Stop (Some counter)
       } {
         set counter : counter + 1
@@ -332,7 +332,7 @@ all? : condition? -> collection -> As-Sequence collection . all-helper condition
 
 all-helper :: (element -> Boolean) -> (Sequence element) -> Boolean
 all-helper : condition? -> sequence -> when (next sequence) {
-  Some element -> condition? element and (all-helper condition?) sequence
+  (Some element) -> condition? element and (all-helper condition?) sequence
   None -> True
 }
 
@@ -342,7 +342,7 @@ any? : condition? -> collection -> As-Sequence collection . any-helper condition
 
 any-helper :: (element -> Boolean) -> (Sequence element) -> Boolean
 any-helper : condition? -> sequence -> when (next sequence) {
-  Some element -> condition? element or (any-helper condition?) sequence
+  (Some element) -> condition? element or (any-helper condition?) sequence
   None -> False
 }
 
@@ -376,7 +376,7 @@ extend : collection -> Extend (As-Sequence collection)
 instance (Extend (left; right) (left-element; right-element)) where (Extend left left-element) (Extend right right-element) : sequence -> (left; right) -> do {
   repeat with-control-flow {
     when (next sequence) {
-      Some (a; b) -> do {
+      (Some (a; b)) -> do {
         set left : left . extend (Some a)
         set right : right . extend (Some b)
         Continue ()
@@ -403,7 +403,7 @@ instance (Container (List element) element) where (Equal element) : target -> li
 
   repeat with-control-flow {
     when (next base) {
-      Some element -> if (element = target) {Stop True} {Continue ()}
+      (Some element) -> if (element = target) {Stop True} {Continue ()}
       None -> Stop False
     }
   }

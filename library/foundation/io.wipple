@@ -16,7 +16,7 @@ instance (Describe String) : string -> string
 instance (Describe Number) : n -> intrinsic "number-to-string" n
 instance (Describe Boolean) : b -> if b {"True"} {"False"}
 instance (Describe (Maybe value)) where (Describe value) : m -> when m {
-  Some value -> "Some _" value
+  (Some value) -> "Some _" value
   None -> "None"
 }
 
