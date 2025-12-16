@@ -132,7 +132,7 @@ func (render *Render) WriteComments(data queries.CommentsData) {
 
 		lastIndex = end
 
-		render.WriteString(before)
+		render.WriteString(strings.TrimSpace(before))
 
 		link, ok := links[key]
 		if !ok {
@@ -143,7 +143,7 @@ func (render *Render) WriteComments(data queries.CommentsData) {
 		link(render)
 	}
 
-	render.WriteString(commentsString[lastIndex:])
+	render.WriteString(strings.TrimSpace(commentsString[lastIndex:]))
 }
 
 func (render *Render) Finish() string {
