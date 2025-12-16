@@ -8,6 +8,7 @@ import (
 func registerStructures() {
 	register(Feedback[string]{
 		Id:    "missing-field",
+		Rank:  RankSyntax,
 		Query: queries.MissingField,
 		Render: func(render *Render, node database.Node, field string) {
 			render.WriteNode(node)
@@ -23,6 +24,7 @@ func registerStructures() {
 
 	register(Feedback[string]{
 		Id:    "extra-field",
+		Rank:  RankSyntax,
 		Query: queries.ExtraField,
 		Render: func(render *Render, node database.Node, field string) {
 			render.WriteCode(field)
@@ -34,6 +36,7 @@ func registerStructures() {
 
 	register(Feedback[struct{}]{
 		Id:    "duplicate-field",
+		Rank:  RankSyntax,
 		Query: queries.DuplicateField,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)

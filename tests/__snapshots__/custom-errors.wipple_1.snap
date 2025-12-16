@@ -334,23 +334,17 @@ NamedTypeNode `2` (custom-errors.wipple:17:12)
 
 Feedback:
 
-`_` (custom-errors.wipple:5:39) (placeholder):
-
-  Found a placeholder of type `Number Number -> Number`.
-  
-  Add a `Number Number -> Number` value here before running your program.
-
-`_` (custom-errors.wipple:6:39) (placeholder):
-
-  Found a placeholder of type `String String -> String`.
-  
-  Add a `String String -> String` value here before running your program.
-
 `Add` (custom-errors.wipple:16:5) (error-instance):
 
   Cannot add `1` (custom-errors.wipple:16:9) and `"a"` (custom-errors.wipple:16:11).
   
   (This feedback comes from the instance `Add Number String _`.)
+
+`Add` (custom-errors.wipple:17:5) (error-instance):
+
+  Missing parentheses around the inputs to `+`.
+  
+  (This feedback comes from the instance `Add () Number _`.)
 
 `Add` (custom-errors.wipple:16:5) (incomplete-type):
 
@@ -366,12 +360,6 @@ Feedback:
   Wipple needs to know the type of this code before running it. Try using a function or assigning it
   to a variable.
 
-`Add` (custom-errors.wipple:17:5) (error-instance):
-
-  Missing parentheses around the inputs to `+`.
-  
-  (This feedback comes from the instance `Add () Number _`.)
-
 `Add` (custom-errors.wipple:17:5) (incomplete-type):
 
   Missing information for the type of `Add` (custom-errors.wipple:17:5).
@@ -385,4 +373,16 @@ Feedback:
   
   Wipple needs to know the type of this code before running it. Try using a function or assigning it
   to a variable.
+
+`_` (custom-errors.wipple:5:39) (placeholder):
+
+  Found a placeholder of type `Number Number -> Number`.
+  
+  Add a `Number Number -> Number` value here before running your program.
+
+`_` (custom-errors.wipple:6:39) (placeholder):
+
+  Found a placeholder of type `String String -> String`.
+  
+  Add a `String String -> String` value here before running your program.
 

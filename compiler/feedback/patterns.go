@@ -8,6 +8,7 @@ import (
 func registerPatterns() {
 	register(Feedback[struct{}]{
 		Id:    "nested-set-pattern",
+		Rank:  RankSyntax,
 		Query: queries.NestedSetPattern,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)
@@ -22,6 +23,7 @@ func registerPatterns() {
 
 	register(Feedback[struct{}]{
 		Id:    "extra-element",
+		Rank:  RankSyntax,
 		Query: queries.ExtraElement,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)

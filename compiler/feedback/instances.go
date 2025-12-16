@@ -8,6 +8,7 @@ import (
 func registerInstances() {
 	register(Feedback[struct{}]{
 		Id:    "missing-instance-value",
+		Rank:  RankSyntax,
 		Query: queries.MissingInstanceValue,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)
@@ -21,6 +22,7 @@ func registerInstances() {
 
 	register(Feedback[struct{}]{
 		Id:    "extra-instance-value",
+		Rank:  RankSyntax,
 		Query: queries.ExtraInstanceValue,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteString("This instance doesn't need a value because it is marked with ")

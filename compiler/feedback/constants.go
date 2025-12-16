@@ -8,6 +8,7 @@ import (
 func registerConstants() {
 	register(Feedback[struct{}]{
 		Id:    "missing-constant-value",
+		Rank:  RankSyntax,
 		Query: queries.MissingConstantValue,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)

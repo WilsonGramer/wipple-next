@@ -8,6 +8,7 @@ import (
 func registerAttributes() {
 	register(Feedback[struct{}]{
 		Id:    "extra-attribute-value",
+		Rank:  RankSyntax,
 		Query: queries.ExtraAttributeValue,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)
@@ -19,6 +20,7 @@ func registerAttributes() {
 
 	register(Feedback[struct{}]{
 		Id:    "duplicate-attribute",
+		Rank:  RankSyntax,
 		Query: queries.DuplicateAttribute,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)
@@ -30,6 +32,7 @@ func registerAttributes() {
 
 	register(Feedback[struct{}]{
 		Id:    "missing-attribute-value",
+		Rank:  RankSyntax,
 		Query: queries.MissingAttributeValue,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)

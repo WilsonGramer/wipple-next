@@ -173,21 +173,25 @@ func setGroups(solver *typecheck.Solver, filter func(node database.Node) bool) {
 func WriteFeedback(db *database.Db, filter func(node database.Node) bool, filterFeedback []string, w io.Writer) int {
 	seenFeedback := map[database.Node][]string{}
 	feedbackCount := 0
-	feedback.Collect(db, filter, func(item feedback.FeedbackItem) {
+	items := feedback.Collect(db, filter, func(item feedback.FeedbackItem) bool {
 		if len(filterFeedback) > 0 && !slices.Contains(filterFeedback, item.Id) {
-			return
+			return false
 		}
 
 		if database.IsHiddenNode(item.On) || !filter(item.On) {
-			return
+			return false
 		}
 
 		if slices.Contains(seenFeedback[item.On], item.Id) {
-			return
+			return false
 		}
 
 		seenFeedback[item.On] = append(seenFeedback[item.On], item.Id)
 
+		return true
+	})
+
+	for _, item := range items {
 		indent := "  "
 
 		rendered := ansi.Wordwrap(item.String(), 100-len(indent), " ")
@@ -214,7 +218,7 @@ func WriteFeedback(db *database.Db, filter func(node database.Node) bool, filter
 		}
 
 		feedbackCount++
-	})
+	}
 
 	return feedbackCount
 }

@@ -66,19 +66,18 @@ func (request *CompileRequest) handle() (*CompileResponse, error) {
 	}
 
 	seenFeedback := map[database.Node][]string{}
-	var feedbackItems []feedback.FeedbackItem
-	feedback.Collect(db, filter, func(item feedback.FeedbackItem) {
+	feedbackItems := feedback.Collect(db, filter, func(item feedback.FeedbackItem) bool {
 		if database.IsHiddenNode(item.On) || !filter(item.On) {
-			return
+			return false
 		}
 
 		if slices.Contains(seenFeedback[item.On], item.Id) {
-			return
+			return false
 		}
 
 		seenFeedback[item.On] = append(seenFeedback[item.On], item.Id)
 
-		feedbackItems = append(feedbackItems, item)
+		return true
 	})
 
 	if len(feedbackItems) > 0 {

@@ -6,12 +6,14 @@ import (
 
 type FeedbackItem struct {
 	Id     string
+	Rank   Rank
 	On     database.Node
 	String func() string
 }
 
 type Feedback[T any] struct {
 	Id     string
+	Rank   Rank
 	Query  func(db *database.Db, node database.Node, filter func(node database.Node) bool, f func(data T))
 	On     func(data T) database.Node // defaults to the queried node
 	Render func(render *Render, node database.Node, data T)
@@ -31,8 +33,9 @@ func register[T any](entry Feedback[T]) {
 			}
 
 			f(FeedbackItem{
-				Id: entry.Id,
-				On: on,
+				Id:   entry.Id,
+				Rank: entry.Rank,
+				On:   on,
 				String: func() string {
 					render := NewRender(db)
 					entry.Render(render, on, data)
@@ -58,14 +61,23 @@ func init() {
 	registerTypes()
 }
 
-func Collect(db *database.Db, filter func(node database.Node) bool, f func(item FeedbackItem)) {
+func Collect(db *database.Db, nodeFilter func(node database.Node) bool, itemFilter func(item FeedbackItem) bool) []FeedbackItem {
+	var items []FeedbackItem
 	database.ContainsNode(db, func(node database.Node) bool {
-		if filter(node) {
+		if nodeFilter(node) {
 			for _, run := range registered {
-				run(db, node, filter, f)
+				run(db, node, nodeFilter, func(item FeedbackItem) {
+					if itemFilter(item) {
+						items = append(items, item)
+					}
+				})
 			}
 		}
 
 		return false
 	})
+
+	sortByRank(items)
+
+	return items
 }

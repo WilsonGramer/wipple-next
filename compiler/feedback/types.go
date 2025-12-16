@@ -15,7 +15,8 @@ func registerTypes() {
 	}
 
 	register(Feedback[conflictingTypesData]{
-		Id: "conflicting-types",
+		Id:   "conflicting-types",
+		Rank: RankTypes,
 		Query: func(db *database.Db, node database.Node, filter func(node database.Node) bool, f func(data conflictingTypesData)) {
 			queries.ConflictingTypes(db, node, filter, func(source database.Node, from database.Node, nodes []database.Node, types []*typecheck.ConstructedType) {
 				f(conflictingTypesData{
@@ -69,6 +70,7 @@ func registerTypes() {
 
 	register(Feedback[*typecheck.ConstructedType]{
 		Id:    "incomplete-type",
+		Rank:  RankTypes,
 		Query: queries.IncompleteType,
 		Render: func(render *Render, node database.Node, ty *typecheck.ConstructedType) {
 			render.WriteString("Missing information for the type of ")
@@ -85,6 +87,7 @@ func registerTypes() {
 
 	register(Feedback[*typecheck.Group]{
 		Id:    "unknown-type",
+		Rank:  RankTypes,
 		Query: queries.UnknownType,
 		Render: func(render *Render, node database.Node, group *typecheck.Group) {
 			render.WriteString("Could not determine the type of ")
@@ -97,6 +100,7 @@ func registerTypes() {
 
 	register(Feedback[database.Node]{
 		Id:    "missing-type",
+		Rank:  RankSyntax,
 		Query: queries.MissingType,
 		Render: func(render *Render, node database.Node, parameter database.Node) {
 			render.WriteNode(node)
@@ -110,6 +114,7 @@ func registerTypes() {
 
 	register(Feedback[struct{}]{
 		Id:    "extra-type",
+		Rank:  RankSyntax,
 		Query: queries.ExtraType,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)
@@ -121,6 +126,7 @@ func registerTypes() {
 
 	register(Feedback[[]database.Node]{
 		Id:    "conflicting-instances",
+		Rank:  RankBounds,
 		Query: queries.OverlappingInstances,
 		Render: func(render *Render, node database.Node, instances []database.Node) {
 			render.WriteNode(node)

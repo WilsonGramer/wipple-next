@@ -211,10 +211,8 @@ func nodeFilter(uri protocol.DocumentUri) func(node database.Node) bool {
 }
 
 func addFeedback(db *database.Db, filter func(node database.Node) bool) []protocol.Diagnostic {
-	diagnostics := []protocol.Diagnostic{}
 	seenFeedback := map[database.Node]map[string]struct{}{}
-
-	feedback.Collect(db, filter, func(item feedback.FeedbackItem) {
+	items := feedback.Collect(db, filter, func(item feedback.FeedbackItem) bool {
 		nodeFeedback, ok := seenFeedback[item.On]
 		if !ok {
 			nodeFeedback = map[string]struct{}{}
@@ -222,10 +220,15 @@ func addFeedback(db *database.Db, filter func(node database.Node) bool) []protoc
 		}
 
 		if _, ok := nodeFeedback[item.Id]; ok {
-			return
+			return false
 		}
 		nodeFeedback[item.Id] = struct{}{}
 
+		return true
+	})
+
+	diagnostics := []protocol.Diagnostic{}
+	for _, item := range items {
 		diagnosticSeverity := protocol.DiagnosticSeverityInformation
 		diagnosticSource := "wipple"
 
@@ -235,7 +238,7 @@ func addFeedback(db *database.Db, filter func(node database.Node) bool) []protoc
 			Message:  item.String(),
 			Source:   &diagnosticSource,
 		})
-	})
+	}
 
 	return diagnostics
 }

@@ -9,6 +9,7 @@ import (
 func registerNames() {
 	register(Feedback[string]{
 		Id:    "unresolved",
+		Rank:  RankName,
 		Query: queries.Unresolved,
 		Render: func(render *Render, node database.Node, name string) {
 			render.WriteString("Can't find ")
@@ -25,7 +26,8 @@ func registerNames() {
 	}
 
 	register(Feedback[ambiguousData]{
-		Id: "ambiguous",
+		Id:   "ambiguous",
+		Rank: RankName,
 		Query: func(db *database.Db, node database.Node, filter func(node database.Node) bool, f func(data ambiguousData)) {
 			queries.Ambiguous(db, node, filter, func(name string) {
 				var definitions []database.Node

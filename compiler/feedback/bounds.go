@@ -9,6 +9,7 @@ import (
 func registerBounds() {
 	register(Feedback[typecheck.ResolvedBound]{
 		Id:    "unresolved-bound",
+		Rank:  RankBounds,
 		Query: queries.UnresolvedBound,
 		Render: func(render *Render, node database.Node, bound typecheck.ResolvedBound) {
 			render.WriteNode(node)
@@ -26,7 +27,8 @@ func registerBounds() {
 	}
 
 	register(Feedback[errorInstanceData]{
-		Id: "error-instance",
+		Id:   "error-instance",
+		Rank: RankCustom,
 		Query: func(db *database.Db, node database.Node, filter func(node database.Node) bool, f func(data errorInstanceData)) {
 			queries.ErrorInstance(db, node, filter, func(bound typecheck.ResolvedBound, comments queries.CommentsData) {
 				f(errorInstanceData{bound: bound, comments: comments})

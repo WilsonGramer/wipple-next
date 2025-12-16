@@ -9,6 +9,7 @@ import (
 func registerSyntax() {
 	register(Feedback[syntax.Error]{
 		Id:    "syntax-error",
+		Rank:  RankSyntax,
 		Query: queries.SyntaxError,
 		Render: func(render *Render, node database.Node, err syntax.Error) {
 			render.WriteString(err.Message)

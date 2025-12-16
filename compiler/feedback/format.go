@@ -8,6 +8,7 @@ import (
 func registerFormat() {
 	register(Feedback[int]{
 		Id:    "missing-format-inputs",
+		Rank:  RankSyntax,
 		Query: queries.MissingFormatInputs,
 		Render: func(render *Render, node database.Node, count int) {
 			render.WriteNode(node)
@@ -21,6 +22,7 @@ func registerFormat() {
 
 	register(Feedback[struct{}]{
 		Id:    "extra-format-input",
+		Rank:  RankSyntax,
 		Query: queries.ExtraFormatInput,
 		Render: func(render *Render, node database.Node, data struct{}) {
 			render.WriteNode(node)
