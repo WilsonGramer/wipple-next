@@ -387,7 +387,5 @@ const buildRuntime = (env, proxy = (f) => f) => {
             }
             return hash >>> 0;
         },
-
-        dropdown: (options) => options,
     };
 };

@@ -46,7 +46,7 @@ external :: String input -> output where (output :: ())
 external : message data -> intrinsic "external" message data
 
 -- Display a dropdown with the provided options.
-[intrinsic] Dropdown : type
+Dropdown : type {value :: String}
 
-dropdown :: String -> Dropdown
-dropdown : value -> intrinsic "dropdown" value
+dropdown-widget :: String -> Dropdown
+dropdown-widget : value -> Dropdown {value : value}

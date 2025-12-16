@@ -1,11 +1,11 @@
 Color : type {color :: String}
 
-color :: String -> Color
-color : color -> Color {color : color}
+color-widget :: String -> Color
+color-widget : color -> Color {color : color}
 
 instance (Random () Color) : () -> do {
   red : random-in (0 to 256)
   green : random-in (0 to 256)
   blue : random-in (0 to 256)
-  Color { color : '{"color":"rgb(_,_,_)"}' red green blue }
+  Color {color : '{"color":"rgb(_,_,_)"}' red green blue}
 }
