@@ -22,7 +22,9 @@ type Request struct {
 	Compile       *CompileRequest       `json:"compile,omitempty"`
 	Documentation *DocumentationRequest `json:"documentation,omitempty"`
 	Format        *FormatRequest        `json:"format,omitempty"`
+	GetShared     *GetSharedRequest     `json:"getShared,omitempty"`
 	IdeInfo       *IdeInfoRequest       `json:"ideInfo,omitempty"`
+	Share         *ShareRequest         `json:"share,omitempty"`
 }
 
 type InputMetadata struct {
@@ -123,8 +125,12 @@ func handle(request Request) (any, int, error) {
 		response, err = request.Documentation.handle()
 	} else if request.Format != nil {
 		response, err = request.Format.handle()
+	} else if request.GetShared != nil {
+		response, err = request.GetShared.handle()
 	} else if request.IdeInfo != nil {
 		response, err = request.IdeInfo.handle()
+	} else if request.Share != nil {
+		response, err = request.Share.handle()
 	} else {
 		return nil, 400, fmt.Errorf("invalid request type")
 	}
