@@ -319,7 +319,7 @@ func getHover(db *database.Db, uri protocol.DocumentUri, position protocol.Posit
 
 		render := feedback.NewRender(db)
 		render.WriteComments(data)
-		documentation := render.Finish()
+		documentation := strings.TrimSpace(render.Finish())
 
 		if documentation != "" {
 			contents = append(contents, documentation)

@@ -45,7 +45,7 @@ func registerTypes() {
 					render.WriteType(ty)
 				})
 			}
-			render.WriteList(tys, "or")
+			render.WriteList(tys, "or", 3)
 
 			render.WriteString(", but it can only be one of these.")
 
@@ -61,7 +61,7 @@ func registerTypes() {
 					})
 				}
 
-				render.WriteList(nodes, "and")
+				render.WriteList(nodes, "and", 3)
 				render.WriteString("; double-check these.")
 			}
 		},
@@ -132,7 +132,7 @@ func registerTypes() {
 					render.WriteNode(instance)
 				})
 			}
-			render.WriteList(items, "and")
+			render.WriteList(items, "and", 3)
 
 			render.WriteString(".")
 			render.WriteBreak()

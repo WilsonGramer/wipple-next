@@ -15,7 +15,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/compiler",
-            "args": ["compile", "test.wipple", "--lib", "library/foundation", "-o", "out.js"],
+            "args": ["compile", "test.wipple", "--lib", "library/src/foundation", "-o", "out.js"],
             "cwd": "${workspaceFolder}"
         },
         {

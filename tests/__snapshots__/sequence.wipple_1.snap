@@ -342,15 +342,8 @@ Feedback:
 
   `_` (sequence.wipple:24:14) is `String` or `Number`, but it can only be one of these.
   
-  `_` (sequence.wipple:24:14) must be the same type as `_` (sequence.wipple:24:13), `element`
-  (sequence.wipple:10:14), `element` (sequence.wipple:9:12), `element` (sequence.wipple:17:75),
-  `infer element` (sequence.wipple:17:26), `value` (sequence.wipple:14:14), `value`
-  (sequence.wipple:13:7), `value` (sequence.wipple:18:35), `value` (sequence.wipple:18:28), `value`
-  (sequence.wipple:18:28), `value` (sequence.wipple:14:14), `value` (sequence.wipple:13:7), `String`
-  (sequence.wipple:23:17), `element` (sequence.wipple:10:14), `element` (sequence.wipple:9:12), `_`
-  (sequence.wipple:24:13), `Number` (sequence.wipple:24:19), `item` (sequence.wipple:20:90), `item`
-  (sequence.wipple:20:55), `item` (sequence.wipple:20:12), and `item` (sequence.wipple:20:12);
-  double-check these.
+  `_` (sequence.wipple:24:14) must be the same type as `Number` (sequence.wipple:24:19), `_`
+  (sequence.wipple:24:13), and `String` (sequence.wipple:23:17); double-check these.
 
 `_` (sequence.wipple:24:30) (placeholder):
 

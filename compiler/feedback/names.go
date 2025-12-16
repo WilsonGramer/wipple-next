@@ -51,7 +51,7 @@ func registerNames() {
 					render.WriteNode(definition)
 				})
 			}
-			render.WriteList(items, "or")
+			render.WriteList(items, "or", 3)
 
 			render.WriteString(".")
 			render.WriteBreak()

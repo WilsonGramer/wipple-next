@@ -1,6 +1,7 @@
 package queries
 
 import (
+	"slices"
 	"wipple/database"
 	"wipple/nodes/types"
 	"wipple/typecheck"
@@ -40,9 +41,26 @@ func ConflictingTypes(db *database.Db, node database.Node, filter func(node data
 
 		nodes := make([]database.Node, 0, len(group.Nodes))
 		for _, other := range group.Nodes {
-			if other != node && filter(other) {
+			if other != from && !database.IsHiddenNode(other) && filter(other) {
 				nodes = append(nodes, other)
 			}
+		}
+
+		seen := map[database.Span]struct{}{}
+		nodes = slices.DeleteFunc(nodes, func(node database.Node) bool {
+			span := database.GetSpanFact(node)
+			if _, ok := seen[span]; ok {
+				return true
+			}
+
+			seen[span] = struct{}{}
+			return false
+		})
+
+		if source != nil {
+			database.SortByProximity(nodes, source)
+		} else {
+			database.SortByProximity(nodes, from)
 		}
 
 		f(source, from, nodes, group.Types)

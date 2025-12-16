@@ -2,6 +2,8 @@ package database
 
 import (
 	"fmt"
+	"math"
+	"slices"
 	"strings"
 )
 
@@ -70,4 +72,28 @@ func NullLocation() Location {
 		Column: 1,
 		Index:  0,
 	}
+}
+
+func SortByProximity(nodes []Node, source Node) {
+	sourceSpan := GetSpanFact(source)
+	slices.SortStableFunc(nodes, func(left Node, right Node) int {
+		leftSpan := GetSpanFact(left)
+		rightSpan := GetSpanFact(right)
+
+		// Deprioritize nodes located before `source`
+		if leftSpan.Start.Index < sourceSpan.Start.Index {
+			return math.MaxInt32
+		}
+		if rightSpan.Start.Index < sourceSpan.Start.Index {
+			return math.MinInt32
+		}
+
+		leftDistance := sourceSpan.Start.Index - leftSpan.Start.Index
+		leftDistance = max(leftDistance, -leftDistance)
+
+		rightDistance := sourceSpan.Start.Index - rightSpan.Start.Index
+		rightDistance = max(rightDistance, -rightDistance)
+
+		return leftDistance - rightDistance
+	})
 }

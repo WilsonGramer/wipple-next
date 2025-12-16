@@ -60,9 +60,23 @@ func (render *Render) WriteBound(bound typecheck.ResolvedBound) {
 	fmt.Fprintf(&render.buf, "%s", colors.Code(typecheck.DisplayResolvedBound(bound)))
 }
 
-func (render *Render) WriteList(items []func(), separator string) {
+func (render *Render) WriteList(items []func(), separator string, limit int) {
 	if len(items) > 2 {
 		for i, item := range items {
+			if limit > 0 && i >= limit {
+				remaining := len(items) - limit
+
+				var trailing string
+				if remaining == 1 {
+					trailing = "other"
+				} else {
+					trailing = "others"
+				}
+
+				fmt.Fprintf(&render.buf, ", %s %d %s", separator, remaining, trailing)
+				break
+			}
+
 			if i > 0 && i == len(items)-1 {
 				fmt.Fprintf(&render.buf, ", %s ", separator)
 			} else if i > 0 {
@@ -86,12 +100,7 @@ func (render *Render) WriteComments(data queries.CommentsData) {
 	links := Links{}
 	for name, linksData := range data.Links {
 		links[name] = func(render *Render) {
-			switch ty := linksData.Type.(type) {
-			case database.Node:
-				render.WriteNode(ty)
-			case *typecheck.ConstructedType:
-				render.WriteType(ty)
-			}
+			render.WriteNode(linksData.Node)
 		}
 
 		links[name+"@related"] = func(render *Render) {
@@ -102,7 +111,7 @@ func (render *Render) WriteComments(data queries.CommentsData) {
 				})
 			}
 
-			render.WriteList(related, "and")
+			render.WriteList(related, "and", 3)
 		}
 
 		links[name+"@type"] = func(render *Render) {
@@ -113,11 +122,11 @@ func (render *Render) WriteComments(data queries.CommentsData) {
 				})
 			}
 
-			render.WriteList(types, "or")
+			render.WriteList(types, "or", 3)
 		}
 	}
 
-	commentsString := strings.Join(data.Comments, "\n")
+	commentsString := strings.TrimSpace(strings.Join(data.Comments, "\n"))
 	matches := regexp.MustCompile("(?s)\\[`([^`]+)`\\]").FindAllStringIndex(commentsString, -1)
 
 	lastIndex := 0
@@ -132,7 +141,7 @@ func (render *Render) WriteComments(data queries.CommentsData) {
 
 		lastIndex = end
 
-		render.WriteString(strings.TrimSpace(before))
+		render.WriteString(before)
 
 		link, ok := links[key]
 		if !ok {
@@ -143,7 +152,7 @@ func (render *Render) WriteComments(data queries.CommentsData) {
 		link(render)
 	}
 
-	render.WriteString(strings.TrimSpace(commentsString[lastIndex:]))
+	render.WriteString(commentsString[lastIndex:])
 }
 
 func (render *Render) Finish() string {

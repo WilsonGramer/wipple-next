@@ -32,6 +32,15 @@ func registerBounds() {
 				f(errorInstanceData{bound: bound, comments: comments})
 			})
 		},
+		On: func(data errorInstanceData) database.Node {
+			if len(data.comments.Links) == 1 {
+				for _, link := range data.comments.Links {
+					return link.Node
+				}
+			}
+
+			return nil
+		},
 		Render: func(render *Render, node database.Node, data errorInstanceData) {
 			render.WriteComments(data.comments)
 			render.WriteBreak()
