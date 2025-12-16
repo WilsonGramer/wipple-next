@@ -17,4 +17,4 @@ instance (Add-Infer String String String) : _
 add-infer :: left right -> sum where (Add-Infer left right sum)
 add-infer : _
 
-_ : (add-infer 1 2 :: String)
+output : (add-infer 1 2 :: String)

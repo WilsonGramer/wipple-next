@@ -6,7 +6,7 @@ A new implementation of the [Wipple](https://github.com/wipplelang/wipple) compi
 
 ## Setup
 
-Make sure you have the latest versions of [`node`](https://nodejs.org) and [`task`](https://taskfile.dev) installed. Then run `task setup`.
+Make sure you have the latest versions of [`go`](https://go.dev) and [`task`](https://taskfile.dev) installed.
 
 ## Using the CLI
 
@@ -36,11 +36,11 @@ The compiler is built around a database of _facts_ relating _nodes_ in the progr
 
 After the parser produces `VariableExpression` objects in the AST:
 
-1.  `VariableExpression#visit` in `compiler/src/nodes` resolves the variable name from the AST object. If the variable is resolved to a definition, a _constraint_ is added linking the type of the variable to the type of the definition. If the variable cannot be resolved, the `Resolved` fact is added to the node with a value of `null`.
+1.  `VariableExpression.visit` in `compiler/nodes/expressions/variable.go` resolves the variable name from the AST object. If the variable is resolved to a definition, a _constraint_ is added linking the type of the variable to the type of the definition. If the variable cannot be resolved, the `ResolvedFact` fact is added to the node with `Definitions` set to `nil`.
 
 2.  The typechecker uses the added constraint to place the variable reference and its definition in the same _group_ (see below).
 
-3.  Feedback is generated according to the available facts. For example, all nodes with the `Resolved` fact set to `null` will produce the `unresolved-variable` error in `compiler/src/feedback/items`.
+3.  Feedback is generated according to the available facts. For example, all nodes with the `ResolvedFact` fact set to `null` will produce the `unresolved-variable` error in `compiler/feedback/names.go`.
 
 ### Typechecking
 

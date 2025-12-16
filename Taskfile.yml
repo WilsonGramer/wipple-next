@@ -1,39 +1,15 @@
 version: "3"
 tasks:
-    setup:
-        cmds:
-            - npm install
-    build:
-        cmds:
-            - (cd compiler && npm run build)
-    compiler:
-        deps:
-            - build
-        cmds:
-            - node compiler {{.CLI_ARGS}}
-        env:
-            NODE_OPTIONS: "--enable-source-maps"
-    profile:
-        deps:
-            - build
-        cmds:
-            - node --cpu-prof compiler {{.CLI_ARGS}}
-        env:
-            NODE_OPTIONS: "--enable-source-maps"
-    lint:
-        cmds:
-            - (cd compiler && npm run lint -- {{.CLI_ARGS}})
-    test:
-        deps:
-            - build
-        cmds:
-            - npm test run -- {{.CLI_ARGS}}
-    install:
-        deps:
-            - build
-        cmds:
-            - (cd compiler && npm run exe)
-    vscode:
-        dir: vscode
-        cmds:
-            - npm run extension
+  compiler:
+    cmds:
+      - go run ./compiler {{.CLI_ARGS}}
+  test:
+    cmds:
+      - go test work
+  install:
+    cmds:
+      - go install ./compiler
+  vscode:
+    dir: vscode
+    cmds:
+      - npm run extension

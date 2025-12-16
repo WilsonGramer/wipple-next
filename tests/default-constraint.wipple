@@ -8,7 +8,7 @@ instance (Collect element (List element)) : _
 instance (Collect element (Set element)) : _
 
 -- Default and bound constraints are resolved in source code order
-collect :: element -> output where (output :: List _) (Collect element output)
+collect :: element -> output where (output :: List element) (Collect element output)
 collect : _
 
 _ : collect "hi"

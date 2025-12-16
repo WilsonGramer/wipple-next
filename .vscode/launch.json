@@ -2,27 +2,21 @@
     "configurations": [
         {
             "name": "Debug Compiler",
-            "program": "${workspaceFolder}/compiler/dist/index.js",
+            "type": "go",
             "request": "launch",
-            "skipFiles": ["<node_internals>/**"],
-            "type": "node",
-            "args": ["compile", "test.wipple"]
+            "mode": "auto",
+            "program": "${workspaceFolder}/compiler",
+            "args": ["compile", "test.wipple", "-o", "out.js"],
+            "cwd": "${workspaceFolder}"
         },
         {
-            "name": "Debug Compiler + Stdlib",
-            "program": "${workspaceFolder}/compiler/dist/index.js",
+            "name": "Debug Compiler + Library",
+            "type": "go",
             "request": "launch",
-            "skipFiles": ["<node_internals>/**"],
-            "type": "node",
-            "args": ["compile", "test.wipple", "--lib", "library/foundation"]
-        },
-        {
-            "name": "Debug Current File",
-            "program": "${file}",
-            "request": "launch",
-            "skipFiles": ["<node_internals>/**"],
-            "type": "node",
-            "sourceMaps": true
+            "mode": "auto",
+            "program": "${workspaceFolder}/compiler",
+            "args": ["compile", "test.wipple", "--lib", "library/foundation", "-o", "out.js"],
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

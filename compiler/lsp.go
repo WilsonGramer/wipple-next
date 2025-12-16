@@ -1,0 +1,368 @@
+package main
+
+import (
+	"net/url"
+	"path/filepath"
+	"slices"
+	"strings"
+	"unicode"
+	"wipple/database"
+	"wipple/feedback"
+	"wipple/nodes/file"
+	"wipple/queries"
+	"wipple/syntax"
+	"wipple/typecheck"
+	"wipple/vendored/semtok"
+
+	"github.com/tliron/commonlog"
+	_ "github.com/tliron/commonlog/simple"
+	"github.com/tliron/glsp"
+	protocol "github.com/tliron/glsp/protocol_3_16"
+	"github.com/tliron/glsp/server"
+)
+
+var (
+	handler       protocol.Handler
+	workspacePath = ""
+	documents     = map[protocol.DocumentUri]*protocol.TextDocumentItem{}
+	dbs           = map[protocol.DocumentUri]*database.Db{}
+
+	tokenTypes = []string{"type", "interface", "typeParameter", "function"}
+)
+
+func lsp() error {
+	database.LspEnabled = true
+
+	commonlog.Configure(2, nil)
+
+	handler = protocol.Handler{
+		Initialize:                     initialize,
+		Shutdown:                       shutdown,
+		SetTrace:                       setTrace,
+		TextDocumentDidChange:          didChange,
+		TextDocumentHover:              hover,
+		TextDocumentDocumentHighlight:  documentHighlight,
+		TextDocumentSemanticTokensFull: semanticTokens,
+	}
+
+	server := server.NewServer(&handler, "wipple", false)
+
+	return server.RunStdio()
+}
+
+func initialize(context *glsp.Context, params *protocol.InitializeParams) (any, error) {
+	if len(params.WorkspaceFolders) > 0 {
+		workspacePath = path(params.WorkspaceFolders[0].URI)
+	}
+
+	capabilities := handler.CreateServerCapabilities()
+
+	openClose := true
+	change := protocol.TextDocumentSyncKindFull
+	capabilities.TextDocumentSync = &protocol.TextDocumentSyncOptions{
+		OpenClose: &openClose,
+		Change:    &change,
+	}
+
+	capabilities.SemanticTokensProvider = &protocol.SemanticTokensOptions{
+		Legend: protocol.SemanticTokensLegend{
+			TokenTypes: tokenTypes,
+		},
+		Full: true,
+	}
+
+	capabilities.HoverProvider = true
+
+	capabilities.DocumentHighlightProvider = true
+
+	return protocol.InitializeResult{Capabilities: capabilities}, nil
+}
+
+func shutdown(context *glsp.Context) error {
+	protocol.SetTraceValue(protocol.TraceValueOff)
+	return nil
+}
+
+func setTrace(context *glsp.Context, params *protocol.SetTraceParams) error {
+	protocol.SetTraceValue(params.Value)
+	return nil
+}
+
+func didChange(context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
+	filter := nodeFilter(params.TextDocument.URI)
+	source := params.ContentChanges[0].(protocol.TextDocumentContentChangeEventWhole).Text
+
+	db, root := MakeRoot()
+
+	// TODO: Support multiple files
+	f, err := syntax.Parse(db, path(params.TextDocument.URI), source, file.ParseFile)
+	if err == nil {
+		Compile(db, root, []*file.FileNode{f})
+	} else {
+		// Syntax error is written to `db` and will be shown in diagnostics below
+	}
+
+	diagnostics := addFeedback(db, filter)
+
+	context.Notify("textDocument/publishDiagnostics", &protocol.PublishDiagnosticsParams{
+		URI:         params.TextDocument.URI,
+		Diagnostics: diagnostics,
+	})
+
+	dbs[params.TextDocument.URI] = db
+
+	return nil
+}
+
+func semanticTokens(context *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {
+	db, ok := dbs[params.TextDocument.URI]
+	if !ok {
+		return nil, nil
+	}
+
+	tokens := addSemanticTokens(db, params.TextDocument.URI)
+	return &tokens, nil
+}
+
+func hover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
+	db, ok := dbs[params.TextDocument.URI]
+	if !ok {
+		return nil, nil
+	}
+
+	hover := getHover(db, params.TextDocument.URI, params.Position)
+	if hover == nil {
+		return nil, nil
+	}
+
+	return hover, nil
+}
+
+func documentHighlight(context *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
+	db, ok := dbs[params.TextDocument.URI]
+	if !ok {
+		return nil, nil
+	}
+
+	highlights := getRelated(db, params.TextDocument.URI, params.Position)
+	return highlights, nil
+}
+
+func path(uri protocol.DocumentUri) string {
+	parsed, err := url.Parse(string(uri))
+	if err != nil {
+		return ""
+	}
+
+	path, err := filepath.Rel(workspacePath, parsed.Path)
+	if err != nil {
+		return ""
+	}
+
+	return path
+}
+
+func convertSpan(span database.Span) protocol.Range {
+	return protocol.Range{
+		Start: protocol.Position{
+			Line:      uint32(span.Start.Line - 1),
+			Character: uint32(span.Start.Column - 1),
+		},
+		End: protocol.Position{
+			Line:      uint32(span.End.Line - 1),
+			Character: uint32(span.End.Column),
+		},
+	}
+}
+
+func nodeFilter(uri protocol.DocumentUri) func(node database.Node) bool {
+	path := path(uri)
+
+	return func(node database.Node) bool {
+		return database.GetSpanFact(node).Path == path
+	}
+}
+
+func addFeedback(db *database.Db, filter func(node database.Node) bool) []protocol.Diagnostic {
+	diagnostics := []protocol.Diagnostic{}
+	seenFeedback := map[database.Node]map[string]struct{}{}
+
+	feedback.Collect(db, filter, func(item feedback.FeedbackItem) {
+		nodeFeedback, ok := seenFeedback[item.On]
+		if !ok {
+			nodeFeedback = map[string]struct{}{}
+			seenFeedback[item.On] = nodeFeedback
+		}
+
+		if _, ok := nodeFeedback[item.Id]; ok {
+			return
+		}
+		nodeFeedback[item.Id] = struct{}{}
+
+		diagnosticSeverity := protocol.DiagnosticSeverityInformation
+		diagnosticSource := "wipple"
+
+		diagnostics = append(diagnostics, protocol.Diagnostic{
+			Severity: &diagnosticSeverity,
+			Range:    convertSpan(database.GetSpanFact(item.On)),
+			Message:  item.String(),
+			Source:   &diagnosticSource,
+		})
+	})
+
+	return diagnostics
+}
+
+func addSemanticTokens(db *database.Db, uri protocol.DocumentUri) protocol.SemanticTokens {
+	filter := nodeFilter(uri)
+
+	tokens := map[database.Span]semtok.Type{}
+	database.ContainsNode(db, func(node database.Node) bool {
+		if !filter(node) {
+			return false
+		}
+
+		span := database.GetSpanFact(node)
+
+		// Don't highlight across whitespace
+		if span.Start.Line != span.End.Line || strings.ContainsFunc(span.Source, unicode.IsSpace) {
+			return false
+		}
+
+		queries.HighlightType(db, node, filter, func(struct{}) {
+			tokens[span] = semtok.TokType
+		})
+
+		queries.HighlightTrait(db, node, filter, func(struct{}) {
+			tokens[span] = semtok.TokNamespace
+		})
+
+		queries.HighlightTypeParameter(db, node, filter, func(struct{}) {
+			tokens[span] = semtok.TokTypeParam
+		})
+
+		queries.HighlightFunction(db, node, filter, func(struct{}) {
+			tokens[span] = semtok.TokFunction
+		})
+
+		return false
+	})
+
+	sortedTokens := make([]semtok.Token, 0, len(tokens))
+	for span, tokenType := range tokens {
+		sortedTokens = append(sortedTokens, semtok.Token{
+			Line:  uint32(span.Start.Line - 1),
+			Start: uint32(span.Start.Column - 1),
+			Len:   uint32(span.End.Index - span.Start.Index),
+			Type:  tokenType,
+		})
+	}
+	slices.SortStableFunc(sortedTokens, func(left semtok.Token, right semtok.Token) int {
+		if left.Line != right.Line {
+			return int(left.Line) - int(right.Line)
+		}
+
+		return int(left.Start) - int(right.Start)
+	})
+
+	encoded := semtok.Encode(sortedTokens, nil, nil)
+	return protocol.SemanticTokens{Data: encoded}
+}
+
+func getHover(db *database.Db, uri protocol.DocumentUri, position protocol.Position) *protocol.Hover {
+	filter := nodeFilter(uri)
+
+	nodeAtPosition := getNodeAtPosition(db, uri, position)
+	if nodeAtPosition == nil {
+		return nil
+	}
+
+	contents := []any{}
+	queries.Type(db, nodeAtPosition, filter, func(ty *typecheck.ConstructedType) {
+		contents = append(contents, protocol.MarkedStringStruct{
+			Language: "wipple",
+			Value:    typecheck.DisplayType(ty, true),
+		})
+	})
+
+	queries.Comments(db, nodeAtPosition, filter, func(data queries.CommentsData) {
+		if data.Node != nodeAtPosition {
+			return
+		}
+
+		render := feedback.NewRender(db)
+		render.WriteComments(data)
+		documentation := render.Finish()
+
+		if documentation != "" {
+			contents = append(contents, documentation)
+		}
+	})
+
+	hoverRange := convertSpan(database.GetSpanFact(nodeAtPosition))
+	return &protocol.Hover{
+		Range:    &hoverRange,
+		Contents: contents,
+	}
+}
+
+func getRelated(db *database.Db, uri protocol.DocumentUri, position protocol.Position) []protocol.DocumentHighlight {
+	filter := nodeFilter(uri)
+
+	nodeAtPosition := getNodeAtPosition(db, uri, position)
+	if nodeAtPosition == nil {
+		return nil
+	}
+
+	highlights := []protocol.DocumentHighlight{
+		{Range: convertSpan(database.GetSpanFact(nodeAtPosition))},
+	}
+
+	queries.Related(db, nodeAtPosition, filter, func(related database.Node) {
+		highlights = append(highlights, protocol.DocumentHighlight{
+			Range: convertSpan(database.GetSpanFact(related)),
+		})
+	})
+
+	return highlights
+}
+
+func getNodeAtPosition(db *database.Db, uri protocol.DocumentUri, position protocol.Position) database.Node {
+	filter := nodeFilter(uri)
+
+	type match struct {
+		length uint32
+		node   database.Node
+	}
+
+	matches := []match{}
+	database.ContainsNode(db, func(node database.Node) bool {
+		if !filter(node) {
+			return false
+		}
+
+		r := convertSpan(database.GetSpanFact(node))
+
+		if r.Start.Line == position.Line &&
+			r.Start.Character <= position.Character &&
+			r.End.Line == position.Line &&
+			r.End.Character >= position.Character {
+			matches = append(matches, match{
+				length: r.End.Character - r.Start.Character,
+				node:   node,
+			})
+		}
+
+		return false
+	})
+
+	slices.SortFunc(matches, func(left match, right match) int {
+		return int(left.length) - int(right.length)
+	})
+
+	if len(matches) == 0 {
+		return nil
+	}
+
+	return matches[0].node
+}
