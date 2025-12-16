@@ -1,6 +1,7 @@
 package syntax
 
 import (
+	"strings"
 	"wipple/database"
 
 	lex "github.com/timtadh/lexmachine"
@@ -121,13 +122,13 @@ func init() {
 	}
 }
 
-func Tokenize(path string, source string) ([]Token, *Error) {
+func Tokenize(path string, source string) ([]*Token, *Error) {
 	scanner, err := lexer.Scanner([]byte(source))
 	if err != nil {
 		panic(err)
 	}
 
-	var tokens []Token
+	var tokens []*Token
 	for token, err, eof := scanner.Next(); !eof; token, err, eof = scanner.Next() {
 		token := token.(*lex.Token)
 		startIndex := token.TC
@@ -159,7 +160,7 @@ func Tokenize(path string, source string) ([]Token, *Error) {
 			}
 		}
 
-		tokens = append(tokens, Token{
+		tokens = append(tokens, &Token{
 			kind:  tokenKinds[token.Type],
 			value: token.Value.(string),
 			span:  span,
@@ -167,4 +168,32 @@ func Tokenize(path string, source string) ([]Token, *Error) {
 	}
 
 	return tokens, nil
+}
+
+func TokenIsKeyword(kind string) bool {
+	return strings.HasSuffix(kind, "Keyword")
+}
+
+func TokenIsOperator(kind string) bool {
+	return strings.HasSuffix(kind, "Operator") || kind == "WhereKeyword"
+}
+
+func TokenIsBinaryOperator(kind string) bool {
+	return TokenIsOperator(kind) && !TokenIsNonAssociativeOperator(kind) && !TokenIsVariadicOperator(kind)
+}
+
+func TokenIsNonAssociativeOperator(kind string) bool {
+	return kind == "WhereKeyword" || kind == "TypeFunctionOperator" || kind == "AnnotateOperator" || kind == "AssignOperator"
+}
+
+func TokenIsVariadicOperator(kind string) bool {
+	return kind == "TupleOperator" || kind == "CollectionOperator"
+}
+
+func TokenIsOpening(kind string) bool {
+	return strings.HasPrefix(kind, "Left")
+}
+
+func TokenIsClosing(kind string) bool {
+	return strings.HasPrefix(kind, "Right")
 }

@@ -98,6 +98,14 @@ func (cmd *RunCmd) Run(ctx *Context) error {
 	return nil
 }
 
+type FormatCmd struct {
+	Path string `arg:"" type:"path" required:""`
+}
+
+func (cmd *FormatCmd) Run(ctx *Context) error {
+	return format(cmd)
+}
+
 type LspCmd struct {
 	Stdio bool
 }
@@ -125,6 +133,7 @@ func (cmd *ServerCmd) Run(ctx *Context) error {
 var cli struct {
 	Compile CompileCmd `cmd:""`
 	Run     RunCmd     `cmd:""`
+	Format  FormatCmd  `cmd:""`
 	Lsp     LspCmd     `cmd:""`
 	Server  ServerCmd  `cmd:""`
 }
@@ -353,4 +362,20 @@ func compile(cmd *CompileCmd, run bool) (string, string, error) {
 	}
 
 	return output.String(), "", nil
+}
+
+func format(cmd *FormatCmd) error {
+	source, err := os.ReadFile(cmd.Path)
+	if err != nil {
+		return err
+	}
+
+	formatted, syntaxError := syntax.Format(string(source))
+	if syntaxError != nil {
+		return fmt.Errorf("syntax error: %v", syntaxError)
+	}
+
+	fmt.Println(formatted)
+
+	return nil
 }

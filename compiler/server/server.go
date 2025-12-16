@@ -21,6 +21,7 @@ var mongodb *mongo.Database
 type Request struct {
 	Compile       *CompileRequest       `json:"compile,omitempty"`
 	Documentation *DocumentationRequest `json:"documentation,omitempty"`
+	Format        *FormatRequest        `json:"format,omitempty"`
 }
 
 type InputMetadata struct {
@@ -119,6 +120,8 @@ func handle(request Request) (any, int, error) {
 		response, err = request.Compile.handle()
 	} else if request.Documentation != nil {
 		response, err = request.Documentation.handle()
+	} else if request.Format != nil {
+		response, err = request.Format.handle()
 	} else {
 		return nil, 400, fmt.Errorf("invalid request type")
 	}

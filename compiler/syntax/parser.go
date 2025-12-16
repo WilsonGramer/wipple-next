@@ -13,7 +13,7 @@ type Parser struct {
 	Db     *db.Db
 	Path   string
 	Source string
-	tokens []Token
+	tokens []*Token
 	index  int
 	stack  []commitEntry
 	cache  map[uintptr]map[int]parseResult
@@ -114,7 +114,7 @@ func (parser *Parser) Token(kind string, configs ...TokenConfig) (string, *Error
 		}
 	}
 
-	token := &parser.tokens[parser.index]
+	token := parser.tokens[parser.index]
 
 	if token.kind != kind {
 		return "", &Error{
