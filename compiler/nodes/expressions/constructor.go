@@ -63,6 +63,7 @@ func (node *ConstructorExpressionNode) Visit(visitor *visit.Visitor) {
 			Source:        node,
 			Trait:         traitDefinition.Node,
 			Substitutions: &substitutions,
+			TraitName:     traitDefinition.Name,
 		}, visit.GetDefinitionConstraints))
 
 		node.matchingSubstitutions = substitutions

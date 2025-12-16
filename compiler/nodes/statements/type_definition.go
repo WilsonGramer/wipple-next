@@ -322,6 +322,7 @@ func (node *TypeDefinitionNode) Visit(visitor *visit.Visitor) {
 		// Types don't have additional constraints
 
 		definition := &visit.TypeDefinition{
+			Name:       node.Name,
 			Node:       node,
 			Comments:   node.Comments,
 			Attributes: visit.ParseTypeAttributes(node.Attributes),
@@ -335,6 +336,7 @@ func (node *TypeDefinitionNode) Visit(visitor *visit.Visitor) {
 					visitor.PopScope()
 
 					visitor.Define(node.Name, &visit.MarkerConstructorDefinition{
+						Name:     definition.Name,
 						Node:     definition.Node,
 						Comments: definition.Comments,
 					})
@@ -354,6 +356,7 @@ func (node *TypeDefinitionNode) Visit(visitor *visit.Visitor) {
 					visitor.PopScope()
 
 					visitor.Define(node.Name, &visit.StructureConstructorDefinition{
+						Name:     definition.Name,
 						Node:     definition.Node,
 						Comments: definition.Comments,
 						Fields:   fields,
@@ -393,6 +396,7 @@ func (node *TypeDefinitionNode) Visit(visitor *visit.Visitor) {
 							}
 
 							constructorDefinition := &visit.VariantConstructorDefinition{
+								Name:  variant.Name,
 								Node:  variantNode,
 								Index: i,
 							}

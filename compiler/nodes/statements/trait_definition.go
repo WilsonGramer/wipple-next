@@ -117,6 +117,7 @@ func (node *TraitDefinitionNode) Visit(visitor *visit.Visitor) {
 		visitor.PopScope()
 
 		definition := &visit.TraitDefinition{
+			Name:       node.Name,
 			Node:       node,
 			Comments:   node.Comments,
 			Attributes: visit.ParseTraitAttributes(node.Attributes),

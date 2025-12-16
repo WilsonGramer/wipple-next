@@ -26,6 +26,7 @@ type UnresolvedBound struct {
 	Source        database.Node
 	Trait         database.Node
 	Substitutions *map[database.Node]Type
+	TraitName     string
 }
 
 type ResolvedBound struct {
@@ -41,6 +42,7 @@ func (b ResolvedBound) Clone() ResolvedBound {
 			Source:        b.Source,
 			Trait:         b.Trait,
 			Substitutions: &substitutions,
+			TraitName:     b.TraitName,
 		},
 		Solver: b.Solver,
 	}
@@ -52,7 +54,7 @@ func DisplayResolvedBound(b ResolvedBound) string {
 }
 
 func DisplayUnresolvedBound(b UnresolvedBound) string {
-	s := database.NodeSource(b.Trait)
+	s := b.TraitName
 
 	parameters := make([]database.Node, 0, len(*b.Substitutions))
 	for parameter := range *b.Substitutions {
@@ -77,6 +79,7 @@ func ApplyBound(b ResolvedBound) ResolvedBound {
 			Source:        b.Source,
 			Trait:         b.Trait,
 			Substitutions: ApplySubstitutions(b.Substitutions, b.Solver),
+			TraitName:     b.TraitName,
 		},
 		Solver: b.Solver,
 	}

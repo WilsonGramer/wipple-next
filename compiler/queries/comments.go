@@ -38,12 +38,13 @@ type CommentsData struct {
 }
 
 func Comments(db *database.Db, node database.Node, filter func(node database.Node) bool, f func(data CommentsData)) {
-	resolved, ok := database.GetFact[visit.ResolvedFact](node)
-	if !ok {
-		return
-	}
-
-	if len(resolved.Definitions) == 1 {
+	if defined, ok := database.GetFact[visit.DefinedFact](node); ok {
+		f(CommentsData{
+			Node:     node,
+			Comments: defined.Definition.GetComments(),
+			Links:    getLinks(db, node, node),
+		})
+	} else if resolved, ok := database.GetFact[visit.ResolvedFact](node); ok && len(resolved.Definitions) == 1 {
 		definition := resolved.Definitions[0]
 
 		f(CommentsData{
@@ -52,6 +53,7 @@ func Comments(db *database.Db, node database.Node, filter func(node database.Nod
 			Links:    getLinks(db, definition.GetNode(), node),
 		})
 	}
+
 }
 
 type Links struct {

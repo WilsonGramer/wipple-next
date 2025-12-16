@@ -105,6 +105,7 @@ func (node *ConstantDefinitionNode) Visit(visitor *visit.Visitor) {
 		visitor.PopScope()
 
 		definition := &visit.ConstantDefinition{
+			Name:       node.Name,
 			Node:       node,
 			Comments:   node.Comments,
 			Attributes: visit.ParseConstantAttributes(node.Attributes),

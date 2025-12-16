@@ -37,6 +37,7 @@ func (node *VariablePatternNode) Visit(visitor *visit.Visitor) {
 	node.matching = visitor.CurrentMatch.Node
 
 	visitor.Define(node.Variable, &visit.VariableDefinition{
+		Name:  node.Variable,
 		Node:  node,
 		Value: visitor.CurrentMatch.Node,
 	})

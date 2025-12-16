@@ -170,7 +170,10 @@ func (node *TypeParameterNode) Visit(visitor *visit.Visitor) {
 	if ok {
 		visitor.Constraint(typecheck.GroupConstraint(node, existing.Node))
 	} else {
-		definition := &visit.TypeParameterDefinition{Node: node}
+		definition := &visit.TypeParameterDefinition{
+			Name: node.Name,
+			Node: node,
+		}
 		visitor.Define(node.Name, definition)
 
 		visitor.Constraint(typecheck.TypeConstraint(node, typecheck.ParameterType(node, node.Name)))

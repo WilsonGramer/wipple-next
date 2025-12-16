@@ -39,13 +39,21 @@ func DisplayNode(node Node) string {
 }
 
 func NodeSource(node Node) string {
+	source := DefinitionSource(node)
+	source = regexp.MustCompile(`(?s)\{.*\}`).ReplaceAllString(source, "{⋯}")   // collapse braces
+	source = regexp.MustCompile(`(?s)::.*`).ReplaceAllString(source, "")        // remove type annotations
+	source = regexp.MustCompile(`(?s)\bwhere\b.*`).ReplaceAllString(source, "") // remove bounds
+	source = regexp.MustCompile(`(?s)\n.*`).ReplaceAllString(source, "⋯")       // collapse multiple lines
+
+	return strings.TrimSpace(source)
+}
+
+func DefinitionSource(node Node) string {
 	span := GetSpanFact(node)
 
 	source := span.Source
-	source = regexp.MustCompile(`(\[.*\]\s*)*`).ReplaceAllString(source, "")    // strip attributes
-	source = regexp.MustCompile(`--.*\n`).ReplaceAllString(source, "")          // strip comments
-	source = regexp.MustCompile(`(?s)\{.*\}`).ReplaceAllString(source, "{⋯}")   // collapse braces
-	source = regexp.MustCompile(`(?s)\bwhere\b.*`).ReplaceAllString(source, "") // remove bounds
+	source = regexp.MustCompile(`(\[.*\]\s*)*`).ReplaceAllString(source, "") // strip attributes
+	source = regexp.MustCompile(`--.*\n`).ReplaceAllString(source, "")       // strip comments
 
 	// Remove parentheses
 	if source != "()" && strings.HasPrefix(source, "(") && strings.HasSuffix(source, ")") {
@@ -71,8 +79,18 @@ func NodeSource(node Node) string {
 		source = source[trimCount : len(source)-trimCount]
 	}
 
-	source = regexp.MustCompile(`(?s)::?.*`).ReplaceAllString(source, "") // remove assigned value
-	source = regexp.MustCompile(`(?s)\n.*`).ReplaceAllString(source, "⋯") // collapse multiple lines
+	// Remove assigned value...
+	index := strings.Index(source, ":")
+	if index >= 0 {
+		// ...but not type annotations or type/trait definitions
+		rest := source[index+1:]
+		if strings.HasPrefix(rest, ":") || strings.Contains(rest, " type ") || strings.Contains(rest, " trait ") {
+			index = -1
+		}
+	}
+	if index >= 0 {
+		source = source[:index]
+	}
 
 	return strings.TrimSpace(source)
 }

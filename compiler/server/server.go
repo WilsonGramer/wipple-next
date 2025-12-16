@@ -19,7 +19,8 @@ var Prelude string
 var mongodb *mongo.Database
 
 type Request struct {
-	Compile *CompileRequest `json:"compile,omitempty"`
+	Compile       *CompileRequest       `json:"compile,omitempty"`
+	Documentation *DocumentationRequest `json:"documentation,omitempty"`
 }
 
 type InputMetadata struct {
@@ -111,15 +112,20 @@ func Run(onLambda bool) error {
 	}
 }
 
-func handle(request Request) (*CompileResponse, int, error) {
+func handle(request Request) (any, int, error) {
+	var response any
+	var err error
 	if request.Compile != nil {
-		response, err := request.Compile.handle()
-		if err != nil {
-			return nil, 500, err
-		}
-
-		return response, 200, nil
+		response, err = request.Compile.handle()
+	} else if request.Documentation != nil {
+		response, err = request.Documentation.handle()
 	} else {
 		return nil, 400, fmt.Errorf("invalid request type")
 	}
+
+	if err != nil {
+		return nil, 500, err
+	}
+
+	return response, 200, nil
 }

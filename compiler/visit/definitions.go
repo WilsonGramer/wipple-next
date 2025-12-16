@@ -14,13 +14,19 @@ func (fact DefinedFact) String() string {
 }
 
 type Definition interface {
+	GetName() string
 	GetNode() database.Node
 	GetComments() []string
 }
 
 type VariableDefinition struct {
+	Name  string
 	Node  database.Node
 	Value database.Node
+}
+
+func (definition *VariableDefinition) GetName() string {
+	return definition.Name
 }
 
 func (definition *VariableDefinition) GetNode() database.Node {
@@ -32,11 +38,16 @@ func (definition *VariableDefinition) GetComments() []string {
 }
 
 type ConstantDefinition struct {
+	Name       string
 	Node       database.Node
 	Comments   []string
 	Attributes ConstantAttributes
 	Assigned   bool
 	Value      database.Node
+}
+
+func (definition *ConstantDefinition) GetName() string {
+	return definition.Name
 }
 
 func (definition *ConstantDefinition) GetNode() database.Node {
@@ -58,10 +69,15 @@ func ParseConstantAttributes(attrs []*attributes.AttributeNode) ConstantAttribut
 }
 
 type TypeDefinition struct {
+	Name       string
 	Node       database.Node
 	Comments   []string
 	Attributes TypeAttributes
 	Parameters []database.Node
+}
+
+func (definition *TypeDefinition) GetName() string {
+	return definition.Name
 }
 
 func (definition *TypeDefinition) GetNode() database.Node {
@@ -83,10 +99,15 @@ func ParseTypeAttributes(attrs []*attributes.AttributeNode) TypeAttributes {
 }
 
 type TraitDefinition struct {
+	Name       string
 	Node       database.Node
 	Comments   []string
 	Attributes TraitAttributes
 	Parameters []database.Node
+}
+
+func (definition *TraitDefinition) GetName() string {
+	return definition.Name
 }
 
 func (definition *TraitDefinition) GetNode() database.Node {
@@ -111,6 +132,10 @@ type InstanceDefinition struct {
 	Trait      database.Node
 }
 
+func (definition *InstanceDefinition) GetName() string {
+	return "instance"
+}
+
 func (definition *InstanceDefinition) GetNode() database.Node {
 	return definition.Node
 }
@@ -132,7 +157,12 @@ func ParseInstanceAttributes(attrs []*attributes.AttributeNode) InstanceAttribut
 }
 
 type TypeParameterDefinition struct {
+	Name string
 	Node database.Node
+}
+
+func (definition *TypeParameterDefinition) GetName() string {
+	return definition.Name
 }
 
 func (definition *TypeParameterDefinition) GetNode() database.Node {
@@ -144,8 +174,13 @@ func (definition *TypeParameterDefinition) GetComments() []string {
 }
 
 type MarkerConstructorDefinition struct {
+	Name     string
 	Node     database.Node
 	Comments []string
+}
+
+func (definition *MarkerConstructorDefinition) GetName() string {
+	return definition.Name
 }
 
 func (definition *MarkerConstructorDefinition) GetNode() database.Node {
@@ -157,9 +192,14 @@ func (definition *MarkerConstructorDefinition) GetComments() []string {
 }
 
 type StructureConstructorDefinition struct {
+	Name     string
 	Node     database.Node
 	Comments []string
 	Fields   map[string]database.Node
+}
+
+func (definition *StructureConstructorDefinition) GetName() string {
+	return definition.Name
 }
 
 func (definition *StructureConstructorDefinition) GetNode() database.Node {
@@ -171,8 +211,13 @@ func (definition *StructureConstructorDefinition) GetComments() []string {
 }
 
 type VariantConstructorDefinition struct {
+	Name  string
 	Node  database.Node
 	Index int
+}
+
+func (definition *VariantConstructorDefinition) GetName() string {
+	return definition.Name
 }
 
 func (definition *VariantConstructorDefinition) GetNode() database.Node {

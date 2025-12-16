@@ -87,5 +87,6 @@ func (node *BoundConstraintNode) Visit(visitor *visit.Visitor) {
 		Source:        node,
 		Trait:         trait.Node,
 		Substitutions: &substitutions,
+		TraitName:     trait.Name,
 	}, visit.GetDefinitionConstraints))
 }

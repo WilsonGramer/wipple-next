@@ -24,6 +24,7 @@ func BoundConstraint(node database.Node, bound UnresolvedBound, getDefinitionCon
 				Source:        source,
 				Trait:         bound.Trait,
 				Substitutions: InstantiateSubstitutions(solver, bound.Substitutions, source, substitutions, replacements),
+				TraitName:     bound.TraitName,
 			}, getDefinitionConstraints)
 		},
 		Run: func(solver *Solver) bool {
@@ -132,6 +133,7 @@ func BoundConstraint(node database.Node, bound UnresolvedBound, getDefinitionCon
 						Source:        bound.Source,
 						Trait:         bound.Trait,
 						Substitutions: &resolvedSubstitutions,
+						TraitName:     bound.TraitName,
 					},
 					Solver: solver,
 				}
