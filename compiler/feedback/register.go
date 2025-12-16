@@ -77,7 +77,7 @@ func Collect(db *database.Db, nodeFilter func(node database.Node) bool, itemFilt
 		return false
 	})
 
-	sortByRank(items)
+	sort(items)
 
 	return items
 }

@@ -1,6 +1,9 @@
 package feedback
 
-import "slices"
+import (
+	"slices"
+	"wipple/database"
+)
 
 type Rank int
 
@@ -13,8 +16,15 @@ const (
 	RankPlaceholder
 )
 
-func sortByRank(items []FeedbackItem) {
+func sort(items []FeedbackItem) {
 	slices.SortStableFunc(items, func(left FeedbackItem, right FeedbackItem) int {
-		return int(left.Rank) - int(right.Rank)
+		leftSpan := database.GetSpanFact(left.On)
+		rightSpan := database.GetSpanFact(right.On)
+
+		if leftSpan.Start.Line == rightSpan.Start.Line {
+			return int(left.Rank) - int(right.Rank)
+		}
+
+		return leftSpan.Start.Line - rightSpan.Start.Line
 	})
 }

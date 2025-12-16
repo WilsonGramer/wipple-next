@@ -185,13 +185,6 @@ NamedTypeNode `Number` (recursive-bounds.wipple:10:22)
 
 Feedback:
 
-`Describe` (recursive-bounds.wipple:10:1) (unresolved-bound):
-
-  `Describe` (recursive-bounds.wipple:10:1) requires the instance `Describe Number`, but this
-  instance isn't defined.
-  
-  Double-check that these types are correct.
-
 `_` (recursive-bounds.wipple:6:30) (placeholder):
 
   Found a placeholder of type `String -> String`.
@@ -209,6 +202,13 @@ Feedback:
   Found a placeholder of type `Maybe String`.
   
   Add a `Maybe String` value here before running your program.
+
+`Describe` (recursive-bounds.wipple:10:1) (unresolved-bound):
+
+  `Describe` (recursive-bounds.wipple:10:1) requires the instance `Describe Number`, but this
+  instance isn't defined.
+  
+  Double-check that these types are correct.
 
 `_` (recursive-bounds.wipple:10:11) (placeholder):
 
