@@ -99,6 +99,7 @@ TypeParameterNode `element` (default-constraint.wipple:7:33)
 PlaceholderExpressionNode `_` (default-constraint.wipple:7:45)
   at default-constraint.wipple:7:45
   is an expression
+  is a placeholder
   has type `element -> List element`
 
 InstanceDefinitionNode `instance (Collect element (Set element))` (default-constraint.wipple:8:1)
@@ -129,6 +130,7 @@ TypeParameterNode `element` (default-constraint.wipple:8:32)
 PlaceholderExpressionNode `_` (default-constraint.wipple:8:44)
   at default-constraint.wipple:8:44
   is an expression
+  is a placeholder
   has type `element -> Set element`
 
 ConstantDefinitionNode `collect` (default-constraint.wipple:10:1)
@@ -197,6 +199,7 @@ AssignmentNode `collect` (default-constraint.wipple:12:1)
 PlaceholderExpressionNode `_` (default-constraint.wipple:12:11)
   at default-constraint.wipple:12:11
   is an expression
+  is a placeholder
   has type `element -> output`
 
 WildcardPatternNode `_` (default-constraint.wipple:14:1)
@@ -276,4 +279,25 @@ PlaceholderTypeNode `_` (default-constraint.wipple:15:26)
   at default-constraint.wipple:15:26
   has type `String`
   is a type
+
+
+Feedback:
+
+`_` (default-constraint.wipple:7:45) (placeholder):
+
+  Found a placeholder of type `element -> List element`.
+  
+  Add a `element -> List element` value here before running your program.
+
+`_` (default-constraint.wipple:8:44) (placeholder):
+
+  Found a placeholder of type `element -> Set element`.
+  
+  Add a `element -> Set element` value here before running your program.
+
+`_` (default-constraint.wipple:12:11) (placeholder):
+
+  Found a placeholder of type `element -> output`.
+  
+  Add a `element -> output` value here before running your program.
 

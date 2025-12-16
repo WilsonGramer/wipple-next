@@ -140,6 +140,7 @@ TypeParameterNode `value` (sequence.wipple:18:35)
 PlaceholderExpressionNode `_` (sequence.wipple:18:44)
   at sequence.wipple:18:44
   is an expression
+  is a placeholder
   has type `(Box value) -> Sequence value`
 
 ConstantDefinitionNode `filter` (sequence.wipple:20:1)
@@ -215,6 +216,7 @@ AssignmentNode `filter` (sequence.wipple:21:1)
 PlaceholderExpressionNode `_` (sequence.wipple:21:10)
   at sequence.wipple:21:10
   is an expression
+  is a placeholder
   has type `(item -> Boolean) -> collection -> Sequence item`
 
 VariablePatternNode `box` (sequence.wipple:23:1)
@@ -233,6 +235,7 @@ AnnotateExpressionNode `_` (sequence.wipple:23:7)
 PlaceholderExpressionNode `_` (sequence.wipple:23:8)
   at sequence.wipple:23:8
   is an expression
+  is a placeholder
   has type `Box String`
 
 NamedTypeNode `Box String` (sequence.wipple:23:13)
@@ -279,6 +282,7 @@ NamedTypeNode `Number` (sequence.wipple:24:19)
 PlaceholderExpressionNode `_` (sequence.wipple:24:30)
   at sequence.wipple:24:30
   is an expression
+  is a placeholder
   has type `Boolean`
 
 CallExpressionNode `filter positive?` (sequence.wipple:25:1)
@@ -316,6 +320,24 @@ VariableExpressionNode `box` (sequence.wipple:25:20)
 
 Feedback:
 
+`_` (sequence.wipple:18:44) (placeholder):
+
+  Found a placeholder of type `(Box value) -> Sequence value`.
+  
+  Add a `(Box value) -> Sequence value` value here before running your program.
+
+`_` (sequence.wipple:21:10) (placeholder):
+
+  Found a placeholder of type `(item -> Boolean) -> collection -> Sequence item`.
+  
+  Add a `(item -> Boolean) -> collection -> Sequence item` value here before running your program.
+
+`_` (sequence.wipple:23:8) (placeholder):
+
+  Found a placeholder of type `Box String`.
+  
+  Add a `Box String` value here before running your program.
+
 `_` (sequence.wipple:24:14) (conflicting-types):
 
   `_` (sequence.wipple:24:14) is `String` or `Number`, but it can only be one of these.
@@ -329,4 +351,10 @@ Feedback:
   (sequence.wipple:24:13), `Number` (sequence.wipple:24:19), `item` (sequence.wipple:20:90), `item`
   (sequence.wipple:20:55), `item` (sequence.wipple:20:12), and `item` (sequence.wipple:20:12);
   double-check these.
+
+`_` (sequence.wipple:24:30) (placeholder):
+
+  Found a placeholder of type `Boolean`.
+  
+  Add a `Boolean` value here before running your program.
 

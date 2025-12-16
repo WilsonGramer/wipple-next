@@ -7,6 +7,12 @@ import (
 	"wipple/visit"
 )
 
+type IsPlaceholder struct{}
+
+func (fact IsPlaceholder) String() string {
+	return "is a placeholder"
+}
+
 type PlaceholderExpressionNode struct {
 	Facts *database.Facts
 }
@@ -32,6 +38,8 @@ func ParsePlaceholderExpression(parser *syntax.Parser) (*PlaceholderExpressionNo
 
 func (node *PlaceholderExpressionNode) Visit(visitor *visit.Visitor) {
 	visitExpression(visitor, node)
+
+	database.SetFact(node, IsPlaceholder{})
 }
 
 func (node *PlaceholderExpressionNode) Codegen(c *codegen.Codegen) error {

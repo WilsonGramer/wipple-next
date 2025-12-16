@@ -55,6 +55,7 @@ NamedTypeNode `Number` (nested-bounds.wipple:5:13)
 PlaceholderExpressionNode `_` (nested-bounds.wipple:5:23)
   at nested-bounds.wipple:5:23
   is an expression
+  is a placeholder
   has type `Number -> ()`
 
 InstanceDefinitionNode `instance (A String)` (nested-bounds.wipple:6:1)
@@ -72,6 +73,7 @@ NamedTypeNode `String` (nested-bounds.wipple:6:13)
 PlaceholderExpressionNode `_` (nested-bounds.wipple:6:23)
   at nested-bounds.wipple:6:23
   is an expression
+  is a placeholder
   has type `String -> ()`
 
 TraitDefinitionNode `B` (nested-bounds.wipple:8:1)
@@ -129,6 +131,7 @@ TypeParameterNode `value` (nested-bounds.wipple:9:29)
 PlaceholderExpressionNode `_` (nested-bounds.wipple:9:38)
   at nested-bounds.wipple:9:38
   is an expression
+  is a placeholder
   has type `value -> ()`
 
 ConstructorExpressionNode `B` (nested-bounds.wipple:11:1)
@@ -205,6 +208,24 @@ UnitExpressionNode `()` (nested-bounds.wipple:13:3)
 
 
 Feedback:
+
+`_` (nested-bounds.wipple:5:23) (placeholder):
+
+  Found a placeholder of type `Number -> ()`.
+  
+  Add a `Number -> ()` value here before running your program.
+
+`_` (nested-bounds.wipple:6:23) (placeholder):
+
+  Found a placeholder of type `String -> ()`.
+  
+  Add a `String -> ()` value here before running your program.
+
+`_` (nested-bounds.wipple:9:38) (placeholder):
+
+  Found a placeholder of type `value -> ()`.
+  
+  Add a `value -> ()` value here before running your program.
 
 `B` (nested-bounds.wipple:13:1) (unresolved-bound):
 

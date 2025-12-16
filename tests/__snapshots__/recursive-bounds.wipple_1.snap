@@ -68,6 +68,7 @@ NamedTypeNode `String` (recursive-bounds.wipple:6:20)
 PlaceholderExpressionNode `_` (recursive-bounds.wipple:6:30)
   at recursive-bounds.wipple:6:30
   is an expression
+  is a placeholder
   has type `String -> String`
 
 InstanceDefinitionNode `instance (Describe (Maybe value))` (recursive-bounds.wipple:7:1)
@@ -102,6 +103,7 @@ TypeParameterNode `value` (recursive-bounds.wipple:7:51)
 PlaceholderExpressionNode `_` (recursive-bounds.wipple:7:60)
   at recursive-bounds.wipple:7:60
   is an expression
+  is a placeholder
   has type `(Maybe value) -> String`
 
 ConstructorExpressionNode `Describe` (recursive-bounds.wipple:9:1)
@@ -127,6 +129,7 @@ AnnotateExpressionNode `_` (recursive-bounds.wipple:9:10)
 PlaceholderExpressionNode `_` (recursive-bounds.wipple:9:11)
   at recursive-bounds.wipple:9:11
   is an expression
+  is a placeholder
   has type `Maybe String`
 
 NamedTypeNode `Maybe String` (recursive-bounds.wipple:9:16)
@@ -164,6 +167,7 @@ AnnotateExpressionNode `_` (recursive-bounds.wipple:10:10)
 PlaceholderExpressionNode `_` (recursive-bounds.wipple:10:11)
   at recursive-bounds.wipple:10:11
   is an expression
+  is a placeholder
   has type `Maybe Number`
 
 NamedTypeNode `Maybe Number` (recursive-bounds.wipple:10:16)
@@ -180,6 +184,30 @@ NamedTypeNode `Number` (recursive-bounds.wipple:10:22)
 
 
 Feedback:
+
+`_` (recursive-bounds.wipple:6:30) (placeholder):
+
+  Found a placeholder of type `String -> String`.
+  
+  Add a `String -> String` value here before running your program.
+
+`_` (recursive-bounds.wipple:7:60) (placeholder):
+
+  Found a placeholder of type `(Maybe value) -> String`.
+  
+  Add a `(Maybe value) -> String` value here before running your program.
+
+`_` (recursive-bounds.wipple:9:11) (placeholder):
+
+  Found a placeholder of type `Maybe String`.
+  
+  Add a `Maybe String` value here before running your program.
+
+`_` (recursive-bounds.wipple:10:11) (placeholder):
+
+  Found a placeholder of type `Maybe Number`.
+  
+  Add a `Maybe Number` value here before running your program.
 
 `Describe` (recursive-bounds.wipple:10:1) (unresolved-bound):
 

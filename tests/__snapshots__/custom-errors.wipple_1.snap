@@ -87,6 +87,7 @@ NamedTypeNode `Number` (custom-errors.wipple:5:29)
 PlaceholderExpressionNode `_` (custom-errors.wipple:5:39)
   at custom-errors.wipple:5:39
   is an expression
+  is a placeholder
   has type `Number Number -> Number`
 
 InstanceDefinitionNode `instance (Add String String String)` (custom-errors.wipple:6:1)
@@ -116,6 +117,7 @@ NamedTypeNode `String` (custom-errors.wipple:6:29)
 PlaceholderExpressionNode `_` (custom-errors.wipple:6:39)
   at custom-errors.wipple:6:39
   is an expression
+  is a placeholder
   has type `String String -> String`
 
 InstanceDefinitionNode `instance (Add () right sum)` (custom-errors.wipple:8:1)
@@ -331,6 +333,18 @@ NamedTypeNode `2` (custom-errors.wipple:17:12)
 
 
 Feedback:
+
+`_` (custom-errors.wipple:5:39) (placeholder):
+
+  Found a placeholder of type `Number Number -> Number`.
+  
+  Add a `Number Number -> Number` value here before running your program.
+
+`_` (custom-errors.wipple:6:39) (placeholder):
+
+  Found a placeholder of type `String String -> String`.
+  
+  Add a `String String -> String` value here before running your program.
 
 `Add` (custom-errors.wipple:16:5) (error-instance):
 

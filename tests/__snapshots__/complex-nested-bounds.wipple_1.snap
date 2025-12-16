@@ -51,6 +51,7 @@ NamedTypeNode `Boolean` (complex-nested-bounds.wipple:4:15)
 PlaceholderExpressionNode `_` (complex-nested-bounds.wipple:4:26)
   at complex-nested-bounds.wipple:4:26
   is an expression
+  is a placeholder
   has type `Boolean -> Boolean`
 
 InstanceDefinitionNode `instance (Not (a -> b))` (complex-nested-bounds.wipple:5:1)
@@ -176,4 +177,13 @@ ConstructorExpressionNode `Not` (complex-nested-bounds.wipple:8:7)
   is an expression
   has type `value -> value`
   resolved to 1 definition(s): TraitDefinitionNode `Not` (complex-nested-bounds.wipple:3:1)
+
+
+Feedback:
+
+`_` (complex-nested-bounds.wipple:4:26) (placeholder):
+
+  Found a placeholder of type `Boolean -> Boolean`.
+  
+  Add a `Boolean -> Boolean` value here before running your program.
 
