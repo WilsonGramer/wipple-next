@@ -211,7 +211,7 @@ const buildRuntime = (env, proxy = (f) => f) => {
         },
 
         external: async (func, input) => {
-            return await env[func](input);
+            return await env[func](proxy(input));
         },
 
         "number-to-string": async (number) => {
