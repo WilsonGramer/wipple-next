@@ -13,3 +13,35 @@ tasks:
     dir: vscode
     cmds:
       - npm run extension
+  dev:
+    deps:
+      - dev:library
+      # - dev:playground
+      - dev:server
+  dev:library:
+    dir: library
+    cmds:
+      - npx serve & task dev:library:watch
+    env:
+      PORT: "3001"
+  dev:library:watch:
+    dir: library
+    watch: true
+    sources:
+      - src/**/*
+    cmds:
+      - node build.js
+  dev:playground:
+    dir: playground
+    cmds:
+      - npm run dev -- --open
+  dev:server:
+    dir: .
+    cmds:
+      - go run ./compiler -- server
+    env:
+      RUST_LOG: "trace"
+      PORT: "3000"
+      LIBRARY_URL: "http://localhost:3001"
+      MONGO_URI: "mongodb://localhost:27017"
+      MONGO_DB_NAME: "wipple-share"

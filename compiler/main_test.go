@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	main "wipple"
 	"wipple/database"
+	"wipple/driver"
 	"wipple/nodes/file"
 	"wipple/syntax"
 
@@ -45,18 +45,18 @@ func TestFiles(t *testing.T) {
 				return true
 			}
 
-			db, root := main.MakeRoot()
+			db, root := driver.MakeRoot()
 
 			f, syntaxError := syntax.Parse(db, entry.Name(), string(source), file.ParseFile)
 			if syntaxError != nil {
 				panic(syntaxError)
 			}
 
-			main.Compile(db, root, []*file.FileNode{f})
+			driver.Compile(db, root, []*file.FileNode{f})
 
 			var buf bytes.Buffer
 			db.Write(&buf, nil)
-			main.WriteFeedback(db, filter, nil, &buf)
+			driver.WriteFeedback(db, filter, nil, &buf)
 
 			snaps.WithConfig(snaps.Dir(filepath.Join(testDir, "__snapshots__")), snaps.Filename(entry.Name())).MatchStandaloneSnapshot(t, buf.String())
 		})

@@ -1,4 +1,4 @@
-package main
+package driver
 
 import (
 	"fmt"
@@ -37,18 +37,27 @@ func (node *RootNode) Visit(visitor *visit.Visitor) {
 	}
 }
 
+func CloneRoot(root *RootNode) *RootNode {
+	return &RootNode{
+		Facts: database.CloneFacts(root.Facts),
+	}
+}
+
 type TopLevelScopes []visit.Scope
 
 func (fact TopLevelScopes) String() string {
 	return "has top-level scopes"
 }
 
-func MakeRoot() (*database.Db, *RootNode) {
-	db := database.NewDb(nil)
-
+func NewRoot(db *database.Db) *RootNode {
 	root := &RootNode{Facts: database.EmptyFacts()}
 	db.Register(root)
+	return root
+}
 
+func MakeRoot() (*database.Db, *RootNode) {
+	db := database.NewDb(nil)
+	root := NewRoot(db)
 	return db, root
 }
 

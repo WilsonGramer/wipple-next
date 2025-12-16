@@ -101,7 +101,7 @@ func (node *ConstructorExpressionNode) Codegen(c *codegen.Codegen) error {
 
 		c.WriteString(span, "})")
 	case *visit.VariantConstructorDefinition:
-		c.WriteNode(span, definition.Node)
+		c.Write(definition.Node)
 	default:
 		return c.Error(node)
 	}

@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 const buildRuntime = (env, proxy = (f) => f) => {
     function variant(index, values) {
         values[variant] = index;

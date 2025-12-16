@@ -9,6 +9,14 @@ import (
 	"github.com/gkampitakis/go-snaps/snaps"
 )
 
+type SyntaxErrorNode struct {
+	Facts *database.Facts
+}
+
+func (node *SyntaxErrorNode) GetFacts() *database.Facts {
+	return node.Facts
+}
+
 func Parse[T database.Node](db *database.Db, path string, source string, f ParseFunc[T]) (T, *Error) {
 	var zero T
 
@@ -24,7 +32,7 @@ func Parse[T database.Node](db *database.Db, path string, source string, f Parse
 
 	err = parser.Finish()
 	if err != nil {
-		node := &database.HiddenNode{
+		node := &SyntaxErrorNode{
 			Facts: database.NewFacts(err.Span),
 		}
 

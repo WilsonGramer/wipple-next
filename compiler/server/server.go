@@ -1,0 +1,125 @@
+package server
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/joho/godotenv"
+	"github.com/rs/cors"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+)
+
+var Prelude string
+
+var mongodb *mongo.Database
+
+type Request struct {
+	Compile *CompileRequest `json:"compile,omitempty"`
+}
+
+type InputMetadata struct {
+	Library string `json:"library,omitempty"`
+}
+
+func Run(onLambda bool) error {
+	godotenv.Load()
+
+	mongoUri := os.Getenv("MONGODB_URI")
+	mongoDbName := os.Getenv("MONGODB_DB_NAME")
+	if mongoUri != "" && mongoDbName != "" {
+		client, err := mongo.Connect(options.Client().ApplyURI(mongoUri))
+		if err != nil {
+			panic(err)
+		}
+
+		mongodb = client.Database(mongoDbName)
+	}
+
+	if onLambda {
+		lambda.Start(func(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+			var req Request
+			err := json.Unmarshal([]byte(request.Body), &req)
+			if err != nil {
+				return &events.APIGatewayProxyResponse{
+					StatusCode: 400,
+					Body:       err.Error(),
+				}, nil
+			}
+
+			res, status, err := handle(req)
+			if err != nil {
+				return &events.APIGatewayProxyResponse{
+					StatusCode: status,
+					Body:       err.Error(),
+				}, nil
+			}
+
+			json, err := json.Marshal(res)
+			if err != nil {
+				return &events.APIGatewayProxyResponse{
+					StatusCode: 500,
+					Body:       err.Error(),
+				}, nil
+			}
+
+			return &events.APIGatewayProxyResponse{
+				StatusCode: status,
+				Body:       string(json),
+			}, nil
+		})
+
+		return nil
+	} else {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != "POST" {
+				http.Error(w, "expected POST request", 400)
+				return
+			}
+
+			var req Request
+			err := json.NewDecoder(r.Body).Decode(&req)
+			if err != nil {
+				http.Error(w, err.Error(), 400)
+				return
+			}
+
+			res, status, err := handle(req)
+			if err != nil {
+				http.Error(w, err.Error(), status)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(res)
+		})
+
+		port := os.Getenv("PORT")
+		if port == "" {
+			return fmt.Errorf("expected PORT")
+		}
+
+		fmt.Printf("Listening on port %s\n", port)
+
+		return http.ListenAndServe(":"+port, cors.AllowAll().Handler(mux))
+	}
+}
+
+func handle(request Request) (*CompileResponse, int, error) {
+	if request.Compile != nil {
+		response, err := request.Compile.handle()
+		if err != nil {
+			return nil, 500, err
+		}
+
+		return response, 200, nil
+	} else {
+		return nil, 400, fmt.Errorf("invalid request type")
+	}
+}

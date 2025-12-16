@@ -1,6 +1,7 @@
 test*.wipple
 out.js
 *.pprof
+.task/
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,go
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,go

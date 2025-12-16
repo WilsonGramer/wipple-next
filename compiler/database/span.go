@@ -6,16 +6,16 @@ import (
 )
 
 type Span struct {
-	Path   string
-	Start  Location
-	End    Location
-	Source string
+	Path   string   `json:"path"`
+	Start  Location `json:"start"`
+	End    Location `json:"end"`
+	Source string   `json:"source"`
 }
 
 type Location struct {
-	Line   int
-	Column int
-	Index  int
+	Line   int `json:"line"`
+	Column int `json:"column"`
+	Index  int `json:"index"`
 }
 
 func JoinSpans(left Span, right Span, source string) Span {

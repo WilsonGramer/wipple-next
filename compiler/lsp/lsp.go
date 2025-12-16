@@ -1,4 +1,4 @@
-package main
+package lsp
 
 import (
 	"net/url"
@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 	"wipple/database"
+	"wipple/driver"
 	"wipple/feedback"
 	"wipple/nodes/file"
 	"wipple/queries"
@@ -30,9 +31,7 @@ var (
 	tokenTypes = []string{"type", "interface", "typeParameter", "function"}
 )
 
-func lsp() error {
-	database.LspEnabled = true
-
+func Run() error {
 	commonlog.Configure(2, nil)
 
 	handler = protocol.Handler{
@@ -92,12 +91,12 @@ func didChange(context *glsp.Context, params *protocol.DidChangeTextDocumentPara
 	filter := nodeFilter(params.TextDocument.URI)
 	source := params.ContentChanges[0].(protocol.TextDocumentContentChangeEventWhole).Text
 
-	db, root := MakeRoot()
+	db, root := driver.MakeRoot()
 
 	// TODO: Support multiple files
 	f, err := syntax.Parse(db, path(params.TextDocument.URI), source, file.ParseFile)
 	if err == nil {
-		Compile(db, root, []*file.FileNode{f})
+		driver.Compile(db, root, []*file.FileNode{f})
 	} else {
 		// Syntax error is written to `db` and will be shown in diagnostics below
 	}

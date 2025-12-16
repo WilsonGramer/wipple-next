@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"slices"
 	"strings"
@@ -26,6 +27,11 @@ func GetFact[T any](node Node) (T, bool) {
 
 func SetFact[T any](node Node, fact T) {
 	(*node.GetFacts())[reflect.TypeFor[T]()] = fact
+}
+
+func CloneFacts(facts *Facts) *Facts {
+	cloned := maps.Clone(*facts)
+	return &cloned
 }
 
 type SpanFact Span

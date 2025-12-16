@@ -15,10 +15,14 @@ import (
 	"wipple/codegen"
 	"wipple/colors"
 	"wipple/database"
+	"wipple/driver"
+	"wipple/lsp"
 	"wipple/nodes/file"
+	"wipple/server"
 	"wipple/syntax"
 
 	"github.com/alecthomas/kong"
+	"github.com/fatih/color"
 )
 
 //go:embed runtime/node-prelude.js
@@ -103,16 +107,35 @@ func (cmd *LspCmd) Run(ctx *Context) error {
 		return fmt.Errorf("expected --stdio")
 	}
 
-	return lsp()
+	database.LspEnabled = true
+	return lsp.Run()
+}
+
+type ServerCmd struct {
+	Lambda bool `cmd:""`
+}
+
+func (cmd *ServerCmd) Run(ctx *Context) error {
+	color.NoColor = true
+	database.LspEnabled = true
+	server.Prelude = runtime + "\nexport { buildRuntime };\n"
+	return server.Run(cmd.Lambda)
 }
 
 var cli struct {
 	Compile CompileCmd `cmd:""`
 	Run     RunCmd     `cmd:""`
 	Lsp     LspCmd     `cmd:""`
+	Server  ServerCmd  `cmd:""`
 }
 
 func main() {
+	// Default to server if running as Lambda function
+	if os.Getenv("LAMBDA_TASK_ROOT") != "" {
+		(&ServerCmd{Lambda: true}).Run(&Context{})
+		return
+	}
+
 	ctx := kong.Parse(&cli)
 	err := ctx.Run(&Context{})
 	ctx.FatalIfErrorf(err)
@@ -145,7 +168,7 @@ func compile(cmd *CompileCmd, run bool) (string, string, error) {
 		}()
 	}
 
-	db, root := MakeRoot()
+	db, root := driver.MakeRoot()
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -264,7 +287,7 @@ func compile(cmd *CompileCmd, run bool) (string, string, error) {
 		}
 
 		start := time.Now()
-		Compile(db, root, layer.files)
+		driver.Compile(db, root, layer.files)
 		duration := time.Since(start)
 
 		_, err = fmt.Fprintf(os.Stderr, " done (%dms)\n", duration.Milliseconds())
@@ -284,7 +307,7 @@ func compile(cmd *CompileCmd, run bool) (string, string, error) {
 		db.Write(&output, filter)
 	}
 
-	feedbackCount := WriteFeedback(db, filter, cmd.FilterFeedback, &output)
+	feedbackCount := driver.WriteFeedback(db, filter, cmd.FilterFeedback, &output)
 	if feedbackCount > 0 {
 		return output.String(), "", fmt.Errorf("compilation failed with %d feedback item(s)", feedbackCount)
 	}
@@ -296,9 +319,10 @@ func compile(cmd *CompileCmd, run bool) (string, string, error) {
 		}
 
 		codegen := codegen.NewCodegen(db, outputPath, codegen.Options{
-			Format:  codegen.IifeFormat,
-			Prelude: nodePrelude + runtime,
-			Input:   "buildRuntime(env)",
+			Format:    codegen.IifeFormat,
+			Prelude:   nodePrelude + runtime,
+			Input:     "buildRuntime(env)",
+			Sourcemap: true,
 		})
 
 		files := make([]database.Node, 0, len(root.Files))

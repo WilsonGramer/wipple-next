@@ -25,14 +25,22 @@ func (db *Db) Register(node Node) {
 }
 
 func ContainsNode(db *Db, f func(node Node) bool) bool {
-	return slices.ContainsFunc(db.nodes, f)
+	for current := db; current != nil; current = current.parent {
+		if slices.ContainsFunc(current.nodes, f) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func ContainsFact[T any, U any](db *Db, f func(node Node, fact T) (U, bool)) (U, bool) {
-	for _, node := range db.nodes {
-		if fact, ok := GetFact[T](node); ok {
-			if result, ok := f(node, fact); ok {
-				return result, true
+	for current := db; current != nil; current = current.parent {
+		for _, node := range current.nodes {
+			if fact, ok := GetFact[T](node); ok {
+				if result, ok := f(node, fact); ok {
+					return result, true
+				}
 			}
 		}
 	}

@@ -21,9 +21,10 @@ const (
 )
 
 type Options struct {
-	Prelude string
-	Format  CodegenFormat
-	Input   string
+	Prelude   string
+	Format    CodegenFormat
+	Input     string
+	Sourcemap bool
 }
 
 type mapping struct {
@@ -360,21 +361,23 @@ func (c *Codegen) String(root database.Node, files []database.Node) (string, err
 		}
 	}
 
-	var sourcemapComment strings.Builder
-	sourcemapComment.WriteString("\n//# sourceMappingURL=data:application/json;base64,")
+	if c.Options.Sourcemap {
+		var sourcemapComment strings.Builder
+		sourcemapComment.WriteString("\n//# sourceMappingURL=data:application/json;base64,")
 
-	encoder := base64.NewEncoder(base64.StdEncoding, &sourcemapComment)
-	_, err = encoder.Write([]byte(generator.String()))
-	if err != nil {
-		return "", err
-	}
-	err = encoder.Close()
-	if err != nil {
-		return "", err
-	}
+		encoder := base64.NewEncoder(base64.StdEncoding, &sourcemapComment)
+		_, err = encoder.Write([]byte(generator.String()))
+		if err != nil {
+			return "", err
+		}
+		err = encoder.Close()
+		if err != nil {
+			return "", err
+		}
 
-	c.output.WriteString(sourcemapComment.String())
-	c.output.WriteString("\n")
+		c.output.WriteString(sourcemapComment.String())
+		c.output.WriteString("\n")
+	}
 
 	return prelude + c.output.String(), nil
 }

@@ -2,12 +2,10 @@ package statements
 
 import (
 	"fmt"
-	"slices"
 
 	"wipple/codegen"
 	"wipple/database"
 	"wipple/nodes/attributes"
-	"wipple/nodes/patterns"
 	"wipple/nodes/types"
 	"wipple/syntax"
 	"wipple/typecheck"
@@ -451,7 +449,7 @@ func (node *variantNode) Codegen(c *codegen.Codegen) error {
 		elementTemporaries[i] = temporary
 	}
 
-	if len(node.Variant.Elements) == 0 {
+	if len(elementTemporaries) == 0 {
 		c.WriteString(span, fmt.Sprintf("runtime.variant(%d, [])", node.Index))
 	} else {
 		c.WriteString(span, "(async (")
@@ -461,26 +459,6 @@ func (node *variantNode) Codegen(c *codegen.Codegen) error {
 		}
 		c.WriteString(span, ") => {")
 		c.WriteLine()
-
-		for _, temporary := range patterns.CollectTemporaries(node.Variant.Elements...) {
-			if slices.Contains(elementTemporaries, temporary) {
-				continue
-			}
-
-			c.WriteString(span, "var ")
-			c.WriteNode(span, temporary)
-			c.WriteString(span, ";")
-			c.WriteLine()
-		}
-
-		for _, pattern := range node.Variant.Elements {
-			c.WriteString(span, "if (true")
-			if err := c.Write(pattern); err != nil {
-				return err
-			}
-			c.WriteString(span, `) {} else { throw new Error("unreachable"); }`)
-			c.WriteLine()
-		}
 
 		c.WriteString(span, fmt.Sprintf("return runtime.variant(%d, [", node.Index))
 		for _, temporary := range elementTemporaries {

@@ -8,9 +8,8 @@ Describe : value => trait (value -> String)
 [default] [error] instance (Describe value)
 
 -- Display a value on the screen.
-show :: value -> () where (Describe value) (value :: String)
+show :: value -> () where (Describe value)
 show : value -> intrinsic "display" (Describe value)
-
 
 instance (Describe String) : string -> string
 instance (Describe Number) : n -> intrinsic "number-to-string" n
@@ -33,5 +32,5 @@ instance (Read String) : Some
 instance (Read Number) : string -> intrinsic "string-to-number" string
 
 -- Ask the user to enter a value.
-prompt :: String -> value where (Read value)
+prompt :: String -> value where (value :: String) (Read value)
 prompt : prompt -> intrinsic "prompt" prompt Read

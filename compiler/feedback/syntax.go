@@ -18,8 +18,8 @@ func registerSyntax() {
 			}
 			render.WriteString(".")
 
-			render.WriteBreak()
 			if err.Reason != "" {
+				render.WriteBreak()
 				render.WriteString(err.Reason)
 			}
 
