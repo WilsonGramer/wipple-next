@@ -25,7 +25,7 @@ import (
 var (
 	handler       protocol.Handler
 	workspacePath = ""
-	documents     = map[protocol.DocumentUri]*protocol.TextDocumentItem{}
+	sources       = map[protocol.DocumentUri]string{}
 	dbs           = map[protocol.DocumentUri]*database.Db{}
 
 	tokenTypes = []string{"type", "interface", "typeParameter", "function"}
@@ -38,10 +38,12 @@ func Run() error {
 		Initialize:                     initialize,
 		Shutdown:                       shutdown,
 		SetTrace:                       setTrace,
+		TextDocumentDidOpen:            didOpen,
 		TextDocumentDidChange:          didChange,
 		TextDocumentHover:              hover,
 		TextDocumentDocumentHighlight:  documentHighlight,
 		TextDocumentSemanticTokensFull: semanticTokens,
+		TextDocumentFormatting:         format,
 	}
 
 	server := server.NewServer(&handler, "wipple", false)
@@ -87,9 +89,16 @@ func setTrace(context *glsp.Context, params *protocol.SetTraceParams) error {
 	return nil
 }
 
+func didOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
+	sources[params.TextDocument.URI] = params.TextDocument.Text
+	return nil
+}
+
 func didChange(context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
-	filter := nodeFilter(params.TextDocument.URI)
 	source := params.ContentChanges[0].(protocol.TextDocumentContentChangeEventWhole).Text
+	sources[params.TextDocument.URI] = source
+
+	filter := nodeFilter(params.TextDocument.URI)
 
 	db, root := driver.MakeRoot()
 
@@ -145,6 +154,25 @@ func documentHighlight(context *glsp.Context, params *protocol.DocumentHighlight
 
 	highlights := getRelated(db, params.TextDocument.URI, params.Position)
 	return highlights, nil
+}
+
+func format(context *glsp.Context, params *protocol.DocumentFormattingParams) ([]protocol.TextEdit, error) {
+	source := sources[params.TextDocument.URI]
+
+	formatted, err := syntax.Format(source)
+	if err != nil {
+		return nil, nil
+	}
+
+	textEdit := protocol.TextEdit{
+		Range: protocol.Range{
+			Start: protocol.Position{Line: 0, Character: 0},
+			End:   protocol.Position{Line: uint32(strings.Count(source, "\n") + 1), Character: 0},
+		},
+		NewText: formatted + "\n",
+	}
+
+	return []protocol.TextEdit{textEdit}, nil
 }
 
 func path(uri protocol.DocumentUri) string {
