@@ -1,3 +1,6 @@
+> [!NOTE]
+> Wipple Next has been merged into the [main repository](https://github.com/wipplelang/wipple).
+
 # Wipple Next
 
 [![Tests](https://github.com/WilsonGramer/wipple-next/actions/workflows/test.yml/badge.svg)](https://github.com/WilsonGramer/wipple-next/actions/workflows/test.yml)
